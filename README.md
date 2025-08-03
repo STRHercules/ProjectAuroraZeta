@@ -1,49 +1,177 @@
-# Project Aurora Zeta
+## 1. Setting & Tone
 
-This repository contains the beginnings of a Unity-based top down shooter. The concept is that players select heroes and survive waves of enemies on the planet **Zeta**. This project will build out a wave-based system, player controls, and other mechanics.
+| Aspect           | Details                                                                                                                                                                                                     |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Visual Style** | Neon-flecked hard-sci-fi with grime: think *The Expanse* meets *Hades*. Smooth isometric camera, exaggerated VFX for readability, holographic UI overlays.                                                  |
+| **Lore Hook**    | The Warp Gates are actually half-functioning *interstellar prison routers*. Zeta’s “storms” are periodic dimensional bleeds that spawn abominations—handy excuse for wave escalation and weird boss biomes. |
+| **Humor Level**  | Darkly cheeky. In-game AI announcer has a dry sense of humor (“Congratulations, Inmate #03894-B. You lived six seconds longer than average!”).                                                              |
 
-## Development
+---
 
-1. Open the repository in Unity 2022 or later.
-2. Ensure you have the `.NET Standard 2.1` compatibility level enabled.
-3. Scripts are located in `Assets/Scripts`.
+## 2. Core Gameplay Loop
 
-## Directory Layout
+1. **Briefing & Load-out (2 min)**
 
-```
-Assets/
-  Scripts/
-    WaveManager.cs   - Handles basic wave spawning.
-    PlayerController.cs - Top down player movement and rotation.
-    SimpleEnemy.cs   - Basic enemy AI that chases the player.
-    Gun.cs           - Fires bullets when the player presses Fire1 and can upgrade damage.
-    Bullet.cs        - Simple projectile that destroys enemies on contact.
-    EnemyHealth.cs   - Tracks enemy hit points and scales with difficulty.
-    PlayerHealth.cs  - Handles player hit points.
-    CameraController.cs - Moves and zooms the camera.
-    GameManager.cs   - Tracks kills, waves, currency and player health.
-    MenuManager.cs   - Handles menu buttons for starting and quitting the game.
-    (GameManager also stores difficulty settings.)
-  Scenes/
-    Main.unity       - Example scene.
-    Menu.unity       - Simple main menu.
-```
+   * Squad votes on difficulty, map variant, and optional mutators (e.g., “Double Boss HP but +50% currency”).
+   * Pick hero → pick a *Career Perk* (persistent talent) → optional vanity skins deducted from kill totals.
 
-## Getting Started
+2. **Crash-Drop Intro (30 sec)**
 
-1. Open `Scenes/Menu.unity` in Unity for a simple starting menu or load `Main.unity` directly.
-2. Attach the `WaveManager` script to an empty GameObject.
-3. Create a player GameObject and attach `PlayerController` and `PlayerHealth` with a `Rigidbody2D`. Set its tag to `Player`.
-4. Add a child GameObject to the player with a `Gun` component and assign a bullet prefab.
-5. Configure enemy prefabs with `SimpleEnemy` and `EnemyHealth` components and set spawn points in the `WaveManager` inspector. Adjust `attackDamage` on the enemy as desired and ensure they are tagged `Enemy`.
-6. Attach `CameraController` to your main camera so you can pan with WASD/arrow keys and zoom with the mouse wheel.
-7. Create a UI Canvas with Text elements for kills, wave count, player HP and currency. Optionally add a panel that will show when the game ends.
-8. Add a GameObject with the `GameManager` script and assign the Texts (including the currency Text) and panel.
-9. Press Play and use the left mouse button or Ctrl to shoot. When the player dies, the game over panel becomes visible and time is paused.
-10. Optionally create a menu canvas in `Menu.unity` with buttons that call `MenuManager.StartGame` or `MenuManager.QuitGame`.
-11. Add a restart button to your game over panel that calls `MenuManager.RestartGame`.
-12. Both `StartGame` and `RestartGame` reset the kill and wave counters through `GameManager.ResetGame`.
-13. Press **U** during gameplay to spend currency and increase bullet damage by one.
-14. Set the game difficulty in the `GameManager` inspector or create menu buttons that call `MenuManager.StartGameWithDifficulty` with an index.
+   * Ship plummets, clamps pop, gear crates explode outward (tutorial pop-ups if first game).
 
-This is a work in progress.
+3. **Wave Phases (\~2 min each)**
+
+   * *Combat (90 sec)*: mow, kite, heal, scream.
+   * *Intermission (30 sec)*: buy items, allocate skill points, reposition.
+
+4. **Mini-Event** (every 5 waves)
+
+   * Escort a crippled mech, defend a “data siphon,” assassinate elite spawners, or salvage a downed freighter for bonus currency.
+
+5. **Milestone Boss**
+
+   * Wave 20, 40, etc. Defeating it triggers a map-wide buff and explosive confetti of loot.
+
+6. **End-State**
+
+   * Hit target wave or squad wipe. Stats splash, kill totals banked, Talent Points awarded.
+
+---
+
+## 3. Camera & Controls
+
+* **RTS-Lite**: WASD pans camera; mouse-wheel zooms; double-space centers on hero.
+* **Hero Leash**: Optional toggle to keep hero locked center-screen (twin-stick vibe).
+* **Tactical Ping Wheel**: Q holds radial menu—mark targets, call “Shop time,” etc.
+* **Spectator Drones**: Dead players fly drones granting vision and mini-CC (EMP zap every 20 s) to keep them engaged until next respawn checkpoint.
+
+---
+
+## 4. Heroes & Progression
+
+### 4.1 Archetypes & Sample Tier-1 Roster
+
+| Class        | Hero (T1)    | Kit Highlights                                                                                             |
+| ------------ | ------------ | ---------------------------------------------------------------------------------------------------------- |
+| **Tank**     | *Bulwark*    | Magnetic shield dome (intercepts projectiles), “Taunt Pulse,” passive %-life regen.                        |
+| **DPS**      | *Arcstriker* | Chain-lightning rifle, overheat mechanic (damage vs self-burn), dash that spews ion trail.                 |
+| **Healer**   | *Nano-Nurse* | Cone heal that leaves HoT spores, revive speed boost, can overcharge to convert heals into DoT on enemies. |
+| **Assassin** | *Wraith*     | Short-range cloak, backstab multiplier, teleport beacon recall.                                            |
+| **Builder**  | *Wrench*     | Deploys turrets/drone swarms; scrap collection minigame gives discount.                                    |
+| **Support**  | *Maestro*    | Aura songs (swap tracks for buff types), shockwave ultimate that scales with active allies.                |
+
+*(Tier-2+ heroes unlock at milestone kill counts and add exotic mechanics like terrain morphing, time-dilation fields, or pet symbiotes.)*
+
+### 4.2 In-Match Upgrades
+
+* **Level Curve**: XP from kills/events → 3 ability ranks + 2 branching augments each.
+* **Item Shop** (gold = kill currency):
+
+  * **Core**: flat stats, lifesteal, cooldown reduction.
+  * **Unique**: “Warp Displacer” (blink every 6 s), “Tesla Coil Boots” (zap on sprint), etc.
+* **Evolve** (Wave 60+): trade gold + “phase shards” (boss drops) to transform hero into *EX form*—new ult, reskinned model.
+
+### 4.3 Persistent Talent Tree
+
+* **Three Tracks**: Offense, Defense, Utility.
+* **Prestige**: Resets tree, grants +10% global XP and a shiny border around username (bragging rights).
+* **Seasonal Mods**: Rotate every month—e.g., “Bio-Plague Season” adds toxins that slightly alter talent effects.
+
+---
+
+## 5. Enemies & Bosses
+
+| Tier          | Example Enemy          | Gimmick                                                | Counterplay                                                            |
+| ------------- | ---------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------- |
+| **Trash**     | *Skitterlings*         | Swarm in packs, low HP, explode on death.              | AOE; Tanks soak.                                                       |
+| **Elite**     | *Warp Revenant*        | Phase shift every 5 s (invuln), fires piercing beams.  | Stagger hits to catch it “solid.”                                      |
+| **Mini-Boss** | *Gravemind Root*       | Static plant spawner that buffs allies.                | Prioritize kill, avoid root pull.                                      |
+| **Mega-Boss** | *Star-Eater Leviathan* | Multi-segmented body circles map, weak spots light up. | Team splits to hit segments simultaneously; Builders drop slow fields. |
+
+* **Adaptive Director**: AI increases spawn composition based on squad performance—too many snipers → spawn shielded chargers.
+
+---
+
+## 6. Difficulty & Mutators
+
+| Difficulty       | Enemy HP   | Start Wave | Extra Modifiers                                          |
+| ---------------- | ---------- | ---------- | -------------------------------------------------------- |
+| Very Easy        | 0.8×       | 1          | Shorter boss telegraphs                                  |
+| Easy             | 0.9×       | 1          | —                                                        |
+| Normal           | 1.0×       | 1          | —                                                        |
+| Hard             | 1.2×       | 10         | Boss adds new ability                                    |
+| Chaotic          | 1.4×       | 20         | Currency gain −15%                                       |
+| Insane           | 1.6×       | 40         | Random mutator every 10 waves                            |
+| **Torment I-VI** | 2.0 → 3.0× | 60         | Stacking debuff “Restless Spirits” (−1% max HP per wave) |
+
+* **Daily Challenge**: Pre-set modifiers, global leaderboard for bragging rights (and a flashy banner skin).
+
+---
+
+## 7. Maps & Hotzones
+
+### 7.1 Core Layout
+
+* **Five Hotzones** (center + mid-edges) rotate active bonus every 60 s:
+
+  * **XP Surge** (+25% XP)
+  * **Danger-Pay** (+50% gold)
+  * **Warp Flux** (random buff but spawns extra elites)
+* Traversal hazards: collapsible bridges, lava vents, fog pockets that disable radar.
+* Environmental assists: hackable turrets, shield pylons that grant overshield while nearby.
+
+### 7.2 Variants
+
+1. **The Shattered Plains** – Wide open, minimal cover, big line-of-sight.
+2. **Orbital Wreckyard** – Tight corridors, conveyor belts that drag units.
+3. **Crystal Caverns** – Multi-level ramps; crystals amplify energy damage (both ways!).
+
+---
+
+## 8. Events & Side Objectives
+
+| Event                   | Mechanics                                           | Reward                          |
+| ----------------------- | --------------------------------------------------- | ------------------------------- |
+| **“Salvage Run”**       | Collect 10 cargo crates before timer.               | Lump-sum gold + rare shop item. |
+| **“Power Core Escort”** | Slow-moving core, enemies target it.                | XP + global damage buff 2 min.  |
+| **“Bounty Hunt”**       | Elite hunter squad invades; names displayed on HUD. | Phase shard (for Evolves).      |
+
+Optional participation—skipping spares resources for defense but forgoes sweet loot.
+
+---
+
+## 9. Quality-of-Life & Accessibility
+
+* Colorblind mode (distinct silhouettes + hologram edges).
+* Toggleable damage numbers / screen shake.
+* One-handed control preset (camera auto-follows hero).
+* “Chill Mode” (no timers, 0.6× enemy speed) earns reduced progress but keeps the vibes friendly.
+
+---
+
+## 10. Monetization & Cosmetics (Kill-Sink Economy)
+
+* **Kill-Shop**: Legendary skins, VO packs, kill-fed pets.
+* **Season Pass** uses *earned* kills instead of cash; premium track optional micro-purchase but *never* sells power.
+* **Leaderboard Badges**: show total kills spent vs banked (flex your grind).
+
+---
+
+## 11. Technical & Backend
+
+| Subsystem         | Approach                                                                                               |
+| ----------------- | ------------------------------------------------------------------------------------------------------ |
+| **Engine**        | Unreal 5 (top-down template) with deterministic netcode layer.                                         |
+| **Save System**   | AES-encrypted JSON blob, cloud-sync option.                                                            |
+| **Matchmaking**   | P2P host-client for ≤ 4 players, relay server for 5-6.                                                 |
+| **Modding Hooks** | Expose hero XML definitions & Lua scripts for community creations—curate via Steam Workshop-style hub. |
+
+---
+
+## 12. Future Expansions
+
+* **New Hero Lines**: *Summoners*, *Time-Benders*, *Bio-Shifters*.
+* **“Rogue-Lite Run”**: Branching arenas, permanent death, choose upgrades between rooms.
+* **Warp Gate Expedition**: PvE-PvP race—two squads on mirrored maps sabotage each other via dimensional anomalies.
+
+---
