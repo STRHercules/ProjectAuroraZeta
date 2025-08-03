@@ -161,7 +161,7 @@ Optional participation—skipping spares resources for defense but forgoes sweet
 
 | Subsystem         | Approach                                                                                               |
 | ----------------- | ------------------------------------------------------------------------------------------------------ |
-| **Engine**        | Unreal 5 (top-down template) with deterministic netcode layer.                          |
+| **Engine**        | Unreal 5 (top-down template) with deterministic netcode layer.                                         |
 | **Save System**   | AES-encrypted JSON blob, cloud-sync option.                                                            |
 | **Matchmaking**   | P2P host-client for ≤ 4 players, relay server for 5-6.                                                 |
 | **Modding Hooks** | Expose hero XML definitions & Lua scripts for community creations—curate via Steam Workshop-style hub. |
