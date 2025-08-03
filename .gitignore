@@ -1,26 +1,36 @@
-# Unity generated files
-[Ll]ibrary/
-[Tt]emp/
-[Oo]bj/
-[Bb]uild/
-[Bb]uilds/
-[Ll]ogs/
-UserSettings/
-Packages/
-ProjectSettings/
-.DS_Store
-*.csproj
-*.unityproj
-*.sln
+# Unreal Engine build artifacts
+Binaries/
+Build/
+DerivedDataCache/
+Intermediate/
+Saved/
+*.sdf
+*.opensdf
 *.suo
-*.tmp
-*.user
-*.userprefs
-*.pidb
-*.booproj
-*.svd
+*.xcodeproj
+*.xcworkspace
+.vs/
+.vscode/
+# Compiled binary files
+*.exe
+*.dll
+*.lib
+*.app
+*.dSYM
 *.pdb
-*.mdb
-sysinfo.txt
-*.apk
-*.unitypackage
+
+# Build intermediates
+*.obj
+*.log
+*.pyc
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Plugin binaries and intermediates
+Plugins/*/Binaries/
+Plugins/*/Intermediate/
+
+# Backup config files
+Config/Default*.ini.bak

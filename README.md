@@ -175,3 +175,6 @@ Optional participation—skipping spares resources for defense but forgoes sweet
 * **Warp Gate Expedition**: PvE-PvP race—two squads on mirrored maps sabotage each other via dimensional anomalies.
 
 ---
+## Development
+
+The game is built with Unreal Engine 5.3. Open `ProjectAuroraZeta.uproject` in the editor to generate project files and begin development.

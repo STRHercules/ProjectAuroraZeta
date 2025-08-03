@@ -1,0 +1,14 @@
+{
+    "FileVersion": 3,
+    "EngineAssociation": "5.3",
+    "Category": "",
+    "Description": "Project Aurora Zeta - cooperative top-down horde shooter.",
+    "Modules": [
+        {
+            "Name": "ProjectAuroraZeta",
+            "Type": "Runtime",
+            "LoadingPhase": "Default"
+        }
+    ],
+    "TargetPlatforms": [ "Win64", "Linux", "Mac" ]
+}
