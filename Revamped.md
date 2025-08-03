@@ -1,7 +1,3 @@
-Alright, space-cadet Nat, strap in! I took your already-stellar outline and cranked the warp drive to 11. Below is a beefier design doc plus a grab-bag of tweaks, twists, and terrible puns to rocket-fuel development and replayability. Use what you like, toss what you don’t, and feel free to ping me for another brainstorming session when the caffeine hits. 🚀
-
----
-
 ## 1. Setting & Tone
 
 | Aspect           | Details                                                                                                                                                                                                     |
