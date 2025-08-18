@@ -75,3 +75,15 @@ Saved/Config/WindowsEditor/Editor.ini
 Saved/Config/WindowsEditor/EditorPerProjectUserSettings.ini
 Saved/ShaderDebugInfo/PCD3D_SM5/WorldGridMaterial_ccfa03e4996f90e8/Default/DDCKey-Editor.txt
 Saved/UnrealBuildTool/BuildConfiguration.xml
+
+# Track C# project files for MonoGame
+!*.csproj
+!*.sln
+
+
+# Ignore .NET build output
+bin/
+
+# Editor settings
+.vscode/
+
