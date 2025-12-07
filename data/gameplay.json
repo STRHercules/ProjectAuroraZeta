@@ -1,0 +1,21 @@
+{
+  "enemy": {
+    "hp": 40.0,
+    "speed": 80.0,
+    "contactDamage": 10.0
+  },
+  "hero": {
+    "hp": 100.0,
+    "moveSpeed": 200.0
+  },
+  "projectile": {
+    "speed": 400.0,
+    "damage": 15.0,
+    "fireRate": 5.0
+  },
+  "spawner": {
+    "interval": 2.5,
+    "batchSize": 3,
+    "initialDelay": 1.5
+  }
+}

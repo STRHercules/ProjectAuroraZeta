@@ -1,0 +1,16 @@
+{
+  "move": {
+    "positiveX": ["d"],
+    "negativeX": ["a"],
+    "positiveY": ["s"],
+    "negativeY": ["w"]
+  },
+  "camera": {
+    "positiveX": ["right"],
+    "negativeX": ["left"],
+    "positiveY": ["down"],
+    "negativeY": ["up"]
+  },
+  "toggleFollow": ["c"],
+  "restart": ["r"]
+}
