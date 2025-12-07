@@ -10,16 +10,18 @@
 #include "../../engine/ecs/components/Tags.h"
 #include "../../engine/math/Vec2.h"
 #include "../components/EnemyAttributes.h"
+#include "../components/PickupBob.h"
+#include "../components/BountyTag.h"
 
 namespace Game {
 
 WaveSystem::WaveSystem(std::mt19937& rng, WaveSettings settings) : rng_(rng), settings_(settings) {}
 
-void WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep& step, Engine::ECS::Entity hero,
+bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep& step, Engine::ECS::Entity hero,
                         int& wave) {
     timer_ -= step.deltaSeconds;
-    if (timer_ > 0.0) return;
-    timer_ += settings_.interval;
+    if (timer_ > 0.0) return false;
+    timer_ += settings_.interval + settings_.grace;
     wave++;
     // Simple scaling: every wave increase HP and batch.
     settings_.enemyHp *= 1.08f;
@@ -42,12 +44,50 @@ void WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
         registry.emplace<Engine::ECS::Transform>(e, pos);
         registry.emplace<Engine::ECS::Velocity>(e, Engine::Vec2{0.0f, 0.0f});
         registry.emplace<Engine::ECS::Renderable>(e,
-            Engine::ECS::Renderable{Engine::Vec2{18.0f, 18.0f}, Engine::Color{200, 80, 80, 255}});
-        registry.emplace<Engine::ECS::AABB>(e, Engine::ECS::AABB{Engine::Vec2{9.0f, 9.0f}});
+            Engine::ECS::Renderable{Engine::Vec2{settings_.enemySize, settings_.enemySize}, Engine::Color{200, 80, 80, 255}});
+        const float hb = settings_.enemyHitbox * 0.5f;
+        registry.emplace<Engine::ECS::AABB>(e, Engine::ECS::AABB{Engine::Vec2{hb, hb}});
         registry.emplace<Engine::ECS::Health>(e, Engine::ECS::Health{settings_.enemyHp, settings_.enemyHp});
         registry.emplace<Engine::ECS::EnemyTag>(e, Engine::ECS::EnemyTag{});
         registry.emplace<Game::EnemyAttributes>(e, Game::EnemyAttributes{settings_.enemySpeed});
     }
+
+    // Every 5th wave spawn a bounty elite near hero.
+    if (wave % 5 == 0) {
+        float ang = angleDist(rng_);
+        float rad = radiusDist(rng_) * 0.6f;
+        Engine::Vec2 pos{center.x + std::cos(ang) * rad, center.y + std::sin(ang) * rad};
+        auto e = registry.create();
+        registry.emplace<Engine::ECS::Transform>(e, pos);
+        registry.emplace<Engine::ECS::Velocity>(e, Engine::Vec2{0.0f, 0.0f});
+        registry.emplace<Engine::ECS::Renderable>(e,
+            Engine::ECS::Renderable{Engine::Vec2{24.0f, 24.0f}, Engine::Color{255, 170, 60, 255}});
+        registry.emplace<Engine::ECS::AABB>(e, Engine::ECS::AABB{Engine::Vec2{12.0f, 12.0f}});
+        registry.emplace<Engine::ECS::Health>(e, Engine::ECS::Health{settings_.enemyHp * 3.0f, settings_.enemyHp * 3.0f});
+        registry.emplace<Engine::ECS::EnemyTag>(e, Engine::ECS::EnemyTag{});
+        registry.emplace<Game::EnemyAttributes>(e, Game::EnemyAttributes{settings_.enemySpeed * 1.1f});
+        registry.emplace<Game::PickupBob>(e, Game::PickupBob{pos, 0.0f, 2.0f, 2.5f});
+        registry.emplace<Game::BountyTag>(e, Game::BountyTag{});
+    }
+
+    // Boss spawn on milestone.
+    if (wave == bossWave_) {
+        float ang = angleDist(rng_);
+        float rad = 260.0f;
+        Engine::Vec2 pos{center.x + std::cos(ang) * rad, center.y + std::sin(ang) * rad};
+        auto e = registry.create();
+        registry.emplace<Engine::ECS::Transform>(e, pos);
+        registry.emplace<Engine::ECS::Velocity>(e, Engine::Vec2{0.0f, 0.0f});
+        registry.emplace<Engine::ECS::Renderable>(e,
+            Engine::ECS::Renderable{Engine::Vec2{34.0f, 34.0f}, Engine::Color{200, 80, 200, 255}});
+        registry.emplace<Engine::ECS::AABB>(e, Engine::ECS::AABB{Engine::Vec2{17.0f, 17.0f}});
+        registry.emplace<Engine::ECS::Health>(e, Engine::ECS::Health{settings_.enemyHp * bossHpMul_, settings_.enemyHp * bossHpMul_});
+        registry.emplace<Engine::ECS::EnemyTag>(e, Engine::ECS::EnemyTag{});
+        registry.emplace<Engine::ECS::BossTag>(e, Engine::ECS::BossTag{});
+        registry.emplace<Game::EnemyAttributes>(e, Game::EnemyAttributes{settings_.enemySpeed * bossSpeedMul_});
+    }
+
+    return true;
 }
 
 }  // namespace Game

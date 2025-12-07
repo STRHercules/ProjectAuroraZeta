@@ -19,6 +19,8 @@ InputKey toInputKey(const std::string& key) {
     if (lower == "right" || lower == "arrow_right" || lower == "cam_right") return InputKey::CamRight;
     if (lower == "c" || lower == "toggle_follow") return InputKey::ToggleFollow;
     if (lower == "r" || lower == "restart") return InputKey::Restart;
+    if (lower == "b" || lower == "toggle_shop" || lower == "shop") return InputKey::ToggleShop;
+    if (lower == "escape" || lower == "pause" || lower == "esc") return InputKey::Pause;
     return InputKey::Count;
 }
 }  // namespace
@@ -62,6 +64,22 @@ ActionState ActionMapper::sample(const InputState& input) const {
         InputKey mapped = toInputKey(key);
         if (mapped != InputKey::Count && input.isDown(mapped)) {
             act.restart = true;
+            break;
+        }
+    }
+    act.toggleShop = input.isDown(InputKey::ToggleShop);
+    for (const auto& key : bindings_.toggleShop) {
+        InputKey mapped = toInputKey(key);
+        if (mapped != InputKey::Count && input.isDown(mapped)) {
+            act.toggleShop = true;
+            break;
+        }
+    }
+    act.pause = input.isDown(InputKey::Pause);
+    for (const auto& key : bindings_.pause) {
+        InputKey mapped = toInputKey(key);
+        if (mapped != InputKey::Count && input.isDown(mapped)) {
+            act.pause = true;
             break;
         }
     }

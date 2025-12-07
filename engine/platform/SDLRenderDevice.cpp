@@ -19,8 +19,14 @@ void SDLRenderDevice::drawFilledRect(const Vec2& topLeft, const Vec2& size, cons
     rect.y = static_cast<int>(topLeft.y);
     rect.w = static_cast<int>(size.x);
     rect.h = static_cast<int>(size.y);
+    SDL_BlendMode prev;
+    SDL_GetRenderDrawBlendMode(renderer_, &prev);
+    if (color.a < 255) {
+        SDL_SetRenderDrawBlendMode(renderer_, SDL_BLENDMODE_BLEND);
+    }
     SDL_SetRenderDrawColor(renderer_, color.r, color.g, color.b, color.a);
     SDL_RenderFillRect(renderer_, &rect);
+    SDL_SetRenderDrawBlendMode(renderer_, prev);
 }
 
 void SDLRenderDevice::drawTexture(const Texture& textureBase, const Vec2& topLeft, const Vec2& size) {

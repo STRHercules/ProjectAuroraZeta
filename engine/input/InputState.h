@@ -16,6 +16,8 @@ enum class InputKey {
     CamLeft,
     CamRight,
     ToggleFollow,
+    ToggleShop,
+    Pause,
     Count
 };
 

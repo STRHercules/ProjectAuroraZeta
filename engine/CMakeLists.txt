@@ -43,6 +43,7 @@ target_include_directories(engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image QUIET)
+find_package(SDL2_ttf REQUIRED)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -52,10 +53,10 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(nlohmann_json)
 
 if (SDL2_image_FOUND)
-    target_link_libraries(engine PUBLIC SDL2::SDL2 SDL2_image::SDL2_image nlohmann_json::nlohmann_json)
+    target_link_libraries(engine PUBLIC SDL2::SDL2 SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf nlohmann_json::nlohmann_json)
     target_compile_definitions(engine PUBLIC ZETA_HAS_SDL_IMAGE=1)
 else()
-    target_link_libraries(engine PUBLIC SDL2::SDL2 nlohmann_json::nlohmann_json)
+    target_link_libraries(engine PUBLIC SDL2::SDL2 SDL2_ttf::SDL2_ttf nlohmann_json::nlohmann_json)
 endif()
 
 if (MSVC)

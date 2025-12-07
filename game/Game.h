@@ -4,6 +4,8 @@
 #include <cstddef>
 #include <string>
 
+#include <SDL.h>
+#include <SDL_ttf.h>
 #include "../engine/core/ApplicationListener.h"
 #include "../engine/ecs/Registry.h"
 #include "../engine/render/Camera2D.h"
@@ -28,6 +30,11 @@
 #include "systems/CollisionSystem.h"
 #include "systems/EnemyAISystem.h"
 #include "systems/WaveSystem.h"
+#include "systems/HitFlashSystem.h"
+#include "systems/DamageNumberSystem.h"
+#include "systems/ShopSystem.h"
+#include "systems/PickupSystem.h"
+#include "systems/EventSystem.h"
 
 namespace Game {
 
@@ -43,6 +50,9 @@ private:
     void processDefeatInput(const Engine::ActionState& actions);
     void resetRun();
     void spawnHero();
+    void drawTextTTF(const std::string& text, const Engine::Vec2& pos, float scale, Engine::Color color);
+    void drawTextUnified(const std::string& text, const Engine::Vec2& pos, float scale, Engine::Color color);
+    bool hasTTF() const { return uiFont_ != nullptr && sdlRenderer_ != nullptr; }
 
     Engine::ECS::Registry registry_{};
     Engine::ECS::Entity hero_{Engine::ECS::kInvalidEntity};
@@ -61,13 +71,42 @@ private:
     Engine::AssetManifest manifest_{};
     float projectileSpeed_{400.0f};
     float projectileDamage_{15.0f};
+    float projectileSize_{8.0f};
+    float projectileHitboxSize_{8.0f};
+    float projectileLifetime_{1.5f};
+    double waveInterval_{2.5};
+    double graceDuration_{1.0};
+    int currencyPerKill_{5};
+    int waveClearBonus_{20};
+    int enemyLowThreshold_{5};
+    double combatDuration_{90.0};
+    double intermissionDuration_{30.0};
+    int bountyBonus_{40};
+    int bossWave_{20};
+    float bossHpMultiplier_{12.0f};
+    float bossSpeedMultiplier_{0.8f};
+    int bossKillBonus_{60};
+    // Shop options
+    int shopDamageCost_{25};
+    int shopHpCost_{25};
+    int shopSpeedCost_{20};
+    float shopDamageBonus_{5.0f};
+    float shopHpBonus_{20.0f};
+    float shopSpeedBonus_{20.0f};  // flat bonus to move speed
+    // Shop click edge detectors (declared once)
+    bool shopLeftPrev_{false};
+    bool shopRightPrev_{false};
+    bool shopMiddlePrev_{false};
     double fireInterval_{0.2};
     float contactDamage_{10.0f};
     double fireCooldown_{0.0};
     float heroMoveSpeed_{200.0f};
     float heroMaxHp_{100.0f};
+    float heroSize_{24.0f};
     int kills_{0};
+    int credits_{0};
     int wave_{0};
+    int enemiesAlive_{0};
     Game::WaveSettings waveSettingsBase_{};
     double waveWarmup_{1.5};
     double waveWarmupBase_{1.5};
@@ -75,14 +114,43 @@ private:
     float fpsSmooth_{60.0f};
     double accumulated_{0.0};
     std::size_t tickCount_{0};
+    float shakeTimer_{0.0f};
+    float shakeMagnitude_{0.0f};
+    float lastHeroHp_{-1.0f};
     std::unique_ptr<Game::MovementSystem> movementSystem_;
     std::unique_ptr<Game::CameraSystem> cameraSystem_;
     std::unique_ptr<Game::ProjectileSystem> projectileSystem_;
     std::unique_ptr<Game::CollisionSystem> collisionSystem_;
     std::unique_ptr<Game::EnemyAISystem> enemyAISystem_;
     std::unique_ptr<Game::WaveSystem> waveSystem_;
+    std::unique_ptr<Game::HitFlashSystem> hitFlashSystem_;
+    std::unique_ptr<Game::DamageNumberSystem> damageNumberSystem_;
+    std::unique_ptr<Game::ShopSystem> shopSystem_;
+    std::unique_ptr<Game::PickupSystem> pickupSystem_;
+    std::unique_ptr<Game::EventSystem> eventSystem_;
     std::unique_ptr<Engine::TextureManager> textureManager_;
+    TTF_Font* uiFont_{nullptr};
+    SDL_Renderer* sdlRenderer_{nullptr};
     bool restartPrev_{false};
+    bool shopOpen_{false};
+    bool waveClearedPending_{false};
+    double shopUnavailableTimer_{0.0};
+    bool paused_{false};
+    bool userPaused_{false};
+    bool pauseTogglePrev_{false};
+    bool shopTogglePrev_{false};
+    double pauseMenuBlink_{0.0};
+    bool inCombat_{true};
+    bool waveSpawned_{false};
+    double combatTimer_{0.0};
+    double intermissionTimer_{0.0};
+    double bossBannerTimer_{0.0};
+    double eventBannerTimer_{0.0};
+    std::string eventBannerText_;
+    // UI helpers
+    double waveBannerTimer_{0.0};
+    int waveBannerWave_{0};
+    double clearBannerTimer_{0.0};
 };
 
 }  // namespace Game

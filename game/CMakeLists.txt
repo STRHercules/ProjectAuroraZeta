@@ -7,6 +7,11 @@ set(GAME_SOURCES
     systems/CollisionSystem.cpp
     systems/EnemyAISystem.cpp
     systems/WaveSystem.cpp
+    systems/HitFlashSystem.cpp
+    systems/DamageNumberSystem.cpp
+    systems/PickupSystem.cpp
+    systems/EventSystem.cpp
+    systems/ShopSystem.cpp
 )
 
 add_library(zeta_game ${GAME_SOURCES})

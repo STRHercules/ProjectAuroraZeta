@@ -12,5 +12,7 @@
     "negativeY": ["up"]
   },
   "toggleFollow": ["c"],
-  "restart": ["r"]
+  "restart": ["r"],
+  "toggleShop": ["b"],
+  "pause": ["escape"]
 }

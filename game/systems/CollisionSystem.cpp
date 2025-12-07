@@ -5,6 +5,8 @@
 #include "../../engine/ecs/components/Projectile.h"
 #include "../../engine/ecs/components/Transform.h"
 #include "../../engine/ecs/components/Tags.h"
+#include "../components/HitFlash.h"
+#include "../components/DamageNumber.h"
 
 namespace {
 bool aabbOverlap(const Engine::ECS::Transform& ta, const Engine::ECS::AABB& aa, const Engine::ECS::Transform& tb,
@@ -24,13 +26,23 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
         [&](Engine::ECS::Entity projEnt, Engine::ECS::Transform& projTf, Engine::ECS::Projectile& proj,
             Engine::ECS::AABB& projBox, Engine::ECS::ProjectileTag&) {
             registry.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::AABB, Engine::ECS::EnemyTag>(
-                [&](Engine::ECS::Entity /*targetEnt*/, Engine::ECS::Transform& tgtTf, Engine::ECS::Health& health,
+                [&](Engine::ECS::Entity targetEnt, Engine::ECS::Transform& tgtTf, Engine::ECS::Health& health,
                     Engine::ECS::AABB& tgtBox, Engine::ECS::EnemyTag&) {
                     if (!health.alive()) return;
                     if (aabbOverlap(projTf, projBox, tgtTf, tgtBox)) {
                         health.current -= proj.damage;
                         deadProjectiles.push_back(projEnt);
                         if (health.current < 0.0f) health.current = 0.0f;
+                        // Kick a brief hit flash for feedback on the enemy.
+                        if (auto* flash = registry.get<Game::HitFlash>(targetEnt)) {
+                            flash->timer = 0.12f;
+                        } else {
+                            registry.emplace<Game::HitFlash>(targetEnt, Game::HitFlash{0.12f});
+                        }
+                        // Spawn a floating damage number.
+                        auto dn = registry.create();
+                        registry.emplace<Engine::ECS::Transform>(dn, tgtTf.position);
+                        registry.emplace<Game::DamageNumber>(dn, Game::DamageNumber{proj.damage, 0.8f, {0.0f, -30.0f}});
                     }
                 });
         });

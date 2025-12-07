@@ -56,19 +56,12 @@ Game will start with 1-6 players, each selecting a unique hero/champion at the s
 ## *Heroes*
 
 - Tanks
-
 - Healers
-
 - Damage Dealers
-
 - Assassins
-
 - Builders
-
 - Support
-
 - Special
-
 - Hidden
 
 ## *Objective*

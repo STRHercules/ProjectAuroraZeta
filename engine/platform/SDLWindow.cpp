@@ -64,8 +64,7 @@ void SDLWindow::pollEvents(Application& app, InputState& input) {
             case SDL_KEYDOWN:
                 switch (evt.key.keysym.sym) {
                     case SDLK_ESCAPE:
-                        isOpen_ = false;
-                        app.requestQuit("Escape pressed.");
+                        input.setKeyDown(InputKey::Pause, true);
                         break;
                     case SDLK_r:
                         input.setKeyDown(InputKey::Restart, true);
@@ -97,14 +96,23 @@ void SDLWindow::pollEvents(Application& app, InputState& input) {
                     case SDLK_c:
                         input.setKeyDown(InputKey::ToggleFollow, true);
                         break;
+                    case SDLK_b:
+                        input.setKeyDown(InputKey::ToggleShop, true);
+                        break;
                     default:
                         break;
                 }
                 break;
             case SDL_KEYUP:
                 switch (evt.key.keysym.sym) {
+                    case SDLK_ESCAPE:
+                        input.setKeyDown(InputKey::Pause, false);
+                        break;
                     case SDLK_r:
                         input.setKeyDown(InputKey::Restart, false);
+                        break;
+                    case SDLK_b:
+                        input.setKeyDown(InputKey::ToggleShop, false);
                         break;
                     case SDLK_w:
                         input.setKeyDown(InputKey::Forward, false);
@@ -160,12 +168,7 @@ void SDLWindow::pollEvents(Application& app, InputState& input) {
 }
 
 void SDLWindow::swapBuffers() {
-    if (!renderer_) {
-        return;
-    }
-    SDL_SetRenderDrawColor(renderer_, 12, 12, 18, 255);
-    SDL_RenderClear(renderer_);
-    SDL_RenderPresent(renderer_);
+    // Present is driven by RenderDevice::present; no-op here to avoid double clear/present.
 }
 
 }  // namespace Engine

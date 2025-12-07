@@ -12,6 +12,8 @@ struct ActionState {
     bool toggleFollow{false};
     bool primaryFire{false};
     bool restart{false};
+    bool toggleShop{false};
+    bool pause{false};
 };
 
 }  // namespace Engine

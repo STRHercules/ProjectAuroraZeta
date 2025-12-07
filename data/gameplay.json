@@ -2,20 +2,53 @@
   "enemy": {
     "hp": 40.0,
     "speed": 80.0,
-    "contactDamage": 10.0
+    "contactDamage": 10.0,
+    "size": 18.0,
+    "hitboxSize": 18.0
   },
   "hero": {
     "hp": 100.0,
-    "moveSpeed": 200.0
+    "moveSpeed": 200.0,
+    "size": 24.0
   },
   "projectile": {
     "speed": 400.0,
     "damage": 15.0,
-    "fireRate": 5.0
+    "fireRate": 5.0,
+    "size": 8.0,
+    "hitboxSize": 6.0,
+    "lifetime": 1.5
   },
   "spawner": {
     "interval": 2.5,
     "batchSize": 3,
-    "initialDelay": 1.5
+    "initialDelay": 1.5,
+    "grace": 1.0
+  },
+  "rewards": {
+    "currencyPerKill": 5,
+    "waveClearBonus": 20,
+    "bountyBonus": 40
+  },
+  "ui": {
+    "enemyLowThreshold": 5
+  },
+  "shop": {
+    "damageCost": 25,
+    "hpCost": 25,
+    "speedCost": 20,
+    "damageBonus": 5.0,
+    "hpBonus": 20.0,
+    "speedBonus": 20.0
+  },
+  "timers": {
+    "combat": 90.0,
+    "intermission": 30.0
+  },
+  "boss": {
+    "wave": 20,
+    "hpMultiplier": 12.0,
+    "speedMultiplier": 0.8,
+    "killBonus": 60
   }
 }

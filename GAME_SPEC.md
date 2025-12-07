@@ -81,7 +81,7 @@ Loop per run:
      - Allocate ability skill points.
      - Reposition and plan next wave.
    - Prototype tuning (current build): waves tick on a short timer from `data/gameplay.json`, enemies gain ~8% HP and ~1% move speed per wave, and spawn batch size increases every other wave.
-   - A brief warmup (configurable `spawner.initialDelay`, default ~1.5s) shows a countdown before the first wave spawns to give players orientation time.
+   - A brief warmup (configurable `spawner.initialDelay`, default ~1.5s) shows a countdown before the first wave spawns to give players orientation time, plus a short “Wave N” banner when each wave begins; `spawner.grace` sets post-wave downtime.
 
 4. **Mini-Events (every 5 waves)**
    - Optional mission-like objectives:
@@ -133,7 +133,10 @@ Loop per run:
 - Prototype shortcuts (for current build):
   - `C` toggles camera follow vs. free pan.
   - `R` restarts the current run (respawns hero, resets waves).
-- Prototype tuning is loaded from `data/gameplay.json` (hero HP/move speed, projectile speed/damage, enemy stats, wave pacing).
+  - `B` opens/closes the placeholder Shop during intermission.
+  - `Esc` pauses/unpauses (shop also pauses).
+  - Shop buys (placeholder): Mouse1=+Damage, Mouse2=+HP, Mouse3=+Move Speed (costs + bonuses from `data/gameplay.json`).
+- Prototype tuning is loaded from `data/gameplay.json` (hero HP/move speed/size, projectile speed/damage/visual size/hitbox size/lifetime, enemy HP/speed/contact damage/size/hitbox size, wave pacing, currency per kill).
 - RTS flavor:
   - Drag-select is not primary; one hero per player.
   - Pings and camera define the “RTS feel.”

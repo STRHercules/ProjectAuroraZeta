@@ -19,6 +19,8 @@ struct InputBindings {
     AxisBinding camera;
     std::vector<std::string> toggleFollow;
     std::vector<std::string> restart;
+    std::vector<std::string> toggleShop;
+    std::vector<std::string> pause;
 };
 
 }  // namespace Engine

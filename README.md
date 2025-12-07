@@ -21,8 +21,14 @@ cmake --build build
 - Fire: `Mouse1`
 - Toggle camera follow: `C`
 - Restart run (dev helper): `R`
+- Open/close placeholder shop during intermission: `B`
+- Pause: `Esc`
+- Shop actions (while open, during intermission):
+  - `Mouse1` buy +Damage
+  - `Mouse2` buy +HP
+  - `Mouse3` (middle) buy +Move Speed
 
 ## Tuning Data
-- `data/gameplay.json` drives hero HP/speed, projectile speed/damage/fire-rate, enemy HP/speed/contact damage, and wave spawn cadence (interval, batch size, initial delay).
+- `data/gameplay.json` drives hero HP/moveSpeed/size, projectile speed/damage/visualSize/hitboxSize/lifetime/fire-rate, enemy HP/speed/contactDamage/size/hitboxSize, wave cadence (interval, batch size, initial delay, post-wave grace), and rewards (currencyPerKill).
 
 Refer to `GAME_SPEC.md` and `AGENTS.md` for architecture and feature roadmap.

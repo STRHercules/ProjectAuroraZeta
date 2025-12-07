@@ -49,6 +49,12 @@ std::optional<InputBindings> InputLoader::loadFromFile(const std::string& path) 
     if (j.contains("restart")) {
         bindings.restart = readStrings(j["restart"]);
     }
+    if (j.contains("toggleShop")) {
+        bindings.toggleShop = readStrings(j["toggleShop"]);
+    }
+    if (j.contains("pause")) {
+        bindings.pause = readStrings(j["pause"]);
+    }
 
     return bindings;
 }
