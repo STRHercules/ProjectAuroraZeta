@@ -8,3 +8,9 @@
 .DS_Store
 .vs/
 .vscode/
+
+# Discord SDK
+discord_social_sdk
+
+# Gamesaves
+saves/profile.dat
