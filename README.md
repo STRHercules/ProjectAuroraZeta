@@ -3,6 +3,10 @@
 Minimal C++20 scaffold for **Project Zeta** (engine/game separation). Current backend uses a `NullWindow` placeholder so the loop exits immediately after initialization.
 
 ## Building
+
+- Requisites: `sudo apt install -y build-essential cmake libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev`
+
+
 ```bash
 cmake -S . -B build
 cmake --build build
