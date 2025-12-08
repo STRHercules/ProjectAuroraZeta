@@ -24,6 +24,7 @@
 #include "../engine/render/RenderDevice.h"
 #include "../engine/render/BitmapTextRenderer.h"
 #include "../engine/platform/SDLRenderDevice.h"
+#include <SDL.h>
 #include <SDL_ttf.h>
 #include "components/DamageNumber.h"
 #include "components/Pickup.h"
@@ -337,6 +338,16 @@ bool GameRoot::onInitialize(Engine::Application& app) {
 }
 
 void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& input) {
+    // Keep viewport in sync with resizable window.
+    if (sdlRenderer_) {
+        int w = viewportWidth_;
+        int h = viewportHeight_;
+        if (SDL_GetRendererOutputSize(sdlRenderer_, &w, &h) == 0) {
+            viewportWidth_ = w;
+            viewportHeight_ = h;
+        }
+    }
+
     accumulated_ += step.deltaSeconds;
     ++tickCount_;
     lastMouseX_ = input.mouseX();

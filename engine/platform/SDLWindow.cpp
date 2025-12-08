@@ -27,8 +27,9 @@ bool SDLWindow::initialize(const WindowConfig& config) {
         return false;
     }
 
+    Uint32 windowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
     window_ = SDL_CreateWindow(config.title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                               config.width, config.height, SDL_WINDOW_SHOWN);
+                               config.width, config.height, windowFlags);
     if (!window_) {
         logError(std::string("SDL_CreateWindow failed: ") + SDL_GetError());
         return false;
