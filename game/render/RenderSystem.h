@@ -1,9 +1,13 @@
 // Game-layer render system that draws ECS renderables.
 #pragma once
 
+#include <vector>
+
 #include "../../engine/ecs/Registry.h"
 #include "../../engine/render/Camera2D.h"
 #include "../../engine/render/RenderDevice.h"
+#include "../../engine/assets/Texture.h"
+#include "../components/Facing.h"
 
 namespace Game {
 
@@ -12,10 +16,12 @@ public:
     explicit RenderSystem(Engine::RenderDevice& device) : device_(device) {}
 
     void draw(const Engine::ECS::Registry& registry, const Engine::Camera2D& camera, int viewportW, int viewportH,
-              const Engine::Texture* gridTexture);
+              const Engine::Texture* gridTexture,
+              const std::vector<Engine::TexturePtr>* gridVariants = nullptr);
 
 private:
-    void drawGrid(const Engine::Camera2D& camera, int viewportW, int viewportH, const Engine::Texture* gridTexture);
+    void drawGrid(const Engine::Camera2D& camera, int viewportW, int viewportH, const Engine::Texture* gridTexture,
+                  const std::vector<Engine::TexturePtr>* gridVariants);
 
     Engine::RenderDevice& device_;
 };

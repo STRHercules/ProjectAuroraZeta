@@ -3,12 +3,14 @@
 
 #include <optional>
 #include <string>
+#include <vector>
 
 namespace Engine {
 
 struct AssetManifest {
     std::string heroTexture;
     std::string gridTexture;
+    std::vector<std::string> gridTextures;
     std::string fontTexture;
 };
 

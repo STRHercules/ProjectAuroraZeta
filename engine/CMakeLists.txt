@@ -15,6 +15,7 @@ set(ENGINE_SOURCES
     ecs/components/Transform.h
     ecs/components/Velocity.h
     ecs/components/Renderable.h
+    ecs/components/SpriteAnimation.h
     ecs/components/Health.h
     ecs/components/Projectile.h
     ecs/components/AABB.h

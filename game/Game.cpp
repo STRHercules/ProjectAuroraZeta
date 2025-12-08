@@ -4,6 +4,10 @@
 #include <algorithm>
 #include <sstream>
 #include <limits>
+#include <vector>
+#include <random>
+#include <filesystem>
+#include <functional>
 
 #include "../engine/core/Application.h"
 #include "../engine/core/Logger.h"
@@ -11,6 +15,7 @@
 #include "../engine/ecs/components/Transform.h"
 #include "../engine/ecs/components/Velocity.h"
 #include "../engine/ecs/components/Renderable.h"
+#include "../engine/ecs/components/SpriteAnimation.h"
 #include "../engine/ecs/components/AABB.h"
 #include "../engine/ecs/components/Health.h"
 #include "../engine/ecs/components/Projectile.h"
@@ -24,7 +29,13 @@
 #include "components/Pickup.h"
 #include "components/PickupBob.h"
 #include "components/BountyTag.h"
+#include "components/EnemyAttributes.h"
+#include "components/EventActive.h"
+#include "components/EventMarker.h"
+#include "components/Spawner.h"
 #include "components/Invulnerable.h"
+#include "meta/SaveManager.h"
+#include "systems/HotzoneSystem.h"
 #include <cmath>
 
 namespace Game {
@@ -59,13 +70,18 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     projectileSystem_ = std::make_unique<ProjectileSystem>();
     collisionSystem_ = std::make_unique<CollisionSystem>();
     enemyAISystem_ = std::make_unique<EnemyAISystem>();
+    animationSystem_ = std::make_unique<AnimationSystem>();
     hitFlashSystem_ = std::make_unique<HitFlashSystem>();
     damageNumberSystem_ = std::make_unique<DamageNumberSystem>();
     shopSystem_ = std::make_unique<ShopSystem>();
     pickupSystem_ = std::make_unique<PickupSystem>();
     eventSystem_ = std::make_unique<EventSystem>();
+    hotzoneSystem_ = std::make_unique<HotzoneSystem>(static_cast<float>(hotzoneRotation_), 1.25f, 1.5f, 1.2f, 1.15f,
+                                                     hotzoneMapRadius_, hotzoneRadiusMin_, hotzoneRadiusMax_,
+                                                     hotzoneMinSeparation_, rng_());
     // Wave settings loaded later from gameplay config.
     textureManager_ = std::make_unique<Engine::TextureManager>(*render_);
+    loadProgress();
 
     // Load bindings from data file; fallback to defaults.
     auto loaded = Engine::InputLoader::loadFromFile("data/input_bindings.json");
@@ -100,8 +116,16 @@ bool GameRoot::onInitialize(Engine::Application& app) {
         Engine::logInfo("Loaded asset manifest from data/assets.json");
     } else {
         Engine::logWarn("Failed to load asset manifest; using defaults.");
-        manifest_.heroTexture = "assets/hero.bmp";
     }
+    if (manifest_.heroTexture.empty()) {
+        manifest_.heroTexture = "assets/Sprites/Characters/DamageDealer.png";
+    }
+    if (manifest_.gridTexture.empty() && manifest_.gridTextures.empty()) {
+        manifest_.gridTextures = {"assets/Tilesheets/floor1.png", "assets/Tilesheets/floor2.png"};
+    }
+
+    loadGridTextures();
+    loadEnemyDefinitions();
 
     // Load gameplay tunables.
     WaveSettings waveSettings{};
@@ -235,6 +259,7 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     }
     waveSystem_ = std::make_unique<WaveSystem>(rng_, waveSettings);
     waveSystem_->setBossConfig(bossWave_, bossHpMultiplier_, bossSpeedMultiplier_);
+    waveSystem_->setEnemyDefinitions(&enemyDefs_);
     waveSettings.contactDamage = contactDamage;
     waveSettingsBase_ = waveSettings;
     waveSettingsDefault_ = waveSettings;
@@ -294,10 +319,6 @@ bool GameRoot::onInitialize(Engine::Application& app) {
 
     // Attempt to load a placeholder sprite for hero (optional).
     if (render_ && textureManager_) {
-        if (!manifest_.gridTexture.empty()) {
-            auto grid = textureManager_->getOrLoadBMP(manifest_.gridTexture);
-            if (grid) gridTexture_ = *grid;
-        }
         // Load bitmap font only if TTF is unavailable.
         if (!hasTTF()) {
             if (auto font = Engine::FontLoader::load("data/font.json", *textureManager_)) {
@@ -645,13 +666,14 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 registry_.emplace<Engine::ECS::Renderable>(proj,
                                                            Engine::ECS::Renderable{Engine::Vec2{projectileSize_, projectileSize_},
                                                                                    Engine::Color{255, 230, 90, 255}});
-                float dmgMul = rageDamageBuff_;
+                float zoneDmgMul = hotzoneSystem_ ? hotzoneSystem_->damageMultiplier() : 1.0f;
+                float dmgMul = rageDamageBuff_ * zoneDmgMul;
                 registry_.emplace<Engine::ECS::Projectile>(proj,
                                                            Engine::ECS::Projectile{Engine::Vec2{dir.x * projectileSpeed_,
                                                                                                  dir.y * projectileSpeed_},
                                                                                      projectileDamage_ * dmgMul, projectileLifetime_});
                 registry_.emplace<Engine::ECS::ProjectileTag>(proj, Engine::ECS::ProjectileTag{});
-                float rateMul = rageRateBuff_;
+                float rateMul = rageRateBuff_ * (hotzoneSystem_ ? hotzoneSystem_->rateMultiplier() : 1.0f);
                 fireCooldown_ = fireInterval_ / std::max(0.1f, rateMul);
             }
         }
@@ -660,6 +682,50 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
     // Movement system.
     if (movementSystem_ && !paused_) {
         movementSystem_->update(registry_, step);
+    }
+    if (hotzoneSystem_) {
+        hotzoneSystem_->update(registry_, step, hero_);
+        if (hotzoneSystem_->consumeFluxSurge()) {
+            // Spawn a burst of elites when Warp Flux rotates in to keep pressure up.
+            Engine::Vec2 heroPos{0.0f, 0.0f};
+            if (const auto* tf = registry_.get<Engine::ECS::Transform>(hero_)) {
+                heroPos = tf->position;
+            }
+            std::uniform_real_distribution<float> ang(0.0f, 6.28318f);
+            std::uniform_real_distribution<float> rad(240.0f, 320.0f);
+            for (int i = 0; i < 3; ++i) {
+                float a = ang(rng_);
+                float r = rad(rng_);
+                Engine::Vec2 pos{heroPos.x + std::cos(a) * r, heroPos.y + std::sin(a) * r};
+                auto e = registry_.create();
+                registry_.emplace<Engine::ECS::Transform>(e, pos);
+                registry_.emplace<Engine::ECS::Velocity>(e, Engine::Vec2{0.0f, 0.0f});
+                registry_.emplace<Game::Facing>(e, Game::Facing{1});
+                const EnemyDefinition* def = nullptr;
+                if (!enemyDefs_.empty()) {
+                    std::uniform_int_distribution<std::size_t> pick(0, enemyDefs_.size() - 1);
+                    def = &enemyDefs_[pick(rng_)];
+                }
+                float sizeMul = def ? def->sizeMultiplier : 1.0f;
+                float hpMul = def ? def->hpMultiplier : 1.0f;
+                float spdMul = def ? def->speedMultiplier : 1.0f;
+                float size = 18.0f * sizeMul;
+                registry_.emplace<Engine::ECS::Renderable>(e,
+                    Engine::ECS::Renderable{Engine::Vec2{size, size}, Engine::Color{200, 140, 255, 255},
+                                            def ? def->texture : Engine::TexturePtr{}});
+                registry_.emplace<Engine::ECS::AABB>(e, Engine::ECS::AABB{Engine::Vec2{size * 0.5f, size * 0.5f}});
+                float hp = waveSettingsBase_.enemyHp * 1.6f * hpMul;
+                registry_.emplace<Engine::ECS::Health>(e, Engine::ECS::Health{hp, hp});
+                registry_.emplace<Engine::ECS::EnemyTag>(e, Engine::ECS::EnemyTag{});
+                registry_.emplace<Game::EnemyAttributes>(e, Game::EnemyAttributes{waveSettingsBase_.enemySpeed * 1.7f * spdMul});
+                if (def && def->texture) {
+                    registry_.emplace<Engine::ECS::SpriteAnimation>(e, Engine::ECS::SpriteAnimation{def->frameWidth,
+                                                                                                   def->frameHeight,
+                                                                                                   4,
+                                                                                                   def->frameDuration});
+                }
+            }
+        }
     }
 
     // Ability cooldown timers and buffs.
@@ -689,9 +755,16 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         enemyAISystem_->update(registry_, hero_, step);
     }
 
+    // Advance sprite animations.
+    if (animationSystem_ && !paused_) {
+        animationSystem_->update(registry_, step);
+    }
+
     // Cleanup dead enemies (visual cleanup can be added later).
     {
         std::vector<Engine::ECS::Entity> toDestroy;
+        float xpMul = hotzoneSystem_ ? hotzoneSystem_->xpMultiplier() : 1.0f;
+        float creditMul = hotzoneSystem_ ? hotzoneSystem_->creditMultiplier() : 1.0f;
         enemiesAlive_ = 0;
         registry_.view<Engine::ECS::Health, Engine::ECS::EnemyTag>(
             [&](Engine::ECS::Entity e, Engine::ECS::Health& hp, Engine::ECS::EnemyTag&) {
@@ -703,13 +776,18 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             });
         for (auto e : toDestroy) {
             kills_ += 1;
-            credits_ += currencyPerKill_;
-            xp_ += xpPerKill_;
+            credits_ += static_cast<int>(std::round(currencyPerKill_ * creditMul));
+            xp_ += static_cast<int>(std::round(xpPerKill_ * xpMul));
             if (registry_.has<Engine::ECS::BossTag>(e)) {
-                credits_ += bossKillBonus_;
-                xp_ += xpPerKill_ * 5;
+                credits_ += static_cast<int>(std::round(bossKillBonus_ * creditMul));
+                xp_ += static_cast<int>(std::round(xpPerKill_ * 5 * xpMul));
                 clearBannerTimer_ = 1.75;
                 waveClearedPending_ = true;
+            }
+            if (const auto* mark = registry_.get<Game::EventMarker>(e)) {
+                if (eventSystem_) {
+                    eventSystem_->notifyTargetKilled(registry_, mark->eventId);
+                }
             }
             // Chance to drop a credit pickup.
             std::uniform_real_distribution<float> dropRoll(0.0f, 1.0f);
@@ -834,14 +912,20 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             heroPos = tf->position;
         }
         eventSystem_->update(registry_, step, wave_, credits_, inCombat_, heroPos, salvageReward_);
+        std::string evLabel = eventSystem_->lastEventLabel().empty() ? "Event" : eventSystem_->lastEventLabel();
         if (eventSystem_->lastSuccess()) {
             std::ostringstream eb;
-            eb << "Event Success +" << salvageReward_ << "c";
+            eb << evLabel << " Success";
+            if (evLabel == "Salvage Run") {
+                eb << " +" << salvageReward_ << "c";
+            }
             eventBannerText_ = eb.str();
             eventBannerTimer_ = 1.5;
         }
         if (eventSystem_->lastFail()) {
-            eventBannerText_ = "Event Failed";
+            std::ostringstream eb;
+            eb << evLabel << " Failed";
+            eventBannerText_ = eb.str();
             eventBannerTimer_ = 1.5;
         }
         eventSystem_->clearOutcome();
@@ -879,7 +963,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
     }
 
     handleHeroDeath();
-    processDefeatInput(actions);
+    processDefeatInput(actions, input);
 
     // Render all rectangles.
     if (render_) {
@@ -894,8 +978,9 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         }
 
         if (renderSystem_) {
-            renderSystem_->draw(registry_, cameraShaken, viewportWidth_, viewportHeight_,
-                                gridTexture_ ? gridTexture_.get() : nullptr);
+            const Engine::Texture* gridPtr = gridTexture_ ? gridTexture_.get() : nullptr;
+            const std::vector<Engine::TexturePtr>* gridVariants = gridTileTextures_.empty() ? nullptr : &gridTileTextures_;
+            renderSystem_->draw(registry_, cameraShaken, viewportWidth_, viewportHeight_, gridPtr, gridVariants);
         }
 
         // Dash trail rendering (simple rectangles).
@@ -1093,11 +1178,37 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             }
             // Active event HUD.
             registry_.view<Game::EventActive>([&](Engine::ECS::Entity, const Game::EventActive& ev) {
-                float t = ev.timer;
+                float t = std::max(0.0f, ev.timer);
                 std::ostringstream evMsg;
-                evMsg << "Event: Salvage crate - " << std::fixed << std::setprecision(1) << std::max(0.0f, t) << "s";
+                if (ev.type == Game::EventType::Salvage) {
+                    evMsg << "Event: Salvage Run - " << std::fixed << std::setprecision(1) << t << "s";
+                } else if (ev.type == Game::EventType::Bounty) {
+                    evMsg << "Event: Bounty Hunt - " << ev.requiredKills << " hunters left | "
+                          << std::fixed << std::setprecision(1) << t << "s";
+                } else {
+                    evMsg << "Event: Assassinate Spawners - " << ev.requiredKills << " spires left | "
+                          << std::fixed << std::setprecision(1) << t << "s";
+                }
                 drawTextUnified(evMsg.str(), Engine::Vec2{10.0f, 154.0f}, 0.9f, Engine::Color{200, 240, 255, 220});
             });
+            if (hotzoneSystem_) {
+                const auto* zone = hotzoneSystem_->activeZone();
+                if (zone) {
+                    std::string label = "XP Surge";
+                    if (hotzoneSystem_->activeBonus() == HotzoneSystem::Bonus::DangerPay) label = "Danger-Pay";
+                    if (hotzoneSystem_->activeBonus() == HotzoneSystem::Bonus::WarpFlux) label = "Warp Flux";
+                    float t = hotzoneSystem_->timeRemaining();
+                    std::ostringstream hz;
+                    hz << "Hotzone: " << label << " (" << std::fixed << std::setprecision(0) << std::max(0.0f, t)
+                       << "s) " << (hotzoneSystem_->heroInsideActive() ? "[IN]" : "[OUT]");
+                    drawTextUnified(hz.str(), Engine::Vec2{10.0f, 136.0f}, 0.9f, Engine::Color{200, 220, 255, 210});
+                    if (hotzoneSystem_->warningActive()) {
+                        std::ostringstream hw;
+                        hw << "Zone shift in " << std::fixed << std::setprecision(1) << std::max(0.0f, t) << "s";
+                        drawTextUnified(hw.str(), Engine::Vec2{10.0f, 118.0f}, 0.9f, Engine::Color{255, 200, 160, 220});
+                    }
+                }
+            }
             // Pause overlay handled separately.
             // Enemies remaining warning.
             if (enemiesAlive_ > 0 && enemiesAlive_ <= enemyLowThreshold_) {
@@ -1201,6 +1312,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
 }
 
 void GameRoot::onShutdown() {
+    saveProgress();
     if (uiFont_) {
         TTF_CloseFont(uiFont_);
         uiFont_ = nullptr;
@@ -1215,6 +1327,9 @@ void GameRoot::handleHeroDeath() {
     auto* hp = registry_.get<Engine::ECS::Health>(hero_);
     if (hp && hp->current <= 0.0f && !defeated_) {
         defeated_ = true;
+        paused_ = true;
+        shopOpen_ = false;
+        levelChoiceOpen_ = false;
         Engine::logWarn("Hero defeated. Run over.");
         if (auto* vel = registry_.get<Engine::ECS::Velocity>(hero_)) {
             vel->value = {0.0f, 0.0f};
@@ -1224,14 +1339,48 @@ void GameRoot::handleHeroDeath() {
             totalKillsAccum_ += kills_;
             bestWave_ = std::max(bestWave_, wave_);
             runStarted_ = false;
+            saveProgress();
         }
     }
 }
 
 void GameRoot::showDefeatOverlay() {
     if (!defeated_) return;
-    std::string msg = "DEFEATED - Press Backspace to Restart or ESC to Quit";
-    drawTextUnified(msg, Engine::Vec2{40.0f, 60.0f}, 1.5f, Engine::Color{255, 80, 80, 220});
+    float panelW = 380.0f;
+    float panelH = 200.0f;
+    float cx = static_cast<float>(viewportWidth_) * 0.5f;
+    float cy = static_cast<float>(viewportHeight_) * 0.45f;
+    Engine::Vec2 panelPos{cx - panelW * 0.5f, cy - panelH * 0.5f};
+    Engine::Color border{255, 80, 80, 220};
+    Engine::Color bg{20, 24, 34, 230};
+    render_->drawFilledRect(panelPos, Engine::Vec2{panelW, panelH}, border);
+    render_->drawFilledRect(Engine::Vec2{panelPos.x + 4.0f, panelPos.y + 4.0f},
+                            Engine::Vec2{panelW - 8.0f, panelH - 8.0f}, bg);
+    drawTextUnified("YOU ARE DOWN", Engine::Vec2{panelPos.x + 36.0f, panelPos.y + 18.0f}, 1.4f,
+                    Engine::Color{255, 120, 120, 240});
+
+    float btnW = 150.0f;
+    float btnH = 46.0f;
+    float gap = 28.0f;
+    float startX = cx - btnW - gap * 0.5f;
+    float y = panelPos.y + 90.0f;
+    int mx = lastMouseX_;
+    int my = lastMouseY_;
+    auto drawBtn = [&](float x, const std::string& label, bool hovered) {
+        Engine::Color base{50, 60, 80, 230};
+        Engine::Color border{180, 200, 255, 230};
+        if (hovered) {
+            base = Engine::Color{70, 90, 120, 240};
+            border = Engine::Color{255, 200, 160, 240};
+        }
+        render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{btnW, btnH}, border);
+        render_->drawFilledRect(Engine::Vec2{x + 3.0f, y + 3.0f}, Engine::Vec2{btnW - 6.0f, btnH - 6.0f}, base);
+        drawTextUnified(label, Engine::Vec2{x + 20.0f, y + 14.0f}, 1.0f, Engine::Color{230, 230, 240, 240});
+    };
+    bool hoverRestart = mx >= startX && mx <= startX + btnW && my >= y && my <= y + btnH;
+    bool hoverQuit = mx >= startX + btnW + gap && mx <= startX + btnW + gap + btnW && my >= y && my <= y + btnH;
+    drawBtn(startX, "Restart", hoverRestart);
+    drawBtn(startX + btnW + gap, "Quit", hoverQuit);
 }
 
 void GameRoot::levelUp() {
@@ -1243,8 +1392,164 @@ void GameRoot::levelUp() {
     rollLevelChoices();
 }
 
-void GameRoot::processDefeatInput(const Engine::ActionState& /*actions*/) {
-    // Reserved for future defeat-specific inputs (e.g., confirm exit/menu).
+void GameRoot::processDefeatInput(const Engine::ActionState& actions, const Engine::InputState& input) {
+    if (!defeated_) return;
+    bool restartEdge = actions.restart && !restartPrev_;
+    bool quitEdge = actions.menuBack && !menuBackPrev_;
+    bool leftClick = input.isMouseButtonDown(0);
+    bool clickEdge = leftClick && !defeatClickPrev_;
+    defeatClickPrev_ = leftClick;
+
+    float btnW = 150.0f;
+    float btnH = 46.0f;
+    float gap = 28.0f;
+    float cx = static_cast<float>(viewportWidth_) * 0.5f;
+    float y = static_cast<float>(viewportHeight_) * 0.45f - 100.0f + 90.0f;  // matches overlay layout
+    float startX = cx - btnW - gap * 0.5f;
+    int mx = input.mouseX();
+    int my = input.mouseY();
+    bool hoverRestart = mx >= startX && mx <= startX + btnW && my >= y && my <= y + btnH;
+    bool hoverQuit = mx >= startX + btnW + gap && mx <= startX + btnW + gap + btnW && my >= y && my <= y + btnH;
+
+    auto doRestart = [&]() {
+        defeated_ = false;
+        userPaused_ = false;
+        paused_ = false;
+        runStarted_ = true;
+        resetRun();
+    };
+    auto doQuit = [&]() {
+        defeated_ = false;
+        inMenu_ = true;
+        menuPage_ = MenuPage::Main;
+        menuSelection_ = 0;
+        userPaused_ = false;
+        paused_ = false;
+        shopOpen_ = false;
+        levelChoiceOpen_ = false;
+        runStarted_ = false;
+        resetRun();
+    };
+
+    if (restartEdge || (clickEdge && hoverRestart)) {
+        doRestart();
+    } else if (quitEdge || (clickEdge && hoverQuit)) {
+        doQuit();
+    }
+}
+
+void GameRoot::loadProgress() {
+    SaveManager mgr(savePath_);
+    SaveData data{};
+    if (mgr.load(data)) {
+        saveData_ = data;
+        totalRuns_ = data.totalRuns;
+        bestWave_ = data.bestWave;
+        totalKillsAccum_ = data.totalKills;
+        Engine::logInfo("Save loaded.");
+    } else {
+        Engine::logWarn("No valid save found; starting fresh profile.");
+    }
+}
+
+void GameRoot::saveProgress() {
+    saveData_.totalRuns = totalRuns_;
+    saveData_.bestWave = bestWave_;
+    saveData_.totalKills = totalKillsAccum_;
+    SaveManager mgr(savePath_);
+    if (!mgr.save(saveData_)) {
+        Engine::logWarn("Failed to write save file.");
+    }
+}
+
+Engine::TexturePtr GameRoot::loadTextureOptional(const std::string& path) {
+    if (!textureManager_ || path.empty()) return {};
+    auto tex = textureManager_->getOrLoadBMP(path);
+    if (!tex) return {};
+    return *tex;
+}
+
+void GameRoot::loadGridTextures() {
+    gridTileTextures_.clear();
+    gridTexture_.reset();
+    auto pushIfLoaded = [&](const std::string& path) {
+        auto tex = loadTextureOptional(path);
+        if (tex) {
+            gridTileTextures_.push_back(tex);
+        } else {
+            Engine::logWarn("Grid texture missing or failed to load: " + path);
+        }
+    };
+    for (const auto& path : manifest_.gridTextures) {
+        pushIfLoaded(path);
+    }
+    if (gridTileTextures_.empty() && !manifest_.gridTexture.empty()) {
+        gridTexture_ = loadTextureOptional(manifest_.gridTexture);
+    }
+    if (gridTileTextures_.empty()) {
+        pushIfLoaded("assets/Tilesheets/floor1.png");
+        pushIfLoaded("assets/Tilesheets/floor2.png");
+    }
+    if (gridTileTextures_.empty() && !gridTexture_) {
+        gridTexture_ = loadTextureOptional("assets/Tilesheets/floor.png");
+    }
+    if (gridTileTextures_.size() == 1) {
+        // Ensure at least two variants for visual variety when possible.
+        if (gridTexture_ && gridTexture_ != gridTileTextures_.front()) {
+            gridTileTextures_.push_back(gridTexture_);
+        } else if (auto alt = loadTextureOptional("assets/Tilesheets/floor.png")) {
+            gridTileTextures_.push_back(alt);
+        }
+    }
+    if (!gridTileTextures_.empty() && !gridTexture_) {
+        gridTexture_ = gridTileTextures_.front();
+    }
+    if (gridTileTextures_.empty() && !gridTexture_) {
+        Engine::logWarn("No grid textures found; falling back to debug grid.");
+    }
+}
+
+void GameRoot::loadEnemyDefinitions() {
+    enemyDefs_.clear();
+    namespace fs = std::filesystem;
+    const fs::path root("assets/Sprites/Enemies");
+    if (!fs::exists(root)) {
+        Engine::logWarn("Enemy sprites directory missing: assets/Sprites/Enemies");
+        return;
+    }
+
+    std::vector<fs::path> files;
+    for (const auto& entry : fs::directory_iterator(root)) {
+        if (!entry.is_regular_file()) continue;
+        const auto ext = entry.path().extension().string();
+        if (ext == ".png" || ext == ".bmp") {
+            files.push_back(entry.path());
+        }
+    }
+    std::sort(files.begin(), files.end());
+
+    for (const auto& path : files) {
+        EnemyDefinition def{};
+        def.id = path.stem().string();
+        def.texture = loadTextureOptional(path.string());
+        if (!def.texture) {
+            Engine::logWarn("Failed to load enemy sprite: " + path.string());
+        }
+
+        std::size_t h = std::hash<std::string>{}(def.id);
+        def.sizeMultiplier = 0.9f + static_cast<float>((h >> 4) % 30) / 100.0f;     // 0.9 - 1.19
+        def.hpMultiplier = 0.9f + static_cast<float>((h >> 12) % 35) / 100.0f;      // 0.9 - 1.24
+        def.speedMultiplier = 0.85f + static_cast<float>((h >> 20) % 30) / 100.0f;  // 0.85 - 1.14
+        def.frameDuration = 0.12f + static_cast<float>((h >> 2) % 6) * 0.01f;       // 0.12 - 0.17
+
+        enemyDefs_.push_back(std::move(def));
+    }
+
+    if (enemyDefs_.empty()) {
+        Engine::logWarn("No enemy sprites found; spawning fallback colored enemies.");
+    } else {
+        Engine::logInfo("Loaded " + std::to_string(enemyDefs_.size()) + " enemy archetypes from sprites.");
+    }
 }
 
 void GameRoot::startNewGame() {
@@ -1726,7 +2031,23 @@ void GameRoot::applyArchetypePreset() {
     heroMoveSpeedPreset_ = heroMoveSpeedBase_ * activeArchetype_.speedMul;
     projectileDamagePreset_ = projectileDamageBase_ * activeArchetype_.damageMul;
     heroColorPreset_ = activeArchetype_.color;
+    heroTexturePath_ = resolveArchetypeTexture(activeArchetype_);
     buildAbilities();
+}
+
+std::string GameRoot::resolveArchetypeTexture(const GameRoot::ArchetypeDef& def) const {
+    if (!def.texturePath.empty()) return def.texturePath;
+    // Default mapping based on id/name.
+    const std::string base = "assets/Sprites/Characters/";
+    if (def.id == "assassin") return base + "Assassin.png";
+    if (def.id == "healer") return base + "Healer.png";
+    if (def.id == "damage") return base + "DamageDealer.png";
+    if (def.id == "tank") return base + "Tank.png";
+    if (def.id == "builder") return base + "Builder.png";
+    if (def.id == "support") return base + "Support.png";
+    if (def.id == "special") return base + "Special.png";
+    // Fallback to manifest heroTexture.
+    return manifest_.heroTexture.empty() ? base + "DamageDealer.png" : manifest_.heroTexture;
 }
 
 void GameRoot::buildAbilities() {
@@ -2063,6 +2384,7 @@ void GameRoot::spawnHero() {
     hero_ = registry_.create();
     registry_.emplace<Engine::ECS::Transform>(hero_, Engine::Vec2{0.0f, 0.0f});
     registry_.emplace<Engine::ECS::Velocity>(hero_, Engine::Vec2{0.0f, 0.0f});
+    registry_.emplace<Game::Facing>(hero_, Game::Facing{1});
     registry_.emplace<Engine::ECS::Renderable>(hero_, Engine::ECS::Renderable{Engine::Vec2{heroSize_, heroSize_},
                                                                                heroColorPreset_});
     const float heroHalf = heroSize_ * 0.5f;
@@ -2071,11 +2393,15 @@ void GameRoot::spawnHero() {
     registry_.emplace<Engine::ECS::HeroTag>(hero_, Engine::ECS::HeroTag{});
 
     // Apply sprite if loaded.
-    if (textureManager_ && !manifest_.heroTexture.empty()) {
-        if (auto tex = textureManager_->getOrLoadBMP(manifest_.heroTexture)) {
+    std::string heroPath = !heroTexturePath_.empty() ? heroTexturePath_ : manifest_.heroTexture;
+    if (textureManager_ && !heroPath.empty()) {
+        if (auto tex = loadTextureOptional(heroPath)) {
             if (auto* rend = registry_.get<Engine::ECS::Renderable>(hero_)) {
-                rend->texture = *tex;
+                rend->texture = tex;
             }
+            registry_.emplace<Engine::ECS::SpriteAnimation>(hero_, Engine::ECS::SpriteAnimation{16, 16, 4, 0.14f});
+        } else {
+            Engine::logWarn("Failed to load hero texture: " + heroPath);
         }
     }
 
@@ -2133,10 +2459,14 @@ void GameRoot::resetRun() {
     if (waveSystem_) {
         waveSystem_ = std::make_unique<WaveSystem>(rng_, waveSettingsBase_);
         waveSystem_->setBossConfig(bossWave_, bossHpMultiplier_, bossSpeedMultiplier_);
+        waveSystem_->setEnemyDefinitions(&enemyDefs_);
         waveSystem_->setTimer(waveWarmupBase_);
     }
     if (collisionSystem_) {
         collisionSystem_->setContactDamage(contactDamage_);
+    }
+    if (hotzoneSystem_) {
+        hotzoneSystem_->initialize(registry_, 5);
     }
     refreshShopInventory();
 

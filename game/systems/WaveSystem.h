@@ -2,9 +2,11 @@
 #pragma once
 
 #include <random>
+#include <vector>
 
 #include "../../engine/ecs/Registry.h"
 #include "../../engine/core/Time.h"
+#include "../EnemyDefinition.h"
 
 namespace Game {
 
@@ -33,14 +35,18 @@ public:
         bossHpMul_ = hpMul;
         bossSpeedMul_ = speedMul;
     }
+    void setEnemyDefinitions(const std::vector<EnemyDefinition>* defs) { enemyDefs_ = defs; }
 
 private:
+    const EnemyDefinition* pickEnemyDef();
+
     std::mt19937& rng_;
     WaveSettings settings_;
     double timer_{0.0};
     int bossWave_{20};
     float bossHpMul_{12.0f};
     float bossSpeedMul_{0.8f};
+    const std::vector<EnemyDefinition>* enemyDefs_{nullptr};
 };
 
 }  // namespace Game

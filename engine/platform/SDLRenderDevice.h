@@ -14,6 +14,8 @@ public:
     void clear(const Color& color) override;
     void drawFilledRect(const Vec2& topLeft, const Vec2& size, const Color& color) override;
     void drawTexture(const Texture& texture, const Vec2& topLeft, const Vec2& size) override;
+    void drawTextureRegion(const Texture& texture, const Vec2& topLeft, const Vec2& size,
+                           const IntRect& source, bool flipX = false) override;
     void present() override;
 
     SDL_Renderer* rawRenderer() const { return renderer_; }

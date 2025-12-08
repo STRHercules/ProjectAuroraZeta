@@ -1,5 +1,9 @@
 {
-  "heroTexture": "assets/hero.bmp",
-  "gridTexture": "",
+  "heroTexture": "assets/Sprites/Characters/DamageDealer.png",
+  "gridTextures": [
+    "assets/Tilesheets/floor1.png",
+    "assets/Tilesheets/floor2.png"
+  ],
+  "gridTexture": "assets/Tilesheets/floor.png",
   "fontTexture": "assets/font.bmp"
 }

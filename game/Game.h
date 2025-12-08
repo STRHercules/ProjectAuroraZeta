@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <string>
+#include <vector>
 
 #include <SDL.h>
 #include <SDL_ttf.h>
@@ -30,11 +31,15 @@
 #include "systems/CollisionSystem.h"
 #include "systems/EnemyAISystem.h"
 #include "systems/WaveSystem.h"
+#include "systems/AnimationSystem.h"
 #include "systems/HitFlashSystem.h"
 #include "systems/DamageNumberSystem.h"
 #include "systems/ShopSystem.h"
 #include "systems/PickupSystem.h"
 #include "systems/EventSystem.h"
+#include "systems/HotzoneSystem.h"
+#include "meta/SaveManager.h"
+#include "EnemyDefinition.h"
 
 namespace Game {
 
@@ -47,7 +52,7 @@ public:
 private:
     void handleHeroDeath();
     void showDefeatOverlay();
-    void processDefeatInput(const Engine::ActionState& actions);
+    void processDefeatInput(const Engine::ActionState& actions, const Engine::InputState& input);
     void resetRun();
     void spawnHero();
     void startNewGame();
@@ -66,11 +71,16 @@ private:
     void loadMenuPresets();
     void applyDifficultyPreset();
     void applyArchetypePreset();
+    void loadProgress();
+    void saveProgress();
     void rebuildWaveSettings();
     void buildAbilities();
     void drawAbilityPanel();
     void executeAbility(int index);
     void upgradeFocusedAbility();
+    void loadGridTextures();
+    void loadEnemyDefinitions();
+    Engine::TexturePtr loadTextureOptional(const std::string& path);
 
     enum class MenuPage { Main, Stats, Options, CharacterSelect };
     enum class LevelChoiceType { Damage, Health, Speed };
@@ -86,6 +96,7 @@ private:
         float speedMul{1.0f};
         float damageMul{1.0f};
         Engine::Color color{90, 200, 255, 255};
+        std::string texturePath;
     };
     struct DifficultyDef {
         std::string id;
@@ -94,6 +105,7 @@ private:
         float enemyHpMul{1.0f};
         int startWave{1};
     };
+    std::string resolveArchetypeTexture(const ArchetypeDef& def) const;
     struct AbilitySlot {
         std::string name;
         std::string description;
@@ -132,6 +144,8 @@ private:
     int viewportHeight_{720};
     Engine::Vec2 mouseWorld_{};
     Engine::TexturePtr gridTexture_{};
+    std::vector<Engine::TexturePtr> gridTileTextures_{};
+    std::string heroTexturePath_{};
     std::unique_ptr<Engine::BitmapTextRenderer> debugText_;
     std::mt19937 rng_{std::random_device{}()};
     Engine::InputBindings bindings_{};
@@ -156,6 +170,12 @@ private:
     float bossSpeedMultiplier_{0.8f};
     int bossKillBonus_{60};
     int salvageReward_{20};
+    // Hotzones
+    float hotzoneMapRadius_{520.0f};
+    float hotzoneRadiusMin_{140.0f};
+    float hotzoneRadiusMax_{220.0f};
+    float hotzoneMinSeparation_{280.0f};
+    double hotzoneRotation_{30.0};
     // Shop options
     int shopDamageCost_{25};
     int shopHpCost_{25};
@@ -235,11 +255,15 @@ private:
     int totalRuns_{0};
     int bestWave_{0};
     int totalKillsAccum_{0};
+    // Persistence
+    std::string savePath_{"saves/profile.dat"};
+    Game::SaveData saveData_{};
     bool runStarted_{false};
     // Level-up choice overlay
     bool levelChoiceOpen_{false};
     LevelChoice levelChoices_[3];
     bool levelChoicePrevClick_{false};
+    bool defeatClickPrev_{false};
     std::vector<ShopItem> shopInventory_;
     std::vector<ShopItem> shopPool_;
     double shopNoCreditTimer_{0.0};
@@ -250,11 +274,13 @@ private:
     std::unique_ptr<Game::CollisionSystem> collisionSystem_;
     std::unique_ptr<Game::EnemyAISystem> enemyAISystem_;
     std::unique_ptr<Game::WaveSystem> waveSystem_;
+    std::unique_ptr<Game::AnimationSystem> animationSystem_;
     std::unique_ptr<Game::HitFlashSystem> hitFlashSystem_;
     std::unique_ptr<Game::DamageNumberSystem> damageNumberSystem_;
     std::unique_ptr<Game::ShopSystem> shopSystem_;
     std::unique_ptr<Game::PickupSystem> pickupSystem_;
     std::unique_ptr<Game::EventSystem> eventSystem_;
+    std::unique_ptr<Game::HotzoneSystem> hotzoneSystem_;
     std::unique_ptr<Engine::TextureManager> textureManager_;
     TTF_Font* uiFont_{nullptr};
     SDL_Renderer* sdlRenderer_{nullptr};
@@ -301,6 +327,7 @@ private:
     ArchetypeDef activeArchetype_{};
     DifficultyDef activeDifficulty_{};
     int startWaveBase_{1};
+    std::vector<EnemyDefinition> enemyDefs_{};
 };
 
 }  // namespace Game

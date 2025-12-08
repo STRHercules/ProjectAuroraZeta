@@ -2,11 +2,16 @@
 
 #include <cmath>
 #include <algorithm>
+#include <cstdint>
+#include <cstddef>
 
 #include "../../engine/ecs/components/Renderable.h"
 #include "../../engine/ecs/components/Transform.h"
+#include "../../engine/ecs/components/Velocity.h"
 #include "../../engine/render/CameraUtil.h"
 #include "../../engine/render/Color.h"
+#include "../../engine/ecs/components/SpriteAnimation.h"
+#include "../components/Facing.h"
 #include "../components/HitFlash.h"
 #include "../components/DamageNumber.h"
 #include "../components/Pickup.h"
@@ -16,9 +21,22 @@
 
 namespace Game {
 
+namespace {
+// Simple coordinate hash to keep tile variant selection stable without storing state.
+uint32_t hashCoords(int x, int y) {
+    uint32_t h = 0x811C9DC5u;
+    h ^= static_cast<uint32_t>(x + 0x9E3779B9u);
+    h *= 0x01000193u;
+    h ^= static_cast<uint32_t>(y + 0x7F4A7C15u);
+    h *= 0x01000193u;
+    return h;
+}
+}  // namespace
+
 void RenderSystem::draw(const Engine::ECS::Registry& registry, const Engine::Camera2D& camera, int viewportW,
-                        int viewportH, const Engine::Texture* gridTexture) {
-    drawGrid(camera, viewportW, viewportH, gridTexture);
+                        int viewportH, const Engine::Texture* gridTexture,
+                        const std::vector<Engine::TexturePtr>* gridVariants) {
+    drawGrid(camera, viewportW, viewportH, gridTexture, gridVariants);
 
     const Engine::Vec2 center{static_cast<float>(viewportW) * 0.5f, static_cast<float>(viewportH) * 0.5f};
     registry.view<Engine::ECS::Transform, Engine::ECS::Renderable>(
@@ -58,8 +76,23 @@ void RenderSystem::draw(const Engine::ECS::Registry& registry, const Engine::Cam
                 }
             }
 
+            bool flipX = false;
+            if (const auto* facing = registry.get<Game::Facing>(e)) {
+                flipX = facing->dirX < 0;
+            } else if (const auto* vel = registry.get<Engine::ECS::Velocity>(e)) {
+                flipX = vel->value.x < -0.01f;
+            }
+
             if (rend.texture) {
-                device_.drawTexture(*rend.texture, screenPos, scaledSize);
+                if (const auto* anim = registry.get<Engine::ECS::SpriteAnimation>(e);
+                    anim && anim->frameCount > 1) {
+                    Engine::IntRect src{anim->frameWidth * anim->currentFrame, 0, anim->frameWidth,
+                                        anim->frameHeight};
+                    device_.drawTextureRegion(*rend.texture, screenPos, scaledSize, src, flipX);
+                } else {
+                    Engine::IntRect src{0, 0, rend.texture->width(), rend.texture->height()};
+                    device_.drawTextureRegion(*rend.texture, screenPos, scaledSize, src, flipX);
+                }
             } else {
                 device_.drawFilledRect(screenPos, scaledSize, color);
             }
@@ -67,13 +100,38 @@ void RenderSystem::draw(const Engine::ECS::Registry& registry, const Engine::Cam
 }
 
 void RenderSystem::drawGrid(const Engine::Camera2D& camera, int viewportW, int viewportH,
-                            const Engine::Texture* gridTexture) {
+                            const Engine::Texture* gridTexture,
+                            const std::vector<Engine::TexturePtr>* gridVariants) {
     const float viewWidth = viewportW / camera.zoom;
     const float viewHeight = viewportH / camera.zoom;
     const float left = camera.position.x - viewWidth * 0.5f;
     const float right = camera.position.x + viewWidth * 0.5f;
     const float top = camera.position.y - viewHeight * 0.5f;
     const float bottom = camera.position.y + viewHeight * 0.5f;
+
+    if (gridVariants && !gridVariants->empty()) {
+        const auto& first = *(*gridVariants)[0];
+        const float tileW = static_cast<float>(first.width());
+        const float tileH = static_cast<float>(first.height());
+        const float firstX = std::floor(left / tileW) * tileW;
+        const float firstY = std::floor(top / tileH) * tileH;
+        const std::size_t variantCount = gridVariants->size();
+        for (float y = firstY; y < bottom; y += tileH) {
+            for (float x = firstX; x < right; x += tileW) {
+                int tileX = static_cast<int>(std::floor(x / tileW));
+                int tileY = static_cast<int>(std::floor(y / tileH));
+                uint32_t h = hashCoords(tileX, tileY);
+                const auto& texPtr = (*gridVariants)[h % variantCount];
+                if (!texPtr) continue;
+                Engine::Vec2 screen = Engine::worldToScreen(Engine::Vec2{x, y}, camera,
+                                                            static_cast<float>(viewportW),
+                                                            static_cast<float>(viewportH));
+                Engine::Vec2 size{tileW * camera.zoom, tileH * camera.zoom};
+                device_.drawTexture(*texPtr, screen, size);
+            }
+        }
+        return;
+    }
 
     if (gridTexture && gridTexture->width() > 0 && gridTexture->height() > 0) {
         const float tileW = static_cast<float>(gridTexture->width());
@@ -91,22 +149,7 @@ void RenderSystem::drawGrid(const Engine::Camera2D& camera, int viewportW, int v
         return;
     }
 
-    const float spacing = 64.0f;
-    const float firstVertical = std::floor(left / spacing) * spacing;
-    const float firstHorizontal = std::floor(top / spacing) * spacing;
-
-    Engine::Color gridColor{30, 30, 38, 120};
-    for (float x = firstVertical; x <= right; x += spacing) {
-        float screenX = (x - camera.position.x) * camera.zoom + viewportW * 0.5f;
-        device_.drawFilledRect(Engine::Vec2{screenX, 0.0f}, Engine::Vec2{1.0f, static_cast<float>(viewportH)},
-                               gridColor);
-    }
-
-    for (float y = firstHorizontal; y <= bottom; y += spacing) {
-        float screenY = (y - camera.position.y) * camera.zoom + viewportH * 0.5f;
-        device_.drawFilledRect(Engine::Vec2{0.0f, screenY}, Engine::Vec2{static_cast<float>(viewportW), 1.0f},
-                               gridColor);
-    }
+    // No debug grid when textures are missing; keep background clean.
 }
 
 }  // namespace Game

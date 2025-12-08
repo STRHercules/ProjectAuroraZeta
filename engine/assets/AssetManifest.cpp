@@ -26,6 +26,13 @@ std::optional<AssetManifest> AssetManifestLoader::load(const std::string& path) 
     if (j.contains("gridTexture") && j["gridTexture"].is_string()) {
         manifest.gridTexture = j["gridTexture"].get<std::string>();
     }
+    if (j.contains("gridTextures") && j["gridTextures"].is_array()) {
+        for (const auto& el : j["gridTextures"]) {
+            if (el.is_string()) {
+                manifest.gridTextures.push_back(el.get<std::string>());
+            }
+        }
+    }
     if (j.contains("fontTexture") && j["fontTexture"].is_string()) {
         manifest.fontTexture = j["fontTexture"].get<std::string>();
     }

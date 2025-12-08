@@ -46,6 +46,7 @@ void GameRoot::executeAbility(int index) {
     // Helper to pull hero position
     const auto* heroTf = registry_.get<Engine::ECS::Transform>(hero_);
     if (!heroTf) return;
+    float zoneDmgMul = hotzoneSystem_ ? hotzoneSystem_->damageMultiplier() : 1.0f;
 
     auto setCooldown = [&](float cd) {
         slot.cooldown = cd;
@@ -74,7 +75,7 @@ void GameRoot::executeAbility(int index) {
             float ang = std::atan2(mouseWorld_.y - heroTf->position.y, mouseWorld_.x - heroTf->position.x);
             ang += spread(rng);
             Engine::Vec2 dir{std::cos(ang), std::sin(ang)};
-            spawnProjectile(dir, projectileSpeed_ * 0.8f, projectileDamage_ * 0.7f * slot.powerScale, 0.9f);
+            spawnProjectile(dir, projectileSpeed_ * 0.8f, projectileDamage_ * 0.7f * slot.powerScale * zoneDmgMul, 0.9f);
         }
         setCooldown(std::max(0.5f, slot.cooldownMax));
     } else if (slot.type == "rage") {
@@ -85,7 +86,7 @@ void GameRoot::executeAbility(int index) {
     } else if (slot.type == "nova") {
         int count = 12 + slot.level * 2;
         float speed = projectileSpeed_ * 0.7f;
-        float dmg = projectileDamage_ * 1.6f * slot.powerScale;
+        float dmg = projectileDamage_ * 1.6f * slot.powerScale * zoneDmgMul;
         for (int i = 0; i < count; ++i) {
             float ang = (6.2831853f * i) / static_cast<float>(count);
             Engine::Vec2 dir{std::cos(ang), std::sin(ang)};
@@ -97,7 +98,7 @@ void GameRoot::executeAbility(int index) {
         for (int w = 0; w < waves; ++w) {
             int count = 20 + slot.level * 2;
             float speed = projectileSpeed_ * (0.8f + 0.1f * w);
-            float dmg = projectileDamage_ * (2.0f + 0.2f * w) * slot.powerScale;
+            float dmg = projectileDamage_ * (2.0f + 0.2f * w) * slot.powerScale * zoneDmgMul;
             for (int i = 0; i < count; ++i) {
                 float ang = (6.2831853f * i) / static_cast<float>(count);
                 Engine::Vec2 dir{std::cos(ang), std::sin(ang)};

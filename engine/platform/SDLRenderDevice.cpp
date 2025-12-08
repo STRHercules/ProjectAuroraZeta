@@ -42,6 +42,26 @@ void SDLRenderDevice::drawTexture(const Texture& textureBase, const Vec2& topLef
     SDL_RenderCopy(renderer_, tex->raw(), nullptr, &dst);
 }
 
+void SDLRenderDevice::drawTextureRegion(const Texture& textureBase, const Vec2& topLeft, const Vec2& size,
+                                        const IntRect& source, bool flipX) {
+    const auto* tex = dynamic_cast<const SDLTexture*>(&textureBase);
+    if (!tex) {
+        return;
+    }
+    SDL_Rect src{};
+    src.x = source.x;
+    src.y = source.y;
+    src.w = source.w;
+    src.h = source.h;
+    SDL_Rect dst{};
+    dst.x = static_cast<int>(topLeft.x);
+    dst.y = static_cast<int>(topLeft.y);
+    dst.w = static_cast<int>(size.x);
+    dst.h = static_cast<int>(size.y);
+    const SDL_RendererFlip flip = flipX ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+    SDL_RenderCopyEx(renderer_, tex->raw(), &src, &dst, 0.0, nullptr, flip);
+}
+
 void SDLRenderDevice::present() { SDL_RenderPresent(renderer_); }
 
 }  // namespace Engine

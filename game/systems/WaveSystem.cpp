@@ -8,14 +8,22 @@
 #include "../../engine/ecs/components/AABB.h"
 #include "../../engine/ecs/components/Health.h"
 #include "../../engine/ecs/components/Tags.h"
+#include "../../engine/ecs/components/SpriteAnimation.h"
 #include "../../engine/math/Vec2.h"
 #include "../components/EnemyAttributes.h"
 #include "../components/PickupBob.h"
 #include "../components/BountyTag.h"
+#include "../components/Facing.h"
 
 namespace Game {
 
 WaveSystem::WaveSystem(std::mt19937& rng, WaveSettings settings) : rng_(rng), settings_(settings) {}
+
+const EnemyDefinition* WaveSystem::pickEnemyDef() {
+    if (!enemyDefs_ || enemyDefs_->empty()) return nullptr;
+    std::uniform_int_distribution<std::size_t> dist(0, enemyDefs_->size() - 1);
+    return &((*enemyDefs_)[dist(rng_)]);
+}
 
 bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep& step, Engine::ECS::Entity hero,
                         int& wave) {
@@ -43,18 +51,31 @@ bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
         auto e = registry.create();
         registry.emplace<Engine::ECS::Transform>(e, pos);
         registry.emplace<Engine::ECS::Velocity>(e, Engine::Vec2{0.0f, 0.0f});
-        bool fast = (i % 3 == 0);  // 1-in-3 spawns are runners
-        float size = fast ? settings_.enemySize * 0.8f : settings_.enemySize;
-        float hpVal = fast ? settings_.enemyHp * 0.6f : settings_.enemyHp;
-        float speedVal = fast ? settings_.enemySpeed * 1.6f : settings_.enemySpeed;
-        Engine::Color col = fast ? Engine::Color{180, 200, 255, 255} : Engine::Color{200, 80, 80, 255};
-        registry.emplace<Engine::ECS::Renderable>(e,
-            Engine::ECS::Renderable{Engine::Vec2{size, size}, col});
-        const float hb = (fast ? settings_.enemyHitbox * 0.7f : settings_.enemyHitbox) * 0.5f;
+        registry.emplace<Game::Facing>(e, Game::Facing{1});
+        const EnemyDefinition* def = pickEnemyDef();
+        float hpVal = settings_.enemyHp;
+        float speedVal = settings_.enemySpeed;
+        float sizeMul = 1.0f;
+        if (def) {
+            hpVal *= def->hpMultiplier;
+            speedVal *= def->speedMultiplier;
+            sizeMul = def->sizeMultiplier;
+        }
+        float size = settings_.enemySize * sizeMul;
+        registry.emplace<Engine::ECS::Renderable>(e, Engine::ECS::Renderable{Engine::Vec2{size, size},
+                                                                              Engine::Color{255, 255, 255, 255},
+                                                                              def ? def->texture : Engine::TexturePtr{}});
+        const float hb = settings_.enemyHitbox * 0.5f * sizeMul;
         registry.emplace<Engine::ECS::AABB>(e, Engine::ECS::AABB{Engine::Vec2{hb, hb}});
         registry.emplace<Engine::ECS::Health>(e, Engine::ECS::Health{hpVal, hpVal});
         registry.emplace<Engine::ECS::EnemyTag>(e, Engine::ECS::EnemyTag{});
         registry.emplace<Game::EnemyAttributes>(e, Game::EnemyAttributes{speedVal});
+        if (def && def->texture) {
+            registry.emplace<Engine::ECS::SpriteAnimation>(e, Engine::ECS::SpriteAnimation{def->frameWidth,
+                                                                                           def->frameHeight,
+                                                                                           4,
+                                                                                           def->frameDuration});
+        }
     }
 
     // Every 5th wave spawn a bounty elite near hero.
@@ -65,12 +86,25 @@ bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
         auto e = registry.create();
         registry.emplace<Engine::ECS::Transform>(e, pos);
         registry.emplace<Engine::ECS::Velocity>(e, Engine::Vec2{0.0f, 0.0f});
-        registry.emplace<Engine::ECS::Renderable>(e,
-            Engine::ECS::Renderable{Engine::Vec2{24.0f, 24.0f}, Engine::Color{255, 170, 60, 255}});
-        registry.emplace<Engine::ECS::AABB>(e, Engine::ECS::AABB{Engine::Vec2{12.0f, 12.0f}});
-        registry.emplace<Engine::ECS::Health>(e, Engine::ECS::Health{settings_.enemyHp * 3.0f, settings_.enemyHp * 3.0f});
+        registry.emplace<Game::Facing>(e, Game::Facing{1});
+        const EnemyDefinition* def = pickEnemyDef();
+        float sizeMul = def ? def->sizeMultiplier : 1.2f;
+        float size = 24.0f * sizeMul;
+        float hpVal = settings_.enemyHp * 3.0f * (def ? def->hpMultiplier : 1.0f);
+        float speedVal = settings_.enemySpeed * 1.1f * (def ? def->speedMultiplier : 1.0f);
+        registry.emplace<Engine::ECS::Renderable>(e, Engine::ECS::Renderable{Engine::Vec2{size, size},
+                                                                              Engine::Color{255, 170, 60, 255},
+                                                                              def ? def->texture : Engine::TexturePtr{}});
+        registry.emplace<Engine::ECS::AABB>(e, Engine::ECS::AABB{Engine::Vec2{size * 0.5f, size * 0.5f}});
+        registry.emplace<Engine::ECS::Health>(e, Engine::ECS::Health{hpVal, hpVal});
         registry.emplace<Engine::ECS::EnemyTag>(e, Engine::ECS::EnemyTag{});
-        registry.emplace<Game::EnemyAttributes>(e, Game::EnemyAttributes{settings_.enemySpeed * 1.1f});
+        registry.emplace<Game::EnemyAttributes>(e, Game::EnemyAttributes{speedVal});
+        if (def && def->texture) {
+            registry.emplace<Engine::ECS::SpriteAnimation>(e, Engine::ECS::SpriteAnimation{def->frameWidth,
+                                                                                           def->frameHeight,
+                                                                                           4,
+                                                                                           def->frameDuration});
+        }
         registry.emplace<Game::PickupBob>(e, Game::PickupBob{pos, 0.0f, 2.0f, 2.5f});
         registry.emplace<Game::BountyTag>(e, Game::BountyTag{});
     }
@@ -83,13 +117,26 @@ bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
         auto e = registry.create();
         registry.emplace<Engine::ECS::Transform>(e, pos);
         registry.emplace<Engine::ECS::Velocity>(e, Engine::Vec2{0.0f, 0.0f});
-        registry.emplace<Engine::ECS::Renderable>(e,
-            Engine::ECS::Renderable{Engine::Vec2{34.0f, 34.0f}, Engine::Color{200, 80, 200, 255}});
-        registry.emplace<Engine::ECS::AABB>(e, Engine::ECS::AABB{Engine::Vec2{17.0f, 17.0f}});
-        registry.emplace<Engine::ECS::Health>(e, Engine::ECS::Health{settings_.enemyHp * bossHpMul_, settings_.enemyHp * bossHpMul_});
+        registry.emplace<Game::Facing>(e, Game::Facing{1});
+        const EnemyDefinition* def = pickEnemyDef();
+        float sizeMul = def ? def->sizeMultiplier * 1.6f : 2.0f;
+        float size = 34.0f * sizeMul;
+        float hpVal = settings_.enemyHp * bossHpMul_ * (def ? def->hpMultiplier : 1.0f);
+        float speedVal = settings_.enemySpeed * bossSpeedMul_ * (def ? def->speedMultiplier : 1.0f);
+        registry.emplace<Engine::ECS::Renderable>(e, Engine::ECS::Renderable{Engine::Vec2{size, size},
+                                                                              Engine::Color{200, 80, 200, 255},
+                                                                              def ? def->texture : Engine::TexturePtr{}});
+        registry.emplace<Engine::ECS::AABB>(e, Engine::ECS::AABB{Engine::Vec2{size * 0.5f, size * 0.5f}});
+        registry.emplace<Engine::ECS::Health>(e, Engine::ECS::Health{hpVal, hpVal});
         registry.emplace<Engine::ECS::EnemyTag>(e, Engine::ECS::EnemyTag{});
         registry.emplace<Engine::ECS::BossTag>(e, Engine::ECS::BossTag{});
-        registry.emplace<Game::EnemyAttributes>(e, Game::EnemyAttributes{settings_.enemySpeed * bossSpeedMul_});
+        registry.emplace<Game::EnemyAttributes>(e, Game::EnemyAttributes{speedVal});
+        if (def && def->texture) {
+            registry.emplace<Engine::ECS::SpriteAnimation>(e, Engine::ECS::SpriteAnimation{def->frameWidth,
+                                                                                           def->frameHeight,
+                                                                                           4,
+                                                                                           def->frameDuration});
+        }
     }
 
     return true;
