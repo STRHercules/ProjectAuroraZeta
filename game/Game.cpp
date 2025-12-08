@@ -127,6 +127,13 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     float shopDamageBonus = shopDamageBonus_;
     float shopHpBonus = shopHpBonus_;
     float shopSpeedBonus = shopSpeedBonus_;
+    int xpPerKill = xpPerKill_;
+    int xpPerWave = xpPerWave_;
+    int xpBase = xpToNext_;
+    float xpGrowth = xpGrowth_;
+    float levelHpBonus = levelHpBonus_;
+    float levelDmgBonus = levelDmgBonus_;
+    float levelSpeedBonus = levelSpeedBonus_;
     {
         std::ifstream gp("data/gameplay.json");
         if (gp.is_open()) {
@@ -164,6 +171,15 @@ bool GameRoot::onInitialize(Engine::Application& app) {
                 currencyPerKill = j["rewards"].value("currencyPerKill", currencyPerKill);
                 waveClearBonus = j["rewards"].value("waveClearBonus", waveClearBonus);
                 bountyBonus = j["rewards"].value("bountyBonus", bountyBonus);
+            }
+            if (j.contains("xp")) {
+                xpPerKill = j["xp"].value("perKill", xpPerKill);
+                xpPerWave = j["xp"].value("perWave", xpPerWave);
+                xpBase = j["xp"].value("baseToLevel", xpBase);
+                xpGrowth = j["xp"].value("growth", xpGrowth);
+                levelHpBonus = j["xp"].value("hpBonus", levelHpBonus);
+                levelDmgBonus = j["xp"].value("damageBonus", levelDmgBonus);
+                levelSpeedBonus = j["xp"].value("speedBonus", levelSpeedBonus);
             }
             if (j.contains("ui")) {
                 enemyLowThreshold = j["ui"].value("enemyLowThreshold", enemyLowThreshold);
@@ -223,6 +239,13 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     shopDamageBonus_ = shopDamageBonus;
     shopHpBonus_ = shopHpBonus;
     shopSpeedBonus_ = shopSpeedBonus;
+    xpPerKill_ = xpPerKill;
+    xpPerWave_ = xpPerWave;
+    xpToNext_ = xpBase;
+    xpGrowth_ = xpGrowth;
+    levelHpBonus_ = levelHpBonus;
+    levelDmgBonus_ = levelDmgBonus;
+    levelSpeedBonus_ = levelSpeedBonus;
     fireInterval_ = 1.0 / fireRate;
     fireCooldown_ = 0.0;
     if (collisionSystem_) collisionSystem_->setContactDamage(contactDamage_);
@@ -243,7 +266,9 @@ bool GameRoot::onInitialize(Engine::Application& app) {
             }
         }
     }
+    // Start in main menu; actual run spawns on New Game.
     resetRun();
+    inMenu_ = true;
     return true;
 }
 
@@ -258,10 +283,10 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
     restartPrev_ = actions.restart;
     const bool shopToggleEdge = actions.toggleShop && !shopTogglePrev_;
     shopTogglePrev_ = actions.toggleShop;
-    if (shopToggleEdge && !inCombat_) {
+    if (shopToggleEdge && !inCombat_ && !inMenu_) {
         shopOpen_ = !shopOpen_;
     }
-    if (shopToggleEdge && inCombat_) {
+    if (shopToggleEdge && inCombat_ && !inMenu_) {
         shopUnavailableTimer_ = 1.0;
     }
     if (shopOpen_ && waveWarmup_ <= waveInterval_) {
@@ -269,13 +294,20 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
     }
     const bool pausePressed = actions.pause && !pauseTogglePrev_;
     pauseTogglePrev_ = actions.pause;
-    if (pausePressed) {
+    if (!inMenu_ && pausePressed) {
         userPaused_ = !userPaused_;
         pauseMenuBlink_ = 0.0;
     }
-    paused_ = userPaused_ || shopOpen_;
+    paused_ = userPaused_ || shopOpen_ || levelChoiceOpen_;
     if (actions.toggleFollow && shopOpen_) {
         // ignore camera toggle while paused/shop
+    }
+
+    // Menu handling before gameplay.
+    updateMenuInput(actions, input, step.deltaSeconds);
+    if (inMenu_) {
+        renderMenu();
+        return;
     }
 
     // Timers.
@@ -398,8 +430,10 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         for (auto e : toDestroy) {
             kills_ += 1;
             credits_ += currencyPerKill_;
+            xp_ += xpPerKill_;
             if (registry_.has<Engine::ECS::BossTag>(e)) {
                 credits_ += bossKillBonus_;
+                xp_ += xpPerKill_ * 5;
                 clearBannerTimer_ = 1.75;
                 waveClearedPending_ = true;
             }
@@ -450,7 +484,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
 
     // Waves and phases.
     // Phase timing continues unless user-paused (shop should not freeze phase timers).
-    if (!defeated_ && !userPaused_) {
+    if (!defeated_ && !userPaused_ && !levelChoiceOpen_) {
         if (inCombat_) {
             combatTimer_ -= step.deltaSeconds;
             if (waveSystem_) {
@@ -473,6 +507,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             if (combatTimer_ <= 0.0 && enemiesAlive_ == 0) {
                 inCombat_ = false;
                 intermissionTimer_ = intermissionDuration_;
+                xp_ += xpPerWave_;  // small wave completion xp
                 waveSpawned_ = false;
                 shopOpen_ = true;
                 paused_ = userPaused_ || shopOpen_;
@@ -512,7 +547,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             pickupSystem_->update(registry_, hero_, credits_);
         }
 
-    if (eventSystem_ && !paused_) {
+    if (eventSystem_ && !paused_ && !levelChoiceOpen_) {
         Engine::Vec2 heroPos{0.0f, 0.0f};
         if (const auto* tf = registry_.get<Engine::ECS::Transform>(hero_)) {
             heroPos = tf->position;
@@ -552,6 +587,12 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
 
     if (damageNumberSystem_) {
         damageNumberSystem_->update(registry_, step);
+    }
+
+    // Level up check.
+    while (xp_ >= xpToNext_) {
+        xp_ -= xpToNext_;
+        levelUp();
     }
 
     handleHeroDeath();
@@ -635,11 +676,11 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 render_->drawFilledRect(Engine::Vec2{clamped.x + 5.0f, clamped.y - 5.0f}, size2, c);
             }
         }
-        if (hasTTF()) {
-            std::ostringstream dbg;
-            dbg << "FPS ~" << std::fixed << std::setprecision(1) << fpsSmooth_;
-            dbg << " | Cam " << (cameraSystem_ && cameraSystem_->followEnabled() ? "Follow" : "Free");
-            dbg << " | Zoom " << std::setprecision(2) << camera_.zoom;
+    if (hasTTF()) {
+        std::ostringstream dbg;
+        dbg << "FPS ~" << std::fixed << std::setprecision(1) << fpsSmooth_;
+        dbg << " | Cam " << (cameraSystem_ && cameraSystem_->followEnabled() ? "Follow" : "Free");
+        dbg << " | Zoom " << std::setprecision(2) << camera_.zoom;
             if (const auto* heroHealth = registry_.get<Engine::ECS::Health>(hero_)) {
                 dbg << " | HP " << std::setprecision(0) << heroHealth->current << "/" << heroHealth->max;
             }
@@ -647,6 +688,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             dbg << " | Credits " << credits_;
             dbg << " | Enemies " << enemiesAlive_;
             dbg << " | WaveClear +" << waveClearBonus_;
+            dbg << " | Lv " << level_ << " (" << xp_ << "/" << xpToNext_ << ")";
             drawTextTTF(dbg.str(), Engine::Vec2{10.0f, 10.0f}, 1.0f, Engine::Color{255, 255, 255, 200});
             if (waveWarmup_ > 0.0) {
                 std::ostringstream warm;
@@ -662,6 +704,15 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 Engine::Vec2 pos{static_cast<float>(viewportWidth_) * 0.5f - 80.0f,
                                  static_cast<float>(viewportHeight_) * 0.08f};
                 drawTextTTF(banner.str(), pos, scale, Engine::Color{180, 230, 255, 230});
+            }
+            if (levelBannerTimer_ > 0.0) {
+                levelBannerTimer_ -= step.deltaSeconds;
+                std::ostringstream lb;
+                lb << "LEVEL UP! " << level_;
+                float scale = 1.3f;
+                Engine::Vec2 pos{static_cast<float>(viewportWidth_) * 0.5f - 90.0f,
+                                 static_cast<float>(viewportHeight_) * 0.26f};
+                drawTextTTF(lb.str(), pos, scale, Engine::Color{200, 255, 200, 235});
             }
             if (clearBannerTimer_ > 0.0) {
                 clearBannerTimer_ -= step.deltaSeconds;
@@ -689,17 +740,17 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             // Intermission overlay when we are in grace time.
             if (!inCombat_) {
                 double intermissionLeft = waveWarmup_;
-                std::ostringstream inter;
-                inter << "Intermission: next wave in " << std::fixed << std::setprecision(1) << intermissionLeft
-                      << "s | Credits: " << credits_;
-                Engine::Color c{140, 220, 255, 220};
-                drawTextTTF(inter.str(), Engine::Vec2{10.0f, 46.0f}, 1.0f, c);
+        std::ostringstream inter;
+        inter << "Intermission: next wave in " << std::fixed << std::setprecision(1) << intermissionLeft
+              << "s | Credits: " << credits_;
+        Engine::Color c{140, 220, 255, 220};
+        drawTextTTF(inter.str(), Engine::Vec2{10.0f, 46.0f}, 1.0f, c);
                 if (shopOpen_) {
-                    std::ostringstream shopMsg;
-                    shopMsg << "[SHOP] Mouse1: +" << shopDamageBonus_ << " dmg (" << shopDamageCost_ << "c) | "
-                            << "Mouse2: +" << shopHpBonus_ << " HP (" << shopHpCost_ << "c) | "
-                            << "Mouse3: +" << shopSpeedBonus_ << " move (" << shopSpeedCost_ << "c) — B closes";
-                    drawTextTTF(shopMsg.str(), Engine::Vec2{10.0f, 64.0f}, 1.0f, Engine::Color{180, 255, 180, 220});
+                std::ostringstream shopMsg;
+                shopMsg << "[SHOP] Mouse1: +" << shopDamageBonus_ << " dmg (" << shopDamageCost_ << "c) | "
+                        << "Mouse2: +" << shopHpBonus_ << " HP (" << shopHpCost_ << "c) | "
+                        << "Mouse3: +" << shopSpeedBonus_ << " move (" << shopSpeedCost_ << "c) — B closes";
+                drawTextTTF(shopMsg.str(), Engine::Vec2{10.0f, 64.0f}, 1.0f, Engine::Color{180, 255, 180, 220});
                 } else {
                     std::string shopPrompt = "Press B to open Shop (placeholder)";
                     drawTextTTF(shopPrompt, Engine::Vec2{10.0f, 64.0f}, 1.0f, Engine::Color{150, 220, 255, 200});
@@ -710,6 +761,19 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 std::ostringstream note;
                 note << "Wave clear bonus +" << waveClearBonus_;
                 drawTextUnified(note.str(), Engine::Vec2{10.0f, 82.0f}, 0.9f, Engine::Color{180, 240, 180, 200});
+            }
+            // XP / Level bar.
+            {
+                float barW = 240.0f;
+                float ratio = xpToNext_ > 0 ? static_cast<float>(xp_) / static_cast<float>(xpToNext_) : 0.0f;
+                ratio = std::clamp(ratio, 0.0f, 1.0f);
+                Engine::Vec2 pos{10.0f, static_cast<float>(viewportHeight_) - 46.0f};
+                render_->drawFilledRect(pos, Engine::Vec2{barW, 10.0f}, Engine::Color{40, 60, 90, 200});
+                render_->drawFilledRect(pos, Engine::Vec2{barW * ratio, 10.0f}, Engine::Color{90, 200, 255, 220});
+                std::ostringstream lvl;
+                lvl << "Lv " << level_ << " (" << xp_ << "/" << xpToNext_ << ")";
+                drawTextUnified(lvl.str(), Engine::Vec2{pos.x, pos.y - 14.0f}, 0.9f,
+                                Engine::Color{200, 230, 255, 220});
             }
             if (shopUnavailableTimer_ > 0.0 && inCombat_) {
                 float pulse = 0.5f + 0.5f * std::sin(static_cast<float>(shopUnavailableTimer_) * 12.0f);
@@ -866,6 +930,12 @@ void GameRoot::handleHeroDeath() {
         if (auto* vel = registry_.get<Engine::ECS::Velocity>(hero_)) {
             vel->value = {0.0f, 0.0f};
         }
+        if (runStarted_) {
+            totalRuns_ += 1;
+            totalKillsAccum_ += kills_;
+            bestWave_ = std::max(bestWave_, wave_);
+            runStarted_ = false;
+        }
     }
 }
 
@@ -875,8 +945,140 @@ void GameRoot::showDefeatOverlay() {
     drawTextUnified(msg, Engine::Vec2{40.0f, 60.0f}, 1.5f, Engine::Color{255, 80, 80, 220});
 }
 
+void GameRoot::levelUp() {
+    level_ += 1;
+    xpToNext_ = static_cast<int>(static_cast<float>(xpToNext_) * xpGrowth_);
+    levelBannerTimer_ = 1.0;
+    levelChoiceOpen_ = true;
+    paused_ = true;
+    rollLevelChoices();
+}
+
 void GameRoot::processDefeatInput(const Engine::ActionState& /*actions*/) {
     // Reserved for future defeat-specific inputs (e.g., confirm exit/menu).
+}
+
+void GameRoot::startNewGame() {
+    inMenu_ = false;
+    userPaused_ = false;
+    paused_ = false;
+    shopOpen_ = false;
+    runStarted_ = true;
+    resetRun();
+}
+
+void GameRoot::updateMenuInput(const Engine::ActionState& actions, const Engine::InputState& input, double dt) {
+    menuPulse_ += dt;
+    bool up = actions.moveY < -0.5f;
+    bool down = actions.moveY > 0.5f;
+    bool upEdge = up && !menuUpPrev_;
+    bool downEdge = down && !menuDownPrev_;
+    menuUpPrev_ = up;
+    menuDownPrev_ = down;
+
+    bool leftClick = input.isMouseButtonDown(0);
+    bool confirmEdge = (leftClick && !menuConfirmPrev_) || (actions.primaryFire && !menuConfirmPrev_);
+    menuConfirmPrev_ = leftClick || actions.primaryFire;
+
+    bool pauseEdge = actions.pause && !menuPausePrev_;
+    menuPausePrev_ = actions.pause;
+
+    auto advanceSelection = [&](int count) {
+        const int maxIndex = count - 1;
+        if (menuSelection_ < 0) menuSelection_ = 0;
+        if (menuSelection_ > maxIndex) menuSelection_ = maxIndex;
+        if (upEdge) menuSelection_ = (menuSelection_ - 1 + count) % count;
+        if (downEdge) menuSelection_ = (menuSelection_ + 1) % count;
+    };
+
+    if (inMenu_) {
+        if (menuPage_ == MenuPage::Main) {
+            const int itemCount = 4;
+            advanceSelection(itemCount);
+            if (confirmEdge) {
+                switch (menuSelection_) {
+                    case 0: startNewGame(); return;
+                    case 1: menuPage_ = MenuPage::Stats; menuSelection_ = 0; return;
+                    case 2: menuPage_ = MenuPage::Options; menuSelection_ = 0; return;
+                    case 3: if (app_) app_->requestQuit("Exit from main menu"); return;
+                }
+            }
+            if (pauseEdge && app_) {
+                app_->requestQuit("Exit from main menu");
+                return;
+            }
+        } else if (menuPage_ == MenuPage::Stats) {
+            const int itemCount = 1;  // Back
+            advanceSelection(itemCount);
+            if (confirmEdge || pauseEdge) {
+                menuPage_ = MenuPage::Main;
+                menuSelection_ = 0;
+            }
+        } else if (menuPage_ == MenuPage::Options) {
+            const int itemCount = 1;  // Back
+            advanceSelection(itemCount);
+            if (confirmEdge || pauseEdge) {
+                menuPage_ = MenuPage::Main;
+                menuSelection_ = 0;
+            }
+        }
+    }
+}
+
+void GameRoot::renderMenu() {
+    if (!render_) return;
+    render_->clear({10, 12, 16, 255});
+
+    const float centerX = static_cast<float>(viewportWidth_) * 0.5f;
+    const float topY = 140.0f;
+    drawTextUnified("PROJECT ZETA", Engine::Vec2{centerX - 140.0f, topY}, 1.7f, Engine::Color{180, 230, 255, 240});
+    drawTextUnified("Placeholder build | WASD move | Mouse aim | B shop | Esc pause", Engine::Vec2{centerX - 220.0f, topY + 28.0f},
+                    0.9f, Engine::Color{150, 200, 230, 220});
+
+    auto drawButton = [&](const std::string& label, int index) {
+        float y = topY + 80.0f + index * 38.0f;
+        Engine::Vec2 pos{centerX - 120.0f, y};
+        Engine::Vec2 size{240.0f, 30.0f};
+        bool focused = (menuPage_ == MenuPage::Main && menuSelection_ == index);
+        uint8_t base = focused ? 90 : 60;
+        Engine::Color bg{static_cast<uint8_t>(base), static_cast<uint8_t>(base + 40), static_cast<uint8_t>(base + 70), 220};
+        render_->drawFilledRect(pos, size, bg);
+        Engine::Color textCol = focused ? Engine::Color{220, 255, 255, 255} : Engine::Color{200, 220, 240, 230};
+        drawTextUnified(label, Engine::Vec2{pos.x + 16.0f, pos.y + 6.0f}, 1.0f, textCol);
+    };
+
+    if (menuPage_ == MenuPage::Main) {
+        drawButton("New Game", 0);
+        drawButton("Stats", 1);
+        drawButton("Options", 2);
+        drawButton("Exit", 3);
+        float pulse = 0.6f + 0.4f * std::sin(static_cast<float>(menuPulse_) * 2.0f);
+        Engine::Color hint{static_cast<uint8_t>(180 + 40 * pulse), 220, 255, 220};
+        drawTextUnified("Navigate: W/S or arrows | Select: Mouse1", Engine::Vec2{centerX - 160.0f, topY + 240.0f},
+                        0.9f, hint);
+    } else if (menuPage_ == MenuPage::Stats) {
+        Engine::Color c{200, 230, 255, 240};
+        drawTextUnified("Stats", Engine::Vec2{centerX - 40.0f, topY + 60.0f}, 1.2f, c);
+        std::ostringstream ss;
+        ss << "Total Runs: " << totalRuns_;
+        drawTextUnified(ss.str(), Engine::Vec2{centerX - 120.0f, topY + 100.0f}, 1.0f, c);
+        ss.str(""); ss.clear();
+        ss << "Best Wave: " << bestWave_;
+        drawTextUnified(ss.str(), Engine::Vec2{centerX - 120.0f, topY + 128.0f}, 1.0f, c);
+        ss.str(""); ss.clear();
+        ss << "Total Kills: " << totalKillsAccum_;
+        drawTextUnified(ss.str(), Engine::Vec2{centerX - 120.0f, topY + 156.0f}, 1.0f, c);
+        drawTextUnified("Esc / Mouse1 to return", Engine::Vec2{centerX - 120.0f, topY + 204.0f}, 0.9f,
+                        Engine::Color{180, 210, 240, 220});
+    } else if (menuPage_ == MenuPage::Options) {
+        Engine::Color c{200, 240, 200, 240};
+        drawTextUnified("Options (placeholder)", Engine::Vec2{centerX - 120.0f, topY + 80.0f}, 1.1f, c);
+        drawTextUnified("- Toggle shop: B", Engine::Vec2{centerX - 120.0f, topY + 118.0f}, 0.95f, c);
+        drawTextUnified("- Pause: Esc", Engine::Vec2{centerX - 120.0f, topY + 144.0f}, 0.95f, c);
+        drawTextUnified("- Movement: WASD", Engine::Vec2{centerX - 120.0f, topY + 170.0f}, 0.95f, c);
+        drawTextUnified("Esc / Mouse1 to return", Engine::Vec2{centerX - 120.0f, topY + 210.0f}, 0.9f,
+                        Engine::Color{180, 210, 240, 220});
+    }
 }
 
 void GameRoot::drawTextTTF(const std::string& text, const Engine::Vec2& pos, float scale, Engine::Color color) {
@@ -907,6 +1109,94 @@ void GameRoot::drawTextUnified(const std::string& text, const Engine::Vec2& pos,
         drawTextTTF(text, pos, scale, color);
     } else if (debugText_) {
         debugText_->drawText(text, pos, scale, color);
+    }
+}
+
+void GameRoot::rollLevelChoices() {
+    std::uniform_int_distribution<int> pickType(0, 2);
+    std::uniform_real_distribution<float> variance(0.9f, 1.15f);
+    float dmg = levelDmgBonus_ * variance(rng_);
+    float hp = levelHpBonus_ * variance(rng_);
+    float spd = levelSpeedBonus_ * variance(rng_);
+    LevelChoice base[3] = {
+        {LevelChoiceType::Damage, dmg},
+        {LevelChoiceType::Health, hp},
+        {LevelChoiceType::Speed, spd},
+    };
+    for (int i = 0; i < 3; ++i) {
+        int t = pickType(rng_);
+        levelChoices_[i] = base[t];
+    }
+}
+
+void GameRoot::applyLevelChoice(int index) {
+    if (index < 0 || index > 2) return;
+    const auto& choice = levelChoices_[index];
+    switch (choice.type) {
+        case LevelChoiceType::Damage:
+            projectileDamage_ += choice.amount;
+            break;
+        case LevelChoiceType::Health:
+            heroMaxHp_ += choice.amount;
+            if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
+                hp->max = heroMaxHp_;
+                hp->current = std::min(hp->max, hp->current + choice.amount * 0.5f);
+            }
+            break;
+        case LevelChoiceType::Speed:
+            heroMoveSpeed_ += choice.amount;
+            break;
+    }
+    levelChoiceOpen_ = false;
+    paused_ = userPaused_ || shopOpen_;
+}
+
+void GameRoot::drawLevelChoiceOverlay() {
+    if (!render_) return;
+    const float panelW = 640.0f;
+    const float panelH = 280.0f;
+    const float cx = static_cast<float>(viewportWidth_) * 0.5f;
+    const float cy = static_cast<float>(viewportHeight_) * 0.5f;
+    Engine::Vec2 topLeft{cx - panelW * 0.5f, cy - panelH * 0.5f};
+    render_->drawFilledRect(topLeft, Engine::Vec2{panelW, panelH}, Engine::Color{18, 26, 34, 230});
+    drawTextUnified("Level Up! Pick an upgrade", Engine::Vec2{topLeft.x + 18.0f, topLeft.y + 14.0f}, 1.1f,
+                    Engine::Color{200, 240, 255, 240});
+
+    const float cardW = 170.0f;
+    const float cardH = 190.0f;
+    const float gap = 12.0f;
+    float startX = cx - (cardW * 1.5f + gap);
+    float y = topLeft.y + 50.0f;
+    for (int i = 0; i < 3; ++i) {
+        float x = startX + i * (cardW + gap);
+        Engine::Color bg{40, 60, 90, 220};
+        render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{cardW, cardH}, bg);
+
+        std::string title;
+        std::string desc;
+        Engine::Color tcol{200, 230, 255, 240};
+        const auto& c = levelChoices_[i];
+        switch (c.type) {
+            case LevelChoiceType::Damage:
+                title = "Sharpen";
+                desc = "+ " + std::to_string(static_cast<int>(c.amount)) + " dmg";
+                tcol = Engine::Color{230, 200, 120, 240};
+                break;
+            case LevelChoiceType::Health:
+                title = "Reinforce";
+                desc = "+ " + std::to_string(static_cast<int>(c.amount)) + " HP";
+                tcol = Engine::Color{180, 240, 200, 240};
+                break;
+            case LevelChoiceType::Speed:
+                title = "Sprint";
+                desc = "+ " + std::to_string(static_cast<int>(c.amount)) + " move";
+                tcol = Engine::Color{200, 220, 255, 240};
+                break;
+        }
+        drawTextUnified(title, Engine::Vec2{x + 14.0f, y + 12.0f}, 1.05f, tcol);
+        drawTextUnified(desc, Engine::Vec2{x + 14.0f, y + 38.0f}, 1.0f, Engine::Color{210, 230, 245, 230});
+        drawTextUnified("Click to select", Engine::Vec2{x + 14.0f, y + cardH - 26.0f}, 0.85f,
+                        Engine::Color{170, 200, 230, 220});
     }
 }
 
@@ -952,6 +1242,8 @@ void GameRoot::resetRun() {
     hero_ = Engine::ECS::kInvalidEntity;
     kills_ = 0;
     credits_ = 0;
+    level_ = 1;
+    xp_ = 0;
     wave_ = 0;
     defeated_ = false;
     accumulated_ = 0.0;
@@ -966,6 +1258,10 @@ void GameRoot::resetRun() {
     shakeTimer_ = 0.0f;
     shakeMagnitude_ = 0.0f;
     lastHeroHp_ = -1.0f;
+    inCombat_ = true;
+    waveSpawned_ = false;
+    combatTimer_ = combatDuration_;
+    intermissionTimer_ = 0.0;
 
     if (waveSystem_) {
         waveSystem_ = std::make_unique<WaveSystem>(rng_, waveSettingsBase_);
@@ -983,6 +1279,8 @@ void GameRoot::resetRun() {
     shopUnavailableTimer_ = 0.0;
     userPaused_ = false;
     paused_ = false;
+    levelChoiceOpen_ = false;
+    levelChoicePrevClick_ = false;
 }
 
 }  // namespace Game

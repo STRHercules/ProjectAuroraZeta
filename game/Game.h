@@ -50,9 +50,23 @@ private:
     void processDefeatInput(const Engine::ActionState& actions);
     void resetRun();
     void spawnHero();
+    void startNewGame();
+    void levelUp();
+    void renderMenu();
+    void updateMenuInput(const Engine::ActionState& actions, const Engine::InputState& input, double dt);
     void drawTextTTF(const std::string& text, const Engine::Vec2& pos, float scale, Engine::Color color);
     void drawTextUnified(const std::string& text, const Engine::Vec2& pos, float scale, Engine::Color color);
     bool hasTTF() const { return uiFont_ != nullptr && sdlRenderer_ != nullptr; }
+    void rollLevelChoices();
+    void applyLevelChoice(int index);
+    void drawLevelChoiceOverlay();
+
+    enum class MenuPage { Main, Stats, Options };
+    enum class LevelChoiceType { Damage, Health, Speed };
+    struct LevelChoice {
+        LevelChoiceType type{LevelChoiceType::Damage};
+        float amount{0.0f};
+    };
 
     Engine::ECS::Registry registry_{};
     Engine::ECS::Entity hero_{Engine::ECS::kInvalidEntity};
@@ -105,6 +119,16 @@ private:
     float heroSize_{24.0f};
     int kills_{0};
     int credits_{0};
+    int level_{1};
+    int xp_{0};
+    int xpToNext_{60};
+    int xpPerKill_{8};
+    int xpPerWave_{5};
+    float levelHpBonus_{12.0f};
+    float levelDmgBonus_{2.5f};
+    float levelSpeedBonus_{5.0f};
+    float xpGrowth_{1.35f};
+    double levelBannerTimer_{0.0};
     int wave_{0};
     int enemiesAlive_{0};
     Game::WaveSettings waveSettingsBase_{};
@@ -117,6 +141,24 @@ private:
     float shakeTimer_{0.0f};
     float shakeMagnitude_{0.0f};
     float lastHeroHp_{-1.0f};
+    // Menu/UI state
+    bool inMenu_{true};
+    MenuPage menuPage_{MenuPage::Main};
+    int menuSelection_{0};
+    bool menuUpPrev_{false};
+    bool menuDownPrev_{false};
+    bool menuConfirmPrev_{false};
+    bool menuPausePrev_{false};
+    double menuPulse_{0.0};
+    // Session stats
+    int totalRuns_{0};
+    int bestWave_{0};
+    int totalKillsAccum_{0};
+    bool runStarted_{false};
+    // Level-up choice overlay
+    bool levelChoiceOpen_{false};
+    LevelChoice levelChoices_[3];
+    bool levelChoicePrevClick_{false};
     std::unique_ptr<Game::MovementSystem> movementSystem_;
     std::unique_ptr<Game::CameraSystem> cameraSystem_;
     std::unique_ptr<Game::ProjectileSystem> projectileSystem_;

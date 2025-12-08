@@ -30,6 +30,15 @@
     "waveClearBonus": 20,
     "bountyBonus": 40
   },
+  "xp": {
+    "perKill": 8,
+    "perWave": 5,
+    "baseToLevel": 60,
+    "growth": 1.35,
+    "hpBonus": 12.0,
+    "damageBonus": 2.5,
+    "speedBonus": 5.0
+  },
   "ui": {
     "enemyLowThreshold": 5
   },
