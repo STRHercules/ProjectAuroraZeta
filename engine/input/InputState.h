@@ -19,6 +19,8 @@ enum class InputKey {
     ToggleShop,
     Pause,
     Dash,
+    Interact,
+    UseItem,
     Ability1,
     Ability2,
     Ability3,

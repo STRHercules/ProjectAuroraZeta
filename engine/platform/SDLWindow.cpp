@@ -95,6 +95,9 @@ void SDLWindow::pollEvents(Application& app, InputState& input) {
                     case SDLK_4:
                         input.setKeyDown(InputKey::Ultimate, true);
                         break;
+                    case SDLK_e:
+                        input.setKeyDown(InputKey::Interact, true);
+                        break;
                     case SDLK_f:
                     case SDLK_F1:
                         input.setKeyDown(InputKey::Reload, true);
@@ -165,6 +168,9 @@ void SDLWindow::pollEvents(Application& app, InputState& input) {
                         break;
                     case SDLK_4:
                         input.setKeyDown(InputKey::Ultimate, false);
+                        break;
+                    case SDLK_e:
+                        input.setKeyDown(InputKey::Interact, false);
                         break;
                     case SDLK_f:
                     case SDLK_F1:

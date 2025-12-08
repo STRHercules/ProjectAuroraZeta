@@ -58,6 +58,12 @@ std::optional<InputBindings> InputLoader::loadFromFile(const std::string& path) 
     if (j.contains("dash")) {
         bindings.dash = readStrings(j["dash"]);
     }
+    if (j.contains("interact")) {
+        bindings.interact = readStrings(j["interact"]);
+    }
+    if (j.contains("useItem")) {
+        bindings.useItem = readStrings(j["useItem"]);
+    }
     if (j.contains("ability1")) {
         bindings.ability1 = readStrings(j["ability1"]);
     }

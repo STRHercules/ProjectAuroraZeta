@@ -25,6 +25,7 @@
 #include "../engine/input/InputBinding.h"
 #include "../engine/input/InputLoader.h"
 #include "render/RenderSystem.h"
+#include "meta/ItemDefs.h"
 #include "systems/MovementSystem.h"
 #include "systems/CameraSystem.h"
 #include "systems/ProjectileSystem.h"
@@ -65,9 +66,13 @@ private:
     void rollLevelChoices();
     void applyLevelChoice(int index);
     void drawLevelChoiceOverlay();
-    void drawShopOverlay();
+    void drawItemShopOverlay();
+    void drawStatShopOverlay();
+    void drawInventoryOverlay();
     void drawPauseOverlay();
     void refreshShopInventory();
+    bool addItemToInventory(const ItemDefinition& def);
+    bool sellItemFromInventory(std::size_t idx, int& creditsOut);
     void loadMenuPresets();
     void applyDifficultyPreset();
     void applyArchetypePreset();
@@ -81,12 +86,18 @@ private:
     void loadGridTextures();
     void loadEnemyDefinitions();
     Engine::TexturePtr loadTextureOptional(const std::string& path);
+    void spawnShopkeeper(const Engine::Vec2& aroundPos);
+    void despawnShopkeeper();
 
     enum class MenuPage { Main, Stats, Options, CharacterSelect };
     enum class LevelChoiceType { Damage, Health, Speed };
     struct LevelChoice {
         LevelChoiceType type{LevelChoiceType::Damage};
         float amount{0.0f};
+    };
+    struct ItemInstance {
+        ItemDefinition def;
+        int quantity{1};
     };
     struct ArchetypeDef {
         std::string id;
@@ -190,6 +201,7 @@ private:
     bool shopMiddlePrev_{false};
     bool shopUIClickPrev_{false};
     double fireInterval_{0.2};
+    double fireIntervalBase_{0.2};
     float contactDamage_{10.0f};
     double fireCooldown_{0.0};
     float heroMoveSpeed_{200.0f};
@@ -265,8 +277,8 @@ private:
     LevelChoice levelChoices_[3];
     bool levelChoicePrevClick_{false};
     bool defeatClickPrev_{false};
-    std::vector<ShopItem> shopInventory_;
-    std::vector<ShopItem> shopPool_;
+    std::vector<ItemDefinition> shopInventory_;
+    std::vector<ItemDefinition> shopPool_;
     double shopNoCreditTimer_{0.0};
     bool dashPrev_{false};
     std::unique_ptr<Game::MovementSystem> movementSystem_;
@@ -286,7 +298,8 @@ private:
     TTF_Font* uiFont_{nullptr};
     SDL_Renderer* sdlRenderer_{nullptr};
     bool restartPrev_{false};
-    bool shopOpen_{false};
+    bool itemShopOpen_{false};
+    bool statShopOpen_{false};
     bool waveClearedPending_{false};
     double shopUnavailableTimer_{0.0};
     bool paused_{false};
@@ -301,6 +314,10 @@ private:
     double bossBannerTimer_{0.0};
     double eventBannerTimer_{0.0};
     std::string eventBannerText_;
+    double freezeTimer_{0.0};
+    float attackSpeedMul_{1.0f};
+    float lifestealPercent_{0.0f};
+    int chainBounces_{0};
     // UI helpers
     double waveBannerTimer_{0.0};
     int waveBannerWave_{0};
@@ -329,6 +346,20 @@ private:
     DifficultyDef activeDifficulty_{};
     int startWaveBase_{1};
     std::vector<EnemyDefinition> enemyDefs_{};
+    std::vector<ItemDefinition> itemCatalog_;
+    // Inventory
+    std::vector<ItemInstance> inventory_;
+    int inventoryCapacity_{16};
+    Engine::ECS::Entity shopkeeper_{Engine::ECS::kInvalidEntity};
+    bool interactPrev_{false};
+    bool useItemPrev_{false};
+
+    struct TurretInstance {
+        Engine::Vec2 pos;
+        float timer{0.0f};
+        float fireCooldown{0.0f};
+    };
+    std::vector<TurretInstance> turrets_;
 };
 
 }  // namespace Game

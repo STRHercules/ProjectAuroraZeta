@@ -11,9 +11,9 @@ InputKey toInputKey(const std::string& key) {
     std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
     if (lower.rfind("key:", 0) == 0) {
         auto k = lower.substr(4);
-        if (k == "q") return InputKey::Ability1;
         if (k == "w") return InputKey::Ability2;
-        if (k == "e") return InputKey::Ability3;
+        if (k == "e") return InputKey::Interact;
+        if (k == "q") return InputKey::UseItem;
         if (k == "r") return InputKey::Ultimate;
         if (k == "f1") return InputKey::Reload;
         if (k == "f") return InputKey::Reload;
@@ -37,6 +37,8 @@ InputKey toInputKey(const std::string& key) {
     if (lower == "b" || lower == "toggle_shop" || lower == "shop") return InputKey::ToggleShop;
     if (lower == "escape" || lower == "pause" || lower == "esc") return InputKey::Pause;
     if (lower == "space" || lower == "dash" || lower == "shift") return InputKey::Dash;
+    if (lower == "e" || lower == "interact") return InputKey::Interact;
+    if (lower == "q" || lower == "use_item" || lower == "useitem") return InputKey::UseItem;
     if (lower == "ability1") return InputKey::Ability1;
     if (lower == "ability2") return InputKey::Ability2;
     if (lower == "ability3") return InputKey::Ability3;
@@ -94,6 +96,22 @@ ActionState ActionMapper::sample(const InputState& input) const {
         InputKey mapped = toInputKey(key);
         if (mapped != InputKey::Count && input.isDown(mapped)) {
             act.toggleShop = true;
+            break;
+        }
+    }
+    act.interact = input.isDown(InputKey::Interact);
+    for (const auto& key : bindings_.interact) {
+        InputKey mapped = toInputKey(key);
+        if (mapped != InputKey::Count && input.isDown(mapped)) {
+            act.interact = true;
+            break;
+        }
+    }
+    act.useItem = input.isDown(InputKey::UseItem);
+    for (const auto& key : bindings_.useItem) {
+        InputKey mapped = toInputKey(key);
+        if (mapped != InputKey::Count && input.isDown(mapped)) {
+            act.useItem = true;
             break;
         }
     }

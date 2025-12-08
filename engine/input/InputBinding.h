@@ -22,6 +22,8 @@ struct InputBindings {
     std::vector<std::string> toggleShop;
     std::vector<std::string> pause;
     std::vector<std::string> dash;
+    std::vector<std::string> interact;
+    std::vector<std::string> useItem;
     std::vector<std::string> ability1;
     std::vector<std::string> ability2;
     std::vector<std::string> ability3;

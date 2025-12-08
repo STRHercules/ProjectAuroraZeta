@@ -15,6 +15,7 @@ set(GAME_SOURCES
     systems/EventSystem.cpp
     systems/HotzoneSystem.cpp
     systems/ShopSystem.cpp
+    meta/ItemDefs.cpp
     meta/SaveManager.cpp
 )
 

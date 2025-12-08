@@ -14,6 +14,8 @@ struct ActionState {
     bool restart{false};
     bool toggleShop{false};
     bool pause{false};
+    bool interact{false};
+    bool useItem{false};
     bool dash{false};
     bool ability1{false};
     bool ability2{false};
