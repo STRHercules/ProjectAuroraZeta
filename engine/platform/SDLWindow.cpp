@@ -66,11 +66,12 @@ void SDLWindow::pollEvents(Application& app, InputState& input) {
                     case SDLK_ESCAPE:
                         input.setKeyDown(InputKey::Pause, true);
                         break;
-                    case SDLK_r:
+                    case SDLK_BACKSPACE:
                         input.setKeyDown(InputKey::Restart, true);
                         break;
                     case SDLK_w:
                         input.setKeyDown(InputKey::Forward, true);
+                        input.setKeyDown(InputKey::Ability2, true);
                         break;
                     case SDLK_s:
                         input.setKeyDown(InputKey::Backward, true);
@@ -80,6 +81,22 @@ void SDLWindow::pollEvents(Application& app, InputState& input) {
                         break;
                     case SDLK_d:
                         input.setKeyDown(InputKey::Right, true);
+                        break;
+                    case SDLK_1:
+                        input.setKeyDown(InputKey::Ability1, true);
+                        break;
+                    case SDLK_2:
+                        input.setKeyDown(InputKey::Ability2, true);
+                        break;
+                    case SDLK_3:
+                        input.setKeyDown(InputKey::Ability3, true);
+                        break;
+                    case SDLK_4:
+                        input.setKeyDown(InputKey::Ultimate, true);
+                        break;
+                    case SDLK_f:
+                    case SDLK_F1:
+                        input.setKeyDown(InputKey::Reload, true);
                         break;
                     case SDLK_UP:
                         input.setKeyDown(InputKey::CamUp, true);
@@ -99,6 +116,11 @@ void SDLWindow::pollEvents(Application& app, InputState& input) {
                     case SDLK_b:
                         input.setKeyDown(InputKey::ToggleShop, true);
                         break;
+                    case SDLK_SPACE:
+                    case SDLK_LSHIFT:
+                    case SDLK_RSHIFT:
+                        input.setKeyDown(InputKey::Dash, true);
+                        break;
                     default:
                         break;
                 }
@@ -108,11 +130,16 @@ void SDLWindow::pollEvents(Application& app, InputState& input) {
                     case SDLK_ESCAPE:
                         input.setKeyDown(InputKey::Pause, false);
                         break;
-                    case SDLK_r:
+                    case SDLK_BACKSPACE:
                         input.setKeyDown(InputKey::Restart, false);
                         break;
                     case SDLK_b:
                         input.setKeyDown(InputKey::ToggleShop, false);
+                        break;
+                    case SDLK_SPACE:
+                    case SDLK_LSHIFT:
+                    case SDLK_RSHIFT:
+                        input.setKeyDown(InputKey::Dash, false);
                         break;
                     case SDLK_w:
                         input.setKeyDown(InputKey::Forward, false);
@@ -125,6 +152,22 @@ void SDLWindow::pollEvents(Application& app, InputState& input) {
                         break;
                     case SDLK_d:
                         input.setKeyDown(InputKey::Right, false);
+                        break;
+                    case SDLK_1:
+                        input.setKeyDown(InputKey::Ability1, false);
+                        break;
+                    case SDLK_2:
+                        input.setKeyDown(InputKey::Ability2, false);
+                        break;
+                    case SDLK_3:
+                        input.setKeyDown(InputKey::Ability3, false);
+                        break;
+                    case SDLK_4:
+                        input.setKeyDown(InputKey::Ultimate, false);
+                        break;
+                    case SDLK_f:
+                    case SDLK_F1:
+                        input.setKeyDown(InputKey::Reload, false);
                         break;
                     case SDLK_UP:
                         input.setKeyDown(InputKey::CamUp, false);

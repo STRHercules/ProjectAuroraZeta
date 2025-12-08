@@ -21,6 +21,13 @@ struct InputBindings {
     std::vector<std::string> restart;
     std::vector<std::string> toggleShop;
     std::vector<std::string> pause;
+    std::vector<std::string> dash;
+    std::vector<std::string> ability1;
+    std::vector<std::string> ability2;
+    std::vector<std::string> ability3;
+    std::vector<std::string> ultimate;
+    std::vector<std::string> reload;
+    std::vector<std::string> menuBack;
 };
 
 }  // namespace Engine

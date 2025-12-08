@@ -55,6 +55,27 @@ std::optional<InputBindings> InputLoader::loadFromFile(const std::string& path) 
     if (j.contains("pause")) {
         bindings.pause = readStrings(j["pause"]);
     }
+    if (j.contains("dash")) {
+        bindings.dash = readStrings(j["dash"]);
+    }
+    if (j.contains("ability1")) {
+        bindings.ability1 = readStrings(j["ability1"]);
+    }
+    if (j.contains("ability2")) {
+        bindings.ability2 = readStrings(j["ability2"]);
+    }
+    if (j.contains("ability3")) {
+        bindings.ability3 = readStrings(j["ability3"]);
+    }
+    if (j.contains("ultimate")) {
+        bindings.ultimate = readStrings(j["ultimate"]);
+    }
+    if (j.contains("reload")) {
+        bindings.reload = readStrings(j["reload"]);
+    }
+    if (j.contains("menuBack")) {
+        bindings.menuBack = readStrings(j["menuBack"]);
+    }
 
     return bindings;
 }

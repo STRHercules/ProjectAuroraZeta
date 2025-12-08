@@ -18,6 +18,13 @@ enum class InputKey {
     ToggleFollow,
     ToggleShop,
     Pause,
+    Dash,
+    Ability1,
+    Ability2,
+    Ability3,
+    Ultimate,
+    Reload,
+    MenuBack,
     Count
 };
 

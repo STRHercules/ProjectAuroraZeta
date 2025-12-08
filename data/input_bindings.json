@@ -12,7 +12,14 @@
     "negativeY": ["up"]
   },
   "toggleFollow": ["c"],
-  "restart": ["r"],
+  "restart": ["backspace"],
   "toggleShop": ["b"],
-  "pause": ["escape"]
+  "pause": ["escape"],
+  "dash": ["space"],
+  "ability1": ["key:1"],
+  "ability2": ["key:2"],
+  "ability3": ["key:3"],
+  "ultimate": ["key:4"],
+  "reload": ["key:f", "key:f1"],
+  "menuBack": ["key:m"]
 }

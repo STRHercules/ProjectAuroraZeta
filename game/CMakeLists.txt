@@ -1,5 +1,6 @@
 set(GAME_SOURCES
     Game.cpp
+    GameAbilities.cpp
     render/RenderSystem.cpp
     systems/MovementSystem.cpp
     systems/CameraSystem.cpp

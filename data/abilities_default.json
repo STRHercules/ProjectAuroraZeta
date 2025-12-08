@@ -1,0 +1,37 @@
+{
+  "damage": [
+    {"name": "Primary Fire", "description": "Standard projectile.", "key": "M1", "cooldown": 0.0, "cost": 0, "type": "primary"},
+    {"name": "Scatter Shot", "description": "Close-range cone blast.", "key": "1", "cooldown": 6.0, "cost": 30, "type": "scatter"},
+    {"name": "Rage", "description": "Boost damage and fire rate briefly.", "key": "2", "cooldown": 12.0, "cost": 40, "type": "rage"},
+    {"name": "Nova Barrage", "description": "Heavy projectiles in all directions.", "key": "3", "cooldown": 10.0, "cost": 45, "type": "nova"},
+    {"name": "Death Blossom", "description": "Ultimate barrage; huge damage.", "key": "4", "cooldown": 35.0, "cost": 60, "type": "ultimate"}
+  ],
+  "tank": [
+    {"name": "Primary Fire", "description": "Sturdy rounds.", "key": "M1", "cooldown": 0.0, "cost": 0, "type": "primary"},
+    {"name": "Shield Bash", "description": "Short stun bash.", "key": "1", "cooldown": 8.0, "cost": 30, "type": "generic"},
+    {"name": "Fortify", "description": "Damage reduction surge.", "key": "2", "cooldown": 14.0, "cost": 40, "type": "generic"},
+    {"name": "Taunt Pulse", "description": "Pull threat nearby.", "key": "3", "cooldown": 16.0, "cost": 45, "type": "generic"},
+    {"name": "Bulwark Dome", "description": "Ultimate barrier bubble.", "key": "4", "cooldown": 40.0, "cost": 60, "type": "generic"}
+  ],
+  "healer": [
+    {"name": "Primary Fire", "description": "Light rounds.", "key": "M1", "cooldown": 0.0, "cost": 0, "type": "primary"},
+    {"name": "Burst Heal", "description": "Heal pulse around self.", "key": "1", "cooldown": 8.0, "cost": 35, "type": "generic"},
+    {"name": "Sanctuary", "description": "Damage reduction field.", "key": "2", "cooldown": 14.0, "cost": 40, "type": "generic"},
+    {"name": "Cleanse", "description": "Remove debuffs / brief invuln.", "key": "3", "cooldown": 18.0, "cost": 45, "type": "generic"},
+    {"name": "Divine Surge", "description": "Big heal + buff.", "key": "4", "cooldown": 42.0, "cost": 60, "type": "ultimate"}
+  ],
+  "builder": [
+    {"name": "Primary Fire", "description": "Rivet shot.", "key": "M1", "cooldown": 0.0, "cost": 0, "type": "primary"},
+    {"name": "Turret Drop", "description": "Deploy mini turret.", "key": "1", "cooldown": 10.0, "cost": 35, "type": "generic"},
+    {"name": "Barrier Plate", "description": "Place temporary wall.", "key": "2", "cooldown": 14.0, "cost": 40, "type": "generic"},
+    {"name": "Overclock", "description": "Buff nearby structures.", "key": "3", "cooldown": 16.0, "cost": 45, "type": "generic"},
+    {"name": "Factory Core", "description": "Ultimate deployable hub.", "key": "4", "cooldown": 45.0, "cost": 65, "type": "ultimate"}
+  ],
+  "support": [
+    {"name": "Primary Fire", "description": "Pulse shot.", "key": "M1", "cooldown": 0.0, "cost": 0, "type": "primary"},
+    {"name": "Amp Field", "description": "Damage boost aura.", "key": "1", "cooldown": 9.0, "cost": 35, "type": "generic"},
+    {"name": "Slow Wave", "description": "Snare enemies.", "key": "2", "cooldown": 12.0, "cost": 40, "type": "generic"},
+    {"name": "Shield Burst", "description": "Temporary shields.", "key": "3", "cooldown": 15.0, "cost": 45, "type": "generic"},
+    {"name": "Inspire", "description": "Ultimate team-wide buff.", "key": "4", "cooldown": 38.0, "cost": 60, "type": "ultimate"}
+  ]
+}

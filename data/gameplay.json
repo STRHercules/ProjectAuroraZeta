@@ -50,6 +50,19 @@
     "hpBonus": 20.0,
     "speedBonus": 20.0
   },
+  "events": {
+    "salvageReward": 30
+  },
+  "dash": {
+    "speedMultiplier": 3.5,
+    "duration": 0.18,
+    "cooldown": 2.5,
+    "invulnFraction": 1.0
+  },
+  "hud": {
+    "showDamageNumbers": true,
+    "screenShake": true
+  },
   "timers": {
     "combat": 90.0,
     "intermission": 30.0

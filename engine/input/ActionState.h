@@ -14,6 +14,13 @@ struct ActionState {
     bool restart{false};
     bool toggleShop{false};
     bool pause{false};
+    bool dash{false};
+    bool ability1{false};
+    bool ability2{false};
+    bool ability3{false};
+    bool ultimate{false};
+    bool reload{false};
+    bool menuBack{false};
 };
 
 }  // namespace Engine

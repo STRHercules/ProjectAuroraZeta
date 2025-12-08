@@ -7,6 +7,7 @@
 #include "../../engine/ecs/components/Tags.h"
 #include "../components/HitFlash.h"
 #include "../components/DamageNumber.h"
+#include "../components/Invulnerable.h"
 
 namespace {
 bool aabbOverlap(const Engine::ECS::Transform& ta, const Engine::ECS::AABB& aa, const Engine::ECS::Transform& tb,
@@ -52,9 +53,12 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
         [&](Engine::ECS::Entity /*enemyEnt*/, Engine::ECS::Transform& enemyTf, Engine::ECS::EnemyTag& /*tag*/,
             Engine::ECS::AABB& enemyBox) {
             registry.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::AABB, Engine::ECS::HeroTag>(
-                [&](Engine::ECS::Entity /*heroEnt*/, Engine::ECS::Transform& heroTf, Engine::ECS::Health& heroHp,
+                [&](Engine::ECS::Entity heroEnt, Engine::ECS::Transform& heroTf, Engine::ECS::Health& heroHp,
                     Engine::ECS::AABB& heroBox, Engine::ECS::HeroTag&) {
                     if (!heroHp.alive()) return;
+                    if (auto* inv = registry.get<Game::Invulnerable>(heroEnt)) {
+                        if (inv->timer > 0.0f) return;
+                    }
                     if (aabbOverlap(enemyTf, enemyBox, heroTf, heroBox)) {
                         heroHp.current -= contactDamage_;
                         if (heroHp.current < 0.0f) heroHp.current = 0.0f;

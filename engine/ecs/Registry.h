@@ -50,6 +50,11 @@ public:
         return p && p->contains(e);
     }
 
+    template <typename T>
+    void remove(Entity e) {
+        storage_.template pool<T>().remove(e);
+    }
+
     template <typename Primary, typename... Rest, typename Func>
     void view(Func&& func) {
         auto& primaryPool = storage_.template pool<Primary>();

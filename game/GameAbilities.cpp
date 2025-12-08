@@ -1,0 +1,114 @@
+// Ability execution and upgrade helpers.
+#include "Game.h"
+
+#include "../engine/ecs/components/Transform.h"
+#include "../engine/ecs/components/Velocity.h"
+#include "../engine/ecs/components/Renderable.h"
+#include "../engine/ecs/components/AABB.h"
+#include "../engine/ecs/components/Projectile.h"
+#include "../engine/ecs/components/Tags.h"
+#include "../engine/math/Vec2.h"
+#include <cmath>
+#include <random>
+#include <algorithm>
+
+namespace Game {
+
+void GameRoot::upgradeFocusedAbility() {
+    if (abilities_.empty()) return;
+    int idx = std::clamp(abilityFocus_, 0, static_cast<int>(abilities_.size() - 1));
+    auto& slot = abilities_[idx];
+    auto& st = abilityStates_[idx];
+    if (slot.level >= slot.maxLevel) return;
+    int cost = slot.upgradeCost + (slot.level - 1) * (slot.upgradeCost / 2);
+    if (credits_ < cost) {
+        shopNoCreditTimer_ = 0.6;
+        return;
+    }
+    credits_ -= cost;
+    slot.level += 1;
+    st.level = slot.level;
+    // Scale power for known types
+    if (slot.type == "scatter" || slot.type == "nova" || slot.type == "ultimate") {
+        slot.powerScale *= 1.2f;
+    } else if (slot.type == "rage") {
+        slot.powerScale *= 1.1f;
+        slot.cooldownMax = std::max(4.0f, slot.cooldownMax * 0.92f);
+    }
+}
+
+void GameRoot::executeAbility(int index) {
+    if (index < 0 || index >= static_cast<int>(abilityStates_.size())) return;
+    auto& slot = abilities_[index];
+    auto& st = abilityStates_[index];
+    if (slot.cooldown > 0.0f) return;
+
+    // Helper to pull hero position
+    const auto* heroTf = registry_.get<Engine::ECS::Transform>(hero_);
+    if (!heroTf) return;
+
+    auto setCooldown = [&](float cd) {
+        slot.cooldown = cd;
+        slot.cooldownMax = std::max(slot.cooldownMax, cd);
+        st.cooldown = cd;
+    };
+
+    auto spawnProjectile = [&](const Engine::Vec2& dir, float speed, float dmg, float sizeMul = 1.0f) {
+        auto p = registry_.create();
+        registry_.emplace<Engine::ECS::Transform>(p, heroTf->position);
+        registry_.emplace<Engine::ECS::Velocity>(p, Engine::Vec2{0.0f, 0.0f});
+        float sz = projectileSize_ * sizeMul;
+        float hb = projectileHitboxSize_ * sizeMul * 0.5f;
+        registry_.emplace<Engine::ECS::AABB>(p, Engine::ECS::AABB{Engine::Vec2{hb, hb}});
+        registry_.emplace<Engine::ECS::Renderable>(p,
+            Engine::ECS::Renderable{Engine::Vec2{sz, sz}, Engine::Color{255, 220, 140, 255}});
+        registry_.emplace<Engine::ECS::Projectile>(p, Engine::ECS::Projectile{dir * speed, dmg, projectileLifetime_});
+        registry_.emplace<Engine::ECS::ProjectileTag>(p, Engine::ECS::ProjectileTag{});
+    };
+
+    if (slot.type == "scatter") {
+        // Cone blast of pellets
+        std::uniform_real_distribution<float> spread(-0.35f, 0.35f);
+        std::mt19937& rng = rng_;
+        for (int i = 0; i < 6 + slot.level; ++i) {
+            float ang = std::atan2(mouseWorld_.y - heroTf->position.y, mouseWorld_.x - heroTf->position.x);
+            ang += spread(rng);
+            Engine::Vec2 dir{std::cos(ang), std::sin(ang)};
+            spawnProjectile(dir, projectileSpeed_ * 0.8f, projectileDamage_ * 0.7f * slot.powerScale, 0.9f);
+        }
+        setCooldown(std::max(0.5f, slot.cooldownMax));
+    } else if (slot.type == "rage") {
+        rageDamageBuff_ = 1.2f * slot.powerScale;
+        rageRateBuff_ = 1.15f * slot.powerScale;
+        rageTimer_ = 5.0f + slot.level * 0.6f;
+        setCooldown(std::max(3.0f, slot.cooldownMax));
+    } else if (slot.type == "nova") {
+        int count = 12 + slot.level * 2;
+        float speed = projectileSpeed_ * 0.7f;
+        float dmg = projectileDamage_ * 1.6f * slot.powerScale;
+        for (int i = 0; i < count; ++i) {
+            float ang = (6.2831853f * i) / static_cast<float>(count);
+            Engine::Vec2 dir{std::cos(ang), std::sin(ang)};
+            spawnProjectile(dir, speed, dmg, 1.2f);
+        }
+        setCooldown(std::max(2.0f, slot.cooldownMax));
+    } else if (slot.type == "ultimate") {
+        int waves = 3;
+        for (int w = 0; w < waves; ++w) {
+            int count = 20 + slot.level * 2;
+            float speed = projectileSpeed_ * (0.8f + 0.1f * w);
+            float dmg = projectileDamage_ * (2.0f + 0.2f * w) * slot.powerScale;
+            for (int i = 0; i < count; ++i) {
+                float ang = (6.2831853f * i) / static_cast<float>(count);
+                Engine::Vec2 dir{std::cos(ang), std::sin(ang)};
+                spawnProjectile(dir, speed, dmg, 1.3f);
+            }
+        }
+        setCooldown(std::max(8.0f, slot.cooldownMax));
+    } else {
+        // Generic placeholder
+        setCooldown(slot.cooldownMax);
+    }
+}
+
+}  // namespace Game

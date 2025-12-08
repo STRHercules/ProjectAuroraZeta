@@ -60,12 +60,66 @@ private:
     void rollLevelChoices();
     void applyLevelChoice(int index);
     void drawLevelChoiceOverlay();
+    void drawShopOverlay();
+    void drawPauseOverlay();
+    void refreshShopInventory();
+    void loadMenuPresets();
+    void applyDifficultyPreset();
+    void applyArchetypePreset();
+    void rebuildWaveSettings();
+    void buildAbilities();
+    void drawAbilityPanel();
+    void executeAbility(int index);
+    void upgradeFocusedAbility();
 
-    enum class MenuPage { Main, Stats, Options };
+    enum class MenuPage { Main, Stats, Options, CharacterSelect };
     enum class LevelChoiceType { Damage, Health, Speed };
     struct LevelChoice {
         LevelChoiceType type{LevelChoiceType::Damage};
         float amount{0.0f};
+    };
+    struct ArchetypeDef {
+        std::string id;
+        std::string name;
+        std::string description;
+        float hpMul{1.0f};
+        float speedMul{1.0f};
+        float damageMul{1.0f};
+        Engine::Color color{90, 200, 255, 255};
+    };
+    struct DifficultyDef {
+        std::string id;
+        std::string name;
+        std::string description;
+        float enemyHpMul{1.0f};
+        int startWave{1};
+    };
+    struct AbilitySlot {
+        std::string name;
+        std::string description;
+        std::string keyHint;
+        int level{1};
+        int maxLevel{5};
+        int upgradeCost{25};
+        float cooldown{0.0f};
+        float cooldownMax{8.0f};
+        bool triggered{false};
+        float powerScale{1.0f};
+        std::string type;  // semantic type used for behavior
+    };
+    struct AbilityDef {
+        std::string name;
+        std::string description;
+        std::string keyHint;
+        float baseCooldown{8.0f};
+        int baseCost{25};
+        std::string type;
+    };
+    struct AbilityState {
+        AbilityDef def;
+        int level{1};
+        int maxLevel{5};
+        float cooldown{0.0f};
     };
 
     Engine::ECS::Registry registry_{};
@@ -85,6 +139,7 @@ private:
     Engine::AssetManifest manifest_{};
     float projectileSpeed_{400.0f};
     float projectileDamage_{15.0f};
+    float projectileDamageBase_{15.0f};
     float projectileSize_{8.0f};
     float projectileHitboxSize_{8.0f};
     float projectileLifetime_{1.5f};
@@ -100,6 +155,7 @@ private:
     float bossHpMultiplier_{12.0f};
     float bossSpeedMultiplier_{0.8f};
     int bossKillBonus_{60};
+    int salvageReward_{20};
     // Shop options
     int shopDamageCost_{25};
     int shopHpCost_{25};
@@ -111,17 +167,34 @@ private:
     bool shopLeftPrev_{false};
     bool shopRightPrev_{false};
     bool shopMiddlePrev_{false};
+    bool shopUIClickPrev_{false};
     double fireInterval_{0.2};
     float contactDamage_{10.0f};
     double fireCooldown_{0.0};
     float heroMoveSpeed_{200.0f};
     float heroMaxHp_{100.0f};
+    float heroMoveSpeedBase_{200.0f};
+    float heroMaxHpBase_{100.0f};
+    float heroMoveSpeedPreset_{200.0f};
+    float heroMaxHpPreset_{100.0f};
+    float projectileDamagePreset_{15.0f};
+    Engine::Color heroColorPreset_{90, 200, 255, 255};
     float heroSize_{24.0f};
+    float dashSpeedMul_{3.5f};
+    float dashDuration_{0.18f};
+    float dashCooldown_{2.5f};
+    float dashInvulnFraction_{1.0f};
+    float dashTimer_{0.0f};
+    float dashCooldownTimer_{0.0f};
+    float dashInvulnTimer_{0.0f};
+    Engine::Vec2 dashDir_{};
+    std::deque<std::pair<Engine::Vec2, float>> dashTrail_;
     int kills_{0};
     int credits_{0};
     int level_{1};
     int xp_{0};
     int xpToNext_{60};
+    int xpBaseToLevel_{60};
     int xpPerKill_{8};
     int xpPerWave_{5};
     float levelHpBonus_{12.0f};
@@ -131,6 +204,7 @@ private:
     double levelBannerTimer_{0.0};
     int wave_{0};
     int enemiesAlive_{0};
+    Game::WaveSettings waveSettingsDefault_{};
     Game::WaveSettings waveSettingsBase_{};
     double waveWarmup_{1.5};
     double waveWarmupBase_{1.5};
@@ -147,9 +221,16 @@ private:
     int menuSelection_{0};
     bool menuUpPrev_{false};
     bool menuDownPrev_{false};
+    bool menuLeftPrev_{false};
+    bool menuRightPrev_{false};
     bool menuConfirmPrev_{false};
     bool menuPausePrev_{false};
+    bool menuBackPrev_{false};
+    bool menuClickPrev_{false};
+    bool pauseClickPrev_{false};
     double menuPulse_{0.0};
+    bool showDamageNumbers_{true};
+    bool screenShake_{true};
     // Session stats
     int totalRuns_{0};
     int bestWave_{0};
@@ -159,6 +240,10 @@ private:
     bool levelChoiceOpen_{false};
     LevelChoice levelChoices_[3];
     bool levelChoicePrevClick_{false};
+    std::vector<ShopItem> shopInventory_;
+    std::vector<ShopItem> shopPool_;
+    double shopNoCreditTimer_{0.0};
+    bool dashPrev_{false};
     std::unique_ptr<Game::MovementSystem> movementSystem_;
     std::unique_ptr<Game::CameraSystem> cameraSystem_;
     std::unique_ptr<Game::ProjectileSystem> projectileSystem_;
@@ -193,6 +278,29 @@ private:
     double waveBannerTimer_{0.0};
     int waveBannerWave_{0};
     double clearBannerTimer_{0.0};
+    // Mouse cache
+    int lastMouseX_{0};
+    int lastMouseY_{0};
+    // Abilities
+    std::vector<AbilitySlot> abilities_;
+    std::vector<AbilityState> abilityStates_;
+    int abilityFocus_{0};
+    bool ability1Prev_{false};
+    bool ability2Prev_{false};
+    bool ability3Prev_{false};
+    bool abilityUltPrev_{false};
+    bool abilityUpgradePrev_{false};
+    float rageTimer_{0.0f};
+    float rageDamageBuff_{1.0f};
+    float rageRateBuff_{1.0f};
+    // Character/difficulty presets
+    std::vector<ArchetypeDef> archetypes_;
+    std::vector<DifficultyDef> difficulties_;
+    int selectedArchetype_{0};
+    int selectedDifficulty_{2};
+    ArchetypeDef activeArchetype_{};
+    DifficultyDef activeDifficulty_{};
+    int startWaveBase_{1};
 };
 
 }  // namespace Game

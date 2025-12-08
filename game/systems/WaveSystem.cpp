@@ -43,13 +43,18 @@ bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
         auto e = registry.create();
         registry.emplace<Engine::ECS::Transform>(e, pos);
         registry.emplace<Engine::ECS::Velocity>(e, Engine::Vec2{0.0f, 0.0f});
+        bool fast = (i % 3 == 0);  // 1-in-3 spawns are runners
+        float size = fast ? settings_.enemySize * 0.8f : settings_.enemySize;
+        float hpVal = fast ? settings_.enemyHp * 0.6f : settings_.enemyHp;
+        float speedVal = fast ? settings_.enemySpeed * 1.6f : settings_.enemySpeed;
+        Engine::Color col = fast ? Engine::Color{180, 200, 255, 255} : Engine::Color{200, 80, 80, 255};
         registry.emplace<Engine::ECS::Renderable>(e,
-            Engine::ECS::Renderable{Engine::Vec2{settings_.enemySize, settings_.enemySize}, Engine::Color{200, 80, 80, 255}});
-        const float hb = settings_.enemyHitbox * 0.5f;
+            Engine::ECS::Renderable{Engine::Vec2{size, size}, col});
+        const float hb = (fast ? settings_.enemyHitbox * 0.7f : settings_.enemyHitbox) * 0.5f;
         registry.emplace<Engine::ECS::AABB>(e, Engine::ECS::AABB{Engine::Vec2{hb, hb}});
-        registry.emplace<Engine::ECS::Health>(e, Engine::ECS::Health{settings_.enemyHp, settings_.enemyHp});
+        registry.emplace<Engine::ECS::Health>(e, Engine::ECS::Health{hpVal, hpVal});
         registry.emplace<Engine::ECS::EnemyTag>(e, Engine::ECS::EnemyTag{});
-        registry.emplace<Game::EnemyAttributes>(e, Game::EnemyAttributes{settings_.enemySpeed});
+        registry.emplace<Game::EnemyAttributes>(e, Game::EnemyAttributes{speedVal});
     }
 
     // Every 5th wave spawn a bounty elite near hero.

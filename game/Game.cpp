@@ -24,6 +24,7 @@
 #include "components/Pickup.h"
 #include "components/PickupBob.h"
 #include "components/BountyTag.h"
+#include "components/Invulnerable.h"
 #include <cmath>
 
 namespace Game {
@@ -82,7 +83,13 @@ bool GameRoot::onInitialize(Engine::Application& app) {
         bindings_.camera.positiveY = {"down"};
         bindings_.camera.negativeY = {"up"};
         bindings_.toggleFollow = {"c"};
-        bindings_.restart = {"r"};
+        bindings_.restart = {"backspace"};
+        bindings_.dash = {"space"};
+        bindings_.ability1 = {"key:1"};
+        bindings_.ability2 = {"key:2"};
+        bindings_.ability3 = {"key:3"};
+        bindings_.ultimate = {"key:4"};
+        bindings_.reload = {"key:f1"};
     }
     actionMapper_ = Engine::ActionMapper(bindings_);
 
@@ -127,6 +134,13 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     float shopDamageBonus = shopDamageBonus_;
     float shopHpBonus = shopHpBonus_;
     float shopSpeedBonus = shopSpeedBonus_;
+    int salvageReward = salvageReward_;
+    float dashSpeedMul = dashSpeedMul_;
+    float dashDuration = dashDuration_;
+    float dashCooldown = dashCooldown_;
+    float dashInvulnFrac = dashInvulnFraction_;
+    bool showDamageNumbers = showDamageNumbers_;
+    bool screenShake = screenShake_;
     int xpPerKill = xpPerKill_;
     int xpPerWave = xpPerWave_;
     int xpBase = xpToNext_;
@@ -192,6 +206,9 @@ bool GameRoot::onInitialize(Engine::Application& app) {
                 shopHpBonus = j["shop"].value("hpBonus", shopHpBonus);
                 shopSpeedBonus = j["shop"].value("speedBonus", shopSpeedBonus);
             }
+            if (j.contains("events")) {
+                salvageReward = j["events"].value("salvageReward", salvageReward);
+            }
             if (j.contains("timers")) {
                 combatDuration = j["timers"].value("combat", combatDuration);
                 intermissionDuration = j["timers"].value("intermission", intermissionDuration);
@@ -202,6 +219,16 @@ bool GameRoot::onInitialize(Engine::Application& app) {
                 bossSpeedMul = j["boss"].value("speedMultiplier", bossSpeedMul);
                 bossKillBonus = j["boss"].value("killBonus", bossKillBonus);
             }
+            if (j.contains("dash")) {
+                dashSpeedMul = j["dash"].value("speedMultiplier", dashSpeedMul);
+                dashDuration = j["dash"].value("duration", dashDuration);
+                dashCooldown = j["dash"].value("cooldown", dashCooldown);
+                dashInvulnFrac = j["dash"].value("invulnFraction", dashInvulnFrac);
+            }
+            if (j.contains("hud")) {
+                showDamageNumbers = j["hud"].value("showDamageNumbers", showDamageNumbers);
+                screenShake = j["hud"].value("screenShake", screenShake);
+            }
         } else {
             Engine::logWarn("Failed to open data/gameplay.json; using defaults.");
         }
@@ -210,14 +237,21 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     waveSystem_->setBossConfig(bossWave_, bossHpMultiplier_, bossSpeedMultiplier_);
     waveSettings.contactDamage = contactDamage;
     waveSettingsBase_ = waveSettings;
+    waveSettingsDefault_ = waveSettings;
     projectileSpeed_ = projectileSpeed;
     projectileDamage_ = projectileDamage;
+    projectileDamageBase_ = projectileDamage;
     projectileSize_ = projectileSize;
     projectileHitboxSize_ = projectileHitbox;
     projectileLifetime_ = projectileLifetime;
     contactDamage_ = waveSettingsBase_.contactDamage;
     heroMoveSpeed_ = heroMoveSpeed;
+    heroMoveSpeedBase_ = heroMoveSpeed;
     heroMaxHp_ = heroHp;
+    heroMaxHpBase_ = heroHp;
+    heroMaxHpPreset_ = heroMaxHp_;
+    heroMoveSpeedPreset_ = heroMoveSpeed_;
+    projectileDamagePreset_ = projectileDamage_;
     heroSize_ = heroSize;
     waveWarmupBase_ = initialWarmup;
     waveWarmup_ = waveWarmupBase_;
@@ -239,9 +273,17 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     shopDamageBonus_ = shopDamageBonus;
     shopHpBonus_ = shopHpBonus;
     shopSpeedBonus_ = shopSpeedBonus;
+    dashSpeedMul_ = dashSpeedMul;
+    dashDuration_ = dashDuration;
+    dashCooldown_ = dashCooldown;
+    dashInvulnFraction_ = dashInvulnFrac;
+    showDamageNumbers_ = showDamageNumbers;
+    screenShake_ = screenShake;
+    salvageReward_ = salvageReward;
     xpPerKill_ = xpPerKill;
     xpPerWave_ = xpPerWave;
-    xpToNext_ = xpBase;
+    xpBaseToLevel_ = xpBase;
+    xpToNext_ = xpBaseToLevel_;
     xpGrowth_ = xpGrowth;
     levelHpBonus_ = levelHpBonus;
     levelDmgBonus_ = levelDmgBonus;
@@ -266,6 +308,7 @@ bool GameRoot::onInitialize(Engine::Application& app) {
             }
         }
     }
+    loadMenuPresets();
     // Start in main menu; actual run spawns on New Game.
     resetRun();
     inMenu_ = true;
@@ -275,14 +318,16 @@ bool GameRoot::onInitialize(Engine::Application& app) {
 void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& input) {
     accumulated_ += step.deltaSeconds;
     ++tickCount_;
+    lastMouseX_ = input.mouseX();
+    lastMouseY_ = input.mouseY();
 
     // Sample high-level actions.
     Engine::ActionState actions = actionMapper_.sample(input);
 
-    const bool restartPressed = actions.restart && !restartPrev_;
-    restartPrev_ = actions.restart;
-    const bool shopToggleEdge = actions.toggleShop && !shopTogglePrev_;
-    shopTogglePrev_ = actions.toggleShop;
+        const bool restartPressed = actions.restart && !restartPrev_;
+        restartPrev_ = actions.restart;
+        const bool shopToggleEdge = actions.toggleShop && !shopTogglePrev_;
+        shopTogglePrev_ = actions.toggleShop;
     if (shopToggleEdge && !inCombat_ && !inMenu_) {
         shopOpen_ = !shopOpen_;
     }
@@ -294,13 +339,62 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
     }
     const bool pausePressed = actions.pause && !pauseTogglePrev_;
     pauseTogglePrev_ = actions.pause;
+    bool menuBackEdge = actions.menuBack && !menuBackPrev_;
+    menuBackPrev_ = actions.menuBack;
     if (!inMenu_ && pausePressed) {
         userPaused_ = !userPaused_;
         pauseMenuBlink_ = 0.0;
     }
+    if (userPaused_ && menuBackEdge) {
+        // Return to main menu from pause
+        inMenu_ = true;
+        menuPage_ = MenuPage::Main;
+        menuSelection_ = 0;
+        userPaused_ = false;
+        paused_ = false;
+        shopOpen_ = false;
+        levelChoiceOpen_ = false;
+        pauseMenuBlink_ = 0.0;
+        pauseClickPrev_ = false;
+    }
     paused_ = userPaused_ || shopOpen_ || levelChoiceOpen_;
     if (actions.toggleFollow && shopOpen_) {
         // ignore camera toggle while paused/shop
+    }
+
+    // Ability focus/upgrade input
+    if (actions.scroll != 0) {
+        abilityFocus_ = std::clamp(abilityFocus_ + (actions.scroll > 0 ? -1 : 1), 0,
+                                   static_cast<int>(abilities_.size() > 0 ? abilities_.size() - 1 : 0));
+    }
+    bool upgradeEdge = actions.reload && !abilityUpgradePrev_;
+    abilityUpgradePrev_ = actions.reload;
+    if (upgradeEdge) {
+        upgradeFocusedAbility();
+    }
+
+    // Level-up choice input (mouse click on cards).
+    if (levelChoiceOpen_) {
+        bool leftClick = input.isMouseButtonDown(0);
+        bool edge = leftClick && !levelChoicePrevClick_;
+        levelChoicePrevClick_ = leftClick;
+        if (edge) {
+            const float cardW = 170.0f;
+            const float cardH = 190.0f;
+            const float gap = 12.0f;
+            float cx = static_cast<float>(viewportWidth_) * 0.5f;
+            float startX = cx - (cardW * 1.5f + gap);
+            float y = static_cast<float>(viewportHeight_) * 0.5f - cardH * 0.5f;
+            int mx = input.mouseX();
+            int my = input.mouseY();
+            for (int i = 0; i < 3; ++i) {
+                float x = startX + i * (cardW + gap);
+                if (mx >= x && mx <= x + cardW && my >= y && my <= y + cardH) {
+                    applyLevelChoice(i);
+                    break;
+                }
+            }
+        }
     }
 
     // Menu handling before gameplay.
@@ -311,17 +405,62 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
     }
 
     // Timers.
-    if (shopUnavailableTimer_ > 0.0) {
-        shopUnavailableTimer_ -= step.deltaSeconds;
-        if (shopUnavailableTimer_ < 0.0) shopUnavailableTimer_ = 0.0;
-    }
-    if (clearBannerTimer_ > 0.0 && debugText_) {
-        // timer already decremented later for text; keep consistent for fallback too
-    }
+        if (shopUnavailableTimer_ > 0.0) {
+            shopUnavailableTimer_ -= step.deltaSeconds;
+            if (shopUnavailableTimer_ < 0.0) shopUnavailableTimer_ = 0.0;
+        }
+        if (shopNoCreditTimer_ > 0.0) {
+            shopNoCreditTimer_ -= step.deltaSeconds;
+            if (shopNoCreditTimer_ < 0.0) shopNoCreditTimer_ = 0.0;
+        }
+        if (clearBannerTimer_ > 0.0 && debugText_) {
+            // timer already decremented later for text; keep consistent for fallback too
+        }
     if (paused_) {
         pauseMenuBlink_ += step.deltaSeconds;
     } else {
         pauseMenuBlink_ = 0.0;
+    }
+    // Pause menu mouse handling
+    if (paused_ && !shopOpen_ && !levelChoiceOpen_ && !defeated_) {
+        bool leftClick = input.isMouseButtonDown(0);
+        bool edge = leftClick && !pauseClickPrev_;
+        pauseClickPrev_ = leftClick;
+        if (edge) {
+            const float panelW = 320.0f;
+            const float panelH = 200.0f;
+            float cx = static_cast<float>(viewportWidth_) * 0.5f;
+            float cy = static_cast<float>(viewportHeight_) * 0.5f;
+            float x0 = cx - panelW * 0.5f;
+            float y0 = cy - panelH * 0.5f;
+            // Buttons
+            float btnW = panelW - 40.0f;
+            float btnH = 44.0f;
+            float resumeX = x0 + 20.0f;
+            float resumeY = y0 + 70.0f;
+            float quitY = resumeY + btnH + 16.0f;
+            int mx = input.mouseX();
+            int my = input.mouseY();
+            auto inside = [&](float x, float y) {
+                return mx >= x && mx <= x + btnW && my >= y && my <= y + btnH;
+            };
+            if (inside(resumeX, resumeY)) {
+                userPaused_ = false;
+                paused_ = shopOpen_ || levelChoiceOpen_;
+                pauseMenuBlink_ = 0.0;
+            } else if (inside(resumeX, quitY)) {
+                inMenu_ = true;
+                menuPage_ = MenuPage::Main;
+                menuSelection_ = 0;
+                userPaused_ = false;
+                paused_ = false;
+                shopOpen_ = false;
+                levelChoiceOpen_ = false;
+                pauseMenuBlink_ = 0.0;
+            }
+        }
+    } else {
+        pauseClickPrev_ = false;
     }
     if (restartPressed) {
         resetRun();
@@ -337,20 +476,66 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 vel->value = {actions.moveX * heroMoveSpeed_, actions.moveY * heroMoveSpeed_};
             }
         }
+        // Dash trigger.
+        const bool dashEdge = actions.dash && !dashPrev_;
+        dashPrev_ = actions.dash;
+        if (!paused_ && dashEdge && dashCooldownTimer_ <= 0.0f) {
+            Engine::Vec2 dir{actions.moveX, actions.moveY};
+            float len2 = dir.x * dir.x + dir.y * dir.y;
+            if (len2 < 0.01f) {
+                if (const auto* tf = registry_.get<Engine::ECS::Transform>(hero_)) {
+                    dir = {mouseWorld_.x - tf->position.x, mouseWorld_.y - tf->position.y};
+                    len2 = dir.x * dir.x + dir.y * dir.y;
+                }
+            }
+            if (len2 > 0.0001f) {
+                float inv = 1.0f / std::sqrt(len2);
+                dir.x *= inv;
+                dir.y *= inv;
+                dashDir_ = dir;
+                dashTimer_ = dashDuration_;
+                dashInvulnTimer_ = dashDuration_ * dashInvulnFraction_;
+                dashCooldownTimer_ = dashCooldown_;
+                if (auto* vel = registry_.get<Engine::ECS::Velocity>(hero_)) {
+                    vel->value = {dashDir_.x * heroMoveSpeed_ * dashSpeedMul_,
+                                  dashDir_.y * heroMoveSpeed_ * dashSpeedMul_};
+                }
+                if (auto* inv = registry_.get<Game::Invulnerable>(hero_)) {
+                    inv->timer = dashInvulnTimer_;
+                } else {
+                    registry_.emplace<Game::Invulnerable>(hero_, Game::Invulnerable{dashInvulnTimer_});
+                }
+                // subtle camera shake cue
+                if (screenShake_) {
+                    shakeTimer_ = std::max(shakeTimer_, 0.08f);
+                    shakeMagnitude_ = std::max(shakeMagnitude_, 4.0f);
+                }
+            }
+        }
         // Shop purchase via mouse buttons when shop is open.
         const bool leftClick = input.isMouseButtonDown(0);
         const bool rightClick = input.isMouseButtonDown(2);
         const bool midClick = input.isMouseButtonDown(1);
+        bool ability1Edge = actions.ability1 && !ability1Prev_;
+        bool ability2Edge = actions.ability2 && !ability2Prev_;
+        bool ability3Edge = actions.ability3 && !ability3Prev_;
+        bool abilityUltEdge = actions.ultimate && !abilityUltPrev_;
+        ability1Prev_ = actions.ability1;
+        ability2Prev_ = actions.ability2;
+        ability3Prev_ = actions.ability3;
+        abilityUltPrev_ = actions.ultimate;
         if (shopOpen_) {
             if (leftClick && !shopLeftPrev_) {
-                // Buy damage upgrade.
+                // Legacy quick-buy: damage
                 if (credits_ >= shopDamageCost_) {
                     credits_ -= shopDamageCost_;
                     projectileDamage_ += shopDamageBonus_;
+                } else {
+                    shopNoCreditTimer_ = 0.6;
                 }
             }
             if (rightClick && !shopRightPrev_) {
-                // Buy HP upgrade.
+                // Quick-buy HP
                 if (credits_ >= shopHpCost_) {
                     credits_ -= shopHpCost_;
                     heroMaxHp_ += shopHpBonus_;
@@ -358,18 +543,88 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                         hp->max = heroMaxHp_;
                         hp->current = std::min(hp->current + shopHpBonus_, hp->max);
                     }
+                } else {
+                    shopNoCreditTimer_ = 0.6;
                 }
             }
             if (midClick && !shopMiddlePrev_) {
                 if (credits_ >= shopSpeedCost_) {
                     credits_ -= shopSpeedCost_;
                     heroMoveSpeed_ += shopSpeedBonus_;
+                } else {
+                    shopNoCreditTimer_ = 0.6;
                 }
             }
+            // UI card click purchases.
+            bool uiClickEdge = leftClick && !shopUIClickPrev_;
+            if (uiClickEdge && shopSystem_) {
+                int mx = input.mouseX();
+                int my = input.mouseY();
+                const float panelW = 560.0f;
+                const float cardW = 160.0f;
+                const float cardH = 120.0f;
+                const float gap = 14.0f;
+                float cx = static_cast<float>(viewportWidth_) * 0.5f;
+                float startX = cx - (panelW * 0.5f) + 18.0f;
+                float y = static_cast<float>(viewportHeight_) * 0.5f - 40.0f;
+                for (std::size_t i = 0; i < shopInventory_.size(); ++i) {
+                    float x = startX + static_cast<float>(i) * (cardW + gap);
+                    if (mx >= x && mx <= x + cardW && my >= y && my <= y + cardH) {
+                        float heroHpCurrent = 0.0f;
+                        if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) heroHpCurrent = hp->current;
+                        int creditsBefore = credits_;
+                        bool bought = shopSystem_->tryPurchase(static_cast<int>(i), credits_, projectileDamage_,
+                                                               heroMaxHp_, heroMoveSpeed_, heroHpCurrent);
+                        if (bought) {
+                            if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
+                                hp->max = heroMaxHp_;
+                                hp->current = std::min(hp->max, heroHpCurrent);
+                            }
+                        } else if (credits_ == creditsBefore) {
+                            shopNoCreditTimer_ = 0.6;
+                        }
+                        break;
+                    }
+                }
+            }
+            shopUIClickPrev_ = leftClick;
         }
         shopLeftPrev_ = leftClick;
         shopRightPrev_ = rightClick;
         shopMiddlePrev_ = midClick;
+        if (!paused_) {
+            if (ability1Edge) executeAbility(1);
+            if (ability2Edge) executeAbility(2);
+            if (ability3Edge) executeAbility(3);
+            if (abilityUltEdge) executeAbility(4);
+        }
+    // Dash timers decrement.
+    if (dashTimer_ > 0.0f) {
+        dashTimer_ -= static_cast<float>(step.deltaSeconds);
+        if (dashTimer_ < 0.0f) dashTimer_ = 0.0f;
+        if (auto* vel = registry_.get<Engine::ECS::Velocity>(hero_)) {
+            vel->value = {dashDir_.x * heroMoveSpeed_ * dashSpeedMul_,
+                          dashDir_.y * heroMoveSpeed_ * dashSpeedMul_};
+        }
+        // Trail node
+        if (const auto* tf = registry_.get<Engine::ECS::Transform>(hero_)) {
+            dashTrail_.push_back({tf->position, 0.22f});
+        }
+    }
+    if (dashCooldownTimer_ > 0.0f) {
+        dashCooldownTimer_ -= static_cast<float>(step.deltaSeconds);
+        if (dashCooldownTimer_ < 0.0f) dashCooldownTimer_ = 0.0f;
+    }
+        if (dashInvulnTimer_ > 0.0f) {
+            dashInvulnTimer_ -= static_cast<float>(step.deltaSeconds);
+            if (auto* inv = registry_.get<Game::Invulnerable>(hero_)) {
+                inv->timer = dashInvulnTimer_;
+                if (inv->timer <= 0.0f) {
+                    registry_.remove<Game::Invulnerable>(hero_);
+                }
+            }
+            if (dashInvulnTimer_ < 0.0f) dashInvulnTimer_ = 0.0f;
+        }
         // Primary fire spawns projectile toward mouse.
         fireCooldown_ -= step.deltaSeconds;
         if (!paused_ && actions.primaryFire && fireCooldown_ <= 0.0) {
@@ -390,12 +645,14 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 registry_.emplace<Engine::ECS::Renderable>(proj,
                                                            Engine::ECS::Renderable{Engine::Vec2{projectileSize_, projectileSize_},
                                                                                    Engine::Color{255, 230, 90, 255}});
+                float dmgMul = rageDamageBuff_;
                 registry_.emplace<Engine::ECS::Projectile>(proj,
                                                            Engine::ECS::Projectile{Engine::Vec2{dir.x * projectileSpeed_,
                                                                                                  dir.y * projectileSpeed_},
-                                                                                     projectileDamage_, projectileLifetime_});
+                                                                                     projectileDamage_ * dmgMul, projectileLifetime_});
                 registry_.emplace<Engine::ECS::ProjectileTag>(proj, Engine::ECS::ProjectileTag{});
-                fireCooldown_ = fireInterval_;
+                float rateMul = rageRateBuff_;
+                fireCooldown_ = fireInterval_ / std::max(0.1f, rateMul);
             }
         }
     }
@@ -403,6 +660,23 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
     // Movement system.
     if (movementSystem_ && !paused_) {
         movementSystem_->update(registry_, step);
+    }
+
+    // Ability cooldown timers and buffs.
+    for (std::size_t i = 0; i < abilities_.size(); ++i) {
+        auto& slot = abilities_[i];
+        slot.cooldown = std::max(0.0f, slot.cooldown - static_cast<float>(step.deltaSeconds));
+    }
+    for (auto& st : abilityStates_) {
+        st.cooldown = std::max(0.0f, st.cooldown - static_cast<float>(step.deltaSeconds));
+    }
+    if (rageTimer_ > 0.0f) {
+        rageTimer_ -= static_cast<float>(step.deltaSeconds);
+        if (rageTimer_ <= 0.0f) {
+            rageTimer_ = 0.0f;
+            rageDamageBuff_ = 1.0f;
+            rageRateBuff_ = 1.0f;
+        }
     }
 
     // Camera system.
@@ -480,6 +754,10 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             waveClearedPending_ = true;
             clearBannerTimer_ = 1.5;
         }
+        // Fast-forward combat timer when field is empty.
+        if (inCombat_ && enemiesAlive_ == 0 && combatTimer_ > 1.0) {
+            combatTimer_ = 1.0;
+        }
     }
 
     // Waves and phases.
@@ -512,6 +790,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 shopOpen_ = true;
                 paused_ = userPaused_ || shopOpen_;
                 if (waveSystem_) waveSystem_->setTimer(0.0);
+                waveWarmup_ = intermissionTimer_;
             }
         } else {  // Intermission
             // If enemies lingering, extend intermission until cleared.
@@ -528,7 +807,9 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 waveSpawned_ = false;
                 shopOpen_ = false;
                 paused_ = userPaused_;
+                refreshShopInventory();
                 if (waveSystem_) waveSystem_->setTimer(0.0);
+                waveWarmup_ = 0.0;
             }
         }
     }
@@ -552,9 +833,11 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         if (const auto* tf = registry_.get<Engine::ECS::Transform>(hero_)) {
             heroPos = tf->position;
         }
-        eventSystem_->update(registry_, step, wave_, credits_, inCombat_, heroPos);
+        eventSystem_->update(registry_, step, wave_, credits_, inCombat_, heroPos, salvageReward_);
         if (eventSystem_->lastSuccess()) {
-            eventBannerText_ = "Event Success +Credits";
+            std::ostringstream eb;
+            eb << "Event Success +" << salvageReward_ << "c";
+            eventBannerText_ = eb.str();
             eventBannerTimer_ = 1.5;
         }
         if (eventSystem_->lastFail()) {
@@ -568,7 +851,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
     if (hero_ != Engine::ECS::kInvalidEntity) {
         if (const auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
             if (lastHeroHp_ < 0.0f) lastHeroHp_ = hp->current;
-            if (hp->current < lastHeroHp_) {
+            if (hp->current < lastHeroHp_ && screenShake_) {
                 shakeTimer_ = 0.25f;
                 shakeMagnitude_ = 6.0f;
             }
@@ -613,6 +896,28 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         if (renderSystem_) {
             renderSystem_->draw(registry_, cameraShaken, viewportWidth_, viewportHeight_,
                                 gridTexture_ ? gridTexture_.get() : nullptr);
+        }
+
+        // Dash trail rendering (simple rectangles).
+        {
+            for (auto it = dashTrail_.begin(); it != dashTrail_.end();) {
+                it->second -= static_cast<float>(step.deltaSeconds);
+                if (it->second <= 0.0f) {
+                    it = dashTrail_.erase(it);
+                    continue;
+                }
+                Engine::Vec2 screen = Engine::worldToScreen(it->first, cameraShaken, static_cast<float>(viewportWidth_),
+                                                            static_cast<float>(viewportHeight_));
+                float alphaRatio = std::clamp(it->second / 0.22f, 0.0f, 1.0f);
+                Engine::Color c{120, 220, 255, static_cast<uint8_t>(140 * alphaRatio)};
+                float size = heroSize_;
+                render_->drawFilledRect(Engine::Vec2{screen.x - size * 0.55f, screen.y - size * 0.55f},
+                                        Engine::Vec2{size * 1.1f, size * 1.1f}, c);
+                Engine::Color cInner{180, 240, 255, static_cast<uint8_t>(120 * alphaRatio)};
+                render_->drawFilledRect(Engine::Vec2{screen.x - size * 0.35f, screen.y - size * 0.35f},
+                                        Engine::Vec2{size * 0.7f, size * 0.7f}, cInner);
+                ++it;
+            }
         }
 
         // Off-screen pickup indicator for nearest pickup.
@@ -689,8 +994,9 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             dbg << " | Enemies " << enemiesAlive_;
             dbg << " | WaveClear +" << waveClearBonus_;
             dbg << " | Lv " << level_ << " (" << xp_ << "/" << xpToNext_ << ")";
+            dbg << " | Dash cd " << std::fixed << std::setprecision(1) << dashCooldownTimer_;
             drawTextTTF(dbg.str(), Engine::Vec2{10.0f, 10.0f}, 1.0f, Engine::Color{255, 255, 255, 200});
-            if (waveWarmup_ > 0.0) {
+            if (!inCombat_ && waveWarmup_ > 0.0) {
                 std::ostringstream warm;
                 warm << "Wave " << (wave_ + 1) << " in " << std::fixed << std::setprecision(1)
                      << std::max(0.0, waveWarmup_) << "s";
@@ -738,19 +1044,16 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 drawTextTTF(eventBannerText_, pos, 1.0f, Engine::Color{200, 240, 255, 230});
             }
             // Intermission overlay when we are in grace time.
-            if (!inCombat_) {
-                double intermissionLeft = waveWarmup_;
-        std::ostringstream inter;
-        inter << "Intermission: next wave in " << std::fixed << std::setprecision(1) << intermissionLeft
-              << "s | Credits: " << credits_;
-        Engine::Color c{140, 220, 255, 220};
+        if (!inCombat_) {
+            double intermissionLeft = waveWarmup_;
+            std::ostringstream inter;
+            inter << "Intermission: next wave in " << std::fixed << std::setprecision(1) << intermissionLeft
+                  << "s | Credits: " << credits_;
+            Engine::Color c{140, 220, 255, 220};
         drawTextTTF(inter.str(), Engine::Vec2{10.0f, 46.0f}, 1.0f, c);
                 if (shopOpen_) {
-                std::ostringstream shopMsg;
-                shopMsg << "[SHOP] Mouse1: +" << shopDamageBonus_ << " dmg (" << shopDamageCost_ << "c) | "
-                        << "Mouse2: +" << shopHpBonus_ << " HP (" << shopHpCost_ << "c) | "
-                        << "Mouse3: +" << shopSpeedBonus_ << " move (" << shopSpeedCost_ << "c) — B closes";
-                drawTextTTF(shopMsg.str(), Engine::Vec2{10.0f, 64.0f}, 1.0f, Engine::Color{180, 255, 180, 220});
+                    drawTextTTF("SHOP OPEN (B closes)", Engine::Vec2{10.0f, 64.0f}, 1.0f,
+                                Engine::Color{180, 255, 180, 220});
                 } else {
                     std::string shopPrompt = "Press B to open Shop (placeholder)";
                     drawTextTTF(shopPrompt, Engine::Vec2{10.0f, 64.0f}, 1.0f, Engine::Color{150, 220, 255, 200});
@@ -774,6 +1077,12 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 lvl << "Lv " << level_ << " (" << xp_ << "/" << xpToNext_ << ")";
                 drawTextUnified(lvl.str(), Engine::Vec2{pos.x, pos.y - 14.0f}, 0.9f,
                                 Engine::Color{200, 230, 255, 220});
+                // Dash cooldown bar
+                float dashRatio = dashCooldown_ > 0.0f ? 1.0f - std::clamp(dashCooldownTimer_ / dashCooldown_, 0.0f, 1.0f) : 1.0f;
+                Engine::Vec2 dpos{pos.x, pos.y + 14.0f};
+                render_->drawFilledRect(dpos, Engine::Vec2{barW, 6.0f}, Engine::Color{40, 40, 50, 200});
+                render_->drawFilledRect(dpos, Engine::Vec2{barW * dashRatio, 6.0f}, Engine::Color{180, 240, 200, 220});
+                drawTextUnified("Dash", Engine::Vec2{dpos.x, dpos.y + 8.0f}, 0.8f, Engine::Color{180, 220, 200, 210});
             }
             if (shopUnavailableTimer_ > 0.0 && inCombat_) {
                 float pulse = 0.5f + 0.5f * std::sin(static_cast<float>(shopUnavailableTimer_) * 12.0f);
@@ -789,15 +1098,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 evMsg << "Event: Salvage crate - " << std::fixed << std::setprecision(1) << std::max(0.0f, t) << "s";
                 drawTextUnified(evMsg.str(), Engine::Vec2{10.0f, 154.0f}, 0.9f, Engine::Color{200, 240, 255, 220});
             });
-            if (paused_ && !shopOpen_) {
-                float blink = 0.6f + 0.4f * std::sin(static_cast<float>(pauseMenuBlink_) * 6.0f);
-                drawTextUnified("PAUSED (Esc)", Engine::Vec2{10.0f, 118.0f}, 1.0f,
-                                Engine::Color{static_cast<uint8_t>(160 + 40 * blink),
-                                              static_cast<uint8_t>(210 + 30 * blink),
-                                              static_cast<uint8_t>(255), 230});
-                drawTextUnified("Resume: Esc   Quit: close window", Engine::Vec2{10.0f, 136.0f}, 0.9f,
-                                Engine::Color{180, 200, 230, 200});
-            }
+            // Pause overlay handled separately.
             // Enemies remaining warning.
             if (enemiesAlive_ > 0 && enemiesAlive_ <= enemyLowThreshold_) {
                 std::ostringstream warn;
@@ -811,7 +1112,8 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 drawTextUnified(msg.str(), Engine::Vec2{10.0f, 172.0f}, 0.9f,
                                 Engine::Color{200, 240, 255, 200});
             });
-            // Floating damage numbers.
+        // Floating damage numbers.
+        if (showDamageNumbers_) {
             registry_.view<Engine::ECS::Transform, Game::DamageNumber>(
                 [&](Engine::ECS::Entity /*e*/, const Engine::ECS::Transform& tf, const Game::DamageNumber& dn) {
                     Engine::Vec2 screen = Engine::worldToScreen(tf.position, camera_, static_cast<float>(viewportWidth_),
@@ -823,6 +1125,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                                     static_cast<uint8_t>(120 * alphaScale), static_cast<uint8_t>(220 * alphaScale)};
                     drawTextUnified(txt.str(), screen, 0.9f, c);
                 });
+        }
             }
         // HUD fallback (rectangles) if debug font missing.
         if (!debugText_) {
@@ -847,33 +1150,6 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 render_->drawFilledRect(Engine::Vec2{10.0f, 28.0f}, Engine::Vec2{140.0f, 12.0f},
                                         Engine::Color{120, 220, 140, 200});
             }
-            if (paused_ && !shopOpen_) {
-    render_->drawFilledRect(Engine::Vec2{10.0f, 46.0f}, Engine::Vec2{120.0f, 12.0f},
-                            Engine::Color{120, 160, 255, 200});
-    // block letters "PAUSED"
-    auto blk = [&](float x, float y) {
-        render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{5.0f, 8.0f},
-                                            Engine::Color{20, 40, 80, 230});
-                };
-                float x = 14.0f, y = 48.0f;
-                // P
-                blk(x, y); blk(x+5, y); blk(x+10, y); blk(x, y+4); blk(x+10, y+4); blk(x, y+8); blk(x+5, y+8);
-                x += 15.0f;
-                // A
-                blk(x, y+8); blk(x+5, y+4); blk(x+10, y+4); blk(x+15, y+8); blk(x+5, y); blk(x+10, y); blk(x+7.5f, y+6);
-                x += 18.0f;
-                // U
-                blk(x, y); blk(x+15, y); blk(x, y+4); blk(x+15, y+4); blk(x, y+8); blk(x+5, y+8); blk(x+10, y+8); blk(x+15, y+8);
-                x += 20.0f;
-                // S
-                blk(x, y); blk(x+5, y); blk(x+10, y); blk(x, y+4); blk(x, y+8); blk(x+5, y+8); blk(x+10, y+8);
-                x += 15.0f;
-                // E
-                blk(x, y); blk(x+5, y); blk(x+10, y); blk(x, y+4); blk(x, y+8); blk(x+5, y+8); blk(x+10, y+8);
-                x += 15.0f;
-                // D
-                blk(x, y); blk(x+5, y); blk(x+10, y+2); blk(x+10, y+6); blk(x+5, y+8); blk(x, y+8); blk(x, y+4);
-            }
             if (enemiesAlive_ > 0 && enemiesAlive_ <= enemyLowThreshold_) {
                 render_->drawFilledRect(Engine::Vec2{10.0f, 64.0f}, Engine::Vec2{100.0f, 10.0f},
                                         Engine::Color{255, 210, 120, 200});
@@ -883,6 +1159,19 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 render_->drawFilledRect(Engine::Vec2{10.0f, 82.0f}, Engine::Vec2{140.0f * tRatio, 8.0f},
                                         Engine::Color{120, 200, 255, 200});
             });
+        }
+        // Shop overlay (TTF path)
+        if (shopOpen_) {
+            drawShopOverlay();
+        }
+        if (paused_ && !shopOpen_ && !levelChoiceOpen_ && !defeated_) {
+            drawPauseOverlay();
+        }
+        if (!inMenu_) {
+            drawAbilityPanel();
+        }
+        if (levelChoiceOpen_) {
+            drawLevelChoiceOverlay();
         }
         showDefeatOverlay();
     }
@@ -941,7 +1230,7 @@ void GameRoot::handleHeroDeath() {
 
 void GameRoot::showDefeatOverlay() {
     if (!defeated_) return;
-    std::string msg = "DEFEATED - Press R to Restart or ESC to Quit";
+    std::string msg = "DEFEATED - Press Backspace to Restart or ESC to Quit";
     drawTextUnified(msg, Engine::Vec2{40.0f, 60.0f}, 1.5f, Engine::Color{255, 80, 80, 220});
 }
 
@@ -959,6 +1248,8 @@ void GameRoot::processDefeatInput(const Engine::ActionState& /*actions*/) {
 }
 
 void GameRoot::startNewGame() {
+    applyDifficultyPreset();
+    applyArchetypePreset();
     inMenu_ = false;
     userPaused_ = false;
     paused_ = false;
@@ -975,6 +1266,12 @@ void GameRoot::updateMenuInput(const Engine::ActionState& actions, const Engine:
     bool downEdge = down && !menuDownPrev_;
     menuUpPrev_ = up;
     menuDownPrev_ = down;
+    bool left = actions.moveX < -0.5f;
+    bool right = actions.moveX > 0.5f;
+    bool leftEdge = left && !menuLeftPrev_;
+    bool rightEdge = right && !menuRightPrev_;
+    menuLeftPrev_ = left;
+    menuRightPrev_ = right;
 
     bool leftClick = input.isMouseButtonDown(0);
     bool confirmEdge = (leftClick && !menuConfirmPrev_) || (actions.primaryFire && !menuConfirmPrev_);
@@ -982,6 +1279,8 @@ void GameRoot::updateMenuInput(const Engine::ActionState& actions, const Engine:
 
     bool pauseEdge = actions.pause && !menuPausePrev_;
     menuPausePrev_ = actions.pause;
+    bool clickEdge = leftClick && !menuClickPrev_;
+    menuClickPrev_ = leftClick;
 
     auto advanceSelection = [&](int count) {
         const int maxIndex = count - 1;
@@ -991,13 +1290,29 @@ void GameRoot::updateMenuInput(const Engine::ActionState& actions, const Engine:
         if (downEdge) menuSelection_ = (menuSelection_ + 1) % count;
     };
 
+    auto inside = [](int mx, int my, float x, float y, float w, float h) {
+        return mx >= x && mx <= x + w && my >= y && my <= y + h;
+    };
+    const float centerX = static_cast<float>(viewportWidth_) * 0.5f;
+    const float topY = 140.0f;
+    int mx = input.mouseX();
+    int my = input.mouseY();
+
     if (inMenu_) {
         if (menuPage_ == MenuPage::Main) {
             const int itemCount = 4;
+            // Hover to select
+            for (int i = 0; i < itemCount; ++i) {
+                float y = topY + 80.0f + i * 38.0f;
+                float x = centerX - 120.0f;
+                if (inside(mx, my, x, y, 240.0f, 30.0f)) {
+                    menuSelection_ = i;
+                }
+            }
             advanceSelection(itemCount);
             if (confirmEdge) {
                 switch (menuSelection_) {
-                    case 0: startNewGame(); return;
+                    case 0: menuPage_ = MenuPage::CharacterSelect; menuSelection_ = 0; return;
                     case 1: menuPage_ = MenuPage::Stats; menuSelection_ = 0; return;
                     case 2: menuPage_ = MenuPage::Options; menuSelection_ = 0; return;
                     case 3: if (app_) app_->requestQuit("Exit from main menu"); return;
@@ -1014,10 +1329,101 @@ void GameRoot::updateMenuInput(const Engine::ActionState& actions, const Engine:
                 menuPage_ = MenuPage::Main;
                 menuSelection_ = 0;
             }
+            // click anywhere to go back
+            if (clickEdge) {
+                menuPage_ = MenuPage::Main;
+                menuSelection_ = 0;
+            }
         } else if (menuPage_ == MenuPage::Options) {
-            const int itemCount = 1;  // Back
+            const int itemCount = 2;  // toggles, back via Esc
             advanceSelection(itemCount);
-            if (confirmEdge || pauseEdge) {
+            // hover selection
+            float boxY0 = topY + 110.0f;
+            for (int i = 0; i < itemCount; ++i) {
+                float y = boxY0 + i * 30.0f;
+                if (inside(mx, my, centerX - 150.0f, y, 200.0f, 22.0f)) {
+                    menuSelection_ = i;
+                }
+            }
+            if (confirmEdge || (clickEdge && inside(mx, my, centerX - 150.0f, boxY0, 200.0f, 22.0f * itemCount + 10.0f))) {
+                switch (menuSelection_) {
+                    case 0: showDamageNumbers_ = !showDamageNumbers_; break;
+                    case 1: screenShake_ = !screenShake_; break;
+                }
+            }
+            if (pauseEdge) {
+                menuPage_ = MenuPage::Main;
+                menuSelection_ = 0;
+            }
+        } else if (menuPage_ == MenuPage::CharacterSelect) {
+            const int focusCount = 4;  // archetype, difficulty, start, back
+            if (leftEdge) menuSelection_ = (menuSelection_ - 1 + focusCount) % focusCount;
+            if (rightEdge) menuSelection_ = (menuSelection_ + 1) % focusCount;
+            auto adjustIndex = [&](int& idx, int count) {
+                if (count <= 0) return;
+                if (idx < 0) idx = 0;
+                if (idx >= count) idx = count - 1;
+                if (upEdge) idx = (idx - 1 + count) % count;
+                if (downEdge) idx = (idx + 1) % count;
+            };
+            if (menuSelection_ == 0) {
+                adjustIndex(selectedArchetype_, static_cast<int>(archetypes_.size()));
+                applyArchetypePreset();
+            } else if (menuSelection_ == 1) {
+                adjustIndex(selectedDifficulty_, static_cast<int>(difficulties_.size()));
+                applyDifficultyPreset();
+            } else if (menuSelection_ == 2 || menuSelection_ == 3) {
+                // Up/down do nothing for Start/Back
+            }
+            // Mouse hover select and click for lists
+            const float panelW = 260.0f;
+            const float gap = 30.0f;
+            const float listStartY = topY + 80.0f;
+            float leftX = centerX - panelW - gap * 0.5f;
+            float rightX = centerX + gap * 0.5f;
+            const float entryH = 26.0f;
+            for (std::size_t i = 0; i < archetypes_.size(); ++i) {
+                float y = listStartY + 32.0f + static_cast<float>(i) * entryH;
+                if (inside(mx, my, leftX + 8.0f, y, panelW - 16.0f, entryH - 4.0f)) {
+                    selectedArchetype_ = static_cast<int>(i);
+                    applyArchetypePreset();
+                    menuSelection_ = 0;
+                }
+            }
+            for (std::size_t i = 0; i < difficulties_.size(); ++i) {
+                float y = listStartY + 32.0f + static_cast<float>(i) * entryH;
+                if (inside(mx, my, rightX + 8.0f, y, panelW - 16.0f, entryH - 4.0f)) {
+                    selectedDifficulty_ = static_cast<int>(i);
+                    applyDifficultyPreset();
+                    menuSelection_ = 1;
+                }
+            }
+            float summaryY = listStartY + 220.0f + 18.0f;
+            float actionY = summaryY + 98.0f;
+            if (inside(mx, my, centerX - 220.0f, actionY, 200.0f, 32.0f)) {
+                menuSelection_ = 2;
+                if (clickEdge) { startNewGame(); return; }
+            }
+            if (inside(mx, my, centerX + 20.0f, actionY, 200.0f, 32.0f)) {
+                menuSelection_ = 3;
+                if (clickEdge) {
+                    menuPage_ = MenuPage::Main;
+                    menuSelection_ = 0;
+                    return;
+                }
+            }
+            if (confirmEdge) {
+                if (menuSelection_ == 2) {
+                    startNewGame();
+                    return;
+                }
+                if (menuSelection_ == 3) {
+                    menuPage_ = MenuPage::Main;
+                    menuSelection_ = 0;
+                    return;
+                }
+            }
+            if (pauseEdge) {
                 menuPage_ = MenuPage::Main;
                 menuSelection_ = 0;
             }
@@ -1072,12 +1478,100 @@ void GameRoot::renderMenu() {
                         Engine::Color{180, 210, 240, 220});
     } else if (menuPage_ == MenuPage::Options) {
         Engine::Color c{200, 240, 200, 240};
-        drawTextUnified("Options (placeholder)", Engine::Vec2{centerX - 120.0f, topY + 80.0f}, 1.1f, c);
-        drawTextUnified("- Toggle shop: B", Engine::Vec2{centerX - 120.0f, topY + 118.0f}, 0.95f, c);
-        drawTextUnified("- Pause: Esc", Engine::Vec2{centerX - 120.0f, topY + 144.0f}, 0.95f, c);
-        drawTextUnified("- Movement: WASD", Engine::Vec2{centerX - 120.0f, topY + 170.0f}, 0.95f, c);
-        drawTextUnified("Esc / Mouse1 to return", Engine::Vec2{centerX - 120.0f, topY + 210.0f}, 0.9f,
-                        Engine::Color{180, 210, 240, 220});
+        drawTextUnified("Options", Engine::Vec2{centerX - 50.0f, topY + 70.0f}, 1.2f, c);
+        auto drawOpt = [&](const std::string& label, bool enabled, int idx, float yOff) {
+            Engine::Color box{40, 70, 90, 220};
+            Engine::Color on{140, 230, 160, 240};
+            Engine::Color off{180, 120, 120, 220};
+            float y = topY + yOff;
+            render_->drawFilledRect(Engine::Vec2{centerX - 150.0f, y}, Engine::Vec2{20.0f, 20.0f}, box);
+            if (enabled) {
+                render_->drawFilledRect(Engine::Vec2{centerX - 147.0f, y + 3.0f}, Engine::Vec2{14.0f, 14.0f}, on);
+            } else {
+                render_->drawFilledRect(Engine::Vec2{centerX - 147.0f, y + 3.0f}, Engine::Vec2{14.0f, 14.0f}, off);
+            }
+            bool focused = (menuSelection_ == idx);
+            Engine::Color lc = focused ? Engine::Color{220, 255, 255, 255} : Engine::Color{200, 220, 240, 230};
+            drawTextUnified(label, Engine::Vec2{centerX - 120.0f, y + 2.0f}, 1.0f, lc);
+        };
+        drawOpt("Damage Numbers", showDamageNumbers_, 0, 110.0f);
+        drawOpt("Screen Shake", screenShake_, 1, 140.0f);
+        Engine::Color hint{180, 210, 240, 220};
+        drawTextUnified("Esc / Mouse1 to return", Engine::Vec2{centerX - 150.0f, topY + 200.0f}, 0.9f, hint);
+    } else if (menuPage_ == MenuPage::CharacterSelect) {
+        Engine::Color titleCol{200, 230, 255, 240};
+        drawTextUnified("Select Character & Difficulty", Engine::Vec2{centerX - 180.0f, topY + 40.0f}, 1.25f,
+                        titleCol);
+        const float panelW = 260.0f;
+        const float panelH = 220.0f;
+        const float gap = 30.0f;
+        const float listStartY = topY + 80.0f;
+        auto drawList = [&](auto& list, int selected, bool focused, float x, const std::string& title) {
+            Engine::Color panel{28, 42, 60, 220};
+            render_->drawFilledRect(Engine::Vec2{x, listStartY}, Engine::Vec2{panelW, panelH}, panel);
+            drawTextUnified(title, Engine::Vec2{x + 12.0f, listStartY + 8.0f}, 1.05f,
+                            Engine::Color{200, 230, 255, 240});
+            const float entryH = 26.0f;
+            for (std::size_t i = 0; i < list.size(); ++i) {
+                float y = listStartY + 32.0f + static_cast<float>(i) * entryH;
+                Engine::Color bg{40, 60, 80, static_cast<uint8_t>(focused && static_cast<int>(i) == selected ? 230 : 160)};
+                if (static_cast<int>(i) == selected) {
+                    bg = Engine::Color{static_cast<uint8_t>(bg.r + 20), static_cast<uint8_t>(bg.g + 40),
+                                       static_cast<uint8_t>(bg.b + 60), 230};
+                }
+                render_->drawFilledRect(Engine::Vec2{x + 8.0f, y}, Engine::Vec2{panelW - 16.0f, entryH - 4.0f}, bg);
+                Engine::Color txt = (static_cast<int>(i) == selected)
+                                        ? Engine::Color{220, 255, 255, 255}
+                                        : Engine::Color{200, 220, 240, 230};
+                drawTextUnified(list[i].name, Engine::Vec2{x + 14.0f, y + 4.0f}, 0.95f, txt);
+            }
+        };
+        float leftX = centerX - panelW - gap * 0.5f;
+        float rightX = centerX + gap * 0.5f;
+        if (!archetypes_.empty()) {
+            drawList(archetypes_, selectedArchetype_, menuSelection_ == 0, leftX, "Archetypes");
+        }
+        if (!difficulties_.empty()) {
+            drawList(difficulties_, selectedDifficulty_, menuSelection_ == 1, rightX, "Difficulties");
+        }
+        // Summary card
+        Engine::Color cardCol{24, 34, 48, 220};
+        float summaryY = listStartY + panelH + 18.0f;
+        render_->drawFilledRect(Engine::Vec2{centerX - 260.0f, summaryY}, Engine::Vec2{520.0f, 86.0f}, cardCol);
+        if (!archetypes_.empty()) {
+            const auto& a = archetypes_[std::clamp(selectedArchetype_, 0, static_cast<int>(archetypes_.size() - 1))];
+            std::ostringstream stats;
+            stats << "HP x" << std::fixed << std::setprecision(2) << a.hpMul
+                  << " | Speed x" << a.speedMul << " | Damage x" << a.damageMul;
+            drawTextUnified(a.name + ": " + a.description, Engine::Vec2{centerX - 248.0f, summaryY + 10.0f}, 0.95f,
+                            Engine::Color{210, 235, 255, 235});
+            drawTextUnified(stats.str(), Engine::Vec2{centerX - 248.0f, summaryY + 32.0f}, 0.9f,
+                            Engine::Color{180, 220, 240, 230});
+        }
+        if (!difficulties_.empty()) {
+            const auto& d =
+                difficulties_[std::clamp(selectedDifficulty_, 0, static_cast<int>(difficulties_.size() - 1))];
+            std::ostringstream desc;
+            desc << d.name << ": " << d.description;
+            drawTextUnified(desc.str(), Engine::Vec2{centerX - 248.0f, summaryY + 54.0f}, 0.9f,
+                            Engine::Color{200, 220, 255, 220});
+        }
+        // Action buttons
+        auto drawAction = [&](const std::string& label, int index, float x) {
+            Engine::Vec2 pos{x, summaryY + 98.0f};
+            Engine::Vec2 size{200.0f, 32.0f};
+            bool focused = menuSelection_ == index;
+            Engine::Color bg{static_cast<uint8_t>(focused ? 90 : 60), static_cast<uint8_t>(focused ? 150 : 110),
+                             static_cast<uint8_t>(focused ? 200 : 160), 230};
+            render_->drawFilledRect(pos, size, bg);
+            drawTextUnified(label, Engine::Vec2{pos.x + 14.0f, pos.y + 6.0f}, 0.98f,
+                            Engine::Color{220, 255, 255, 255});
+        };
+        drawAction("Start Run", 2, centerX - 220.0f);
+        drawAction("Back", 3, centerX + 20.0f);
+        Engine::Color hint{180, 210, 240, 220};
+        drawTextUnified("Left/Right to switch panels | Up/Down to change selection | Enter/Click to confirm",
+                        Engine::Vec2{centerX - 260.0f, summaryY + 142.0f}, 0.85f, hint);
     }
 }
 
@@ -1109,6 +1603,220 @@ void GameRoot::drawTextUnified(const std::string& text, const Engine::Vec2& pos,
         drawTextTTF(text, pos, scale, color);
     } else if (debugText_) {
         debugText_->drawText(text, pos, scale, color);
+    }
+}
+
+void GameRoot::loadMenuPresets() {
+    archetypes_.clear();
+    difficulties_.clear();
+
+    std::ifstream f("data/menu_presets.json");
+    if (f.is_open()) {
+        nlohmann::json j;
+        f >> j;
+        if (j.contains("archetypes") && j["archetypes"].is_array()) {
+            for (const auto& a : j["archetypes"]) {
+                ArchetypeDef def{};
+                def.id = a.value("id", "");
+                def.name = a.value("name", "");
+                def.description = a.value("description", "");
+                def.hpMul = a.value("hpMul", 1.0f);
+                def.speedMul = a.value("speedMul", 1.0f);
+                def.damageMul = a.value("damageMul", 1.0f);
+                if (a.contains("color") && a["color"].is_array() && a["color"].size() >= 3) {
+                    def.color = Engine::Color{
+                        static_cast<uint8_t>(a["color"][0].get<int>()),
+                        static_cast<uint8_t>(a["color"][1].get<int>()),
+                        static_cast<uint8_t>(a["color"][2].get<int>()),
+                        static_cast<uint8_t>(a["color"].size() > 3 ? a["color"][3].get<int>() : 255)};
+                }
+                if (!def.name.empty()) {
+                    archetypes_.push_back(def);
+                }
+            }
+        }
+        if (j.contains("difficulties") && j["difficulties"].is_array()) {
+            for (const auto& d : j["difficulties"]) {
+                DifficultyDef def{};
+                def.id = d.value("id", "");
+                def.name = d.value("name", "");
+                def.description = d.value("description", "");
+                def.enemyHpMul = d.value("enemyHpMul", 1.0f);
+                def.startWave = d.value("startWave", 1);
+                if (!def.name.empty()) {
+                    difficulties_.push_back(def);
+                }
+            }
+        }
+    } else {
+        Engine::logWarn("menu_presets.json missing; using defaults for archetypes/difficulties.");
+    }
+
+    auto addArchetype = [&](const std::string& id, const std::string& name, const std::string& desc, float hp,
+                            float spd, float dmg, Engine::Color col) {
+        ArchetypeDef def{id, name, desc, hp, spd, dmg, col};
+        archetypes_.push_back(def);
+    };
+    if (archetypes_.empty()) {
+        addArchetype("tank", "Tank", "High survivability frontliner with slower stride.", 1.35f, 0.9f, 0.9f,
+                     Engine::Color{110, 190, 255, 255});
+        addArchetype("healer", "Healer", "Supportive sustain, balanced speed, lighter offense.", 1.05f, 1.0f, 0.95f,
+                     Engine::Color{170, 220, 150, 255});
+        addArchetype("damage", "Damage Dealer", "Glass-cannon firepower, slightly faster pacing.", 0.95f, 1.05f, 1.15f,
+                     Engine::Color{255, 180, 120, 255});
+        addArchetype("assassin", "Assassin", "Very quick and lethal but fragile.", 0.85f, 1.25f, 1.2f,
+                     Engine::Color{255, 110, 180, 255});
+        addArchetype("builder", "Builder", "Sturdier utility specialist with slower advance.", 1.1f, 0.95f, 0.9f,
+                     Engine::Color{200, 200, 120, 255});
+        addArchetype("support", "Support", "All-rounder tuned for team buffs.", 1.0f, 1.0f, 1.0f,
+                     Engine::Color{150, 210, 230, 255});
+        addArchetype("special", "Special", "Experimental kit with slight boosts across the board.", 1.1f, 1.05f, 1.05f,
+                     Engine::Color{200, 160, 240, 255});
+    }
+
+    auto addDifficulty = [&](const std::string& id, const std::string& name, const std::string& desc, float hpMul,
+                             int startWave) {
+        DifficultyDef def{id, name, desc, hpMul, startWave};
+        difficulties_.push_back(def);
+    };
+    if (difficulties_.empty()) {
+        addDifficulty("very_easy", "Very Easy", "80% enemy HP, starts at wave 1.", 0.8f, 1);
+        addDifficulty("easy", "Easy", "90% enemy HP, starts at wave 1.", 0.9f, 1);
+        addDifficulty("normal", "Normal", "Baseline 100% enemy HP, starts at wave 1.", 1.0f, 1);
+        addDifficulty("hard", "Hard", "120% enemy HP, starts at wave 10.", 1.2f, 10);
+        addDifficulty("chaotic", "Chaotic", "140% enemy HP, starts at wave 20.", 1.4f, 20);
+        addDifficulty("insane", "Insane", "160% enemy HP, starts at wave 40.", 1.6f, 40);
+        addDifficulty("torment", "Torment I", "200% enemy HP, starts at wave 60 (placeholder target).", 2.0f, 60);
+    }
+
+    selectedArchetype_ = std::clamp(selectedArchetype_, 0, static_cast<int>(archetypes_.size() - 1));
+    selectedDifficulty_ = std::clamp(selectedDifficulty_, 0, static_cast<int>(difficulties_.size() - 1));
+    activeArchetype_ = archetypes_[selectedArchetype_];
+    activeDifficulty_ = difficulties_[selectedDifficulty_];
+    applyDifficultyPreset();
+    applyArchetypePreset();
+}
+
+void GameRoot::rebuildWaveSettings() {
+    waveSettingsBase_ = waveSettingsDefault_;
+    startWaveBase_ = std::max(1, activeDifficulty_.startWave);
+    float hpMul = activeDifficulty_.enemyHpMul;
+    float hpGrowth = std::pow(1.08f, static_cast<float>(startWaveBase_ - 1));
+    float speedGrowth = std::pow(1.01f, static_cast<float>(startWaveBase_ - 1));
+    waveSettingsBase_.enemyHp *= hpMul * hpGrowth;
+    waveSettingsBase_.enemySpeed *= speedGrowth;
+    int batchIncrease = (startWaveBase_ - 1) / 2;
+    waveSettingsBase_.batchSize = std::min(12, waveSettingsBase_.batchSize + batchIncrease);
+    contactDamage_ = waveSettingsBase_.contactDamage;
+    if (collisionSystem_) collisionSystem_->setContactDamage(contactDamage_);
+}
+
+void GameRoot::applyDifficultyPreset() {
+    if (difficulties_.empty()) return;
+    selectedDifficulty_ = std::clamp(selectedDifficulty_, 0, static_cast<int>(difficulties_.size() - 1));
+    activeDifficulty_ = difficulties_[selectedDifficulty_];
+    rebuildWaveSettings();
+}
+
+void GameRoot::applyArchetypePreset() {
+    if (archetypes_.empty()) return;
+    selectedArchetype_ = std::clamp(selectedArchetype_, 0, static_cast<int>(archetypes_.size() - 1));
+    activeArchetype_ = archetypes_[selectedArchetype_];
+    heroMaxHpPreset_ = heroMaxHpBase_ * activeArchetype_.hpMul;
+    heroMoveSpeedPreset_ = heroMoveSpeedBase_ * activeArchetype_.speedMul;
+    projectileDamagePreset_ = projectileDamageBase_ * activeArchetype_.damageMul;
+    heroColorPreset_ = activeArchetype_.color;
+    buildAbilities();
+}
+
+void GameRoot::buildAbilities() {
+    abilities_.clear();
+    abilityStates_.clear();
+    abilityFocus_ = 0;
+    rageTimer_ = 0.0f;
+    rageDamageBuff_ = 1.0f;
+    rageRateBuff_ = 1.0f;
+
+    // Load from data file
+    std::ifstream f("data/abilities.json");
+    nlohmann::json j;
+    if (f.is_open()) {
+        try {
+            f >> j;
+        } catch (...) {
+            Engine::logWarn("abilities.json parse error; using defaults.");
+        }
+    } else {
+        std::ifstream fdef("data/abilities_default.json");
+        if (fdef.is_open()) {
+            try {
+                fdef >> j;
+            } catch (...) {
+                Engine::logWarn("abilities_default.json parse error; using built-ins.");
+            }
+        }
+    }
+    auto pushAbility = [&](const AbilityDef& def) {
+        AbilitySlot slot{};
+        slot.name = def.name;
+        slot.description = def.description;
+        slot.keyHint = def.keyHint;
+        slot.cooldownMax = def.baseCooldown;
+        slot.cooldown = 0.0f;
+        slot.upgradeCost = def.baseCost;
+        slot.type = def.type;
+        slot.powerScale = 1.0f;
+        abilities_.push_back(slot);
+
+        AbilityState st{};
+        st.def = def;
+        st.level = 1;
+        st.maxLevel = 5;
+        st.cooldown = 0.0f;
+        abilityStates_.push_back(st);
+    };
+
+    bool loaded = false;
+    if (j.contains(activeArchetype_.id)) {
+        const auto& arr = j[activeArchetype_.id];
+        if (arr.is_array()) {
+            for (const auto& a : arr) {
+                AbilityDef def{};
+                def.name = a.value("name", "");
+                def.description = a.value("description", "");
+                def.keyHint = a.value("key", "");
+                def.baseCooldown = a.value("cooldown", 8.0f);
+                def.baseCost = a.value("cost", 25);
+                def.type = a.value("type", "generic");
+                if (!def.name.empty()) {
+                    pushAbility(def);
+                }
+            }
+            loaded = !abilities_.empty();
+        }
+    }
+
+    if (!loaded) {
+        const std::string archetype = activeArchetype_.id;
+        if (archetype == "damage" || archetype == "damage dealer" || archetype == "dd") {
+            pushAbility({"Primary Fire", "Standard projectile.", "M1", 0.0f, 0, "primary"});
+            pushAbility({"Scatter Shot", "Close-range cone blast.", "1", 6.0f, 30, "scatter"});
+            pushAbility({"Rage", "Boost damage and fire rate briefly.", "2", 12.0f, 40, "rage"});
+            pushAbility({"Nova Barrage", "Heavy projectiles in all directions.", "3", 10.0f, 45, "nova"});
+            pushAbility({"Death Blossom", "Ultimate barrage; huge damage.", "4", 35.0f, 60, "ultimate"});
+        } else if (archetype == "tank") {
+            pushAbility({"Primary Fire", "Sturdy rounds.", "M1", 0.0f, 0, "primary"});
+            pushAbility({"Shield Bash", "Short stun bash.", "1", 8.0f, 30, "generic"});
+            pushAbility({"Fortify", "Damage reduction surge.", "2", 14.0f, 40, "generic"});
+            pushAbility({"Taunt Pulse", "Pull threat nearby.", "3", 16.0f, 45, "generic"});
+            pushAbility({"Bulwark Dome", "Ultimate barrier bubble.", "4", 40.0f, 60, "generic"});
+        } else {
+            pushAbility({"Primary Fire", "Baseline projectile.", "M1", 0.0f, 0, "primary"});
+            pushAbility({"Ability 1", "Supplemental attack.", "1", 8.0f, 30, "generic"});
+            pushAbility({"Ability 2", "Utility (dash/invis/etc.).", "2", 12.0f, 35, "generic"});
+            pushAbility({"Ability 3", "Heavy hit or heal.", "3", 14.0f, 45, "generic"});
+            pushAbility({"Ultimate", "Long-cooldown power spike.", "4", 40.0f, 60, "ultimate"});
+        }
     }
 }
 
@@ -1200,12 +1908,163 @@ void GameRoot::drawLevelChoiceOverlay() {
     }
 }
 
+static std::string shopLabelForType(ShopItem::Type type) {
+    switch (type) {
+        case ShopItem::Type::Damage: return "+Damage";
+        case ShopItem::Type::Health: return "+Health";
+        case ShopItem::Type::Speed: return "+Speed";
+    }
+    return "Item";
+}
+
+void GameRoot::refreshShopInventory() {
+    shopPool_.clear();
+    shopPool_.push_back(ShopItem{"Sharper Rounds", "Increase projectile damage.", shopDamageCost_, ShopItem::Type::Damage, shopDamageBonus_});
+    shopPool_.push_back(ShopItem{"Critical Drills", "Bigger damage spike.", shopDamageCost_ + 10, ShopItem::Type::Damage, shopDamageBonus_ * 1.6f});
+    shopPool_.push_back(ShopItem{"Reinforced Plating", "Increase max HP.", shopHpCost_, ShopItem::Type::Health, shopHpBonus_});
+    shopPool_.push_back(ShopItem{"Fortified Core", "Heavier HP boost.", shopHpCost_ + 15, ShopItem::Type::Health, shopHpBonus_ * 1.5f});
+    shopPool_.push_back(ShopItem{"Sprint Module", "Increase move speed.", shopSpeedCost_, ShopItem::Type::Speed, shopSpeedBonus_});
+    shopPool_.push_back(ShopItem{"Kinetic Bearings", "Bigger speed bump.", shopSpeedCost_ + 10, ShopItem::Type::Speed, shopSpeedBonus_ * 1.5f});
+
+    // Shuffle and take first 3.
+    std::shuffle(shopPool_.begin(), shopPool_.end(), rng_);
+    shopInventory_.assign(shopPool_.begin(), shopPool_.begin() + std::min<std::size_t>(3, shopPool_.size()));
+    if (shopSystem_) {
+        shopSystem_->setInventory(shopInventory_);
+    }
+}
+
+void GameRoot::drawShopOverlay() {
+    if (!render_ || !shopOpen_) return;
+    const float panelW = 600.0f;
+    const float panelH = 200.0f;
+    const float cx = static_cast<float>(viewportWidth_) * 0.5f;
+    const float cy = static_cast<float>(viewportHeight_) * 0.6f;
+    Engine::Vec2 topLeft{cx - panelW * 0.5f, cy - panelH * 0.5f};
+    render_->drawFilledRect(topLeft, Engine::Vec2{panelW, panelH}, Engine::Color{16, 20, 30, 230});
+    drawTextUnified("Shop - B closes", Engine::Vec2{topLeft.x + 18.0f, topLeft.y + 12.0f}, 1.0f,
+                    Engine::Color{200, 255, 200, 240});
+    const float cardW = 160.0f;
+    const float cardH = 120.0f;
+    const float gap = 14.0f;
+    float startX = topLeft.x + 18.0f;
+    float y = topLeft.y + 36.0f;
+    for (std::size_t i = 0; i < shopInventory_.size(); ++i) {
+        float x = startX + static_cast<float>(i) * (cardW + gap);
+        render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{cardW, cardH}, Engine::Color{32, 46, 66, 220});
+        const auto& item = shopInventory_[i];
+        std::string title = shopLabelForType(item.type);
+        std::ostringstream desc;
+        switch (item.type) {
+            case ShopItem::Type::Damage: desc << "+" << static_cast<int>(item.value) << " damage"; break;
+            case ShopItem::Type::Health: desc << "+" << static_cast<int>(item.value) << " HP"; break;
+            case ShopItem::Type::Speed: desc << "+" << static_cast<int>(item.value) << " speed"; break;
+        }
+        drawTextUnified(title, Engine::Vec2{x + 12.0f, y + 10.0f}, 1.0f, Engine::Color{220, 240, 255, 240});
+        drawTextUnified(desc.str(), Engine::Vec2{x + 12.0f, y + 34.0f}, 0.95f, Engine::Color{200, 220, 240, 230});
+        std::ostringstream cost;
+        cost << item.cost << "c";
+        bool affordable = credits_ >= item.cost;
+        Engine::Color costCol = affordable ? Engine::Color{180, 255, 200, 240}
+                                           : Engine::Color{220, 160, 160, 220};
+        drawTextUnified(cost.str(), Engine::Vec2{x + 12.0f, y + 62.0f}, 0.9f, costCol);
+        Engine::Color hintCol{170, 200, 230, 200};
+        if (!affordable && shopNoCreditTimer_ > 0.0) {
+            float pulse = 0.6f + 0.4f * std::sin(static_cast<float>(shopNoCreditTimer_) * 18.0f);
+            hintCol = Engine::Color{static_cast<uint8_t>(220), static_cast<uint8_t>(140 * pulse),
+                                    static_cast<uint8_t>(140 * pulse), 230};
+        }
+        drawTextUnified("Click to buy", Engine::Vec2{x + 12.0f, y + 88.0f}, 0.85f, hintCol);
+    }
+    std::ostringstream wallet;
+    wallet << "Credits: " << credits_;
+    drawTextUnified(wallet.str(), Engine::Vec2{topLeft.x + panelW - 170.0f, topLeft.y + 12.0f}, 0.95f,
+                    Engine::Color{200, 255, 200, 240});
+}
+
+void GameRoot::drawPauseOverlay() {
+    if (!render_ || !paused_ || shopOpen_ || levelChoiceOpen_ || defeated_) return;
+    const float panelW = 320.0f;
+    const float panelH = 200.0f;
+    float cx = static_cast<float>(viewportWidth_) * 0.5f;
+    float cy = static_cast<float>(viewportHeight_) * 0.5f;
+    float x0 = cx - panelW * 0.5f;
+    float y0 = cy - panelH * 0.5f;
+    render_->drawFilledRect(Engine::Vec2{x0, y0}, Engine::Vec2{panelW, panelH}, Engine::Color{18, 26, 36, 230});
+    drawTextUnified("Paused", Engine::Vec2{x0 + 18.0f, y0 + 16.0f}, 1.1f, Engine::Color{200, 230, 255, 240});
+
+    float btnW = panelW - 40.0f;
+    float btnH = 44.0f;
+    float resumeX = x0 + 20.0f;
+    float resumeY = y0 + 70.0f;
+    float quitY = resumeY + btnH + 16.0f;
+    auto drawBtn = [&](const std::string& label, float bx, float by, bool hovered) {
+        Engine::Color bg = hovered ? Engine::Color{44, 70, 96, 240} : Engine::Color{32, 48, 64, 230};
+        render_->drawFilledRect(Engine::Vec2{bx, by}, Engine::Vec2{btnW, btnH}, bg);
+        drawTextUnified(label, Engine::Vec2{bx + 18.0f, by + 10.0f}, 1.0f,
+                        hovered ? Engine::Color{230, 250, 255, 255} : Engine::Color{220, 240, 255, 240});
+    };
+    int mx = lastMouseX_;
+    int my = lastMouseY_;
+    bool hoverResume = mx >= resumeX && mx <= resumeX + btnW && my >= resumeY && my <= resumeY + btnH;
+    bool hoverQuit = mx >= resumeX && mx <= resumeX + btnW && my >= quitY && my <= quitY + btnH;
+    drawBtn("Resume", resumeX, resumeY, hoverResume);
+    drawBtn("Main Menu", resumeX, quitY, hoverQuit);
+}
+
+void GameRoot::drawAbilityPanel() {
+    if (!render_ || abilities_.empty()) return;
+    const float scale = 1.15f;
+    const float panelW = 320.0f * scale;
+    const float panelH = 240.0f * scale;
+    const float margin = 16.0f;
+    float x = static_cast<float>(viewportWidth_) - panelW - margin;
+    float y = static_cast<float>(viewportHeight_) - panelH - margin;
+    render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{panelW, panelH}, Engine::Color{16, 24, 34, 210});
+    const float headerH = 26.0f * scale;
+    drawTextUnified("Abilities", Engine::Vec2{x + 12.0f, y + 10.0f}, 1.0f * scale, Engine::Color{200, 230, 255, 235});
+    const float lineH = 30.0f * scale;
+    const float hintH = 36.0f * scale;
+    float listHeight = static_cast<float>(abilities_.size()) * lineH;
+    float available = panelH - headerH - hintH - 24.0f;  // padding
+    float listStartY = y + headerH + std::max(12.0f, (available - listHeight) * 0.5f);
+    for (std::size_t i = 0; i < abilities_.size(); ++i) {
+        const auto& ab = abilities_[i];
+        float ly = listStartY + static_cast<float>(i) * lineH;
+        bool focused = static_cast<int>(i) == abilityFocus_;
+        Engine::Color keyCol{180, 210, 240, 230};
+        Engine::Color nameCol{210, 235, 255, static_cast<uint8_t>(focused ? 255 : 235)};
+        Engine::Color lvlCol{180, 220, 190, 230};
+        Engine::Color bg{static_cast<uint8_t>(focused ? 32u : 24u), static_cast<uint8_t>(focused ? 44u : 36u),
+                         56u, 220};
+        render_->drawFilledRect(Engine::Vec2{x + 6.0f, ly - 2.0f}, Engine::Vec2{panelW - 12.0f, lineH - 2.0f}, bg);
+        drawTextUnified(ab.keyHint, Engine::Vec2{x + 10.0f, ly}, 0.95f * scale, keyCol);
+        drawTextUnified(ab.name, Engine::Vec2{x + 54.0f, ly}, 1.0f * scale, nameCol);
+        std::ostringstream lv;
+        lv << "Lv " << ab.level << "/" << ab.maxLevel;
+        drawTextUnified(lv.str(), Engine::Vec2{x + panelW - 90.0f, ly}, 0.9f * scale, lvlCol);
+        if (ab.cooldown > 0.0f && ab.cooldownMax > 0.0f) {
+            float cdRatio = std::clamp(ab.cooldown / ab.cooldownMax, 0.0f, 1.0f);
+            render_->drawFilledRect(Engine::Vec2{x + 8.0f, ly + 18.0f}, Engine::Vec2{(panelW - 16.0f) * cdRatio, 4.0f},
+                                    Engine::Color{80, 140, 200, 220});
+        }
+    }
+    // Separate hint block beneath ability rows
+    float hintY = y + panelH - hintH + 6.0f;
+    render_->drawFilledRect(Engine::Vec2{x + 6.0f, hintY - 10.0f}, Engine::Vec2{panelW - 12.0f, hintH},
+                            Engine::Color{20, 30, 44, 220});
+    std::ostringstream hint;
+            hint << "Scroll swaps | F upgrades (Cost " << abilities_[abilityFocus_].upgradeCost << "c)";
+    drawTextUnified(hint.str(), Engine::Vec2{x + 12.0f, hintY}, 0.95f * scale,
+                    Engine::Color{170, 200, 230, 220});
+}
+
 void GameRoot::spawnHero() {
     hero_ = registry_.create();
     registry_.emplace<Engine::ECS::Transform>(hero_, Engine::Vec2{0.0f, 0.0f});
     registry_.emplace<Engine::ECS::Velocity>(hero_, Engine::Vec2{0.0f, 0.0f});
     registry_.emplace<Engine::ECS::Renderable>(hero_, Engine::ECS::Renderable{Engine::Vec2{heroSize_, heroSize_},
-                                                                               Engine::Color{90, 200, 255, 255}});
+                                                                               heroColorPreset_});
     const float heroHalf = heroSize_ * 0.5f;
     registry_.emplace<Engine::ECS::AABB>(hero_, Engine::ECS::AABB{Engine::Vec2{heroHalf, heroHalf}});
     registry_.emplace<Engine::ECS::Health>(hero_, Engine::ECS::Health{heroMaxHp_, heroMaxHp_});
@@ -1244,7 +2103,11 @@ void GameRoot::resetRun() {
     credits_ = 0;
     level_ = 1;
     xp_ = 0;
-    wave_ = 0;
+    xpToNext_ = xpBaseToLevel_;
+    heroMaxHp_ = heroMaxHpPreset_;
+    heroMoveSpeed_ = heroMoveSpeedPreset_;
+    projectileDamage_ = projectileDamagePreset_;
+    wave_ = std::max(0, startWaveBase_ - 1);
     defeated_ = false;
     accumulated_ = 0.0;
     tickCount_ = 0;
@@ -1262,6 +2125,10 @@ void GameRoot::resetRun() {
     waveSpawned_ = false;
     combatTimer_ = combatDuration_;
     intermissionTimer_ = 0.0;
+    dashTimer_ = 0.0f;
+    dashCooldownTimer_ = 0.0f;
+    dashInvulnTimer_ = 0.0f;
+    dashDir_ = {0.0f, 0.0f};
 
     if (waveSystem_) {
         waveSystem_ = std::make_unique<WaveSystem>(rng_, waveSettingsBase_);
@@ -1271,16 +2138,24 @@ void GameRoot::resetRun() {
     if (collisionSystem_) {
         collisionSystem_->setContactDamage(contactDamage_);
     }
+    refreshShopInventory();
 
     spawnHero();
     if (cameraSystem_) cameraSystem_->resetFollow(true);
     shopOpen_ = false;
     shopLeftPrev_ = shopRightPrev_ = shopMiddlePrev_ = false;
     shopUnavailableTimer_ = 0.0;
+    shopNoCreditTimer_ = 0.0;
     userPaused_ = false;
     paused_ = false;
     levelChoiceOpen_ = false;
     levelChoicePrevClick_ = false;
+    for (auto& ab : abilities_) {
+        ab.cooldown = 0.0f;
+    }
+    for (auto& st : abilityStates_) {
+        st.cooldown = 0.0f;
+    }
 }
 
 }  // namespace Game

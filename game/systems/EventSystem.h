@@ -11,7 +11,7 @@ namespace Game {
 class EventSystem {
 public:
     void update(Engine::ECS::Registry& registry, const Engine::TimeStep& step, int wave, int& credits,
-                bool inCombat, const Engine::Vec2& heroPos);
+                bool inCombat, const Engine::Vec2& heroPos, int salvageReward);
     bool lastSuccess() const { return lastSuccess_; }
     bool lastFail() const { return lastFail_; }
     void clearOutcome() { lastSuccess_ = lastFail_ = false; }
