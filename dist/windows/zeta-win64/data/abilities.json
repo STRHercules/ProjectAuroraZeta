@@ -1,0 +1,9 @@
+{
+  "damage": [
+    {"name": "Primary Fire", "description": "Standard projectile.", "key": "M1", "cooldown": 0.0, "cost": 0, "type": "primary"},
+    {"name": "Scatter Shot", "description": "Close-range cone blast.", "key": "1", "cooldown": 6.0, "cost": 30, "type": "scatter"},
+    {"name": "Rage", "description": "Boost damage and fire rate briefly.", "key": "2", "cooldown": 12.0, "cost": 40, "type": "rage"},
+    {"name": "Nova Barrage", "description": "Heavy projectiles in all directions.", "key": "3", "cooldown": 10.0, "cost": 45, "type": "nova"},
+    {"name": "Death Blossom", "description": "Ultimate barrage; huge damage.", "key": "4", "cooldown": 35.0, "cost": 60, "type": "ultimate"}
+  ]
+}

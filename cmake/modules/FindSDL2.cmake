@@ -1,0 +1,40 @@
+find_path(SDL2_INCLUDE_DIR SDL.h
+    PATH_SUFFIXES include/SDL2 SDL2 include
+    PATHS ${CMAKE_PREFIX_PATH})
+
+find_library(SDL2_LIBRARY NAMES SDL2 SDL2-2.0 SDL2.dll SDL2
+    PATHS ${CMAKE_PREFIX_PATH}
+    PATH_SUFFIXES lib)
+
+find_library(SDL2MAIN_LIBRARY NAMES SDL2main
+    PATHS ${CMAKE_PREFIX_PATH}
+    PATH_SUFFIXES lib)
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(SDL2 DEFAULT_MSG SDL2_LIBRARY SDL2_INCLUDE_DIR)
+
+if (SDL2_FOUND)
+    set(SDL2_INCLUDE_DIRS ${SDL2_INCLUDE_DIR})
+    set(SDL2_LIBRARIES ${SDL2_LIBRARY})
+    if (SDL2MAIN_LIBRARY)
+        list(APPEND SDL2_LIBRARIES ${SDL2MAIN_LIBRARY})
+    endif()
+
+    if (NOT TARGET SDL2::SDL2)
+        add_library(SDL2::SDL2 UNKNOWN IMPORTED)
+        set_target_properties(SDL2::SDL2 PROPERTIES
+            IMPORTED_LOCATION ${SDL2_LIBRARY}
+            INTERFACE_INCLUDE_DIRECTORIES ${SDL2_INCLUDE_DIRS}
+        )
+    endif()
+
+    if (SDL2MAIN_LIBRARY AND NOT TARGET SDL2::SDL2main)
+        add_library(SDL2::SDL2main UNKNOWN IMPORTED)
+        set_target_properties(SDL2::SDL2main PROPERTIES
+            IMPORTED_LOCATION ${SDL2MAIN_LIBRARY}
+            INTERFACE_INCLUDE_DIRECTORIES ${SDL2_INCLUDE_DIRS}
+        )
+    endif()
+endif()
+
+mark_as_advanced(SDL2_INCLUDE_DIR SDL2_LIBRARY SDL2MAIN_LIBRARY)

@@ -171,10 +171,11 @@ private:
     int bossKillBonus_{60};
     int salvageReward_{20};
     // Hotzones
-    float hotzoneMapRadius_{520.0f};
+    float hotzoneMapRadius_{900.0f};
     float hotzoneRadiusMin_{140.0f};
     float hotzoneRadiusMax_{220.0f};
-    float hotzoneMinSeparation_{280.0f};
+    float hotzoneMinSeparation_{700.0f};
+    float hotzoneSpawnClearance_{320.0f};
     double hotzoneRotation_{30.0};
     // Shop options
     int shopDamageCost_{25};

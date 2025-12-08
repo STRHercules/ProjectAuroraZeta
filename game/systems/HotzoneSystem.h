@@ -23,7 +23,7 @@ public:
 
     HotzoneSystem(float rotationInterval, float xpBonus, float creditBonus,
                   float fluxDamageBonus, float fluxRateBonus,
-                  float mapRadius, float minRadius, float maxRadius, float minSeparation,
+                  float mapRadius, float minRadius, float maxRadius, float minSeparation, float minSpawnClearance,
                   uint32_t seed = 1337u);
 
     void initialize(Engine::ECS::Registry& registry, int zoneCount);
@@ -63,10 +63,11 @@ private:
     float fluxRateMultiplier_{1.15f};
     bool heroInsideActive_{false};
     bool fluxSurgePending_{false};
-    float mapRadius_{480.0f};
+    float mapRadius_{900.0f};
     float minRadius_{140.0f};
     float maxRadius_{220.0f};
-    float minSeparation_{220.0f};
+    float minSeparation_{700.0f};
+    float minSpawnClearance_{300.0f};
     double warningWindow_{3.0};
     bool warningActive_{false};
     std::mt19937 rng_;

@@ -52,11 +52,11 @@ bool GameRoot::onInitialize(Engine::Application& app) {
             Engine::logWarn(std::string("TTF_Init failed: ") + TTF_GetError());
         } else {
             constexpr int kUIFontSize = 28;
-            uiFont_ = TTF_OpenFont("src/TinyUnicode.ttf", kUIFontSize);
+            uiFont_ = TTF_OpenFont("data/TinyUnicode.ttf", kUIFontSize);
             if (!uiFont_) {
                 Engine::logWarn(std::string("TTF_OpenFont failed: ") + TTF_GetError());
             } else {
-                Engine::logInfo("Loaded TTF font src/TinyUnicode.ttf");
+                Engine::logInfo("Loaded TTF font data/TinyUnicode.ttf");
             }
         }
     } else {
@@ -78,7 +78,7 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     eventSystem_ = std::make_unique<EventSystem>();
     hotzoneSystem_ = std::make_unique<HotzoneSystem>(static_cast<float>(hotzoneRotation_), 1.25f, 1.5f, 1.2f, 1.15f,
                                                      hotzoneMapRadius_, hotzoneRadiusMin_, hotzoneRadiusMax_,
-                                                     hotzoneMinSeparation_, rng_());
+                                                     hotzoneMinSeparation_, hotzoneSpawnClearance_, rng_());
     // Wave settings loaded later from gameplay config.
     textureManager_ = std::make_unique<Engine::TextureManager>(*render_);
     loadProgress();
@@ -1150,24 +1150,43 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 note << "Wave clear bonus +" << waveClearBonus_;
                 drawTextUnified(note.str(), Engine::Vec2{10.0f, 82.0f}, 0.9f, Engine::Color{180, 240, 180, 200});
             }
-            // XP / Level bar.
+            // HP and XP bars (bottom-left).
             {
-                float barW = 240.0f;
-                float ratio = xpToNext_ > 0 ? static_cast<float>(xp_) / static_cast<float>(xpToNext_) : 0.0f;
-                ratio = std::clamp(ratio, 0.0f, 1.0f);
-                Engine::Vec2 pos{10.0f, static_cast<float>(viewportHeight_) - 46.0f};
-                render_->drawFilledRect(pos, Engine::Vec2{barW, 10.0f}, Engine::Color{40, 60, 90, 200});
-                render_->drawFilledRect(pos, Engine::Vec2{barW * ratio, 10.0f}, Engine::Color{90, 200, 255, 220});
+                const float barW = 260.0f;
+                const float hpH = 18.0f;
+                const float xpH = 16.0f;
+                Engine::Vec2 origin{10.0f, static_cast<float>(viewportHeight_) - 70.0f};
+
+                // HP bar
+                float hpRatio = 1.0f;
+                if (const auto* heroHealth = registry_.get<Engine::ECS::Health>(hero_)) {
+                    hpRatio = heroHealth->max > 0.0f ? heroHealth->current / heroHealth->max : 0.0f;
+                    hpRatio = std::clamp(hpRatio, 0.0f, 1.0f);
+                }
+                render_->drawFilledRect(origin, Engine::Vec2{barW, hpH}, Engine::Color{50, 30, 30, 200});
+                render_->drawFilledRect(origin, Engine::Vec2{barW * hpRatio, hpH}, Engine::Color{200, 80, 80, 230});
+                std::ostringstream hpTxt;
+                hpTxt << "HP " << static_cast<int>(std::round(hpRatio * 100)) << "%";
+                drawTextUnified(hpTxt.str(), Engine::Vec2{origin.x + 8.0f, origin.y + 2.0f}, 0.9f,
+                                Engine::Color{255, 230, 230, 240});
+
+                // XP bar directly under HP
+                float xpRatio = xpToNext_ > 0 ? static_cast<float>(xp_) / static_cast<float>(xpToNext_) : 0.0f;
+                xpRatio = std::clamp(xpRatio, 0.0f, 1.0f);
+                Engine::Vec2 xpPos{origin.x, origin.y + hpH + 6.0f};
+                render_->drawFilledRect(xpPos, Engine::Vec2{barW, xpH}, Engine::Color{30, 40, 60, 200});
+                render_->drawFilledRect(xpPos, Engine::Vec2{barW * xpRatio, xpH}, Engine::Color{90, 180, 255, 230});
                 std::ostringstream lvl;
-                lvl << "Lv " << level_ << " (" << xp_ << "/" << xpToNext_ << ")";
-                drawTextUnified(lvl.str(), Engine::Vec2{pos.x, pos.y - 14.0f}, 0.9f,
-                                Engine::Color{200, 230, 255, 220});
-                // Dash cooldown bar
+                lvl << "Lv " << level_ << "  " << xp_ << "/" << xpToNext_;
+                drawTextUnified(lvl.str(), Engine::Vec2{xpPos.x + 8.0f, xpPos.y + 1.0f}, 0.9f,
+                                Engine::Color{220, 235, 255, 240});
+
+                // Dash cooldown bar beneath XP
                 float dashRatio = dashCooldown_ > 0.0f ? 1.0f - std::clamp(dashCooldownTimer_ / dashCooldown_, 0.0f, 1.0f) : 1.0f;
-                Engine::Vec2 dpos{pos.x, pos.y + 14.0f};
-                render_->drawFilledRect(dpos, Engine::Vec2{barW, 6.0f}, Engine::Color{40, 40, 50, 200});
-                render_->drawFilledRect(dpos, Engine::Vec2{barW * dashRatio, 6.0f}, Engine::Color{180, 240, 200, 220});
-                drawTextUnified("Dash", Engine::Vec2{dpos.x, dpos.y + 8.0f}, 0.8f, Engine::Color{180, 220, 200, 210});
+                Engine::Vec2 dpos{xpPos.x, xpPos.y + xpH + 6.0f};
+                render_->drawFilledRect(dpos, Engine::Vec2{barW, 8.0f}, Engine::Color{40, 40, 50, 200});
+                render_->drawFilledRect(dpos, Engine::Vec2{barW * dashRatio, 8.0f}, Engine::Color{180, 240, 200, 220});
+                drawTextUnified("Dash", Engine::Vec2{dpos.x + 8.0f, dpos.y + 0.5f}, 0.8f, Engine::Color{180, 220, 200, 210});
             }
             if (shopUnavailableTimer_ > 0.0 && inCombat_) {
                 float pulse = 0.5f + 0.5f * std::sin(static_cast<float>(shopUnavailableTimer_) * 12.0f);
@@ -1239,7 +1258,8 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         }
             }
         // HUD fallback (rectangles) if debug font missing.
-        if (!debugText_) {
+        // Fallback bars only when TTF is unavailable and we rely on bitmap font.
+        if (!hasTTF() && !debugText_) {
             const float barW = 200.0f;
             const float barH = 12.0f;
             float hpRatio = 1.0f;
@@ -1487,7 +1507,7 @@ void GameRoot::loadGridTextures() {
         gridTexture_ = loadTextureOptional(manifest_.gridTexture);
     }
     if (gridTileTextures_.empty()) {
-        pushIfLoaded("assets/Tilesheets/floor1.png");
+        pushIfLoaded("assets/Tilesheets/floor.png");
         pushIfLoaded("assets/Tilesheets/floor2.png");
     }
     if (gridTileTextures_.empty() && !gridTexture_) {
@@ -2404,18 +2424,6 @@ void GameRoot::spawnHero() {
             Engine::logWarn("Failed to load hero texture: " + heroPath);
         }
     }
-
-    // Spawn simple debug markers for spatial sanity checks.
-    auto marker1 = registry_.create();
-    registry_.emplace<Engine::ECS::Transform>(marker1, Engine::Vec2{200.0f, 0.0f});
-    registry_.emplace<Engine::ECS::Renderable>(marker1,
-                                               Engine::ECS::Renderable{Engine::Vec2{16.0f, 16.0f},
-                                                                       Engine::Color{200, 80, 80, 255}});
-    auto marker2 = registry_.create();
-    registry_.emplace<Engine::ECS::Transform>(marker2, Engine::Vec2{-200.0f, -120.0f});
-    registry_.emplace<Engine::ECS::Renderable>(marker2,
-                                               Engine::ECS::Renderable{Engine::Vec2{16.0f, 16.0f},
-                                                                       Engine::Color{80, 200, 120, 255}});
 
     camera_.position = {0.0f, 0.0f};
     camera_.zoom = 1.0f;

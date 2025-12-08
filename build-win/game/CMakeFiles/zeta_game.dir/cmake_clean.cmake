@@ -1,0 +1,43 @@
+file(REMOVE_RECURSE
+  "CMakeFiles/zeta_game.dir/Game.cpp.obj"
+  "CMakeFiles/zeta_game.dir/Game.cpp.obj.d"
+  "CMakeFiles/zeta_game.dir/GameAbilities.cpp.obj"
+  "CMakeFiles/zeta_game.dir/GameAbilities.cpp.obj.d"
+  "CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.obj"
+  "CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.obj.d"
+  "CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.obj"
+  "CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.obj.d"
+  "CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.obj"
+  "CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.obj.d"
+  "CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.obj"
+  "CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.obj.d"
+  "CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.obj"
+  "CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.obj.d"
+  "CMakeFiles/zeta_game.dir/systems/DamageNumberSystem.cpp.obj"
+  "CMakeFiles/zeta_game.dir/systems/DamageNumberSystem.cpp.obj.d"
+  "CMakeFiles/zeta_game.dir/systems/EnemyAISystem.cpp.obj"
+  "CMakeFiles/zeta_game.dir/systems/EnemyAISystem.cpp.obj.d"
+  "CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.obj"
+  "CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.obj.d"
+  "CMakeFiles/zeta_game.dir/systems/HitFlashSystem.cpp.obj"
+  "CMakeFiles/zeta_game.dir/systems/HitFlashSystem.cpp.obj.d"
+  "CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.obj"
+  "CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.obj.d"
+  "CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.obj"
+  "CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.obj.d"
+  "CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.obj"
+  "CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.obj.d"
+  "CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.obj"
+  "CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.obj.d"
+  "CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.obj"
+  "CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.obj.d"
+  "CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.obj"
+  "CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.obj.d"
+  "libzeta_game.a"
+  "libzeta_game.pdb"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang CXX)
+  include(CMakeFiles/zeta_game.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()

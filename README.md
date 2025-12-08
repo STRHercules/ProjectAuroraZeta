@@ -13,6 +13,18 @@ cmake --build build
 ./build/zeta
 ```
 
+### Windows (cross-build from Linux)
+
+Prereqs: `mingw-w64`, `cmake`, `zip`, and the prebuilt SDL runtimes extracted under `~/winlibs/sdl` (matching the SDL2/SDL2_image/SDL2_ttf versions already staged there).
+
+```bash
+export WIN_SDL_ROOT=~/winlibs/sdl
+./scripts/build-win.sh
+./scripts/package-win.sh
+```
+
+The distributable zip is written to `dist/windows/zeta-win64.zip` and contains `zeta.exe`, required SDL DLLs, data, and a `start.bat` launcher.
+
 ## Layout
 - `engine/` — engine-agnostic systems (Application loop, logging, window abstraction).
 - `game/` — game-specific bootstrap implementing engine callbacks.

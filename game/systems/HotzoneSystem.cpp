@@ -23,7 +23,7 @@ Engine::Color colorForBonus(HotzoneSystem::Bonus b, bool active) {
 
 HotzoneSystem::HotzoneSystem(float rotationInterval, float xpBonus, float creditBonus,
                              float fluxDamageBonus, float fluxRateBonus,
-                             float mapRadius, float minRadius, float maxRadius, float minSeparation,
+                             float mapRadius, float minRadius, float maxRadius, float minSeparation, float minSpawnClearance,
                              uint32_t seed)
     : rotationInterval_(rotationInterval),
       rotationTimer_(rotationInterval),
@@ -35,17 +35,23 @@ HotzoneSystem::HotzoneSystem(float rotationInterval, float xpBonus, float credit
       minRadius_(minRadius),
       maxRadius_(maxRadius),
       minSeparation_(minSeparation),
+      minSpawnClearance_(minSpawnClearance),
       rng_(seed) {}
 
 Engine::Vec2 HotzoneSystem::samplePosition() {
     // Uniform sample in circle; enforce minimum separation by rejection.
     std::uniform_real_distribution<float> angle(0.0f, 6.28318f);
     std::uniform_real_distribution<float> r01(0.0f, 1.0f);
-    const int kMaxAttempts = 50;
+    const int kMaxAttempts = 300;
+    const float minSpawnClearance2 = minSpawnClearance_ * minSpawnClearance_;
     for (int attempt = 0; attempt < kMaxAttempts; ++attempt) {
         float a = angle(rng_);
         float r = std::sqrt(r01(rng_)) * mapRadius_;
         Engine::Vec2 candidate{std::cos(a) * r, std::sin(a) * r};
+        // Keep a buffer from spawn (origin) so zones don't cluster around the hero start.
+        if ((candidate.x * candidate.x + candidate.y * candidate.y) < minSpawnClearance2) {
+            continue;
+        }
         bool farEnough = true;
         for (const auto& z : zones_) {
             float dx = candidate.x - z.center.x;
@@ -60,7 +66,16 @@ Engine::Vec2 HotzoneSystem::samplePosition() {
     // Fallback if we cannot place after attempts.
     float a = angle(rng_);
     float r = std::sqrt(r01(rng_)) * mapRadius_;
-    return Engine::Vec2{std::cos(a) * r, std::sin(a) * r};
+    Engine::Vec2 fallback{std::cos(a) * r, std::sin(a) * r};
+    // If fallback is too close to spawn, push it out along the same ray.
+    float len2 = fallback.x * fallback.x + fallback.y * fallback.y;
+    if (len2 < minSpawnClearance2) {
+        float len = std::sqrt(len2) + 1e-3f;
+        float scale = (minSpawnClearance_ + 20.0f) / len;
+        fallback.x *= scale;
+        fallback.y *= scale;
+    }
+    return fallback;
 }
 
 void HotzoneSystem::initialize(Engine::ECS::Registry& registry, int zoneCount) {
@@ -77,7 +92,9 @@ void HotzoneSystem::initialize(Engine::ECS::Registry& registry, int zoneCount) {
         registry.emplace<Engine::ECS::Transform>(e, z.center);
         // Visualize as softly colored disc (rectangle stand-in).
         Engine::Vec2 size{z.radius * 2.0f, z.radius * 2.0f};
-        registry.emplace<Engine::ECS::Renderable>(e, Engine::ECS::Renderable{size, colorForBonus(z.bonus, idx == 0)});
+        auto c = colorForBonus(z.bonus, idx == 0);
+        if (idx != 0) c.a = 0;  // hide inactive zones
+        registry.emplace<Engine::ECS::Renderable>(e, Engine::ECS::Renderable{size, c});
         z.entity = e;
         zones_.push_back(z);
         ++idx;
@@ -125,7 +142,9 @@ void HotzoneSystem::updateVisuals(Engine::ECS::Registry& registry) {
         if (auto* rend = registry.get<Engine::ECS::Renderable>(z.entity)) {
             bool active = static_cast<int>(i) == activeIndex_;
             auto base = colorForBonus(z.bonus, active);
-            if (active && warningActive_) {
+            if (!active) {
+                base.a = 0;
+            } else if (warningActive_) {
                 // Pulse brighter on warning.
                 base.a = static_cast<uint8_t>(std::min(255, base.a + 80));
             }

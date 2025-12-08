@@ -1,0 +1,3 @@
+/usr/bin/cmake -E rm -f CMakeFiles/zeta.dir/objects.a
+/usr/bin/x86_64-w64-mingw32-ar qc CMakeFiles/zeta.dir/objects.a @CMakeFiles/zeta.dir/objects1.rsp
+/usr/bin/x86_64-w64-mingw32-g++-posix -O3 -DNDEBUG -pthread -mconsole -Wl,--whole-archive CMakeFiles/zeta.dir/objects.a -Wl,--no-whole-archive -o zeta.exe -Wl,--out-implib,libzeta.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles/zeta.dir/linkLibs.rsp
