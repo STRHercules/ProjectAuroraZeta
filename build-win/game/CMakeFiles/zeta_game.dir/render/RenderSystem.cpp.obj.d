@@ -1,6 +1,6 @@
 game/CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.obj: \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/render/RenderSystem.cpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/render/RenderSystem.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/RenderSystem.cpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/RenderSystem.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/vector \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/requires_hosted.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/c++config.h \
@@ -69,7 +69,7 @@ game/CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_base.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/max_size_type.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/numbers \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/ecs/Registry.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/ecs/Registry.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cstdint \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/stdint.h \
  /usr/share/mingw-w64/include/stdint.h \
@@ -79,7 +79,7 @@ game/CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/deque.tcc \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_heap.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_queue.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/ecs/ComponentStorage.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/ecs/ComponentStorage.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/memory \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_tempbuf.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_raw_storage_iter.h \
@@ -194,13 +194,13 @@ game/CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/erase_if.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/utility \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_relops.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/ecs/Entity.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/render/Camera2D.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/render/../math/Vec2.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/render/RenderDevice.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/render/Color.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/assets/Texture.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/render/../components/Facing.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/ecs/Entity.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/render/Camera2D.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/render/../math/Vec2.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/render/RenderDevice.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/render/Color.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/assets/Texture.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../components/Facing.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cmath \
  /usr/share/mingw-w64/include/math.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/specfun.h \
@@ -223,17 +223,17 @@ game/CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/uniform_int_dist.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_algo.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/glue_algorithm_defs.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/ecs/components/Renderable.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/ecs/components/Transform.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/ecs/components/Velocity.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/render/CameraUtil.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/ecs/components/SpriteAnimation.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/render/../components/HitFlash.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/render/../components/DamageNumber.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/render/../components/Pickup.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/render/../components/PickupBob.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/render/BitmapTextRenderer.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/render/TextRenderer.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/render/BitmapFont.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/ecs/components/Renderable.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/ecs/components/Transform.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/ecs/components/Velocity.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/render/CameraUtil.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/ecs/components/SpriteAnimation.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../components/HitFlash.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../components/DamageNumber.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../components/Pickup.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../components/PickupBob.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/render/BitmapTextRenderer.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/render/TextRenderer.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/render/BitmapFont.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/array \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/ecs/components/Tags.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/ecs/components/Tags.h

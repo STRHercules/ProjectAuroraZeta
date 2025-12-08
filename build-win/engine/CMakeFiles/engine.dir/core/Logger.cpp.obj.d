@@ -1,6 +1,6 @@
 engine/CMakeFiles/engine.dir/core/Logger.cpp.obj: \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/core/Logger.cpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/core/Logger.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/core/Logger.cpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/core/Logger.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/chrono \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/requires_hosted.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/c++config.h \

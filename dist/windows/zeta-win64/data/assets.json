@@ -1,9 +1,27 @@
 {
   "heroTexture": "assets/Sprites/Characters/DamageDealer.png",
   "gridTextures": [
-    "assets/Tilesheets/floor.png",
-    "assets/Tilesheets/floor2.png"
+    "assets/Tilesheets/Sprite-0001.png",
+    "assets/Tilesheets/Sprite-0002.png",
+    "assets/Tilesheets/Sprite-0003.png",
+    "assets/Tilesheets/Sprite-0004.png",
+    "assets/Tilesheets/Sprite-0005.png",
+    "assets/Tilesheets/Sprite-0006.png",
+    "assets/Tilesheets/Sprite-0007.png",
+    "assets/Tilesheets/Sprite-0008.png",
+    "assets/Tilesheets/Sprite-0009.png",
+    "assets/Tilesheets/Sprite-0010.png",
+    "assets/Tilesheets/Sprite-0011.png",
+    "assets/Tilesheets/Sprite-0012.png",
+    "assets/Tilesheets/Sprite-0013.png",
+    "assets/Tilesheets/Sprite-0014.png",
+    "assets/Tilesheets/Sprite-0015.png",
+    "assets/Tilesheets/Sprite-0016.png",
+    "assets/Tilesheets/Sprite-0017.png",
+    "assets/Tilesheets/Sprite-0018.png",
+    "assets/Tilesheets/Sprite-0019.png",
+    "assets/Tilesheets/Sprite-0020.png"
   ],
-  "gridTexture": "assets/Tilesheets/floor.png",
+  "gridTexture": "",
   "fontTexture": ""
 }

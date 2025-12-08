@@ -1,6 +1,6 @@
 engine/CMakeFiles/engine.dir/assets/TextureLoader.cpp.obj: \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureLoader.cpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureLoader.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureLoader.cpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureLoader.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/optional \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/type_traits \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/c++config.h \
@@ -113,7 +113,7 @@ engine/CMakeFiles/engine.dir/assets/TextureLoader.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/uses_allocator_args.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tuple \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_util.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/Texture.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/Texture.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/memory \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_tempbuf.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_uninitialized.h \
@@ -174,29 +174,29 @@ engine/CMakeFiles/engine.dir/assets/TextureLoader.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_algobase.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/glue_memory_defs.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/execution_defs.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_main.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_stdinc.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_config.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_platform.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/begin_code.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/close_code.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_main.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_stdinc.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_config.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_platform.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/begin_code.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/close_code.h \
  /usr/share/mingw-w64/include/winsdkver.h \
  /usr/share/mingw-w64/include/winapifamily.h \
  /usr/share/mingw-w64/include/sdkddkver.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/stdarg.h \
  /usr/share/mingw-w64/include/stdarg.h \
  /usr/share/mingw-w64/include/_mingw_stdarg.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_assert.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_atomic.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_audio.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_error.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_endian.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_mutex.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_thread.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_rwops.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_clipboard.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_cpuinfo.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_assert.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_atomic.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_audio.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_error.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_endian.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_mutex.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_thread.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_rwops.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_clipboard.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_cpuinfo.h \
  /usr/share/mingw-w64/include/intrin.h \
  /usr/share/mingw-w64/include/setjmp.h \
  /usr/share/mingw-w64/include/psdk_inc/intrin-impl.h \
@@ -299,49 +299,49 @@ engine/CMakeFiles/engine.dir/assets/TextureLoader.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/ammintrin.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/xopintrin.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/cpuid.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_events.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_video.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_pixels.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_rect.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_surface.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_blendmode.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_keyboard.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_keycode.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_scancode.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_mouse.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_joystick.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_guid.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_gamecontroller.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_sensor.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_quit.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_gesture.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_touch.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_filesystem.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_haptic.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_hidapi.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_hints.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_loadso.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_log.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_messagebox.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_metal.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_power.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_render.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_shape.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_system.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_timer.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_version.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_locale.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_misc.h \
- /home/natalie/winlibs/sdl/SDL2_image-2.8.2/x86_64-w64-mingw32/include/SDL2/SDL_image.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_version.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/begin_code.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/close_code.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/../platform/SDLTexture.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/../platform/SDLRenderDevice.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/../platform/../render/RenderDevice.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/../platform/../render/../math/Vec2.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/../platform/../render/Color.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/../core/Logger.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_events.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_video.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_pixels.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_rect.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_surface.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_blendmode.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_keyboard.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_keycode.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_scancode.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_mouse.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_joystick.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_guid.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_gamecontroller.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_sensor.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_quit.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_gesture.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_touch.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_filesystem.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_haptic.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_hidapi.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_hints.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_loadso.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_log.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_messagebox.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_metal.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_power.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_render.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_shape.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_system.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_timer.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_version.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_locale.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_misc.h \
+ /home/zach/winlibs/sdl/SDL2_image-2.8.2/x86_64-w64-mingw32/include/SDL2/SDL_image.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_version.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/begin_code.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/close_code.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/../platform/SDLTexture.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/../platform/SDLRenderDevice.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/../platform/../render/RenderDevice.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/../platform/../render/../math/Vec2.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/../platform/../render/Color.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/../core/Logger.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/chrono \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/chrono.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ratio \

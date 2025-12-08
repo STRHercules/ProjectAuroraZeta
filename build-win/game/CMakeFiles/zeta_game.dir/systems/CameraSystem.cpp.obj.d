@@ -1,8 +1,8 @@
 game/CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.obj: \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/CameraSystem.cpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/CameraSystem.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/core/Time.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/ecs/Registry.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/CameraSystem.cpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/CameraSystem.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/core/Time.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/ecs/Registry.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cstdint \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/c++config.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/os_defines.h \
@@ -80,7 +80,7 @@ game/CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/vector.tcc \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_heap.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_queue.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/ecs/ComponentStorage.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/ecs/ComponentStorage.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/memory \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_tempbuf.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_raw_storage_iter.h \
@@ -195,19 +195,19 @@ game/CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/erase_if.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/utility \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_relops.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/ecs/Entity.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/input/ActionState.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/input/InputState.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/ecs/Entity.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/input/ActionState.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/input/InputState.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/array \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/render/Camera2D.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/render/../math/Vec2.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/render/Camera2D.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/render/../math/Vec2.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/algorithm \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_algo.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/algorithmfwd.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/uniform_int_dist.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_algo.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/glue_algorithm_defs.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/core/Logger.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/core/Logger.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/chrono \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/chrono.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ratio \
@@ -234,4 +234,4 @@ game/CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/span \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/variant \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/iostream \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/ecs/components/Transform.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/ecs/components/Transform.h

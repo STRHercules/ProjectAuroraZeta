@@ -57,10 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/natalie/Documents/GitHub/ProjectAuroraZeta
+CMAKE_SOURCE_DIR = /home/zach/Documents/GitHub/ProjectAuroraZeta
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win
+CMAKE_BINARY_DIR = /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -87,14 +87,14 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(CMAKE_COMMAND) -E cmake_progress_start /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game//CMakeFiles/progress.marks
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 game/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles 0
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(CMAKE_COMMAND) -E cmake_progress_start /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game//CMakeFiles/progress.marks
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 game/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 game/clean
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 game/clean
 .PHONY : clean
 
 # The main clean target
@@ -103,22 +103,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 game/preinstall
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 game/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 game/preinstall
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 game/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 game/CMakeFiles/zeta_game.dir/rule:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 game/CMakeFiles/zeta_game.dir/rule
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 game/CMakeFiles/zeta_game.dir/rule
 .PHONY : game/CMakeFiles/zeta_game.dir/rule
 
 # Convenience name for target.
@@ -127,7 +127,7 @@ zeta_game: game/CMakeFiles/zeta_game.dir/rule
 
 # fast build rule for target.
 zeta_game/fast:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/build
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/build
 .PHONY : zeta_game/fast
 
 Game.obj: Game.cpp.obj
@@ -135,7 +135,7 @@ Game.obj: Game.cpp.obj
 
 # target to build an object file
 Game.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/Game.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/Game.cpp.obj
 .PHONY : Game.cpp.obj
 
 Game.i: Game.cpp.i
@@ -143,7 +143,7 @@ Game.i: Game.cpp.i
 
 # target to preprocess a source file
 Game.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/Game.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/Game.cpp.i
 .PHONY : Game.cpp.i
 
 Game.s: Game.cpp.s
@@ -151,7 +151,7 @@ Game.s: Game.cpp.s
 
 # target to generate assembly for a file
 Game.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/Game.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/Game.cpp.s
 .PHONY : Game.cpp.s
 
 GameAbilities.obj: GameAbilities.cpp.obj
@@ -159,7 +159,7 @@ GameAbilities.obj: GameAbilities.cpp.obj
 
 # target to build an object file
 GameAbilities.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/GameAbilities.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/GameAbilities.cpp.obj
 .PHONY : GameAbilities.cpp.obj
 
 GameAbilities.i: GameAbilities.cpp.i
@@ -167,7 +167,7 @@ GameAbilities.i: GameAbilities.cpp.i
 
 # target to preprocess a source file
 GameAbilities.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/GameAbilities.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/GameAbilities.cpp.i
 .PHONY : GameAbilities.cpp.i
 
 GameAbilities.s: GameAbilities.cpp.s
@@ -175,15 +175,39 @@ GameAbilities.s: GameAbilities.cpp.s
 
 # target to generate assembly for a file
 GameAbilities.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/GameAbilities.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/GameAbilities.cpp.s
 .PHONY : GameAbilities.cpp.s
+
+meta/ItemDefs.obj: meta/ItemDefs.cpp.obj
+.PHONY : meta/ItemDefs.obj
+
+# target to build an object file
+meta/ItemDefs.cpp.obj:
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/meta/ItemDefs.cpp.obj
+.PHONY : meta/ItemDefs.cpp.obj
+
+meta/ItemDefs.i: meta/ItemDefs.cpp.i
+.PHONY : meta/ItemDefs.i
+
+# target to preprocess a source file
+meta/ItemDefs.cpp.i:
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/meta/ItemDefs.cpp.i
+.PHONY : meta/ItemDefs.cpp.i
+
+meta/ItemDefs.s: meta/ItemDefs.cpp.s
+.PHONY : meta/ItemDefs.s
+
+# target to generate assembly for a file
+meta/ItemDefs.cpp.s:
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/meta/ItemDefs.cpp.s
+.PHONY : meta/ItemDefs.cpp.s
 
 meta/SaveManager.obj: meta/SaveManager.cpp.obj
 .PHONY : meta/SaveManager.obj
 
 # target to build an object file
 meta/SaveManager.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.obj
 .PHONY : meta/SaveManager.cpp.obj
 
 meta/SaveManager.i: meta/SaveManager.cpp.i
@@ -191,7 +215,7 @@ meta/SaveManager.i: meta/SaveManager.cpp.i
 
 # target to preprocess a source file
 meta/SaveManager.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.i
 .PHONY : meta/SaveManager.cpp.i
 
 meta/SaveManager.s: meta/SaveManager.cpp.s
@@ -199,7 +223,7 @@ meta/SaveManager.s: meta/SaveManager.cpp.s
 
 # target to generate assembly for a file
 meta/SaveManager.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.s
 .PHONY : meta/SaveManager.cpp.s
 
 render/RenderSystem.obj: render/RenderSystem.cpp.obj
@@ -207,7 +231,7 @@ render/RenderSystem.obj: render/RenderSystem.cpp.obj
 
 # target to build an object file
 render/RenderSystem.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.obj
 .PHONY : render/RenderSystem.cpp.obj
 
 render/RenderSystem.i: render/RenderSystem.cpp.i
@@ -215,7 +239,7 @@ render/RenderSystem.i: render/RenderSystem.cpp.i
 
 # target to preprocess a source file
 render/RenderSystem.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.i
 .PHONY : render/RenderSystem.cpp.i
 
 render/RenderSystem.s: render/RenderSystem.cpp.s
@@ -223,7 +247,7 @@ render/RenderSystem.s: render/RenderSystem.cpp.s
 
 # target to generate assembly for a file
 render/RenderSystem.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.s
 .PHONY : render/RenderSystem.cpp.s
 
 systems/AnimationSystem.obj: systems/AnimationSystem.cpp.obj
@@ -231,7 +255,7 @@ systems/AnimationSystem.obj: systems/AnimationSystem.cpp.obj
 
 # target to build an object file
 systems/AnimationSystem.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.obj
 .PHONY : systems/AnimationSystem.cpp.obj
 
 systems/AnimationSystem.i: systems/AnimationSystem.cpp.i
@@ -239,7 +263,7 @@ systems/AnimationSystem.i: systems/AnimationSystem.cpp.i
 
 # target to preprocess a source file
 systems/AnimationSystem.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.i
 .PHONY : systems/AnimationSystem.cpp.i
 
 systems/AnimationSystem.s: systems/AnimationSystem.cpp.s
@@ -247,7 +271,7 @@ systems/AnimationSystem.s: systems/AnimationSystem.cpp.s
 
 # target to generate assembly for a file
 systems/AnimationSystem.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.s
 .PHONY : systems/AnimationSystem.cpp.s
 
 systems/CameraSystem.obj: systems/CameraSystem.cpp.obj
@@ -255,7 +279,7 @@ systems/CameraSystem.obj: systems/CameraSystem.cpp.obj
 
 # target to build an object file
 systems/CameraSystem.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.obj
 .PHONY : systems/CameraSystem.cpp.obj
 
 systems/CameraSystem.i: systems/CameraSystem.cpp.i
@@ -263,7 +287,7 @@ systems/CameraSystem.i: systems/CameraSystem.cpp.i
 
 # target to preprocess a source file
 systems/CameraSystem.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.i
 .PHONY : systems/CameraSystem.cpp.i
 
 systems/CameraSystem.s: systems/CameraSystem.cpp.s
@@ -271,7 +295,7 @@ systems/CameraSystem.s: systems/CameraSystem.cpp.s
 
 # target to generate assembly for a file
 systems/CameraSystem.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.s
 .PHONY : systems/CameraSystem.cpp.s
 
 systems/CollisionSystem.obj: systems/CollisionSystem.cpp.obj
@@ -279,7 +303,7 @@ systems/CollisionSystem.obj: systems/CollisionSystem.cpp.obj
 
 # target to build an object file
 systems/CollisionSystem.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.obj
 .PHONY : systems/CollisionSystem.cpp.obj
 
 systems/CollisionSystem.i: systems/CollisionSystem.cpp.i
@@ -287,7 +311,7 @@ systems/CollisionSystem.i: systems/CollisionSystem.cpp.i
 
 # target to preprocess a source file
 systems/CollisionSystem.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.i
 .PHONY : systems/CollisionSystem.cpp.i
 
 systems/CollisionSystem.s: systems/CollisionSystem.cpp.s
@@ -295,7 +319,7 @@ systems/CollisionSystem.s: systems/CollisionSystem.cpp.s
 
 # target to generate assembly for a file
 systems/CollisionSystem.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.s
 .PHONY : systems/CollisionSystem.cpp.s
 
 systems/DamageNumberSystem.obj: systems/DamageNumberSystem.cpp.obj
@@ -303,7 +327,7 @@ systems/DamageNumberSystem.obj: systems/DamageNumberSystem.cpp.obj
 
 # target to build an object file
 systems/DamageNumberSystem.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/DamageNumberSystem.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/DamageNumberSystem.cpp.obj
 .PHONY : systems/DamageNumberSystem.cpp.obj
 
 systems/DamageNumberSystem.i: systems/DamageNumberSystem.cpp.i
@@ -311,7 +335,7 @@ systems/DamageNumberSystem.i: systems/DamageNumberSystem.cpp.i
 
 # target to preprocess a source file
 systems/DamageNumberSystem.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/DamageNumberSystem.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/DamageNumberSystem.cpp.i
 .PHONY : systems/DamageNumberSystem.cpp.i
 
 systems/DamageNumberSystem.s: systems/DamageNumberSystem.cpp.s
@@ -319,7 +343,7 @@ systems/DamageNumberSystem.s: systems/DamageNumberSystem.cpp.s
 
 # target to generate assembly for a file
 systems/DamageNumberSystem.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/DamageNumberSystem.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/DamageNumberSystem.cpp.s
 .PHONY : systems/DamageNumberSystem.cpp.s
 
 systems/EnemyAISystem.obj: systems/EnemyAISystem.cpp.obj
@@ -327,7 +351,7 @@ systems/EnemyAISystem.obj: systems/EnemyAISystem.cpp.obj
 
 # target to build an object file
 systems/EnemyAISystem.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/EnemyAISystem.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/EnemyAISystem.cpp.obj
 .PHONY : systems/EnemyAISystem.cpp.obj
 
 systems/EnemyAISystem.i: systems/EnemyAISystem.cpp.i
@@ -335,7 +359,7 @@ systems/EnemyAISystem.i: systems/EnemyAISystem.cpp.i
 
 # target to preprocess a source file
 systems/EnemyAISystem.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/EnemyAISystem.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/EnemyAISystem.cpp.i
 .PHONY : systems/EnemyAISystem.cpp.i
 
 systems/EnemyAISystem.s: systems/EnemyAISystem.cpp.s
@@ -343,7 +367,7 @@ systems/EnemyAISystem.s: systems/EnemyAISystem.cpp.s
 
 # target to generate assembly for a file
 systems/EnemyAISystem.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/EnemyAISystem.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/EnemyAISystem.cpp.s
 .PHONY : systems/EnemyAISystem.cpp.s
 
 systems/EventSystem.obj: systems/EventSystem.cpp.obj
@@ -351,7 +375,7 @@ systems/EventSystem.obj: systems/EventSystem.cpp.obj
 
 # target to build an object file
 systems/EventSystem.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.obj
 .PHONY : systems/EventSystem.cpp.obj
 
 systems/EventSystem.i: systems/EventSystem.cpp.i
@@ -359,7 +383,7 @@ systems/EventSystem.i: systems/EventSystem.cpp.i
 
 # target to preprocess a source file
 systems/EventSystem.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.i
 .PHONY : systems/EventSystem.cpp.i
 
 systems/EventSystem.s: systems/EventSystem.cpp.s
@@ -367,7 +391,7 @@ systems/EventSystem.s: systems/EventSystem.cpp.s
 
 # target to generate assembly for a file
 systems/EventSystem.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.s
 .PHONY : systems/EventSystem.cpp.s
 
 systems/HitFlashSystem.obj: systems/HitFlashSystem.cpp.obj
@@ -375,7 +399,7 @@ systems/HitFlashSystem.obj: systems/HitFlashSystem.cpp.obj
 
 # target to build an object file
 systems/HitFlashSystem.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/HitFlashSystem.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/HitFlashSystem.cpp.obj
 .PHONY : systems/HitFlashSystem.cpp.obj
 
 systems/HitFlashSystem.i: systems/HitFlashSystem.cpp.i
@@ -383,7 +407,7 @@ systems/HitFlashSystem.i: systems/HitFlashSystem.cpp.i
 
 # target to preprocess a source file
 systems/HitFlashSystem.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/HitFlashSystem.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/HitFlashSystem.cpp.i
 .PHONY : systems/HitFlashSystem.cpp.i
 
 systems/HitFlashSystem.s: systems/HitFlashSystem.cpp.s
@@ -391,7 +415,7 @@ systems/HitFlashSystem.s: systems/HitFlashSystem.cpp.s
 
 # target to generate assembly for a file
 systems/HitFlashSystem.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/HitFlashSystem.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/HitFlashSystem.cpp.s
 .PHONY : systems/HitFlashSystem.cpp.s
 
 systems/HotzoneSystem.obj: systems/HotzoneSystem.cpp.obj
@@ -399,7 +423,7 @@ systems/HotzoneSystem.obj: systems/HotzoneSystem.cpp.obj
 
 # target to build an object file
 systems/HotzoneSystem.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.obj
 .PHONY : systems/HotzoneSystem.cpp.obj
 
 systems/HotzoneSystem.i: systems/HotzoneSystem.cpp.i
@@ -407,7 +431,7 @@ systems/HotzoneSystem.i: systems/HotzoneSystem.cpp.i
 
 # target to preprocess a source file
 systems/HotzoneSystem.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.i
 .PHONY : systems/HotzoneSystem.cpp.i
 
 systems/HotzoneSystem.s: systems/HotzoneSystem.cpp.s
@@ -415,7 +439,7 @@ systems/HotzoneSystem.s: systems/HotzoneSystem.cpp.s
 
 # target to generate assembly for a file
 systems/HotzoneSystem.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.s
 .PHONY : systems/HotzoneSystem.cpp.s
 
 systems/MovementSystem.obj: systems/MovementSystem.cpp.obj
@@ -423,7 +447,7 @@ systems/MovementSystem.obj: systems/MovementSystem.cpp.obj
 
 # target to build an object file
 systems/MovementSystem.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.obj
 .PHONY : systems/MovementSystem.cpp.obj
 
 systems/MovementSystem.i: systems/MovementSystem.cpp.i
@@ -431,7 +455,7 @@ systems/MovementSystem.i: systems/MovementSystem.cpp.i
 
 # target to preprocess a source file
 systems/MovementSystem.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.i
 .PHONY : systems/MovementSystem.cpp.i
 
 systems/MovementSystem.s: systems/MovementSystem.cpp.s
@@ -439,7 +463,7 @@ systems/MovementSystem.s: systems/MovementSystem.cpp.s
 
 # target to generate assembly for a file
 systems/MovementSystem.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.s
 .PHONY : systems/MovementSystem.cpp.s
 
 systems/PickupSystem.obj: systems/PickupSystem.cpp.obj
@@ -447,7 +471,7 @@ systems/PickupSystem.obj: systems/PickupSystem.cpp.obj
 
 # target to build an object file
 systems/PickupSystem.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.obj
 .PHONY : systems/PickupSystem.cpp.obj
 
 systems/PickupSystem.i: systems/PickupSystem.cpp.i
@@ -455,7 +479,7 @@ systems/PickupSystem.i: systems/PickupSystem.cpp.i
 
 # target to preprocess a source file
 systems/PickupSystem.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.i
 .PHONY : systems/PickupSystem.cpp.i
 
 systems/PickupSystem.s: systems/PickupSystem.cpp.s
@@ -463,7 +487,7 @@ systems/PickupSystem.s: systems/PickupSystem.cpp.s
 
 # target to generate assembly for a file
 systems/PickupSystem.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.s
 .PHONY : systems/PickupSystem.cpp.s
 
 systems/ProjectileSystem.obj: systems/ProjectileSystem.cpp.obj
@@ -471,7 +495,7 @@ systems/ProjectileSystem.obj: systems/ProjectileSystem.cpp.obj
 
 # target to build an object file
 systems/ProjectileSystem.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.obj
 .PHONY : systems/ProjectileSystem.cpp.obj
 
 systems/ProjectileSystem.i: systems/ProjectileSystem.cpp.i
@@ -479,7 +503,7 @@ systems/ProjectileSystem.i: systems/ProjectileSystem.cpp.i
 
 # target to preprocess a source file
 systems/ProjectileSystem.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.i
 .PHONY : systems/ProjectileSystem.cpp.i
 
 systems/ProjectileSystem.s: systems/ProjectileSystem.cpp.s
@@ -487,7 +511,7 @@ systems/ProjectileSystem.s: systems/ProjectileSystem.cpp.s
 
 # target to generate assembly for a file
 systems/ProjectileSystem.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.s
 .PHONY : systems/ProjectileSystem.cpp.s
 
 systems/ShopSystem.obj: systems/ShopSystem.cpp.obj
@@ -495,7 +519,7 @@ systems/ShopSystem.obj: systems/ShopSystem.cpp.obj
 
 # target to build an object file
 systems/ShopSystem.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.obj
 .PHONY : systems/ShopSystem.cpp.obj
 
 systems/ShopSystem.i: systems/ShopSystem.cpp.i
@@ -503,7 +527,7 @@ systems/ShopSystem.i: systems/ShopSystem.cpp.i
 
 # target to preprocess a source file
 systems/ShopSystem.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.i
 .PHONY : systems/ShopSystem.cpp.i
 
 systems/ShopSystem.s: systems/ShopSystem.cpp.s
@@ -511,7 +535,7 @@ systems/ShopSystem.s: systems/ShopSystem.cpp.s
 
 # target to generate assembly for a file
 systems/ShopSystem.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.s
 .PHONY : systems/ShopSystem.cpp.s
 
 systems/WaveSystem.obj: systems/WaveSystem.cpp.obj
@@ -519,7 +543,7 @@ systems/WaveSystem.obj: systems/WaveSystem.cpp.obj
 
 # target to build an object file
 systems/WaveSystem.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.obj
 .PHONY : systems/WaveSystem.cpp.obj
 
 systems/WaveSystem.i: systems/WaveSystem.cpp.i
@@ -527,7 +551,7 @@ systems/WaveSystem.i: systems/WaveSystem.cpp.i
 
 # target to preprocess a source file
 systems/WaveSystem.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.i
 .PHONY : systems/WaveSystem.cpp.i
 
 systems/WaveSystem.s: systems/WaveSystem.cpp.s
@@ -535,7 +559,7 @@ systems/WaveSystem.s: systems/WaveSystem.cpp.s
 
 # target to generate assembly for a file
 systems/WaveSystem.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.s
 .PHONY : systems/WaveSystem.cpp.s
 
 # Help Target
@@ -553,6 +577,9 @@ help:
 	@echo "... GameAbilities.obj"
 	@echo "... GameAbilities.i"
 	@echo "... GameAbilities.s"
+	@echo "... meta/ItemDefs.obj"
+	@echo "... meta/ItemDefs.i"
+	@echo "... meta/ItemDefs.s"
 	@echo "... meta/SaveManager.obj"
 	@echo "... meta/SaveManager.i"
 	@echo "... meta/SaveManager.s"
@@ -609,6 +636,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

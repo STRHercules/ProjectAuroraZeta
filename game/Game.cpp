@@ -25,6 +25,7 @@
 #include "../engine/render/BitmapTextRenderer.h"
 #include "../engine/platform/SDLRenderDevice.h"
 #include <SDL.h>
+#include <SDL_image.h>
 #include <SDL_ttf.h>
 #include "components/DamageNumber.h"
 #include "components/Pickup.h"
@@ -51,6 +52,20 @@ bool GameRoot::onInitialize(Engine::Application& app) {
         sdlRenderer_ = sdl->rawRenderer();
     }
     if (sdlRenderer_) {
+        // Custom cursor
+        SDL_Surface* cursorSurf = IMG_Load("assets/GUI/pointer.png");
+        if (!cursorSurf) {
+            Engine::logWarn(std::string("Failed to load cursor assets/GUI/pointer.png: ") + IMG_GetError());
+        } else {
+            customCursor_ = SDL_CreateColorCursor(cursorSurf, 0, 0);
+            SDL_FreeSurface(cursorSurf);
+            if (customCursor_) {
+                SDL_SetCursor(customCursor_);
+                SDL_ShowCursor(SDL_ENABLE);
+            } else {
+                Engine::logWarn(std::string("Failed to create SDL cursor: ") + SDL_GetError());
+            }
+        }
         if (TTF_Init() != 0) {
             Engine::logWarn(std::string("TTF_Init failed: ") + TTF_GetError());
         } else {
@@ -1187,7 +1202,9 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
 
         if (renderSystem_) {
             const Engine::Texture* gridPtr = gridTexture_ ? gridTexture_.get() : nullptr;
-            const std::vector<Engine::TexturePtr>* gridVariants = gridTileTextures_.empty() ? nullptr : &gridTileTextures_;
+            const std::vector<Engine::TexturePtr>* gridVariants =
+                gridTileTexturesWeighted_.empty() ? (gridTileTextures_.empty() ? nullptr : &gridTileTextures_)
+                                                  : &gridTileTexturesWeighted_;
             renderSystem_->draw(registry_, cameraShaken, viewportWidth_, viewportHeight_, gridPtr, gridVariants);
         }
 
@@ -1584,6 +1601,10 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
 
 void GameRoot::onShutdown() {
     saveProgress();
+    if (customCursor_) {
+        SDL_FreeCursor(customCursor_);
+        customCursor_ = nullptr;
+    }
     if (uiFont_) {
         TTF_CloseFont(uiFont_);
         uiFont_ = nullptr;
@@ -1747,10 +1768,23 @@ void GameRoot::spawnShopkeeper(const Engine::Vec2& aroundPos) {
     float r = std::uniform_real_distribution<float>(260.0f, 420.0f)(rng_);
     float a = std::uniform_real_distribution<float>(0.0f, 6.28318f)(rng_);
     Engine::Vec2 pos{aroundPos.x + std::cos(a) * r, aroundPos.y + std::sin(a) * r};
+    // Lazy-load shop building texture once.
+    if (!shopTexture_) {
+        shopTexture_ = loadTextureOptional("assets/Sprites/Buildings/house1.png");
+        if (!shopTexture_) {
+            Engine::logWarn("Shop texture missing (assets/Sprites/Buildings/house1.png); falling back to placeholder box.");
+        }
+    }
     shopkeeper_ = registry_.create();
     registry_.emplace<Engine::ECS::Transform>(shopkeeper_, pos);
-    registry_.emplace<Engine::ECS::Renderable>(shopkeeper_, Engine::ECS::Renderable{
-        Engine::Vec2{28.0f, 28.0f}, Engine::Color{120, 220, 255, 230}});
+    if (shopTexture_) {
+        Engine::Vec2 size{static_cast<float>(shopTexture_->width()), static_cast<float>(shopTexture_->height())};
+        registry_.emplace<Engine::ECS::Renderable>(shopkeeper_, Engine::ECS::Renderable{
+            size, Engine::Color{255, 255, 255, 255}, shopTexture_});
+    } else {
+        registry_.emplace<Engine::ECS::Renderable>(shopkeeper_, Engine::ECS::Renderable{
+            Engine::Vec2{28.0f, 28.0f}, Engine::Color{120, 220, 255, 230}});
+    }
     registry_.emplace<Game::ShopkeeperTag>(shopkeeper_, Game::ShopkeeperTag{});
 }
 
@@ -1763,6 +1797,7 @@ void GameRoot::despawnShopkeeper() {
 
 void GameRoot::loadGridTextures() {
     gridTileTextures_.clear();
+    gridTileTexturesWeighted_.clear();
     gridTexture_.reset();
     auto pushIfLoaded = [&](const std::string& path) {
         auto tex = loadTextureOptional(path);
@@ -1795,6 +1830,25 @@ void GameRoot::loadGridTextures() {
     }
     if (!gridTileTextures_.empty() && !gridTexture_) {
         gridTexture_ = gridTileTextures_.front();
+    }
+    // Build weighted variants to control distribution frequency.
+    if (!gridTileTextures_.empty()) {
+        auto weightForIndex = [](std::size_t idx) {
+            if (idx <= 4) return 40;                // 0001-0005 dominant (~85%)
+            if (idx >= 5 && idx <= 12) return 4;    // 0006-0013 occasional
+            if (idx == 13) return 1;                // 0014 exceedingly rare (48x48)
+            if (idx == 14 || idx == 15) return 2;   // 0015-0016 rare
+            return 1;                               // 0017-0020 extremely rare
+        };
+        for (std::size_t i = 0; i < gridTileTextures_.size(); ++i) {
+            int w = weightForIndex(i);
+            for (int k = 0; k < w; ++k) {
+                gridTileTexturesWeighted_.push_back(gridTileTextures_[i]);
+            }
+        }
+    }
+    if (gridTileTexturesWeighted_.empty()) {
+        gridTileTexturesWeighted_ = gridTileTextures_;  // fallback to uniform
     }
     if (gridTileTextures_.empty() && !gridTexture_) {
         Engine::logWarn("No grid textures found; falling back to debug grid.");

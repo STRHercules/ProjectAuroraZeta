@@ -1,4 +1,4 @@
-# Install script for directory: /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src
+# Install script for directory: /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

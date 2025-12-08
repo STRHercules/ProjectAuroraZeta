@@ -57,10 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/natalie/Documents/GitHub/ProjectAuroraZeta
+CMAKE_SOURCE_DIR = /home/zach/Documents/GitHub/ProjectAuroraZeta
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win
+CMAKE_BINARY_DIR = /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -87,14 +87,14 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(CMAKE_COMMAND) -E cmake_progress_start /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine//CMakeFiles/progress.marks
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 engine/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles 0
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(CMAKE_COMMAND) -E cmake_progress_start /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine//CMakeFiles/progress.marks
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 engine/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 engine/clean
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 engine/clean
 .PHONY : clean
 
 # The main clean target
@@ -103,22 +103,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 engine/preinstall
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 engine/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 engine/preinstall
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 engine/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 engine/CMakeFiles/engine.dir/rule:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 engine/CMakeFiles/engine.dir/rule
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 engine/CMakeFiles/engine.dir/rule
 .PHONY : engine/CMakeFiles/engine.dir/rule
 
 # Convenience name for target.
@@ -127,7 +127,7 @@ engine: engine/CMakeFiles/engine.dir/rule
 
 # fast build rule for target.
 engine/fast:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/build
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/build
 .PHONY : engine/fast
 
 assets/AssetManifest.obj: assets/AssetManifest.cpp.obj
@@ -135,7 +135,7 @@ assets/AssetManifest.obj: assets/AssetManifest.cpp.obj
 
 # target to build an object file
 assets/AssetManifest.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/assets/AssetManifest.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/assets/AssetManifest.cpp.obj
 .PHONY : assets/AssetManifest.cpp.obj
 
 assets/AssetManifest.i: assets/AssetManifest.cpp.i
@@ -143,7 +143,7 @@ assets/AssetManifest.i: assets/AssetManifest.cpp.i
 
 # target to preprocess a source file
 assets/AssetManifest.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/assets/AssetManifest.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/assets/AssetManifest.cpp.i
 .PHONY : assets/AssetManifest.cpp.i
 
 assets/AssetManifest.s: assets/AssetManifest.cpp.s
@@ -151,7 +151,7 @@ assets/AssetManifest.s: assets/AssetManifest.cpp.s
 
 # target to generate assembly for a file
 assets/AssetManifest.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/assets/AssetManifest.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/assets/AssetManifest.cpp.s
 .PHONY : assets/AssetManifest.cpp.s
 
 assets/FontLoader.obj: assets/FontLoader.cpp.obj
@@ -159,7 +159,7 @@ assets/FontLoader.obj: assets/FontLoader.cpp.obj
 
 # target to build an object file
 assets/FontLoader.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/assets/FontLoader.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/assets/FontLoader.cpp.obj
 .PHONY : assets/FontLoader.cpp.obj
 
 assets/FontLoader.i: assets/FontLoader.cpp.i
@@ -167,7 +167,7 @@ assets/FontLoader.i: assets/FontLoader.cpp.i
 
 # target to preprocess a source file
 assets/FontLoader.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/assets/FontLoader.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/assets/FontLoader.cpp.i
 .PHONY : assets/FontLoader.cpp.i
 
 assets/FontLoader.s: assets/FontLoader.cpp.s
@@ -175,7 +175,7 @@ assets/FontLoader.s: assets/FontLoader.cpp.s
 
 # target to generate assembly for a file
 assets/FontLoader.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/assets/FontLoader.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/assets/FontLoader.cpp.s
 .PHONY : assets/FontLoader.cpp.s
 
 assets/TextureLoader.obj: assets/TextureLoader.cpp.obj
@@ -183,7 +183,7 @@ assets/TextureLoader.obj: assets/TextureLoader.cpp.obj
 
 # target to build an object file
 assets/TextureLoader.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/assets/TextureLoader.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/assets/TextureLoader.cpp.obj
 .PHONY : assets/TextureLoader.cpp.obj
 
 assets/TextureLoader.i: assets/TextureLoader.cpp.i
@@ -191,7 +191,7 @@ assets/TextureLoader.i: assets/TextureLoader.cpp.i
 
 # target to preprocess a source file
 assets/TextureLoader.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/assets/TextureLoader.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/assets/TextureLoader.cpp.i
 .PHONY : assets/TextureLoader.cpp.i
 
 assets/TextureLoader.s: assets/TextureLoader.cpp.s
@@ -199,7 +199,7 @@ assets/TextureLoader.s: assets/TextureLoader.cpp.s
 
 # target to generate assembly for a file
 assets/TextureLoader.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/assets/TextureLoader.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/assets/TextureLoader.cpp.s
 .PHONY : assets/TextureLoader.cpp.s
 
 assets/TextureManager.obj: assets/TextureManager.cpp.obj
@@ -207,7 +207,7 @@ assets/TextureManager.obj: assets/TextureManager.cpp.obj
 
 # target to build an object file
 assets/TextureManager.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/assets/TextureManager.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/assets/TextureManager.cpp.obj
 .PHONY : assets/TextureManager.cpp.obj
 
 assets/TextureManager.i: assets/TextureManager.cpp.i
@@ -215,7 +215,7 @@ assets/TextureManager.i: assets/TextureManager.cpp.i
 
 # target to preprocess a source file
 assets/TextureManager.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/assets/TextureManager.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/assets/TextureManager.cpp.i
 .PHONY : assets/TextureManager.cpp.i
 
 assets/TextureManager.s: assets/TextureManager.cpp.s
@@ -223,7 +223,7 @@ assets/TextureManager.s: assets/TextureManager.cpp.s
 
 # target to generate assembly for a file
 assets/TextureManager.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/assets/TextureManager.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/assets/TextureManager.cpp.s
 .PHONY : assets/TextureManager.cpp.s
 
 core/Application.obj: core/Application.cpp.obj
@@ -231,7 +231,7 @@ core/Application.obj: core/Application.cpp.obj
 
 # target to build an object file
 core/Application.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/core/Application.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/core/Application.cpp.obj
 .PHONY : core/Application.cpp.obj
 
 core/Application.i: core/Application.cpp.i
@@ -239,7 +239,7 @@ core/Application.i: core/Application.cpp.i
 
 # target to preprocess a source file
 core/Application.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/core/Application.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/core/Application.cpp.i
 .PHONY : core/Application.cpp.i
 
 core/Application.s: core/Application.cpp.s
@@ -247,7 +247,7 @@ core/Application.s: core/Application.cpp.s
 
 # target to generate assembly for a file
 core/Application.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/core/Application.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/core/Application.cpp.s
 .PHONY : core/Application.cpp.s
 
 core/Logger.obj: core/Logger.cpp.obj
@@ -255,7 +255,7 @@ core/Logger.obj: core/Logger.cpp.obj
 
 # target to build an object file
 core/Logger.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/core/Logger.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/core/Logger.cpp.obj
 .PHONY : core/Logger.cpp.obj
 
 core/Logger.i: core/Logger.cpp.i
@@ -263,7 +263,7 @@ core/Logger.i: core/Logger.cpp.i
 
 # target to preprocess a source file
 core/Logger.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/core/Logger.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/core/Logger.cpp.i
 .PHONY : core/Logger.cpp.i
 
 core/Logger.s: core/Logger.cpp.s
@@ -271,7 +271,7 @@ core/Logger.s: core/Logger.cpp.s
 
 # target to generate assembly for a file
 core/Logger.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/core/Logger.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/core/Logger.cpp.s
 .PHONY : core/Logger.cpp.s
 
 input/ActionMapper.obj: input/ActionMapper.cpp.obj
@@ -279,7 +279,7 @@ input/ActionMapper.obj: input/ActionMapper.cpp.obj
 
 # target to build an object file
 input/ActionMapper.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.obj
 .PHONY : input/ActionMapper.cpp.obj
 
 input/ActionMapper.i: input/ActionMapper.cpp.i
@@ -287,7 +287,7 @@ input/ActionMapper.i: input/ActionMapper.cpp.i
 
 # target to preprocess a source file
 input/ActionMapper.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.i
 .PHONY : input/ActionMapper.cpp.i
 
 input/ActionMapper.s: input/ActionMapper.cpp.s
@@ -295,7 +295,7 @@ input/ActionMapper.s: input/ActionMapper.cpp.s
 
 # target to generate assembly for a file
 input/ActionMapper.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.s
 .PHONY : input/ActionMapper.cpp.s
 
 input/InputLoader.obj: input/InputLoader.cpp.obj
@@ -303,7 +303,7 @@ input/InputLoader.obj: input/InputLoader.cpp.obj
 
 # target to build an object file
 input/InputLoader.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/input/InputLoader.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/input/InputLoader.cpp.obj
 .PHONY : input/InputLoader.cpp.obj
 
 input/InputLoader.i: input/InputLoader.cpp.i
@@ -311,7 +311,7 @@ input/InputLoader.i: input/InputLoader.cpp.i
 
 # target to preprocess a source file
 input/InputLoader.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/input/InputLoader.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/input/InputLoader.cpp.i
 .PHONY : input/InputLoader.cpp.i
 
 input/InputLoader.s: input/InputLoader.cpp.s
@@ -319,7 +319,7 @@ input/InputLoader.s: input/InputLoader.cpp.s
 
 # target to generate assembly for a file
 input/InputLoader.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/input/InputLoader.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/input/InputLoader.cpp.s
 .PHONY : input/InputLoader.cpp.s
 
 platform/NullWindow.obj: platform/NullWindow.cpp.obj
@@ -327,7 +327,7 @@ platform/NullWindow.obj: platform/NullWindow.cpp.obj
 
 # target to build an object file
 platform/NullWindow.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/platform/NullWindow.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/platform/NullWindow.cpp.obj
 .PHONY : platform/NullWindow.cpp.obj
 
 platform/NullWindow.i: platform/NullWindow.cpp.i
@@ -335,7 +335,7 @@ platform/NullWindow.i: platform/NullWindow.cpp.i
 
 # target to preprocess a source file
 platform/NullWindow.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/platform/NullWindow.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/platform/NullWindow.cpp.i
 .PHONY : platform/NullWindow.cpp.i
 
 platform/NullWindow.s: platform/NullWindow.cpp.s
@@ -343,7 +343,7 @@ platform/NullWindow.s: platform/NullWindow.cpp.s
 
 # target to generate assembly for a file
 platform/NullWindow.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/platform/NullWindow.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/platform/NullWindow.cpp.s
 .PHONY : platform/NullWindow.cpp.s
 
 platform/SDLRenderDevice.obj: platform/SDLRenderDevice.cpp.obj
@@ -351,7 +351,7 @@ platform/SDLRenderDevice.obj: platform/SDLRenderDevice.cpp.obj
 
 # target to build an object file
 platform/SDLRenderDevice.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/platform/SDLRenderDevice.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/platform/SDLRenderDevice.cpp.obj
 .PHONY : platform/SDLRenderDevice.cpp.obj
 
 platform/SDLRenderDevice.i: platform/SDLRenderDevice.cpp.i
@@ -359,7 +359,7 @@ platform/SDLRenderDevice.i: platform/SDLRenderDevice.cpp.i
 
 # target to preprocess a source file
 platform/SDLRenderDevice.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/platform/SDLRenderDevice.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/platform/SDLRenderDevice.cpp.i
 .PHONY : platform/SDLRenderDevice.cpp.i
 
 platform/SDLRenderDevice.s: platform/SDLRenderDevice.cpp.s
@@ -367,7 +367,7 @@ platform/SDLRenderDevice.s: platform/SDLRenderDevice.cpp.s
 
 # target to generate assembly for a file
 platform/SDLRenderDevice.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/platform/SDLRenderDevice.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/platform/SDLRenderDevice.cpp.s
 .PHONY : platform/SDLRenderDevice.cpp.s
 
 platform/SDLTexture.obj: platform/SDLTexture.cpp.obj
@@ -375,7 +375,7 @@ platform/SDLTexture.obj: platform/SDLTexture.cpp.obj
 
 # target to build an object file
 platform/SDLTexture.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/platform/SDLTexture.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/platform/SDLTexture.cpp.obj
 .PHONY : platform/SDLTexture.cpp.obj
 
 platform/SDLTexture.i: platform/SDLTexture.cpp.i
@@ -383,7 +383,7 @@ platform/SDLTexture.i: platform/SDLTexture.cpp.i
 
 # target to preprocess a source file
 platform/SDLTexture.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/platform/SDLTexture.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/platform/SDLTexture.cpp.i
 .PHONY : platform/SDLTexture.cpp.i
 
 platform/SDLTexture.s: platform/SDLTexture.cpp.s
@@ -391,7 +391,7 @@ platform/SDLTexture.s: platform/SDLTexture.cpp.s
 
 # target to generate assembly for a file
 platform/SDLTexture.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/platform/SDLTexture.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/platform/SDLTexture.cpp.s
 .PHONY : platform/SDLTexture.cpp.s
 
 platform/SDLWindow.obj: platform/SDLWindow.cpp.obj
@@ -399,7 +399,7 @@ platform/SDLWindow.obj: platform/SDLWindow.cpp.obj
 
 # target to build an object file
 platform/SDLWindow.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/platform/SDLWindow.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/platform/SDLWindow.cpp.obj
 .PHONY : platform/SDLWindow.cpp.obj
 
 platform/SDLWindow.i: platform/SDLWindow.cpp.i
@@ -407,7 +407,7 @@ platform/SDLWindow.i: platform/SDLWindow.cpp.i
 
 # target to preprocess a source file
 platform/SDLWindow.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/platform/SDLWindow.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/platform/SDLWindow.cpp.i
 .PHONY : platform/SDLWindow.cpp.i
 
 platform/SDLWindow.s: platform/SDLWindow.cpp.s
@@ -415,7 +415,7 @@ platform/SDLWindow.s: platform/SDLWindow.cpp.s
 
 # target to generate assembly for a file
 platform/SDLWindow.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/platform/SDLWindow.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/platform/SDLWindow.cpp.s
 .PHONY : platform/SDLWindow.cpp.s
 
 render/BitmapTextRenderer.obj: render/BitmapTextRenderer.cpp.obj
@@ -423,7 +423,7 @@ render/BitmapTextRenderer.obj: render/BitmapTextRenderer.cpp.obj
 
 # target to build an object file
 render/BitmapTextRenderer.cpp.obj:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj
 .PHONY : render/BitmapTextRenderer.cpp.obj
 
 render/BitmapTextRenderer.i: render/BitmapTextRenderer.cpp.i
@@ -431,7 +431,7 @@ render/BitmapTextRenderer.i: render/BitmapTextRenderer.cpp.i
 
 # target to preprocess a source file
 render/BitmapTextRenderer.cpp.i:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.i
 .PHONY : render/BitmapTextRenderer.cpp.i
 
 render/BitmapTextRenderer.s: render/BitmapTextRenderer.cpp.s
@@ -439,7 +439,7 @@ render/BitmapTextRenderer.s: render/BitmapTextRenderer.cpp.s
 
 # target to generate assembly for a file
 render/BitmapTextRenderer.cpp.s:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.s
 .PHONY : render/BitmapTextRenderer.cpp.s
 
 # Help Target
@@ -501,6 +501,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

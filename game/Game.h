@@ -156,7 +156,10 @@ private:
     int viewportHeight_{720};
     Engine::Vec2 mouseWorld_{};
     Engine::TexturePtr gridTexture_{};
+    std::vector<Engine::TexturePtr> gridTileTexturesWeighted_;
     std::vector<Engine::TexturePtr> gridTileTextures_{};
+    Engine::TexturePtr shopTexture_{};
+    SDL_Cursor* customCursor_{nullptr};
     std::string heroTexturePath_{};
     std::unique_ptr<Engine::BitmapTextRenderer> debugText_;
     std::mt19937 rng_{std::random_device{}()};

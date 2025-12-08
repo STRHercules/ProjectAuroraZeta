@@ -1,4 +1,4 @@
-# Install script for directory: /home/natalie/Documents/GitHub/ProjectAuroraZeta
+# Install script for directory: /home/zach/Documents/GitHub/ProjectAuroraZeta
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -39,12 +39,12 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine/cmake_install.cmake")
+  include("/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game/cmake_install.cmake")
+  include("/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game/cmake_install.cmake")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT)
@@ -55,5 +55,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

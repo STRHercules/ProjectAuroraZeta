@@ -3,7 +3,7 @@ set(CMAKE_HOST_SYSTEM_NAME "Linux")
 set(CMAKE_HOST_SYSTEM_VERSION "6.14.0-36-generic")
 set(CMAKE_HOST_SYSTEM_PROCESSOR "x86_64")
 
-include("/home/natalie/Documents/GitHub/ProjectAuroraZeta/cmake/toolchains/mingw-w64.cmake")
+include("/home/zach/Documents/GitHub/ProjectAuroraZeta/cmake/toolchains/mingw-w64.cmake")
 
 set(CMAKE_SYSTEM "Windows")
 set(CMAKE_SYSTEM_NAME "Windows")

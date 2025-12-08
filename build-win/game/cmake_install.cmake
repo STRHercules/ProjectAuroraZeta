@@ -1,4 +1,4 @@
-# Install script for directory: /home/natalie/Documents/GitHub/ProjectAuroraZeta/game
+# Install script for directory: /home/zach/Documents/GitHub/ProjectAuroraZeta/game
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

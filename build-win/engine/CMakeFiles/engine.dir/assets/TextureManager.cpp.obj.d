@@ -1,6 +1,6 @@
 engine/CMakeFiles/engine.dir/assets/TextureManager.cpp.obj: \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureManager.cpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureManager.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureManager.cpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureManager.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/optional \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/type_traits \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/c++config.h \
@@ -120,7 +120,7 @@ engine/CMakeFiles/engine.dir/assets/TextureManager.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ext/aligned_buffer.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/node_handle.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/erase_if.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/Texture.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/Texture.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/memory \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_tempbuf.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_uninitialized.h \
@@ -180,8 +180,8 @@ engine/CMakeFiles/engine.dir/assets/TextureManager.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_algobase.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/glue_memory_defs.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/execution_defs.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureLoader.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/../core/Logger.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureLoader.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/../core/Logger.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/chrono \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/chrono.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ratio \

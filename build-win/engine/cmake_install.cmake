@@ -1,4 +1,4 @@
-# Install script for directory: /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine
+# Install script for directory: /home/zach/Documents/GitHub/ProjectAuroraZeta/engine
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -39,6 +39,6 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-build/cmake_install.cmake")
+  include("/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-build/cmake_install.cmake")
 endif()
 

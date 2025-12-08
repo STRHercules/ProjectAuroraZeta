@@ -1,6 +1,6 @@
 engine/CMakeFiles/engine.dir/assets/FontLoader.cpp.obj: \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/FontLoader.cpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/FontLoader.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/FontLoader.cpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/FontLoader.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/optional \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/type_traits \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/c++config.h \
@@ -113,12 +113,12 @@ engine/CMakeFiles/engine.dir/assets/FontLoader.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/uses_allocator_args.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tuple \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_util.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/../render/BitmapFont.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/../render/BitmapFont.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/array \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cstdint \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/stdint.h \
  /usr/share/mingw-w64/include/stdint.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/../render/../assets/Texture.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/../render/../assets/Texture.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/memory \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_tempbuf.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_uninitialized.h \
@@ -177,7 +177,7 @@ engine/CMakeFiles/engine.dir/assets/FontLoader.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_algobase.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/glue_memory_defs.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/execution_defs.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureManager.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureManager.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/unordered_map \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/unordered_map.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/hashtable.h \
@@ -191,7 +191,7 @@ engine/CMakeFiles/engine.dir/assets/FontLoader.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/basic_file.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/c++io.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/fstream.tcc \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/json.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/json.hpp \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/algorithm \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_algo.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/algorithmfwd.h \
@@ -209,9 +209,9 @@ engine/CMakeFiles/engine.dir/assets/FontLoader.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stream_iterator.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/utility \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_relops.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/adl_serializer.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/abi_macros.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/conversions/from_json.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/adl_serializer.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/abi_macros.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/conversions/from_json.hpp \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/forward_list \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/forward_list.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/forward_list.tcc \
@@ -245,29 +245,29 @@ engine/CMakeFiles/engine.dir/assets/FontLoader.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/gslice_array.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/mask_array.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/indirect_array.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/exceptions.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/value_t.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/macro_scope.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/detected.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/void_t.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/thirdparty/hedley/hedley.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/exceptions.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/value_t.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/macro_scope.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/detected.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/void_t.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/thirdparty/hedley/hedley.hpp \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/version \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cassert \
  /usr/share/mingw-w64/include/assert.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/string_escape.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/input/position_t.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/cpp_future.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/type_traits.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/iterators/iterator_traits.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/call_std/begin.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/call_std/end.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/json_fwd.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/string_concat.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/string_escape.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/input/position_t.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/cpp_future.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/type_traits.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/iterators/iterator_traits.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/call_std/begin.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/call_std/end.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/json_fwd.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/string_concat.hpp \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cstring \
  /usr/share/mingw-w64/include/string.h \
  /usr/share/mingw-w64/include/sec_api/string_s.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/identity_tag.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/std_fs.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/identity_tag.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/std_fs.hpp \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/filesystem \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/fs_fwd.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/chrono.h \
@@ -288,37 +288,37 @@ engine/CMakeFiles/engine.dir/assets/FontLoader.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/codecvt \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/fs_dir.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/fs_ops.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/conversions/to_json.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/iterators/iteration_proxy.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/conversions/to_json.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/iterators/iteration_proxy.hpp \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ranges \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/span \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/byte_container_with_subtype.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/hash.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/input/binary_reader.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/input/input_adapters.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/byte_container_with_subtype.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/hash.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/input/binary_reader.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/input/input_adapters.hpp \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/numeric \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_numeric.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/glue_numeric_defs.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/input/json_sax.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/input/lexer.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/is_sax.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/input/parser.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/iterators/internal_iterator.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/iterators/primitive_iterator.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/iterators/iter_impl.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/iterators/json_reverse_iterator.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/json_custom_base_class.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/json_pointer.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/json_ref.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/output/binary_writer.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/output/output_adapters.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/output/serializer.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/conversions/to_chars.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/ordered_map.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/input/json_sax.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/input/lexer.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/is_sax.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/input/parser.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/iterators/internal_iterator.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/iterators/primitive_iterator.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/iterators/iter_impl.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/iterators/json_reverse_iterator.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/json_custom_base_class.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/json_pointer.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/json_ref.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/output/binary_writer.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/output/output_adapters.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/output/serializer.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/conversions/to_chars.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/ordered_map.hpp \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/any \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/macro_unscope.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/thirdparty/hedley/hedley_undef.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/../core/Logger.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/macro_unscope.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/thirdparty/hedley/hedley_undef.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/../core/Logger.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/chrono \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/chrono_io.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/format \

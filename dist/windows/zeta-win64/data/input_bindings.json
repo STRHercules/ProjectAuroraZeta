@@ -16,6 +16,8 @@
   "toggleShop": ["b"],
   "pause": ["escape"],
   "dash": ["space"],
+  "interact": ["key:e"],
+  "useItem": ["key:q"],
   "ability1": ["key:1"],
   "ability2": ["key:2"],
   "ability3": ["key:3"],

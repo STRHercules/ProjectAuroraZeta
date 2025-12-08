@@ -1,6 +1,6 @@
 game/CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.obj: \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/ShopSystem.cpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/ShopSystem.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/ShopSystem.cpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/ShopSystem.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/vector \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/requires_hosted.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/c++config.h \
@@ -69,7 +69,7 @@ game/CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_base.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/max_size_type.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/numbers \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/../components/ShopItem.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../meta/ItemDefs.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/string \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stringfwd.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/char_traits.h \

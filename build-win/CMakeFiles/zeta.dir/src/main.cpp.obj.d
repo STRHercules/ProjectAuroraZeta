@@ -1,5 +1,5 @@
 CMakeFiles/zeta.dir/src/main.cpp.obj: \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/main.cpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/main.cpp \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/memory \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/memoryfwd.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/c++config.h \
@@ -170,29 +170,29 @@ CMakeFiles/zeta.dir/src/main.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_algobase.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/glue_memory_defs.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/execution_defs.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_main.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_stdinc.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_config.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_platform.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/begin_code.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/close_code.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_main.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_stdinc.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_config.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_platform.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/begin_code.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/close_code.h \
  /usr/share/mingw-w64/include/winsdkver.h \
  /usr/share/mingw-w64/include/winapifamily.h \
  /usr/share/mingw-w64/include/sdkddkver.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/stdarg.h \
  /usr/share/mingw-w64/include/stdarg.h \
  /usr/share/mingw-w64/include/_mingw_stdarg.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_assert.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_atomic.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_audio.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_error.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_endian.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_mutex.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_thread.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_rwops.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_clipboard.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_cpuinfo.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_assert.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_atomic.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_audio.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_error.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_endian.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_mutex.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_thread.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_rwops.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_clipboard.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_cpuinfo.h \
  /usr/share/mingw-w64/include/intrin.h \
  /usr/share/mingw-w64/include/setjmp.h \
  /usr/share/mingw-w64/include/psdk_inc/intrin-impl.h \
@@ -295,58 +295,58 @@ CMakeFiles/zeta.dir/src/main.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/ammintrin.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/xopintrin.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/cpuid.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_events.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_video.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_pixels.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_rect.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_surface.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_blendmode.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_keyboard.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_keycode.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_scancode.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_mouse.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_joystick.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_guid.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_gamecontroller.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_sensor.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_quit.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_gesture.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_touch.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_filesystem.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_haptic.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_hidapi.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_hints.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_loadso.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_log.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_messagebox.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_metal.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_power.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_render.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_shape.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_system.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_timer.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_version.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_locale.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_misc.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../engine/core/Application.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../engine/core/ApplicationListener.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../engine/core/Time.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../engine/core/../input/InputState.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_events.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_video.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_pixels.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_rect.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_surface.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_blendmode.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_keyboard.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_keycode.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_scancode.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_mouse.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_joystick.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_guid.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_gamecontroller.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_sensor.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_quit.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_gesture.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_touch.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_filesystem.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_haptic.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_hidapi.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_hints.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_loadso.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_log.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_messagebox.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_metal.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_power.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_render.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_shape.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_system.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_timer.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_version.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_locale.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_misc.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../engine/core/Application.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../engine/core/ApplicationListener.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../engine/core/Time.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../engine/core/../input/InputState.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/array \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../engine/core/../platform/Window.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../engine/core/../render/RenderDevice.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../engine/core/../render/../math/Vec2.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../engine/core/../render/Color.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../engine/platform/SDLWindow.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/Game.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../engine/core/../platform/Window.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../engine/core/../render/RenderDevice.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../engine/core/../render/../math/Vec2.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../engine/core/../render/Color.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../engine/platform/SDLWindow.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/Game.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/vector \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_vector.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_bvector.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/vector.tcc \
- /home/natalie/winlibs/sdl/SDL2_ttf-2.22.0/x86_64-w64-mingw32/include/SDL2/SDL_ttf.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/begin_code.h \
- /home/natalie/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/close_code.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/ecs/Registry.h \
+ /home/zach/winlibs/sdl/SDL2_ttf-2.22.0/x86_64-w64-mingw32/include/SDL2/SDL_ttf.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/begin_code.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/close_code.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/ecs/Registry.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cstdint \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/queue \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/deque \
@@ -354,7 +354,7 @@ CMakeFiles/zeta.dir/src/main.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/deque.tcc \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_heap.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_queue.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/ecs/ComponentStorage.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/ecs/ComponentStorage.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/typeindex \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/unordered_map \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/unordered_map.h \
@@ -365,19 +365,19 @@ CMakeFiles/zeta.dir/src/main.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/erase_if.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/utility \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_relops.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/ecs/Entity.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/render/Camera2D.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/gameplay/InputHelpers.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/gameplay/../render/CameraUtil.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/assets/TextureLoader.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/ecs/Entity.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/render/Camera2D.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/gameplay/InputHelpers.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/gameplay/../render/CameraUtil.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/assets/TextureLoader.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/optional \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/assets/Texture.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/assets/TextureManager.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/assets/AssetManifest.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/assets/FontLoader.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/assets/../render/BitmapFont.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/render/BitmapTextRenderer.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/render/TextRenderer.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/assets/Texture.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/assets/TextureManager.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/assets/AssetManifest.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/assets/FontLoader.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/assets/../render/BitmapFont.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/render/BitmapTextRenderer.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/render/TextRenderer.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/random \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cmath \
  /usr/share/mingw-w64/include/math.h \
@@ -409,7 +409,7 @@ CMakeFiles/zeta.dir/src/main.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/basic_file.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/c++io.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/fstream.tcc \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/json.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/json.hpp \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/algorithm \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_algo.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/algorithmfwd.h \
@@ -419,9 +419,9 @@ CMakeFiles/zeta.dir/src/main.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/std_function.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/iterator \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stream_iterator.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/adl_serializer.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/abi_macros.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/conversions/from_json.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/adl_serializer.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/abi_macros.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/conversions/from_json.hpp \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/forward_list \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/forward_list.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/forward_list.tcc \
@@ -439,29 +439,29 @@ CMakeFiles/zeta.dir/src/main.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/gslice_array.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/mask_array.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/indirect_array.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/exceptions.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/value_t.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/macro_scope.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/detected.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/void_t.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/thirdparty/hedley/hedley.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/exceptions.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/value_t.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/macro_scope.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/detected.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/void_t.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/thirdparty/hedley/hedley.hpp \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/version \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cassert \
  /usr/share/mingw-w64/include/assert.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/string_escape.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/input/position_t.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/cpp_future.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/type_traits.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/iterators/iterator_traits.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/call_std/begin.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/call_std/end.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/json_fwd.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/string_concat.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/string_escape.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/input/position_t.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/cpp_future.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/type_traits.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/iterators/iterator_traits.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/call_std/begin.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/call_std/end.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/json_fwd.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/string_concat.hpp \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cstring \
  /usr/share/mingw-w64/include/string.h \
  /usr/share/mingw-w64/include/sec_api/string_s.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/identity_tag.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/std_fs.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/identity_tag.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/std_fs.hpp \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/filesystem \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/fs_fwd.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/chrono.h \
@@ -482,53 +482,53 @@ CMakeFiles/zeta.dir/src/main.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/codecvt \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/fs_dir.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/fs_ops.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/conversions/to_json.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/iterators/iteration_proxy.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/conversions/to_json.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/iterators/iteration_proxy.hpp \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ranges \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/span \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/byte_container_with_subtype.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/hash.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/input/binary_reader.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/input/input_adapters.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/input/json_sax.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/input/lexer.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/is_sax.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/input/parser.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/iterators/internal_iterator.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/iterators/primitive_iterator.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/iterators/iter_impl.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/iterators/json_reverse_iterator.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/json_custom_base_class.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/json_pointer.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/json_ref.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/output/binary_writer.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/output/output_adapters.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/output/serializer.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/conversions/to_chars.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/ordered_map.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/byte_container_with_subtype.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/hash.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/input/binary_reader.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/input/input_adapters.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/input/json_sax.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/input/lexer.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/meta/is_sax.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/input/parser.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/iterators/internal_iterator.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/iterators/primitive_iterator.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/iterators/iter_impl.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/iterators/json_reverse_iterator.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/json_custom_base_class.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/json_pointer.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/json_ref.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/output/binary_writer.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/output/output_adapters.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/output/serializer.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/conversions/to_chars.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/ordered_map.hpp \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/any \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/macro_unscope.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/thirdparty/hedley/hedley_undef.hpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/input/ActionMapper.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/input/ActionState.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/input/InputBinding.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/input/InputLoader.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/render/RenderSystem.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/render/../components/Facing.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/MovementSystem.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/CameraSystem.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/ProjectileSystem.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/CollisionSystem.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/EnemyAISystem.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/WaveSystem.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/../EnemyDefinition.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/AnimationSystem.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/HitFlashSystem.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/DamageNumberSystem.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/ShopSystem.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/../components/ShopItem.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/PickupSystem.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/EventSystem.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/../components/EventActive.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/HotzoneSystem.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/src/../game/meta/SaveManager.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/detail/macro_unscope.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/thirdparty/hedley/hedley_undef.hpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/input/ActionMapper.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/input/ActionState.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/input/InputBinding.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/input/InputLoader.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/render/RenderSystem.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/render/../components/Facing.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/meta/ItemDefs.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/MovementSystem.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/CameraSystem.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/ProjectileSystem.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/CollisionSystem.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/EnemyAISystem.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/WaveSystem.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/../EnemyDefinition.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/AnimationSystem.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/HitFlashSystem.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/DamageNumberSystem.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/ShopSystem.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/PickupSystem.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/EventSystem.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/../components/EventActive.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/HotzoneSystem.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/meta/SaveManager.h

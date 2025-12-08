@@ -54,10 +54,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/natalie/Documents/GitHub/ProjectAuroraZeta
+CMAKE_SOURCE_DIR = /home/zach/Documents/GitHub/ProjectAuroraZeta
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win
+CMAKE_BINARY_DIR = /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -134,14 +134,14 @@ CMakeFiles/zeta.dir/all: engine/CMakeFiles/engine.dir/all
 CMakeFiles/zeta.dir/all: game/CMakeFiles/zeta_game.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zeta.dir/build.make CMakeFiles/zeta.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zeta.dir/build.make CMakeFiles/zeta.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=15,16 "Built target zeta"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=15,16 "Built target zeta"
 .PHONY : CMakeFiles/zeta.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/zeta.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles 34
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles 35
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/zeta.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles 0
 .PHONY : CMakeFiles/zeta.dir/rule
 
 # Convenience name for target.
@@ -160,14 +160,14 @@ CMakeFiles/zeta.dir/clean:
 engine/CMakeFiles/engine.dir/all:
 	$(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/depend
 	$(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14 "Built target engine"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14 "Built target engine"
 .PHONY : engine/CMakeFiles/engine.dir/all
 
 # Build rule for subdir invocation for target.
 engine/CMakeFiles/engine.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles 14
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles 14
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 engine/CMakeFiles/engine.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles 0
 .PHONY : engine/CMakeFiles/engine.dir/rule
 
 # Convenience name for target.
@@ -186,14 +186,14 @@ engine/CMakeFiles/engine.dir/clean:
 game/CMakeFiles/zeta_game.dir/all: engine/CMakeFiles/engine.dir/all
 	$(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/depend
 	$(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34 "Built target zeta_game"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35 "Built target zeta_game"
 .PHONY : game/CMakeFiles/zeta_game.dir/all
 
 # Build rule for subdir invocation for target.
 game/CMakeFiles/zeta_game.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles 32
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles 33
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 game/CMakeFiles/zeta_game.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles 0
 .PHONY : game/CMakeFiles/zeta_game.dir/rule
 
 # Convenience name for target.

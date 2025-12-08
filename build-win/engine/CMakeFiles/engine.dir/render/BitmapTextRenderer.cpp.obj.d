@@ -1,7 +1,7 @@
 engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj: \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/render/BitmapTextRenderer.cpp \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/render/BitmapTextRenderer.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/render/TextRenderer.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/BitmapTextRenderer.cpp \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/BitmapTextRenderer.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/TextRenderer.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/string \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/requires_hosted.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/c++config.h \
@@ -107,9 +107,9 @@ engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/uses_allocator_args.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tuple \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_util.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/render/Color.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/render/../math/Vec2.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/render/../assets/Texture.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/Color.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/../math/Vec2.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/../assets/Texture.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/memory \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_tempbuf.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_uninitialized.h \
@@ -175,7 +175,7 @@ engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_algobase.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/glue_memory_defs.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/execution_defs.h \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/render/BitmapFont.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/BitmapFont.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/array \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cstdint \
- /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/render/RenderDevice.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/RenderDevice.h

@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/natalie/Documents/GitHub/ProjectAuroraZeta
+CMAKE_SOURCE_DIR = /home/zach/Documents/GitHub/ProjectAuroraZeta
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win
+CMAKE_BINARY_DIR = /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win
 
 # Include any dependencies generated for this target.
 include engine/CMakeFiles/engine.dir/depend.make
@@ -71,198 +71,198 @@ include engine/CMakeFiles/engine.dir/flags.make
 
 engine/CMakeFiles/engine.dir/core/Application.cpp.obj: engine/CMakeFiles/engine.dir/flags.make
 engine/CMakeFiles/engine.dir/core/Application.cpp.obj: engine/CMakeFiles/engine.dir/includes_CXX.rsp
-engine/CMakeFiles/engine.dir/core/Application.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/core/Application.cpp
+engine/CMakeFiles/engine.dir/core/Application.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/core/Application.cpp
 engine/CMakeFiles/engine.dir/core/Application.cpp.obj: engine/CMakeFiles/engine.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object engine/CMakeFiles/engine.dir/core/Application.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/core/Application.cpp.obj -MF CMakeFiles/engine.dir/core/Application.cpp.obj.d -o CMakeFiles/engine.dir/core/Application.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/core/Application.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object engine/CMakeFiles/engine.dir/core/Application.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/core/Application.cpp.obj -MF CMakeFiles/engine.dir/core/Application.cpp.obj.d -o CMakeFiles/engine.dir/core/Application.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/core/Application.cpp
 
 engine/CMakeFiles/engine.dir/core/Application.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/engine.dir/core/Application.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/core/Application.cpp > CMakeFiles/engine.dir/core/Application.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/core/Application.cpp > CMakeFiles/engine.dir/core/Application.cpp.i
 
 engine/CMakeFiles/engine.dir/core/Application.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/engine.dir/core/Application.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/core/Application.cpp -o CMakeFiles/engine.dir/core/Application.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/core/Application.cpp -o CMakeFiles/engine.dir/core/Application.cpp.s
 
 engine/CMakeFiles/engine.dir/core/Logger.cpp.obj: engine/CMakeFiles/engine.dir/flags.make
 engine/CMakeFiles/engine.dir/core/Logger.cpp.obj: engine/CMakeFiles/engine.dir/includes_CXX.rsp
-engine/CMakeFiles/engine.dir/core/Logger.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/core/Logger.cpp
+engine/CMakeFiles/engine.dir/core/Logger.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/core/Logger.cpp
 engine/CMakeFiles/engine.dir/core/Logger.cpp.obj: engine/CMakeFiles/engine.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object engine/CMakeFiles/engine.dir/core/Logger.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/core/Logger.cpp.obj -MF CMakeFiles/engine.dir/core/Logger.cpp.obj.d -o CMakeFiles/engine.dir/core/Logger.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/core/Logger.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object engine/CMakeFiles/engine.dir/core/Logger.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/core/Logger.cpp.obj -MF CMakeFiles/engine.dir/core/Logger.cpp.obj.d -o CMakeFiles/engine.dir/core/Logger.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/core/Logger.cpp
 
 engine/CMakeFiles/engine.dir/core/Logger.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/engine.dir/core/Logger.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/core/Logger.cpp > CMakeFiles/engine.dir/core/Logger.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/core/Logger.cpp > CMakeFiles/engine.dir/core/Logger.cpp.i
 
 engine/CMakeFiles/engine.dir/core/Logger.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/engine.dir/core/Logger.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/core/Logger.cpp -o CMakeFiles/engine.dir/core/Logger.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/core/Logger.cpp -o CMakeFiles/engine.dir/core/Logger.cpp.s
 
 engine/CMakeFiles/engine.dir/platform/NullWindow.cpp.obj: engine/CMakeFiles/engine.dir/flags.make
 engine/CMakeFiles/engine.dir/platform/NullWindow.cpp.obj: engine/CMakeFiles/engine.dir/includes_CXX.rsp
-engine/CMakeFiles/engine.dir/platform/NullWindow.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/platform/NullWindow.cpp
+engine/CMakeFiles/engine.dir/platform/NullWindow.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/platform/NullWindow.cpp
 engine/CMakeFiles/engine.dir/platform/NullWindow.cpp.obj: engine/CMakeFiles/engine.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object engine/CMakeFiles/engine.dir/platform/NullWindow.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/platform/NullWindow.cpp.obj -MF CMakeFiles/engine.dir/platform/NullWindow.cpp.obj.d -o CMakeFiles/engine.dir/platform/NullWindow.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/platform/NullWindow.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object engine/CMakeFiles/engine.dir/platform/NullWindow.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/platform/NullWindow.cpp.obj -MF CMakeFiles/engine.dir/platform/NullWindow.cpp.obj.d -o CMakeFiles/engine.dir/platform/NullWindow.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/platform/NullWindow.cpp
 
 engine/CMakeFiles/engine.dir/platform/NullWindow.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/engine.dir/platform/NullWindow.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/platform/NullWindow.cpp > CMakeFiles/engine.dir/platform/NullWindow.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/platform/NullWindow.cpp > CMakeFiles/engine.dir/platform/NullWindow.cpp.i
 
 engine/CMakeFiles/engine.dir/platform/NullWindow.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/engine.dir/platform/NullWindow.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/platform/NullWindow.cpp -o CMakeFiles/engine.dir/platform/NullWindow.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/platform/NullWindow.cpp -o CMakeFiles/engine.dir/platform/NullWindow.cpp.s
 
 engine/CMakeFiles/engine.dir/platform/SDLWindow.cpp.obj: engine/CMakeFiles/engine.dir/flags.make
 engine/CMakeFiles/engine.dir/platform/SDLWindow.cpp.obj: engine/CMakeFiles/engine.dir/includes_CXX.rsp
-engine/CMakeFiles/engine.dir/platform/SDLWindow.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLWindow.cpp
+engine/CMakeFiles/engine.dir/platform/SDLWindow.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLWindow.cpp
 engine/CMakeFiles/engine.dir/platform/SDLWindow.cpp.obj: engine/CMakeFiles/engine.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object engine/CMakeFiles/engine.dir/platform/SDLWindow.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/platform/SDLWindow.cpp.obj -MF CMakeFiles/engine.dir/platform/SDLWindow.cpp.obj.d -o CMakeFiles/engine.dir/platform/SDLWindow.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLWindow.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object engine/CMakeFiles/engine.dir/platform/SDLWindow.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/platform/SDLWindow.cpp.obj -MF CMakeFiles/engine.dir/platform/SDLWindow.cpp.obj.d -o CMakeFiles/engine.dir/platform/SDLWindow.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLWindow.cpp
 
 engine/CMakeFiles/engine.dir/platform/SDLWindow.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/engine.dir/platform/SDLWindow.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLWindow.cpp > CMakeFiles/engine.dir/platform/SDLWindow.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLWindow.cpp > CMakeFiles/engine.dir/platform/SDLWindow.cpp.i
 
 engine/CMakeFiles/engine.dir/platform/SDLWindow.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/engine.dir/platform/SDLWindow.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLWindow.cpp -o CMakeFiles/engine.dir/platform/SDLWindow.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLWindow.cpp -o CMakeFiles/engine.dir/platform/SDLWindow.cpp.s
 
 engine/CMakeFiles/engine.dir/platform/SDLRenderDevice.cpp.obj: engine/CMakeFiles/engine.dir/flags.make
 engine/CMakeFiles/engine.dir/platform/SDLRenderDevice.cpp.obj: engine/CMakeFiles/engine.dir/includes_CXX.rsp
-engine/CMakeFiles/engine.dir/platform/SDLRenderDevice.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLRenderDevice.cpp
+engine/CMakeFiles/engine.dir/platform/SDLRenderDevice.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLRenderDevice.cpp
 engine/CMakeFiles/engine.dir/platform/SDLRenderDevice.cpp.obj: engine/CMakeFiles/engine.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object engine/CMakeFiles/engine.dir/platform/SDLRenderDevice.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/platform/SDLRenderDevice.cpp.obj -MF CMakeFiles/engine.dir/platform/SDLRenderDevice.cpp.obj.d -o CMakeFiles/engine.dir/platform/SDLRenderDevice.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLRenderDevice.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object engine/CMakeFiles/engine.dir/platform/SDLRenderDevice.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/platform/SDLRenderDevice.cpp.obj -MF CMakeFiles/engine.dir/platform/SDLRenderDevice.cpp.obj.d -o CMakeFiles/engine.dir/platform/SDLRenderDevice.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLRenderDevice.cpp
 
 engine/CMakeFiles/engine.dir/platform/SDLRenderDevice.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/engine.dir/platform/SDLRenderDevice.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLRenderDevice.cpp > CMakeFiles/engine.dir/platform/SDLRenderDevice.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLRenderDevice.cpp > CMakeFiles/engine.dir/platform/SDLRenderDevice.cpp.i
 
 engine/CMakeFiles/engine.dir/platform/SDLRenderDevice.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/engine.dir/platform/SDLRenderDevice.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLRenderDevice.cpp -o CMakeFiles/engine.dir/platform/SDLRenderDevice.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLRenderDevice.cpp -o CMakeFiles/engine.dir/platform/SDLRenderDevice.cpp.s
 
 engine/CMakeFiles/engine.dir/platform/SDLTexture.cpp.obj: engine/CMakeFiles/engine.dir/flags.make
 engine/CMakeFiles/engine.dir/platform/SDLTexture.cpp.obj: engine/CMakeFiles/engine.dir/includes_CXX.rsp
-engine/CMakeFiles/engine.dir/platform/SDLTexture.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLTexture.cpp
+engine/CMakeFiles/engine.dir/platform/SDLTexture.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLTexture.cpp
 engine/CMakeFiles/engine.dir/platform/SDLTexture.cpp.obj: engine/CMakeFiles/engine.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object engine/CMakeFiles/engine.dir/platform/SDLTexture.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/platform/SDLTexture.cpp.obj -MF CMakeFiles/engine.dir/platform/SDLTexture.cpp.obj.d -o CMakeFiles/engine.dir/platform/SDLTexture.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLTexture.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object engine/CMakeFiles/engine.dir/platform/SDLTexture.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/platform/SDLTexture.cpp.obj -MF CMakeFiles/engine.dir/platform/SDLTexture.cpp.obj.d -o CMakeFiles/engine.dir/platform/SDLTexture.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLTexture.cpp
 
 engine/CMakeFiles/engine.dir/platform/SDLTexture.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/engine.dir/platform/SDLTexture.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLTexture.cpp > CMakeFiles/engine.dir/platform/SDLTexture.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLTexture.cpp > CMakeFiles/engine.dir/platform/SDLTexture.cpp.i
 
 engine/CMakeFiles/engine.dir/platform/SDLTexture.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/engine.dir/platform/SDLTexture.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLTexture.cpp -o CMakeFiles/engine.dir/platform/SDLTexture.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLTexture.cpp -o CMakeFiles/engine.dir/platform/SDLTexture.cpp.s
 
 engine/CMakeFiles/engine.dir/assets/TextureLoader.cpp.obj: engine/CMakeFiles/engine.dir/flags.make
 engine/CMakeFiles/engine.dir/assets/TextureLoader.cpp.obj: engine/CMakeFiles/engine.dir/includes_CXX.rsp
-engine/CMakeFiles/engine.dir/assets/TextureLoader.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureLoader.cpp
+engine/CMakeFiles/engine.dir/assets/TextureLoader.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureLoader.cpp
 engine/CMakeFiles/engine.dir/assets/TextureLoader.cpp.obj: engine/CMakeFiles/engine.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object engine/CMakeFiles/engine.dir/assets/TextureLoader.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/assets/TextureLoader.cpp.obj -MF CMakeFiles/engine.dir/assets/TextureLoader.cpp.obj.d -o CMakeFiles/engine.dir/assets/TextureLoader.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureLoader.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object engine/CMakeFiles/engine.dir/assets/TextureLoader.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/assets/TextureLoader.cpp.obj -MF CMakeFiles/engine.dir/assets/TextureLoader.cpp.obj.d -o CMakeFiles/engine.dir/assets/TextureLoader.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureLoader.cpp
 
 engine/CMakeFiles/engine.dir/assets/TextureLoader.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/engine.dir/assets/TextureLoader.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureLoader.cpp > CMakeFiles/engine.dir/assets/TextureLoader.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureLoader.cpp > CMakeFiles/engine.dir/assets/TextureLoader.cpp.i
 
 engine/CMakeFiles/engine.dir/assets/TextureLoader.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/engine.dir/assets/TextureLoader.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureLoader.cpp -o CMakeFiles/engine.dir/assets/TextureLoader.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureLoader.cpp -o CMakeFiles/engine.dir/assets/TextureLoader.cpp.s
 
 engine/CMakeFiles/engine.dir/assets/TextureManager.cpp.obj: engine/CMakeFiles/engine.dir/flags.make
 engine/CMakeFiles/engine.dir/assets/TextureManager.cpp.obj: engine/CMakeFiles/engine.dir/includes_CXX.rsp
-engine/CMakeFiles/engine.dir/assets/TextureManager.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureManager.cpp
+engine/CMakeFiles/engine.dir/assets/TextureManager.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureManager.cpp
 engine/CMakeFiles/engine.dir/assets/TextureManager.cpp.obj: engine/CMakeFiles/engine.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object engine/CMakeFiles/engine.dir/assets/TextureManager.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/assets/TextureManager.cpp.obj -MF CMakeFiles/engine.dir/assets/TextureManager.cpp.obj.d -o CMakeFiles/engine.dir/assets/TextureManager.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureManager.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object engine/CMakeFiles/engine.dir/assets/TextureManager.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/assets/TextureManager.cpp.obj -MF CMakeFiles/engine.dir/assets/TextureManager.cpp.obj.d -o CMakeFiles/engine.dir/assets/TextureManager.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureManager.cpp
 
 engine/CMakeFiles/engine.dir/assets/TextureManager.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/engine.dir/assets/TextureManager.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureManager.cpp > CMakeFiles/engine.dir/assets/TextureManager.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureManager.cpp > CMakeFiles/engine.dir/assets/TextureManager.cpp.i
 
 engine/CMakeFiles/engine.dir/assets/TextureManager.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/engine.dir/assets/TextureManager.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureManager.cpp -o CMakeFiles/engine.dir/assets/TextureManager.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureManager.cpp -o CMakeFiles/engine.dir/assets/TextureManager.cpp.s
 
 engine/CMakeFiles/engine.dir/assets/AssetManifest.cpp.obj: engine/CMakeFiles/engine.dir/flags.make
 engine/CMakeFiles/engine.dir/assets/AssetManifest.cpp.obj: engine/CMakeFiles/engine.dir/includes_CXX.rsp
-engine/CMakeFiles/engine.dir/assets/AssetManifest.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/AssetManifest.cpp
+engine/CMakeFiles/engine.dir/assets/AssetManifest.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/AssetManifest.cpp
 engine/CMakeFiles/engine.dir/assets/AssetManifest.cpp.obj: engine/CMakeFiles/engine.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object engine/CMakeFiles/engine.dir/assets/AssetManifest.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/assets/AssetManifest.cpp.obj -MF CMakeFiles/engine.dir/assets/AssetManifest.cpp.obj.d -o CMakeFiles/engine.dir/assets/AssetManifest.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/AssetManifest.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object engine/CMakeFiles/engine.dir/assets/AssetManifest.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/assets/AssetManifest.cpp.obj -MF CMakeFiles/engine.dir/assets/AssetManifest.cpp.obj.d -o CMakeFiles/engine.dir/assets/AssetManifest.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/AssetManifest.cpp
 
 engine/CMakeFiles/engine.dir/assets/AssetManifest.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/engine.dir/assets/AssetManifest.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/AssetManifest.cpp > CMakeFiles/engine.dir/assets/AssetManifest.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/AssetManifest.cpp > CMakeFiles/engine.dir/assets/AssetManifest.cpp.i
 
 engine/CMakeFiles/engine.dir/assets/AssetManifest.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/engine.dir/assets/AssetManifest.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/AssetManifest.cpp -o CMakeFiles/engine.dir/assets/AssetManifest.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/AssetManifest.cpp -o CMakeFiles/engine.dir/assets/AssetManifest.cpp.s
 
 engine/CMakeFiles/engine.dir/assets/FontLoader.cpp.obj: engine/CMakeFiles/engine.dir/flags.make
 engine/CMakeFiles/engine.dir/assets/FontLoader.cpp.obj: engine/CMakeFiles/engine.dir/includes_CXX.rsp
-engine/CMakeFiles/engine.dir/assets/FontLoader.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/FontLoader.cpp
+engine/CMakeFiles/engine.dir/assets/FontLoader.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/FontLoader.cpp
 engine/CMakeFiles/engine.dir/assets/FontLoader.cpp.obj: engine/CMakeFiles/engine.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object engine/CMakeFiles/engine.dir/assets/FontLoader.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/assets/FontLoader.cpp.obj -MF CMakeFiles/engine.dir/assets/FontLoader.cpp.obj.d -o CMakeFiles/engine.dir/assets/FontLoader.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/FontLoader.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object engine/CMakeFiles/engine.dir/assets/FontLoader.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/assets/FontLoader.cpp.obj -MF CMakeFiles/engine.dir/assets/FontLoader.cpp.obj.d -o CMakeFiles/engine.dir/assets/FontLoader.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/FontLoader.cpp
 
 engine/CMakeFiles/engine.dir/assets/FontLoader.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/engine.dir/assets/FontLoader.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/FontLoader.cpp > CMakeFiles/engine.dir/assets/FontLoader.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/FontLoader.cpp > CMakeFiles/engine.dir/assets/FontLoader.cpp.i
 
 engine/CMakeFiles/engine.dir/assets/FontLoader.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/engine.dir/assets/FontLoader.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/assets/FontLoader.cpp -o CMakeFiles/engine.dir/assets/FontLoader.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/FontLoader.cpp -o CMakeFiles/engine.dir/assets/FontLoader.cpp.s
 
 engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj: engine/CMakeFiles/engine.dir/flags.make
 engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj: engine/CMakeFiles/engine.dir/includes_CXX.rsp
-engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/render/BitmapTextRenderer.cpp
+engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/BitmapTextRenderer.cpp
 engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj: engine/CMakeFiles/engine.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj -MF CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj.d -o CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/render/BitmapTextRenderer.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj -MF CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj.d -o CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/BitmapTextRenderer.cpp
 
 engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/render/BitmapTextRenderer.cpp > CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/BitmapTextRenderer.cpp > CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.i
 
 engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/render/BitmapTextRenderer.cpp -o CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/BitmapTextRenderer.cpp -o CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.s
 
 engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.obj: engine/CMakeFiles/engine.dir/flags.make
 engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.obj: engine/CMakeFiles/engine.dir/includes_CXX.rsp
-engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/input/ActionMapper.cpp
+engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/ActionMapper.cpp
 engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.obj: engine/CMakeFiles/engine.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.obj -MF CMakeFiles/engine.dir/input/ActionMapper.cpp.obj.d -o CMakeFiles/engine.dir/input/ActionMapper.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/input/ActionMapper.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.obj -MF CMakeFiles/engine.dir/input/ActionMapper.cpp.obj.d -o CMakeFiles/engine.dir/input/ActionMapper.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/ActionMapper.cpp
 
 engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/engine.dir/input/ActionMapper.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/input/ActionMapper.cpp > CMakeFiles/engine.dir/input/ActionMapper.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/ActionMapper.cpp > CMakeFiles/engine.dir/input/ActionMapper.cpp.i
 
 engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/engine.dir/input/ActionMapper.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/input/ActionMapper.cpp -o CMakeFiles/engine.dir/input/ActionMapper.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/ActionMapper.cpp -o CMakeFiles/engine.dir/input/ActionMapper.cpp.s
 
 engine/CMakeFiles/engine.dir/input/InputLoader.cpp.obj: engine/CMakeFiles/engine.dir/flags.make
 engine/CMakeFiles/engine.dir/input/InputLoader.cpp.obj: engine/CMakeFiles/engine.dir/includes_CXX.rsp
-engine/CMakeFiles/engine.dir/input/InputLoader.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/input/InputLoader.cpp
+engine/CMakeFiles/engine.dir/input/InputLoader.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/InputLoader.cpp
 engine/CMakeFiles/engine.dir/input/InputLoader.cpp.obj: engine/CMakeFiles/engine.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object engine/CMakeFiles/engine.dir/input/InputLoader.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/input/InputLoader.cpp.obj -MF CMakeFiles/engine.dir/input/InputLoader.cpp.obj.d -o CMakeFiles/engine.dir/input/InputLoader.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/input/InputLoader.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object engine/CMakeFiles/engine.dir/input/InputLoader.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/input/InputLoader.cpp.obj -MF CMakeFiles/engine.dir/input/InputLoader.cpp.obj.d -o CMakeFiles/engine.dir/input/InputLoader.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/InputLoader.cpp
 
 engine/CMakeFiles/engine.dir/input/InputLoader.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/engine.dir/input/InputLoader.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/input/InputLoader.cpp > CMakeFiles/engine.dir/input/InputLoader.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/InputLoader.cpp > CMakeFiles/engine.dir/input/InputLoader.cpp.i
 
 engine/CMakeFiles/engine.dir/input/InputLoader.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/engine.dir/input/InputLoader.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine/input/InputLoader.cpp -o CMakeFiles/engine.dir/input/InputLoader.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/InputLoader.cpp -o CMakeFiles/engine.dir/input/InputLoader.cpp.s
 
 # Object files for target engine
 engine_OBJECTS = \
@@ -298,19 +298,19 @@ engine/libengine.a: engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.obj
 engine/libengine.a: engine/CMakeFiles/engine.dir/input/InputLoader.cpp.obj
 engine/libengine.a: engine/CMakeFiles/engine.dir/build.make
 engine/libengine.a: engine/CMakeFiles/engine.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Linking CXX static library libengine.a"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && $(CMAKE_COMMAND) -P CMakeFiles/engine.dir/cmake_clean_target.cmake
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/engine.dir/link.txt --verbose=$(VERBOSE)
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Linking CXX static library libengine.a"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && $(CMAKE_COMMAND) -P CMakeFiles/engine.dir/cmake_clean_target.cmake
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/engine.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 engine/CMakeFiles/engine.dir/build: engine/libengine.a
 .PHONY : engine/CMakeFiles/engine.dir/build
 
 engine/CMakeFiles/engine.dir/clean:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine && $(CMAKE_COMMAND) -P CMakeFiles/engine.dir/cmake_clean.cmake
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && $(CMAKE_COMMAND) -P CMakeFiles/engine.dir/cmake_clean.cmake
 .PHONY : engine/CMakeFiles/engine.dir/clean
 
 engine/CMakeFiles/engine.dir/depend:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/natalie/Documents/GitHub/ProjectAuroraZeta /home/natalie/Documents/GitHub/ProjectAuroraZeta/engine /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/engine/CMakeFiles/engine.dir/DependInfo.cmake "--color=$(COLOR)"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/zach/Documents/GitHub/ProjectAuroraZeta /home/zach/Documents/GitHub/ProjectAuroraZeta/engine /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine/CMakeFiles/engine.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : engine/CMakeFiles/engine.dir/depend
 

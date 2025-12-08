@@ -1,4 +1,4 @@
-# Install script for directory: /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-subbuild
+# Install script for directory: /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-subbuild
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-subbuild/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-subbuild/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

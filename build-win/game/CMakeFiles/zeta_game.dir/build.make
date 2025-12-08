@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/natalie/Documents/GitHub/ProjectAuroraZeta
+CMAKE_SOURCE_DIR = /home/zach/Documents/GitHub/ProjectAuroraZeta
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win
+CMAKE_BINARY_DIR = /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win
 
 # Include any dependencies generated for this target.
 include game/CMakeFiles/zeta_game.dir/depend.make
@@ -71,258 +71,273 @@ include game/CMakeFiles/zeta_game.dir/flags.make
 
 game/CMakeFiles/zeta_game.dir/Game.cpp.obj: game/CMakeFiles/zeta_game.dir/flags.make
 game/CMakeFiles/zeta_game.dir/Game.cpp.obj: game/CMakeFiles/zeta_game.dir/includes_CXX.rsp
-game/CMakeFiles/zeta_game.dir/Game.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/Game.cpp
+game/CMakeFiles/zeta_game.dir/Game.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/game/Game.cpp
 game/CMakeFiles/zeta_game.dir/Game.cpp.obj: game/CMakeFiles/zeta_game.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object game/CMakeFiles/zeta_game.dir/Game.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/Game.cpp.obj -MF CMakeFiles/zeta_game.dir/Game.cpp.obj.d -o CMakeFiles/zeta_game.dir/Game.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/Game.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object game/CMakeFiles/zeta_game.dir/Game.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/Game.cpp.obj -MF CMakeFiles/zeta_game.dir/Game.cpp.obj.d -o CMakeFiles/zeta_game.dir/Game.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/game/Game.cpp
 
 game/CMakeFiles/zeta_game.dir/Game.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/zeta_game.dir/Game.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/Game.cpp > CMakeFiles/zeta_game.dir/Game.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/game/Game.cpp > CMakeFiles/zeta_game.dir/Game.cpp.i
 
 game/CMakeFiles/zeta_game.dir/Game.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/zeta_game.dir/Game.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/Game.cpp -o CMakeFiles/zeta_game.dir/Game.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/game/Game.cpp -o CMakeFiles/zeta_game.dir/Game.cpp.s
 
 game/CMakeFiles/zeta_game.dir/GameAbilities.cpp.obj: game/CMakeFiles/zeta_game.dir/flags.make
 game/CMakeFiles/zeta_game.dir/GameAbilities.cpp.obj: game/CMakeFiles/zeta_game.dir/includes_CXX.rsp
-game/CMakeFiles/zeta_game.dir/GameAbilities.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/GameAbilities.cpp
+game/CMakeFiles/zeta_game.dir/GameAbilities.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/game/GameAbilities.cpp
 game/CMakeFiles/zeta_game.dir/GameAbilities.cpp.obj: game/CMakeFiles/zeta_game.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object game/CMakeFiles/zeta_game.dir/GameAbilities.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/GameAbilities.cpp.obj -MF CMakeFiles/zeta_game.dir/GameAbilities.cpp.obj.d -o CMakeFiles/zeta_game.dir/GameAbilities.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/GameAbilities.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object game/CMakeFiles/zeta_game.dir/GameAbilities.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/GameAbilities.cpp.obj -MF CMakeFiles/zeta_game.dir/GameAbilities.cpp.obj.d -o CMakeFiles/zeta_game.dir/GameAbilities.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/game/GameAbilities.cpp
 
 game/CMakeFiles/zeta_game.dir/GameAbilities.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/zeta_game.dir/GameAbilities.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/GameAbilities.cpp > CMakeFiles/zeta_game.dir/GameAbilities.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/game/GameAbilities.cpp > CMakeFiles/zeta_game.dir/GameAbilities.cpp.i
 
 game/CMakeFiles/zeta_game.dir/GameAbilities.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/zeta_game.dir/GameAbilities.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/GameAbilities.cpp -o CMakeFiles/zeta_game.dir/GameAbilities.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/game/GameAbilities.cpp -o CMakeFiles/zeta_game.dir/GameAbilities.cpp.s
 
 game/CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/flags.make
 game/CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/includes_CXX.rsp
-game/CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/render/RenderSystem.cpp
+game/CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/RenderSystem.cpp
 game/CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object game/CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.obj -MF CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.obj.d -o CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/render/RenderSystem.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object game/CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.obj -MF CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.obj.d -o CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/RenderSystem.cpp
 
 game/CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/render/RenderSystem.cpp > CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/RenderSystem.cpp > CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.i
 
 game/CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/render/RenderSystem.cpp -o CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/RenderSystem.cpp -o CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.s
 
 game/CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/flags.make
 game/CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/includes_CXX.rsp
-game/CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/MovementSystem.cpp
+game/CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/MovementSystem.cpp
 game/CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object game/CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.obj -MF CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.obj.d -o CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/MovementSystem.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object game/CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.obj -MF CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.obj.d -o CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/MovementSystem.cpp
 
 game/CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/MovementSystem.cpp > CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/MovementSystem.cpp > CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.i
 
 game/CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/MovementSystem.cpp -o CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/MovementSystem.cpp -o CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.s
 
 game/CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/flags.make
 game/CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/includes_CXX.rsp
-game/CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/CameraSystem.cpp
+game/CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/CameraSystem.cpp
 game/CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object game/CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.obj -MF CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.obj.d -o CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/CameraSystem.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object game/CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.obj -MF CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.obj.d -o CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/CameraSystem.cpp
 
 game/CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/CameraSystem.cpp > CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/CameraSystem.cpp > CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.i
 
 game/CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/CameraSystem.cpp -o CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/CameraSystem.cpp -o CMakeFiles/zeta_game.dir/systems/CameraSystem.cpp.s
 
 game/CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/flags.make
 game/CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/includes_CXX.rsp
-game/CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/ProjectileSystem.cpp
+game/CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/ProjectileSystem.cpp
 game/CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object game/CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.obj -MF CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.obj.d -o CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/ProjectileSystem.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object game/CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.obj -MF CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.obj.d -o CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/ProjectileSystem.cpp
 
 game/CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/ProjectileSystem.cpp > CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/ProjectileSystem.cpp > CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.i
 
 game/CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/ProjectileSystem.cpp -o CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/ProjectileSystem.cpp -o CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.s
 
 game/CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/flags.make
 game/CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/includes_CXX.rsp
-game/CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/CollisionSystem.cpp
+game/CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/CollisionSystem.cpp
 game/CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object game/CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.obj -MF CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.obj.d -o CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/CollisionSystem.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object game/CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.obj -MF CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.obj.d -o CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/CollisionSystem.cpp
 
 game/CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/CollisionSystem.cpp > CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/CollisionSystem.cpp > CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.i
 
 game/CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/CollisionSystem.cpp -o CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/CollisionSystem.cpp -o CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.s
 
 game/CMakeFiles/zeta_game.dir/systems/EnemyAISystem.cpp.obj: game/CMakeFiles/zeta_game.dir/flags.make
 game/CMakeFiles/zeta_game.dir/systems/EnemyAISystem.cpp.obj: game/CMakeFiles/zeta_game.dir/includes_CXX.rsp
-game/CMakeFiles/zeta_game.dir/systems/EnemyAISystem.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/EnemyAISystem.cpp
+game/CMakeFiles/zeta_game.dir/systems/EnemyAISystem.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/EnemyAISystem.cpp
 game/CMakeFiles/zeta_game.dir/systems/EnemyAISystem.cpp.obj: game/CMakeFiles/zeta_game.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object game/CMakeFiles/zeta_game.dir/systems/EnemyAISystem.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/systems/EnemyAISystem.cpp.obj -MF CMakeFiles/zeta_game.dir/systems/EnemyAISystem.cpp.obj.d -o CMakeFiles/zeta_game.dir/systems/EnemyAISystem.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/EnemyAISystem.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object game/CMakeFiles/zeta_game.dir/systems/EnemyAISystem.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/systems/EnemyAISystem.cpp.obj -MF CMakeFiles/zeta_game.dir/systems/EnemyAISystem.cpp.obj.d -o CMakeFiles/zeta_game.dir/systems/EnemyAISystem.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/EnemyAISystem.cpp
 
 game/CMakeFiles/zeta_game.dir/systems/EnemyAISystem.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/zeta_game.dir/systems/EnemyAISystem.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/EnemyAISystem.cpp > CMakeFiles/zeta_game.dir/systems/EnemyAISystem.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/EnemyAISystem.cpp > CMakeFiles/zeta_game.dir/systems/EnemyAISystem.cpp.i
 
 game/CMakeFiles/zeta_game.dir/systems/EnemyAISystem.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/zeta_game.dir/systems/EnemyAISystem.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/EnemyAISystem.cpp -o CMakeFiles/zeta_game.dir/systems/EnemyAISystem.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/EnemyAISystem.cpp -o CMakeFiles/zeta_game.dir/systems/EnemyAISystem.cpp.s
 
 game/CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/flags.make
 game/CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/includes_CXX.rsp
-game/CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/WaveSystem.cpp
+game/CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/WaveSystem.cpp
 game/CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object game/CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.obj -MF CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.obj.d -o CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/WaveSystem.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object game/CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.obj -MF CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.obj.d -o CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/WaveSystem.cpp
 
 game/CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/WaveSystem.cpp > CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/WaveSystem.cpp > CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.i
 
 game/CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/WaveSystem.cpp -o CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/WaveSystem.cpp -o CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.s
 
 game/CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/flags.make
 game/CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/includes_CXX.rsp
-game/CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/AnimationSystem.cpp
+game/CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/AnimationSystem.cpp
 game/CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object game/CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.obj -MF CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.obj.d -o CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/AnimationSystem.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object game/CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.obj -MF CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.obj.d -o CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/AnimationSystem.cpp
 
 game/CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/AnimationSystem.cpp > CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/AnimationSystem.cpp > CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.i
 
 game/CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/AnimationSystem.cpp -o CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/AnimationSystem.cpp -o CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.s
 
 game/CMakeFiles/zeta_game.dir/systems/HitFlashSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/flags.make
 game/CMakeFiles/zeta_game.dir/systems/HitFlashSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/includes_CXX.rsp
-game/CMakeFiles/zeta_game.dir/systems/HitFlashSystem.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/HitFlashSystem.cpp
+game/CMakeFiles/zeta_game.dir/systems/HitFlashSystem.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/HitFlashSystem.cpp
 game/CMakeFiles/zeta_game.dir/systems/HitFlashSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object game/CMakeFiles/zeta_game.dir/systems/HitFlashSystem.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/systems/HitFlashSystem.cpp.obj -MF CMakeFiles/zeta_game.dir/systems/HitFlashSystem.cpp.obj.d -o CMakeFiles/zeta_game.dir/systems/HitFlashSystem.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/HitFlashSystem.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object game/CMakeFiles/zeta_game.dir/systems/HitFlashSystem.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/systems/HitFlashSystem.cpp.obj -MF CMakeFiles/zeta_game.dir/systems/HitFlashSystem.cpp.obj.d -o CMakeFiles/zeta_game.dir/systems/HitFlashSystem.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/HitFlashSystem.cpp
 
 game/CMakeFiles/zeta_game.dir/systems/HitFlashSystem.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/zeta_game.dir/systems/HitFlashSystem.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/HitFlashSystem.cpp > CMakeFiles/zeta_game.dir/systems/HitFlashSystem.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/HitFlashSystem.cpp > CMakeFiles/zeta_game.dir/systems/HitFlashSystem.cpp.i
 
 game/CMakeFiles/zeta_game.dir/systems/HitFlashSystem.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/zeta_game.dir/systems/HitFlashSystem.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/HitFlashSystem.cpp -o CMakeFiles/zeta_game.dir/systems/HitFlashSystem.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/HitFlashSystem.cpp -o CMakeFiles/zeta_game.dir/systems/HitFlashSystem.cpp.s
 
 game/CMakeFiles/zeta_game.dir/systems/DamageNumberSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/flags.make
 game/CMakeFiles/zeta_game.dir/systems/DamageNumberSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/includes_CXX.rsp
-game/CMakeFiles/zeta_game.dir/systems/DamageNumberSystem.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/DamageNumberSystem.cpp
+game/CMakeFiles/zeta_game.dir/systems/DamageNumberSystem.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/DamageNumberSystem.cpp
 game/CMakeFiles/zeta_game.dir/systems/DamageNumberSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object game/CMakeFiles/zeta_game.dir/systems/DamageNumberSystem.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/systems/DamageNumberSystem.cpp.obj -MF CMakeFiles/zeta_game.dir/systems/DamageNumberSystem.cpp.obj.d -o CMakeFiles/zeta_game.dir/systems/DamageNumberSystem.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/DamageNumberSystem.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object game/CMakeFiles/zeta_game.dir/systems/DamageNumberSystem.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/systems/DamageNumberSystem.cpp.obj -MF CMakeFiles/zeta_game.dir/systems/DamageNumberSystem.cpp.obj.d -o CMakeFiles/zeta_game.dir/systems/DamageNumberSystem.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/DamageNumberSystem.cpp
 
 game/CMakeFiles/zeta_game.dir/systems/DamageNumberSystem.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/zeta_game.dir/systems/DamageNumberSystem.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/DamageNumberSystem.cpp > CMakeFiles/zeta_game.dir/systems/DamageNumberSystem.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/DamageNumberSystem.cpp > CMakeFiles/zeta_game.dir/systems/DamageNumberSystem.cpp.i
 
 game/CMakeFiles/zeta_game.dir/systems/DamageNumberSystem.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/zeta_game.dir/systems/DamageNumberSystem.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/DamageNumberSystem.cpp -o CMakeFiles/zeta_game.dir/systems/DamageNumberSystem.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/DamageNumberSystem.cpp -o CMakeFiles/zeta_game.dir/systems/DamageNumberSystem.cpp.s
 
 game/CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/flags.make
 game/CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/includes_CXX.rsp
-game/CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/PickupSystem.cpp
+game/CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/PickupSystem.cpp
 game/CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object game/CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.obj -MF CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.obj.d -o CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/PickupSystem.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object game/CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.obj -MF CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.obj.d -o CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/PickupSystem.cpp
 
 game/CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/PickupSystem.cpp > CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/PickupSystem.cpp > CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.i
 
 game/CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/PickupSystem.cpp -o CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/PickupSystem.cpp -o CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.s
 
 game/CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/flags.make
 game/CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/includes_CXX.rsp
-game/CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/EventSystem.cpp
+game/CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/EventSystem.cpp
 game/CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object game/CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.obj -MF CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.obj.d -o CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/EventSystem.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object game/CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.obj -MF CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.obj.d -o CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/EventSystem.cpp
 
 game/CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/EventSystem.cpp > CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/EventSystem.cpp > CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.i
 
 game/CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/EventSystem.cpp -o CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/EventSystem.cpp -o CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.s
 
 game/CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/flags.make
 game/CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/includes_CXX.rsp
-game/CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/HotzoneSystem.cpp
+game/CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/HotzoneSystem.cpp
 game/CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object game/CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.obj -MF CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.obj.d -o CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/HotzoneSystem.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object game/CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.obj -MF CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.obj.d -o CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/HotzoneSystem.cpp
 
 game/CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/HotzoneSystem.cpp > CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/HotzoneSystem.cpp > CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.i
 
 game/CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/HotzoneSystem.cpp -o CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/HotzoneSystem.cpp -o CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.s
 
 game/CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/flags.make
 game/CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/includes_CXX.rsp
-game/CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/ShopSystem.cpp
+game/CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/ShopSystem.cpp
 game/CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.obj: game/CMakeFiles/zeta_game.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object game/CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.obj -MF CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.obj.d -o CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/ShopSystem.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object game/CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.obj -MF CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.obj.d -o CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/ShopSystem.cpp
 
 game/CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/ShopSystem.cpp > CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/ShopSystem.cpp > CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.i
 
 game/CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/systems/ShopSystem.cpp -o CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/ShopSystem.cpp -o CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.s
+
+game/CMakeFiles/zeta_game.dir/meta/ItemDefs.cpp.obj: game/CMakeFiles/zeta_game.dir/flags.make
+game/CMakeFiles/zeta_game.dir/meta/ItemDefs.cpp.obj: game/CMakeFiles/zeta_game.dir/includes_CXX.rsp
+game/CMakeFiles/zeta_game.dir/meta/ItemDefs.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/game/meta/ItemDefs.cpp
+game/CMakeFiles/zeta_game.dir/meta/ItemDefs.cpp.obj: game/CMakeFiles/zeta_game.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object game/CMakeFiles/zeta_game.dir/meta/ItemDefs.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/meta/ItemDefs.cpp.obj -MF CMakeFiles/zeta_game.dir/meta/ItemDefs.cpp.obj.d -o CMakeFiles/zeta_game.dir/meta/ItemDefs.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/game/meta/ItemDefs.cpp
+
+game/CMakeFiles/zeta_game.dir/meta/ItemDefs.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/zeta_game.dir/meta/ItemDefs.cpp.i"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/game/meta/ItemDefs.cpp > CMakeFiles/zeta_game.dir/meta/ItemDefs.cpp.i
+
+game/CMakeFiles/zeta_game.dir/meta/ItemDefs.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/zeta_game.dir/meta/ItemDefs.cpp.s"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/game/meta/ItemDefs.cpp -o CMakeFiles/zeta_game.dir/meta/ItemDefs.cpp.s
 
 game/CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.obj: game/CMakeFiles/zeta_game.dir/flags.make
 game/CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.obj: game/CMakeFiles/zeta_game.dir/includes_CXX.rsp
-game/CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.obj: /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/meta/SaveManager.cpp
+game/CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/game/meta/SaveManager.cpp
 game/CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.obj: game/CMakeFiles/zeta_game.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object game/CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.obj"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.obj -MF CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.obj.d -o CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.obj -c /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/meta/SaveManager.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building CXX object game/CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.obj -MF CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.obj.d -o CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/game/meta/SaveManager.cpp
 
 game/CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.i"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/meta/SaveManager.cpp > CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.i
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/game/meta/SaveManager.cpp > CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.i
 
 game/CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.s"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/natalie/Documents/GitHub/ProjectAuroraZeta/game/meta/SaveManager.cpp -o CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.s
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/game/meta/SaveManager.cpp -o CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.s
 
 # Object files for target zeta_game
 zeta_game_OBJECTS = \
@@ -342,6 +357,7 @@ zeta_game_OBJECTS = \
 "CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.obj" \
 "CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.obj" \
 "CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.obj" \
+"CMakeFiles/zeta_game.dir/meta/ItemDefs.cpp.obj" \
 "CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.obj"
 
 # External object files for target zeta_game
@@ -363,22 +379,23 @@ game/libzeta_game.a: game/CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.obj
 game/libzeta_game.a: game/CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.obj
 game/libzeta_game.a: game/CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.obj
 game/libzeta_game.a: game/CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.obj
+game/libzeta_game.a: game/CMakeFiles/zeta_game.dir/meta/ItemDefs.cpp.obj
 game/libzeta_game.a: game/CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.obj
 game/libzeta_game.a: game/CMakeFiles/zeta_game.dir/build.make
 game/libzeta_game.a: game/CMakeFiles/zeta_game.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Linking CXX static library libzeta_game.a"
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && $(CMAKE_COMMAND) -P CMakeFiles/zeta_game.dir/cmake_clean_target.cmake
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/zeta_game.dir/link.txt --verbose=$(VERBOSE)
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Linking CXX static library libzeta_game.a"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && $(CMAKE_COMMAND) -P CMakeFiles/zeta_game.dir/cmake_clean_target.cmake
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/zeta_game.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 game/CMakeFiles/zeta_game.dir/build: game/libzeta_game.a
 .PHONY : game/CMakeFiles/zeta_game.dir/build
 
 game/CMakeFiles/zeta_game.dir/clean:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game && $(CMAKE_COMMAND) -P CMakeFiles/zeta_game.dir/cmake_clean.cmake
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && $(CMAKE_COMMAND) -P CMakeFiles/zeta_game.dir/cmake_clean.cmake
 .PHONY : game/CMakeFiles/zeta_game.dir/clean
 
 game/CMakeFiles/zeta_game.dir/depend:
-	cd /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/natalie/Documents/GitHub/ProjectAuroraZeta /home/natalie/Documents/GitHub/ProjectAuroraZeta/game /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/game/CMakeFiles/zeta_game.dir/DependInfo.cmake "--color=$(COLOR)"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/zach/Documents/GitHub/ProjectAuroraZeta /home/zach/Documents/GitHub/ProjectAuroraZeta/game /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game/CMakeFiles/zeta_game.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : game/CMakeFiles/zeta_game.dir/depend
 

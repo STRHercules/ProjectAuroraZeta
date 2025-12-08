@@ -29,7 +29,7 @@ events:
       Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "a.exe"
       
       The CXX compiler identification is GNU, found in:
-        /home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles/3.28.3/CompilerIdCXX/a.exe
+        /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles/3.28.3/CompilerIdCXX/a.exe
       
   -
     kind: "try_compile-v1"
@@ -40,8 +40,8 @@ events:
     checks:
       - "Detecting CXX compiler ABI info"
     directories:
-      source: "/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles/CMakeScratch/TryCompile-Jgqxlv"
-      binary: "/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles/CMakeScratch/TryCompile-Jgqxlv"
+      source: "/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles/CMakeScratch/TryCompile-Jgqxlv"
+      binary: "/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles/CMakeScratch/TryCompile-Jgqxlv"
     cmakeVariables:
       CMAKE_CXX_FLAGS: ""
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -50,11 +50,11 @@ events:
       variable: "CMAKE_CXX_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: '/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles/CMakeScratch/TryCompile-Jgqxlv'
+        Change Dir: '/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles/CMakeScratch/TryCompile-Jgqxlv'
         
         Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_7ee49/fast
         /usr/bin/gmake  -f CMakeFiles/cmTC_7ee49.dir/build.make CMakeFiles/cmTC_7ee49.dir/build
-        gmake[1]: Entering directory '/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles/CMakeScratch/TryCompile-Jgqxlv'
+        gmake[1]: Entering directory '/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles/CMakeScratch/TryCompile-Jgqxlv'
         Building CXX object CMakeFiles/cmTC_7ee49.dir/CMakeCXXCompilerABI.cpp.obj
         /usr/bin/x86_64-w64-mingw32-g++-posix   -std=gnu++20   -v -o CMakeFiles/cmTC_7ee49.dir/CMakeCXXCompilerABI.cpp.obj -c /usr/share/cmake-3.28/Modules/CMakeCXXCompilerABI.cpp
         Using built-in specs.
@@ -105,7 +105,7 @@ events:
         COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_7ee49.exe' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_7ee49.'
          /usr/lib/gcc/x86_64-w64-mingw32/13-posix/collect2 -plugin /usr/lib/gcc/x86_64-w64-mingw32/13-posix/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-w64-mingw32/13-posix/lto-wrapper -plugin-opt=-fresolution=/tmp/ccODgSZa.res -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lmoldname -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-ladvapi32 -plugin-opt=-pass-through=-lshell32 -plugin-opt=-pass-through=-luser32 -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lmoldname -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 -m i386pep -Bdynamic -o cmTC_7ee49.exe /usr/lib/gcc/x86_64-w64-mingw32/13-posix/../../../../x86_64-w64-mingw32/lib/crt2.o /usr/lib/gcc/x86_64-w64-mingw32/13-posix/crtbegin.o -L/usr/lib/gcc/x86_64-w64-mingw32/13-posix -L/usr/lib/gcc/x86_64-w64-mingw32/13-posix/../../../../x86_64-w64-mingw32/lib --whole-archive CMakeFiles/cmTC_7ee49.dir/objects.a --no-whole-archive --out-implib libcmTC_7ee49.dll.a --major-image-version 0 --minor-image-version 0 -lstdc++ -lmingw32 -lgcc_s -lgcc -lmoldname -lmingwex -lmsvcrt -lkernel32 -lpthread -ladvapi32 -lshell32 -luser32 -lkernel32 -lmingw32 -lgcc_s -lgcc -lmoldname -lmingwex -lmsvcrt -lkernel32 /usr/lib/gcc/x86_64-w64-mingw32/13-posix/crtend.o
         COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_7ee49.exe' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_7ee49.'
-        gmake[1]: Leaving directory '/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles/CMakeScratch/TryCompile-Jgqxlv'
+        gmake[1]: Leaving directory '/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles/CMakeScratch/TryCompile-Jgqxlv'
         
       exitCode: 0
   -
@@ -143,11 +143,11 @@ events:
     message: |
       Parsed CXX implicit link information:
         link line regex: [^( *|.*[/\\])(x86_64-w64-mingw32-ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
-        ignore line: [Change Dir: '/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles/CMakeScratch/TryCompile-Jgqxlv']
+        ignore line: [Change Dir: '/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles/CMakeScratch/TryCompile-Jgqxlv']
         ignore line: []
         ignore line: [Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_7ee49/fast]
         ignore line: [/usr/bin/gmake  -f CMakeFiles/cmTC_7ee49.dir/build.make CMakeFiles/cmTC_7ee49.dir/build]
-        ignore line: [gmake[1]: Entering directory '/home/natalie/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles/CMakeScratch/TryCompile-Jgqxlv']
+        ignore line: [gmake[1]: Entering directory '/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles/CMakeScratch/TryCompile-Jgqxlv']
         ignore line: [Building CXX object CMakeFiles/cmTC_7ee49.dir/CMakeCXXCompilerABI.cpp.obj]
         ignore line: [/usr/bin/x86_64-w64-mingw32-g++-posix   -std=gnu++20   -v -o CMakeFiles/cmTC_7ee49.dir/CMakeCXXCompilerABI.cpp.obj -c /usr/share/cmake-3.28/Modules/CMakeCXXCompilerABI.cpp]
         ignore line: [Using built-in specs.]
