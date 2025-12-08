@@ -1,0 +1,15 @@
+mkdir -p ~/winlibs/sdl
+cd ~/winlibs/sdl
+# SDL2 base
+wget https://www.libsdl.org/release/SDL2-devel-2.30.9-mingw.zip
+# SDL2_ttf
+wget https://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-devel-2.22.0-mingw.zip
+# SDL2_image (optional but supported)
+wget https://www.libsdl.org/projects/SDL_image/release/SDL2_image-devel-2.8.2-mingw.zip
+
+
+
+unzip SDL2-devel-2.30.9-mingw.zip
+unzip SDL2_ttf-devel-2.22.0-mingw.zip
+unzip SDL2_image-devel-2.8.2-mingw.zip
+
