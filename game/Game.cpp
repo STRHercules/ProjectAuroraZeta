@@ -1742,8 +1742,8 @@ void GameRoot::renderMenu() {
 
     const float centerX = static_cast<float>(viewportWidth_) * 0.5f;
     const float topY = 140.0f;
-    drawTextUnified("PROJECT ZETA", Engine::Vec2{centerX - 140.0f, topY}, 1.7f, Engine::Color{180, 230, 255, 240});
-    drawTextUnified("Placeholder build | WASD move | Mouse aim | B shop | Esc pause", Engine::Vec2{centerX - 220.0f, topY + 28.0f},
+    drawTextUnified("    PROJECT ZETA", Engine::Vec2{centerX - 140.0f, topY}, 1.7f, Engine::Color{180, 230, 255, 240});
+    drawTextUnified("Pre-Alpha Build | WASD move | Mouse aim | B shop | Esc pause", Engine::Vec2{centerX - 220.0f, topY + 28.0f},
                     0.9f, Engine::Color{150, 200, 230, 220});
 
     auto drawButton = [&](const std::string& label, int index) {
@@ -1765,7 +1765,7 @@ void GameRoot::renderMenu() {
         drawButton("Exit", 3);
         float pulse = 0.6f + 0.4f * std::sin(static_cast<float>(menuPulse_) * 2.0f);
         Engine::Color hint{static_cast<uint8_t>(180 + 40 * pulse), 220, 255, 220};
-        drawTextUnified("Navigate: W/S or arrows | Select: Mouse1", Engine::Vec2{centerX - 160.0f, topY + 240.0f},
+        drawTextUnified("          A Major Bonghit Production", Engine::Vec2{centerX - 160.0f, topY + 240.0f},
                         0.9f, hint);
     } else if (menuPage_ == MenuPage::Stats) {
         Engine::Color c{200, 230, 255, 240};

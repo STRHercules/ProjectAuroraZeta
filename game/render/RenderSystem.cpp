@@ -126,7 +126,9 @@ void RenderSystem::drawGrid(const Engine::Camera2D& camera, int viewportW, int v
                 Engine::Vec2 screen = Engine::worldToScreen(Engine::Vec2{x, y}, camera,
                                                             static_cast<float>(viewportW),
                                                             static_cast<float>(viewportH));
-                Engine::Vec2 size{tileW * camera.zoom, tileH * camera.zoom};
+                screen.x = std::round(screen.x);
+                screen.y = std::round(screen.y);
+                Engine::Vec2 size{tileW * camera.zoom + 1.0f, tileH * camera.zoom + 1.0f};
                 device_.drawTexture(*texPtr, screen, size);
             }
         }
@@ -142,7 +144,9 @@ void RenderSystem::drawGrid(const Engine::Camera2D& camera, int viewportW, int v
             for (float x = firstX; x < right; x += tileW) {
                 Engine::Vec2 screen = Engine::worldToScreen(Engine::Vec2{x, y}, camera, static_cast<float>(viewportW),
                                                             static_cast<float>(viewportH));
-                Engine::Vec2 size{tileW * camera.zoom, tileH * camera.zoom};
+                screen.x = std::round(screen.x);
+                screen.y = std::round(screen.y);
+                Engine::Vec2 size{tileW * camera.zoom + 1.0f, tileH * camera.zoom + 1.0f};
                 device_.drawTexture(*gridTexture, screen, size);
             }
         }
