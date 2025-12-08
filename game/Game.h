@@ -73,6 +73,7 @@ private:
     void refreshShopInventory();
     bool addItemToInventory(const ItemDefinition& def);
     bool sellItemFromInventory(std::size_t idx, int& creditsOut);
+    void clampInventorySelection();
     void loadMenuPresets();
     void applyDifficultyPreset();
     void applyArchetypePreset();
@@ -350,6 +351,9 @@ private:
     // Inventory
     std::vector<ItemInstance> inventory_;
     int inventoryCapacity_{16};
+    int inventorySelected_{-1};
+    bool inventoryScrollLeftPrev_{false};
+    bool inventoryScrollRightPrev_{false};
     Engine::ECS::Entity shopkeeper_{Engine::ECS::kInvalidEntity};
     bool interactPrev_{false};
     bool useItemPrev_{false};

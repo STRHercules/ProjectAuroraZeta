@@ -445,6 +445,23 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         return;
     }
 
+    // Inventory selection (arrow keys).
+    bool invLeftEdge = input.isDown(Engine::InputKey::CamLeft) && !inventoryScrollLeftPrev_;
+    bool invRightEdge = input.isDown(Engine::InputKey::CamRight) && !inventoryScrollRightPrev_;
+    inventoryScrollLeftPrev_ = input.isDown(Engine::InputKey::CamLeft);
+    inventoryScrollRightPrev_ = input.isDown(Engine::InputKey::CamRight);
+    if (inventory_.empty()) {
+        inventorySelected_ = -1;
+    } else {
+        clampInventorySelection();
+        if (invLeftEdge) {
+            inventorySelected_ = (inventorySelected_ - 1 + static_cast<int>(inventory_.size())) %
+                                 static_cast<int>(inventory_.size());
+        } else if (invRightEdge) {
+            inventorySelected_ = (inventorySelected_ + 1) % static_cast<int>(inventory_.size());
+        }
+    }
+
     // Timers.
         if (shopUnavailableTimer_ > 0.0) {
             shopUnavailableTimer_ -= step.deltaSeconds;
@@ -614,12 +631,19 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 int mx = input.mouseX();
                 int my = input.mouseY();
                 const float panelW = 760.0f;
+                const float panelH = 240.0f;
+                const float invW = 200.0f;
+                const float popGap = 24.0f;
+                const float totalW = panelW + popGap + invW;
                 const float cardW = 160.0f;
                 const float cardH = 130.0f;
                 const float gap = 14.0f;
                 float cx = static_cast<float>(viewportWidth_) * 0.5f;
-                float startX = cx - (panelW * 0.5f) + 18.0f;
-                float y = static_cast<float>(viewportHeight_) * 0.5f - 40.0f;
+                float cy = static_cast<float>(viewportHeight_) * 0.6f;
+                float topLeftX = cx - totalW * 0.5f;
+                float topLeftY = cy - panelH * 0.5f;
+                float startX = topLeftX + 18.0f;
+                float y = topLeftY + 42.0f;
                 // Purchases
                 for (std::size_t i = 0; i < shopInventory_.size(); ++i) {
                     float x = startX + static_cast<float>(i) * (cardW + gap);
@@ -646,8 +670,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     }
                 }
                 // Selling inventory rows
-                const float invW = 200.0f;
-                float invX = cx + panelW * 0.5f - invW - 18.0f;
+                float invX = topLeftX + panelW + popGap;
                 float invY = y;
                 const float rowH = 28.0f;
                 for (std::size_t i = 0; i < inventory_.size(); ++i) {
@@ -690,36 +713,48 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             if (ability3Edge) executeAbility(3);
             if (abilityUltEdge) executeAbility(4);
             if (useItemEdge) {
-                        // Consume the first Support item in inventory.
-                        for (std::size_t i = 0; i < inventory_.size(); ++i) {
-                            const auto& inst = inventory_[i];
-                            if (inst.def.kind == ItemKind::Support) {
-                                switch (inst.def.effect) {
-                                    case ItemEffect::Heal: {
-                                        if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
-                                            hp->current = std::min(hp->max, hp->current + inst.def.value * hp->max);
-                                        }
-                                        break;
-                                    }
-                                    case ItemEffect::FreezeTime:
-                                        freezeTimer_ = std::max(freezeTimer_, static_cast<double>(inst.def.value));
-                                        break;
-                                    case ItemEffect::Turret: {
-                                        TurretInstance t{};
-                                        if (const auto* tf = registry_.get<Engine::ECS::Transform>(hero_)) t.pos = tf->position;
-                                        t.timer = inst.def.value;
-                                        t.fireCooldown = 0.0f;
-                                        turrets_.push_back(t);
-                                        break;
-                                    }
-                                    default:
-                                        break;
-                                }
-                                inventory_.erase(inventory_.begin() + static_cast<std::ptrdiff_t>(i));
-                                break;
-                            }
-                        }
+                clampInventorySelection();
+                // Prefer the selected support item; otherwise pick the first support available.
+                int targetIdx = -1;
+                if (inventorySelected_ >= 0 && inventorySelected_ < static_cast<int>(inventory_.size()) &&
+                    inventory_[inventorySelected_].def.kind == ItemKind::Support) {
+                    targetIdx = inventorySelected_;
+                } else {
+                    for (std::size_t i = 0; i < inventory_.size(); ++i) {
+                        if (inventory_[i].def.kind == ItemKind::Support) { targetIdx = static_cast<int>(i); break; }
                     }
+                }
+                if (targetIdx != -1) {
+                    const auto& inst = inventory_[targetIdx];
+                    switch (inst.def.effect) {
+                        case ItemEffect::Heal: {
+                            if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
+                                hp->current = std::min(hp->max, hp->current + inst.def.value * hp->max);
+                            }
+                            break;
+                        }
+                        case ItemEffect::FreezeTime:
+                            freezeTimer_ = std::max(freezeTimer_, static_cast<double>(inst.def.value));
+                            break;
+                        case ItemEffect::Turret: {
+                            TurretInstance t{};
+                            if (const auto* tf = registry_.get<Engine::ECS::Transform>(hero_)) t.pos = tf->position;
+                            t.timer = inst.def.value;
+                            t.fireCooldown = 0.0f;
+                            turrets_.push_back(t);
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                    inventory_.erase(inventory_.begin() + targetIdx);
+                    if (inventory_.empty()) {
+                        inventorySelected_ = -1;
+                    } else {
+                        clampInventorySelection();
+                    }
+                }
+            }
         }
     // Dash timers decrement.
     if (dashTimer_ > 0.0f) {
@@ -1325,10 +1360,40 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             }
             // HP and XP bars (bottom-left).
             {
-                const float barW = 260.0f;
+                const float barW = 300.0f;
                 const float hpH = 18.0f;
                 const float xpH = 16.0f;
-                Engine::Vec2 origin{10.0f, static_cast<float>(viewportHeight_) - 70.0f};
+                Engine::Vec2 origin{10.0f, static_cast<float>(viewportHeight_) - 82.0f};
+                // Held item display just above the bars.
+                Engine::Vec2 invPos{origin.x, origin.y - 50.0f};
+                float invW = barW;
+                float invH = 32.0f;
+                render_->drawFilledRect(invPos, Engine::Vec2{invW, invH}, Engine::Color{18, 24, 34, 210});
+                auto rarityCol = [](ItemRarity r) {
+                    switch (r) {
+                        case ItemRarity::Common: return Engine::Color{200, 220, 240, 240};
+                        case ItemRarity::Rare: return Engine::Color{140, 210, 255, 240};
+                        case ItemRarity::Legendary: return Engine::Color{255, 215, 140, 240};
+                    }
+                    return Engine::Color{200, 220, 240, 240};
+                };
+                if (inventory_.empty()) {
+                    inventorySelected_ = -1;
+                    drawTextUnified("Inventory empty (use <-/-> to cycle)", Engine::Vec2{invPos.x + 10.0f, invPos.y + 6.0f},
+                                    0.9f, Engine::Color{200, 220, 240, 220});
+                } else {
+                    clampInventorySelection();
+                    const auto& held = inventory_[inventorySelected_];
+                    bool usable = held.def.kind == ItemKind::Support;
+                    std::ostringstream heldText;
+                    heldText << "Holding: " << held.def.name;
+                    drawTextUnified(heldText.str(), Engine::Vec2{invPos.x + 10.0f, invPos.y + 2.0f}, 1.0f,
+                                    rarityCol(held.def.rarity));
+                    std::ostringstream hint;
+                    hint << "<- / -> to cycle   Q to " << (usable ? "use" : "use support item");
+                    drawTextUnified(hint.str(), Engine::Vec2{invPos.x + 10.0f, invPos.y + 12.0f},
+                                    0.85f, Engine::Color{180, 200, 220, 210});
+                }
 
                 // HP bar
                 float hpRatio = 1.0f;
@@ -2490,9 +2555,12 @@ void GameRoot::drawItemShopOverlay() {
     if (!render_ || !itemShopOpen_) return;
     const float panelW = 760.0f;
     const float panelH = 240.0f;
+    const float invW = 200.0f;
+    const float popGap = 24.0f;
+    const float totalW = panelW + popGap + invW;
     const float cx = static_cast<float>(viewportWidth_) * 0.5f;
     const float cy = static_cast<float>(viewportHeight_) * 0.6f;
-    Engine::Vec2 topLeft{cx - panelW * 0.5f, cy - panelH * 0.5f};
+    Engine::Vec2 topLeft{cx - totalW * 0.5f, cy - panelH * 0.5f};
     render_->drawFilledRect(topLeft, Engine::Vec2{panelW, panelH}, Engine::Color{16, 20, 30, 230});
     drawTextUnified("Traveling Shop (E to close)", Engine::Vec2{topLeft.x + 18.0f, topLeft.y + 12.0f}, 1.0f,
                     Engine::Color{200, 255, 200, 240});
@@ -2551,8 +2619,7 @@ void GameRoot::drawItemShopOverlay() {
     }
 
     // Inventory panel (sell)
-    const float invW = 200.0f;
-    float invX = topLeft.x + panelW - invW - 18.0f;
+    float invX = topLeft.x + panelW + popGap;
     float invY = topLeft.y + 42.0f;
     render_->drawFilledRect(Engine::Vec2{invX - 6.0f, invY - 10.0f}, Engine::Vec2{invW + 12.0f, panelH - 60.0f},
                             Engine::Color{24, 32, 46, 210});
@@ -2775,6 +2842,9 @@ void GameRoot::resetRun() {
     dashDir_ = {0.0f, 0.0f};
     inventory_.clear();
     inventory_.shrink_to_fit();
+    inventorySelected_ = -1;
+    inventoryScrollLeftPrev_ = false;
+    inventoryScrollRightPrev_ = false;
     shopkeeper_ = Engine::ECS::kInvalidEntity;
     interactPrev_ = false;
     useItemPrev_ = false;
@@ -2816,6 +2886,7 @@ void GameRoot::resetRun() {
 bool GameRoot::addItemToInventory(const ItemDefinition& def) {
     if (static_cast<int>(inventory_.size()) >= inventoryCapacity_) return false;
     inventory_.push_back(ItemInstance{def, 1});
+    clampInventorySelection();
     // Apply passive bonuses for Unique items.
     switch (def.effect) {
         case ItemEffect::AttackSpeed:
@@ -2840,7 +2911,19 @@ bool GameRoot::sellItemFromInventory(std::size_t idx, int& creditsOut) {
     int refund = std::max(1, inst.def.cost / 2);
     creditsOut += refund;
     inventory_.erase(inventory_.begin() + static_cast<std::ptrdiff_t>(idx));
+    clampInventorySelection();
     return true;
+}
+
+void GameRoot::clampInventorySelection() {
+    if (inventory_.empty()) {
+        inventorySelected_ = -1;
+        return;
+    }
+    if (inventorySelected_ < 0) inventorySelected_ = 0;
+    if (inventorySelected_ >= static_cast<int>(inventory_.size())) {
+        inventorySelected_ = static_cast<int>(inventory_.size()) - 1;
+    }
 }
 
 }  // namespace Game
