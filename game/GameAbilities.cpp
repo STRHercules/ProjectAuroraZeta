@@ -44,6 +44,10 @@ void GameRoot::executeAbility(int index) {
     auto& slot = abilities_[index];
     auto& st = abilityStates_[index];
     if (slot.cooldown > 0.0f) return;
+    if (slot.energyCost > 0.0f && energy_ < slot.energyCost) {
+        energyWarningTimer_ = 0.6;
+        return;
+    }
 
     // Helper to pull hero position
     const auto* heroTf = registry_.get<Engine::ECS::Transform>(hero_);
@@ -54,6 +58,11 @@ void GameRoot::executeAbility(int index) {
         slot.cooldown = cd;
         slot.cooldownMax = std::max(slot.cooldownMax, cd);
         st.cooldown = cd;
+    };
+    auto spendEnergy = [&]() {
+        if (slot.energyCost > 0.0f) {
+            energy_ = std::max(0.0f, energy_ - slot.energyCost);
+        }
     };
 
     auto spawnProjectile = [&](const Engine::Vec2& dir, float speed, Engine::Gameplay::DamageEvent dmgEvent, float sizeMul = 1.0f) {
@@ -71,6 +80,7 @@ void GameRoot::executeAbility(int index) {
 
     if (slot.type == "scatter") {
         // Cone blast of pellets
+        spendEnergy();
         std::uniform_real_distribution<float> spread(-0.35f, 0.35f);
         std::mt19937& rng = rng_;
         for (int i = 0; i < 6 + slot.level; ++i) {
@@ -86,6 +96,7 @@ void GameRoot::executeAbility(int index) {
         }
         setCooldown(std::max(0.5f, slot.cooldownMax));
     } else if (slot.type == "rage") {
+        spendEnergy();
         rageDamageBuff_ = 1.2f * slot.powerScale;
         rageRateBuff_ = 1.15f * slot.powerScale;
         rageTimer_ = 5.0f + slot.level * 0.6f;
@@ -100,6 +111,7 @@ void GameRoot::executeAbility(int index) {
         registry_.emplace<Game::ArmorBuff>(hero_, Game::ArmorBuff{buff, rageTimer_});
         setCooldown(std::max(3.0f, slot.cooldownMax));
     } else if (slot.type == "nova") {
+        spendEnergy();
         int count = 12 + slot.level * 2;
         float speed = projectileSpeed_ * 0.7f;
         float dmg = projectileDamage_ * 1.6f * slot.powerScale * zoneDmgMul;
@@ -113,6 +125,7 @@ void GameRoot::executeAbility(int index) {
         }
         setCooldown(std::max(2.0f, slot.cooldownMax));
     } else if (slot.type == "ultimate") {
+        spendEnergy();
         int waves = 3;
         for (int w = 0; w < waves; ++w) {
             int count = 20 + slot.level * 2;
@@ -130,6 +143,7 @@ void GameRoot::executeAbility(int index) {
         setCooldown(std::max(8.0f, slot.cooldownMax));
     } else {
         // Generic placeholder
+        spendEnergy();
         setCooldown(slot.cooldownMax);
     }
 }

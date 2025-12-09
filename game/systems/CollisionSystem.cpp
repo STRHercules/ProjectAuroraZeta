@@ -62,6 +62,10 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                                     heroHp.currentHealth = std::min(heroHp.maxHealth, heroHp.currentHealth + heal);
                                 });
                         }
+                        // Grant XP for damage dealt.
+                        if (xpPtr_ && dealt > 0.0f) {
+                            *xpPtr_ += static_cast<int>(std::round(dealt * xpPerDamageDealt_));
+                        }
                         // Chain bounce.
                         if (proj.chain > 0) {
                             Engine::ECS::Entity best = Engine::ECS::kInvalidEntity;
@@ -146,6 +150,9 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                                 flash->timer = 0.12f;
                             } else {
                                 registry.emplace<Game::HitFlash>(heroEnt, Game::HitFlash{0.12f});
+                            }
+                            if (xpPtr_ && heroEnt == hero_) {
+                                *xpPtr_ += static_cast<int>(std::round(dealt * xpPerDamageTaken_));
                             }
                         }
                     }

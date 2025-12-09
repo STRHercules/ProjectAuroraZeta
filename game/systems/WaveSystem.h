@@ -36,6 +36,8 @@ public:
     void resetTimer() { timer_ = 0.0; }
     void setTimer(double t) { timer_ = t; }
     double timeToNext() const { return timer_; }
+    void setRound(int round) { currentRound_ = round; }
+    void setSpawnBatchInterval(int interval) { spawnBatchInterval_ = std::max(1, interval); }
     void setBossConfig(int bossWave, float hpMul, float speedMul) {
         bossWave_ = bossWave;
         bossHpMul_ = hpMul;
@@ -51,6 +53,9 @@ private:
     std::mt19937& rng_;
     WaveSettings settings_;
     double timer_{0.0};
+    int currentRound_{1};
+    int spawnBatchInterval_{5};
+    int roundBatchApplied_{0};
     int bossWave_{20};
     float bossHpMul_{12.0f};
     float bossSpeedMul_{0.8f};

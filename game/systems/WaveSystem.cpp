@@ -30,6 +30,13 @@ bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
                         int& wave) {
     timer_ -= step.deltaSeconds;
     if (timer_ > 0.0) return false;
+    // Round-based spawn scaling: every N rounds add 1 batch size (once per threshold).
+    int level = std::max(0, currentRound_ / spawnBatchInterval_);
+    if (level > roundBatchApplied_) {
+        int diff = level - roundBatchApplied_;
+        settings_.batchSize = std::min(16, settings_.batchSize + diff);
+        roundBatchApplied_ = level;
+    }
     timer_ += settings_.interval + settings_.grace;
     wave++;
     // Simple scaling: every wave increase HP and batch.

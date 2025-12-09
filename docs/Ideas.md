@@ -31,17 +31,6 @@
     * Quit
         * Does what it already does
 
-# Experience
-* Taking and Dealing damage grants the character small trickle exp.
-* Defeating enemies grants standard exp.
-* Defeating bosses grants moderate exp.
-* Finishing Events/Challenges grants considerable exp.
-
-# Camera
-* Camera will be in free-cam by default, with the option to lock the camera to your character with [C].
-* Fog of War
-    * Refer to `~/Fog of War.md`
-        
 # Gameplay
 * Lives
     * When playing by yourself, the player will have 2 lives by default.
@@ -50,15 +39,6 @@
         * Resurrecting players requires defeating bosses and getting and then using Resurrection Tomes.
     * Some Characters may grant extra or a defecit of lives.
     * When all players have exhausted all lives, the game ends.
-* We will be moving to a new 'Round' system.
-    * Round System:
-        * The Game will start in the intermission mode as it does now.
-        * The game will now have multiple Rounds, each round having multiple waves of enemies.
-        * Intermission will now happen inbetween Rounds, instead of inbetween waves.
-        * Increasing rounds will also increase the amount of waves per round
-        * As waves increase per round, the amount spawned per wave will increase.
-* Characters, monsters and bosses alike may have Health, Shields, and/or Armor.
-    * Refer to `Shields, Armor & Health System.md`
 * Energy/Mana
     * Characters will need to consume Energy or Mana to perform abilities.
     * Each ability will cost a certain amount of Energy or Mana.
@@ -83,16 +63,28 @@
     * Melee
         * High Armor - High regen melee characters that will take enemies head-on.
     * Magical
-        * Utilizes Magic Damage that excels in melting Sheilds.
+        * Utilizes Magic Damage that excels in melting Shields.
     * Thorn Tank
         * Absorbs damage and redirects it back at their target.
+
+# Builder Unit
+* Constructs Buildings
+    * Turrets
+        * Placeable turrets - similar to the item but does not time-out and rather has health/armor/shields
+    * Barracks
+        * Produces mini units that will attack nearest target
+            * Mini Units will be controllable/moveable like RTS units
+    * Bunker
+        * Mini-UNits can bunker down inside to offer protection while combining their firepower
+    * Houses (Unit Supply)
+        * Need houses to act as 'supply' for unit production. Each house increases maximum mini-units count by 2, to a maximum of 10.
 
 # Movement
 * Players will have two movement options available to them via the settings screen:
     * RTS-Like
         * Players will right-click an area on the map to make their characters walk to the designated destination.
         * Players use WASD to pan the camera.
-    * Modern
+    * Modern (How it is now)
         * WASD Controls movement
         * Players can toggle between Free-Cam and Character-Locked Camera
 
@@ -114,8 +106,8 @@
     ### Ability Shop (Copper - Cheap, Compounding Pricing):
     * Increase Weapon Damage by 1 Per Level
     * Increase Attack Speed by 0.05% Per Level
-    * Increase Weapon Range by 1 Per Level
-    * Increase Sight Range by 1 Per Level
+    * Increase Weapon Range by 1 Per Level to a maximum of +5
+    * Increase Sight Range by 1 Per Level to a maximum of +5
     * Increase Max Health by 5 Per Level
     * Increase Armor by 1 Per Level
 

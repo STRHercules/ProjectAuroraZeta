@@ -136,6 +136,7 @@ private:
         bool triggered{false};
         float powerScale{1.0f};
         std::string type;  // semantic type used for behavior
+        float energyCost{0.0f};
     };
     struct AbilityDef {
         std::string name;
@@ -250,12 +251,21 @@ private:
     int xpBaseToLevel_{60};
     int xpPerKill_{8};
     int xpPerWave_{5};
+    float xpPerDamageDealt_{0.0f};
+    float xpPerDamageTaken_{0.0f};
+    int xpPerEvent_{0};
     float levelHpBonus_{12.0f};
     float levelDmgBonus_{2.5f};
     float levelSpeedBonus_{5.0f};
     float xpGrowth_{1.35f};
     double levelBannerTimer_{0.0};
     int wave_{0};
+    int round_{1};
+    int wavesTargetThisRound_{2};
+    int wavesClearedThisRound_{0};
+    int wavesPerRoundBase_{2};
+    int wavesPerRoundGrowthInterval_{2};
+    int spawnBatchRoundInterval_{5};
     int enemiesAlive_{0};
     Game::WaveSettings waveSettingsDefault_{};
     Game::WaveSettings waveSettingsBase_{};
@@ -340,9 +350,17 @@ private:
     float attackSpeedMul_{1.0f};
     float lifestealPercent_{0.0f};
     int chainBounces_{0};
+    // Energy
+    float energy_{0.0f};
+    float energyMax_{100.0f};
+    float energyRegen_{14.0f};
+    float energyRegenIntermission_{26.0f};
+    double energyWarningTimer_{0.0};
     // UI helpers
     double waveBannerTimer_{0.0};
     int waveBannerWave_{0};
+    double roundBannerTimer_{0.0};
+    int roundBanner_{1};
     double clearBannerTimer_{0.0};
     // Mouse cache
     int lastMouseX_{0};

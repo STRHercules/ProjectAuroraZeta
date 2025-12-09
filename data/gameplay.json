@@ -44,11 +44,24 @@
   "xp": {
     "perKill": 8,
     "perWave": 5,
+    "perDamageDealt": 0.04,
+    "perDamageTaken": 0.02,
+    "perEvent": 50,
     "baseToLevel": 60,
     "growth": 1.35,
     "hpBonus": 12.0,
     "damageBonus": 2.5,
     "speedBonus": 5.0
+  },
+  "rounds": {
+    "baseWaves": 2,
+    "wavesPerRoundGrowthInterval": 2,
+    "spawnBatchInterval": 5
+  },
+  "energy": {
+    "baseMax": 100.0,
+    "regenPerSecond": 14.0,
+    "intermissionRegenPerSecond": 26.0
   },
   "ui": {
     "enemyLowThreshold": 5

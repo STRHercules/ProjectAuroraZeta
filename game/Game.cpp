@@ -201,11 +201,20 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     bool screenShake = screenShake_;
     int xpPerKill = xpPerKill_;
     int xpPerWave = xpPerWave_;
+    float xpPerDmgDealt = xpPerDamageDealt_;
+    float xpPerDmgTaken = xpPerDamageTaken_;
+    int xpPerEvent = xpPerEvent_;
     int xpBase = xpToNext_;
     float xpGrowth = xpGrowth_;
     float levelHpBonus = levelHpBonus_;
     float levelDmgBonus = levelDmgBonus_;
     float levelSpeedBonus = levelSpeedBonus_;
+    int wavesPerRoundBase = wavesPerRoundBase_;
+    int wavesPerRoundGrowth = wavesPerRoundGrowthInterval_;
+    int spawnBatchInterval = spawnBatchRoundInterval_;
+    float energyMax = energyMax_;
+    float energyRegen = energyRegen_;
+    float energyIntermission = energyRegenIntermission_;
     {
         std::ifstream gp("data/gameplay.json");
         if (gp.is_open()) {
@@ -258,11 +267,24 @@ bool GameRoot::onInitialize(Engine::Application& app) {
             if (j.contains("xp")) {
                 xpPerKill = j["xp"].value("perKill", xpPerKill);
                 xpPerWave = j["xp"].value("perWave", xpPerWave);
+                xpPerDmgDealt = j["xp"].value("perDamageDealt", xpPerDmgDealt);
+                xpPerDmgTaken = j["xp"].value("perDamageTaken", xpPerDmgTaken);
+                xpPerEvent = j["xp"].value("perEvent", xpPerEvent);
                 xpBase = j["xp"].value("baseToLevel", xpBase);
                 xpGrowth = j["xp"].value("growth", xpGrowth);
                 levelHpBonus = j["xp"].value("hpBonus", levelHpBonus);
                 levelDmgBonus = j["xp"].value("damageBonus", levelDmgBonus);
                 levelSpeedBonus = j["xp"].value("speedBonus", levelSpeedBonus);
+            }
+            if (j.contains("rounds")) {
+                wavesPerRoundBase = j["rounds"].value("baseWaves", wavesPerRoundBase);
+                wavesPerRoundGrowth = j["rounds"].value("wavesPerRoundGrowthInterval", wavesPerRoundGrowth);
+                spawnBatchInterval = j["rounds"].value("spawnBatchInterval", spawnBatchInterval);
+            }
+            if (j.contains("energy")) {
+                energyMax = j["energy"].value("baseMax", energyMax);
+                energyRegen = j["energy"].value("regenPerSecond", energyRegen);
+                energyIntermission = j["energy"].value("intermissionRegenPerSecond", energyIntermission);
             }
             if (j.contains("ui")) {
                 enemyLowThreshold = j["ui"].value("enemyLowThreshold", enemyLowThreshold);
@@ -306,6 +328,8 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     waveSystem_->setBossConfig(bossWave_, bossHpMultiplier_, bossSpeedMultiplier_);
     waveSystem_->setEnemyDefinitions(&enemyDefs_);
     waveSystem_->setBaseArmor(Engine::Gameplay::BaseStats{waveSettings.enemyHealthArmor, waveSettings.enemyShieldArmor});
+    waveSystem_->setSpawnBatchInterval(spawnBatchRoundInterval_);
+    waveSystem_->setRound(round_);
     waveSettings.contactDamage = contactDamage;
     waveSettingsBase_ = waveSettings;
     waveSettingsDefault_ = waveSettings;
@@ -362,9 +386,19 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     salvageReward_ = salvageReward;
     xpPerKill_ = xpPerKill;
     xpPerWave_ = xpPerWave;
+    xpPerDamageDealt_ = xpPerDmgDealt;
+    xpPerDamageTaken_ = xpPerDmgTaken;
+    xpPerEvent_ = xpPerEvent;
     xpBaseToLevel_ = xpBase;
     xpToNext_ = xpBaseToLevel_;
     xpGrowth_ = xpGrowth;
+    energy_ = energyMax_;
+    wavesPerRoundBase_ = std::max(1, wavesPerRoundBase);
+    wavesPerRoundGrowthInterval_ = std::max(1, wavesPerRoundGrowth);
+    spawnBatchRoundInterval_ = std::max(1, spawnBatchInterval);
+    energyMax_ = std::max(1.0f, energyMax);
+    energyRegen_ = std::max(0.0f, energyRegen);
+    energyRegenIntermission_ = std::max(0.0f, energyIntermission);
     levelHpBonus_ = levelHpBonus;
     levelDmgBonus_ = levelDmgBonus;
     levelSpeedBonus_ = levelSpeedBonus;
@@ -1111,6 +1145,8 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             credits_ += waveClearBonus_;
             waveClearedPending_ = true;
             clearBannerTimer_ = 1.5;
+            wavesClearedThisRound_ += 1;
+            waveSpawned_ = false;
         }
         // Fast-forward combat timer when field is empty.
         if (inCombat_ && enemiesAlive_ == 0 && combatTimer_ > 1.0) {
@@ -1144,8 +1180,8 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     }
                 }
             }
-                // If combat timer elapses AND enemies are cleared, go to intermission.
-                if (combatTimer_ <= 0.0 && enemiesAlive_ == 0) {
+                // End of round: once required waves cleared and field is empty, go to intermission.
+                if (wavesClearedThisRound_ >= wavesTargetThisRound_ && enemiesAlive_ == 0) {
                 inCombat_ = false;
                 intermissionTimer_ = intermissionDuration_;
                 xp_ += xpPerWave_;  // small wave completion xp
@@ -1159,6 +1195,10 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 spawnShopkeeper(heroPos);
                 if (waveSystem_) waveSystem_->setTimer(0.0);
                 waveWarmup_ = intermissionTimer_;
+                round_ += 1;
+                wavesClearedThisRound_ = 0;
+                wavesTargetThisRound_ = wavesPerRoundBase_ + (round_ - 1) / wavesPerRoundGrowthInterval_;
+                waveSystem_->setRound(round_);
             }
         } else {  // Intermission
             // If enemies lingering, extend intermission until cleared.
@@ -1178,8 +1218,13 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 paused_ = userPaused_;
                 despawnShopkeeper();
                 refreshShopInventory();
-                if (waveSystem_) waveSystem_->setTimer(0.0);
-                waveWarmup_ = 0.0;
+                if (waveSystem_) {
+                    waveSystem_->setRound(round_);
+                    waveSystem_->setTimer(waveWarmupBase_);
+                }
+                waveWarmup_ = waveWarmupBase_;
+                roundBanner_ = round_;
+                roundBannerTimer_ = 1.6;
             }
         }
     }
@@ -1207,6 +1252,13 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             if (buffSystem_) {
                 buffSystem_->update(registry_, step);
             }
+            // Energy regeneration (faster during intermission).
+            float regen = inCombat_ ? energyRegen_ : energyRegenIntermission_;
+            energy_ = std::min(energyMax_, energy_ + regen * static_cast<float>(step.deltaSeconds));
+            if (energyWarningTimer_ > 0.0) {
+                energyWarningTimer_ -= step.deltaSeconds;
+                if (energyWarningTimer_ < 0.0) energyWarningTimer_ = 0.0;
+            }
         }
 
     if (eventSystem_ && !paused_ && !levelChoiceOpen_) {
@@ -1224,6 +1276,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             }
             eventBannerText_ = eb.str();
             eventBannerTimer_ = 1.5;
+            xp_ += xpPerEvent_;
         }
         if (eventSystem_->lastFail()) {
             std::ostringstream eb;
@@ -1392,7 +1445,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 float currPool = heroHealth->currentHealth + heroHealth->currentShields;
                 dbg << " | HP " << std::setprecision(0) << currPool << "/" << maxPool;
             }
-            dbg << " | Wave " << wave_ << " | Kills " << kills_;
+            dbg << " | Round " << round_ << " | Wave " << wave_ << " | Kills " << kills_;
             dbg << " | Credits " << credits_;
             dbg << " | Enemies " << enemiesAlive_;
             dbg << " | WaveClear +" << waveClearBonus_;
@@ -1413,6 +1466,15 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 Engine::Vec2 pos{static_cast<float>(viewportWidth_) * 0.5f - 80.0f,
                                  static_cast<float>(viewportHeight_) * 0.08f};
                 drawTextTTF(banner.str(), pos, scale, Engine::Color{180, 230, 255, 230});
+            }
+            if (roundBannerTimer_ > 0.0) {
+                roundBannerTimer_ -= step.deltaSeconds;
+                std::ostringstream rb;
+                rb << "ROUND " << roundBanner_;
+                float scale = 1.5f;
+                Engine::Vec2 pos{static_cast<float>(viewportWidth_) * 0.5f - 90.0f,
+                                 static_cast<float>(viewportHeight_) * 0.18f};
+                drawTextTTF(rb.str(), pos, scale, Engine::Color{255, 220, 180, 230});
             }
             if (levelBannerTimer_ > 0.0) {
                 levelBannerTimer_ -= step.deltaSeconds;
@@ -1450,7 +1512,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         if (!inCombat_) {
             double intermissionLeft = waveWarmup_;
             std::ostringstream inter;
-            inter << "Intermission: next wave in " << std::fixed << std::setprecision(1) << intermissionLeft
+            inter << "Intermission: next round in " << std::fixed << std::setprecision(1) << intermissionLeft
                   << "s | Credits: " << credits_;
             Engine::Color c{140, 220, 255, 220};
         drawTextTTF(inter.str(), Engine::Vec2{10.0f, 46.0f}, 1.0f, c);
@@ -1545,6 +1607,14 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 render_->drawFilledRect(dpos, Engine::Vec2{barW, 8.0f}, Engine::Color{40, 40, 50, 200});
                 render_->drawFilledRect(dpos, Engine::Vec2{barW * dashRatio, 8.0f}, Engine::Color{180, 240, 200, 220});
                 drawTextUnified("Dash", Engine::Vec2{dpos.x + 8.0f, dpos.y + 0.5f}, 0.8f, Engine::Color{180, 220, 200, 210});
+                // Energy bar beneath dash
+                float energyRatio = energyMax_ > 0.0f ? std::clamp(energy_ / energyMax_, 0.0f, 1.0f) : 0.0f;
+                Engine::Vec2 epos{dpos.x, dpos.y + 12.0f};
+                render_->drawFilledRect(epos, Engine::Vec2{barW, 8.0f}, Engine::Color{28, 30, 46, 200});
+                render_->drawFilledRect(epos, Engine::Vec2{barW * energyRatio, 8.0f}, Engine::Color{120, 200, 255, 230});
+                drawTextUnified("Energy", Engine::Vec2{epos.x + 8.0f, epos.y + 0.5f}, 0.8f,
+                                energyWarningTimer_ > 0.0 ? Engine::Color{255, 200, 160, 220}
+                                                          : Engine::Color{180, 210, 240, 210});
             }
             if (shopUnavailableTimer_ > 0.0 && inCombat_) {
                 float pulse = 0.5f + 0.5f * std::sin(static_cast<float>(shopUnavailableTimer_) * 12.0f);
@@ -2614,6 +2684,7 @@ void GameRoot::buildAbilities() {
         slot.upgradeCost = def.baseCost;
         slot.type = def.type;
         slot.powerScale = 1.0f;
+        slot.energyCost = static_cast<float>(def.baseCost);
         abilities_.push_back(slot);
 
         AbilityState st{};
@@ -3067,6 +3138,13 @@ void GameRoot::resetRun() {
     level_ = 1;
     xp_ = 0;
     xpToNext_ = xpBaseToLevel_;
+    round_ = 1;
+    wavesClearedThisRound_ = 0;
+    wavesTargetThisRound_ = wavesPerRoundBase_ + (round_ - 1) / wavesPerRoundGrowthInterval_;
+    roundBanner_ = 1;
+    roundBannerTimer_ = 0.0;
+    energy_ = energyMax_;
+    energyWarningTimer_ = 0.0;
     heroMaxHp_ = heroMaxHpPreset_;
     heroUpgrades_ = {};
     heroShield_ = heroShieldPreset_;
@@ -3086,10 +3164,10 @@ void GameRoot::resetRun() {
     shakeTimer_ = 0.0f;
     shakeMagnitude_ = 0.0f;
     lastHeroHp_ = -1.0f;
-    inCombat_ = true;
+    inCombat_ = false;
     waveSpawned_ = false;
     combatTimer_ = combatDuration_;
-    intermissionTimer_ = 0.0;
+    intermissionTimer_ = waveWarmupBase_;
     dashTimer_ = 0.0f;
     dashCooldownTimer_ = 0.0f;
     dashInvulnTimer_ = 0.0f;
@@ -3110,6 +3188,8 @@ void GameRoot::resetRun() {
         waveSystem_ = std::make_unique<WaveSystem>(rng_, waveSettingsBase_);
         waveSystem_->setBossConfig(bossWave_, bossHpMultiplier_, bossSpeedMultiplier_);
         waveSystem_->setEnemyDefinitions(&enemyDefs_);
+        waveSystem_->setSpawnBatchInterval(spawnBatchRoundInterval_);
+        waveSystem_->setRound(round_);
         waveSystem_->setTimer(waveWarmupBase_);
     }
     if (collisionSystem_) {
@@ -3121,6 +3201,9 @@ void GameRoot::resetRun() {
     refreshShopInventory();
 
     spawnHero();
+    if (collisionSystem_) {
+        collisionSystem_->setXpHooks(&xp_, hero_, xpPerDamageDealt_, xpPerDamageTaken_);
+    }
     if (cameraSystem_) cameraSystem_->resetFollow(true);
     itemShopOpen_ = false;
     statShopOpen_ = false;
