@@ -92,6 +92,7 @@ private:
     void loadGridTextures();
     void loadEnemyDefinitions();
     void loadPickupTextures();
+    void loadProjectileTextures();
     Engine::TexturePtr loadTextureOptional(const std::string& path);
     void spawnShopkeeper(const Engine::Vec2& aroundPos);
     void despawnShopkeeper();
@@ -178,6 +179,8 @@ private:
     Engine::TexturePtr pickupFrenzyTex_{};
     Engine::TexturePtr pickupImmortalTex_{};
     Engine::TexturePtr pickupTurretTex_{};
+    std::vector<Engine::TexturePtr> projectileTextures_;
+    Engine::TexturePtr projectileTexRed_;
     SDL_Cursor* customCursor_{nullptr};
     std::string heroTexturePath_{};
     std::unique_ptr<Engine::BitmapTextRenderer> debugText_;
@@ -249,6 +252,7 @@ private:
     double fireInterval_{0.2};
     double fireIntervalBase_{0.2};
     float autoFireRangeBonus_{0.0f};
+    float autoFireBaseRange_{320.0f};
     bool autoAttackEnabled_{true};
     float contactDamage_{10.0f};
     double fireCooldown_{0.0};
@@ -465,8 +469,8 @@ private:
     int fogHeightTiles_{512};
     float fogOriginOffsetX_{0.0f};
     float fogOriginOffsetY_{0.0f};
-    float heroVisionRadiusBaseTiles_{6.0f};
-    float heroVisionRadiusTiles_{6.0f};
+    float heroVisionRadiusBaseTiles_{8.0f};  // increased default vision (+2 tiles)
+    float heroVisionRadiusTiles_{8.0f};
     SDL_Texture* fogTexture_{nullptr};
 };
 

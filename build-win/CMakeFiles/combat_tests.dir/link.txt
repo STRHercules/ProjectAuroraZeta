@@ -1,0 +1,3 @@
+/usr/bin/cmake -E rm -f CMakeFiles/combat_tests.dir/objects.a
+/usr/bin/x86_64-w64-mingw32-ar qc CMakeFiles/combat_tests.dir/objects.a @CMakeFiles/combat_tests.dir/objects1.rsp
+/usr/bin/x86_64-w64-mingw32-g++-posix -O3 -DNDEBUG -pthread -Wl,--whole-archive CMakeFiles/combat_tests.dir/objects.a -Wl,--no-whole-archive -o combat_tests.exe -Wl,--out-implib,libcombat_tests.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles/combat_tests.dir/linkLibs.rsp

@@ -198,4 +198,11 @@ game/CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.obj: \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/core/Time.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/ecs/components/Transform.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/ecs/components/../../math/Vec2.h \
- /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/ecs/components/Projectile.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/ecs/components/Projectile.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/ecs/components/../../gameplay/Combat.h \
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/algorithm \
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_algo.h \
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/algorithmfwd.h \
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/uniform_int_dist.h \
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_algo.h \
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/glue_algorithm_defs.h

@@ -130,6 +130,19 @@ zeta/fast:
 .PHONY : zeta/fast
 
 #=============================================================================
+# Target rules for targets named combat_tests
+
+# Build rule for target.
+combat_tests: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 combat_tests
+.PHONY : combat_tests
+
+# fast build rule for target.
+combat_tests/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/combat_tests.dir/build.make CMakeFiles/combat_tests.dir/build
+.PHONY : combat_tests/fast
+
+#=============================================================================
 # Target rules for targets named engine
 
 # Build rule for target.
@@ -179,6 +192,30 @@ src/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zeta.dir/build.make CMakeFiles/zeta.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
+tests/CombatTests.obj: tests/CombatTests.cpp.obj
+.PHONY : tests/CombatTests.obj
+
+# target to build an object file
+tests/CombatTests.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/combat_tests.dir/build.make CMakeFiles/combat_tests.dir/tests/CombatTests.cpp.obj
+.PHONY : tests/CombatTests.cpp.obj
+
+tests/CombatTests.i: tests/CombatTests.cpp.i
+.PHONY : tests/CombatTests.i
+
+# target to preprocess a source file
+tests/CombatTests.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/combat_tests.dir/build.make CMakeFiles/combat_tests.dir/tests/CombatTests.cpp.i
+.PHONY : tests/CombatTests.cpp.i
+
+tests/CombatTests.s: tests/CombatTests.cpp.s
+.PHONY : tests/CombatTests.s
+
+# target to generate assembly for a file
+tests/CombatTests.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/combat_tests.dir/build.make CMakeFiles/combat_tests.dir/tests/CombatTests.cpp.s
+.PHONY : tests/CombatTests.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -187,12 +224,16 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... combat_tests"
 	@echo "... engine"
 	@echo "... zeta"
 	@echo "... zeta_game"
 	@echo "... src/main.obj"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... tests/CombatTests.obj"
+	@echo "... tests/CombatTests.i"
+	@echo "... tests/CombatTests.s"
 .PHONY : help
 
 

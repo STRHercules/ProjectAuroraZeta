@@ -11,6 +11,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/engine.dir/core/Application.cpp.obj.d"
   "CMakeFiles/engine.dir/core/Logger.cpp.obj"
   "CMakeFiles/engine.dir/core/Logger.cpp.obj.d"
+  "CMakeFiles/engine.dir/gameplay/FogOfWar.cpp.obj"
+  "CMakeFiles/engine.dir/gameplay/FogOfWar.cpp.obj.d"
   "CMakeFiles/engine.dir/input/ActionMapper.cpp.obj"
   "CMakeFiles/engine.dir/input/ActionMapper.cpp.obj.d"
   "CMakeFiles/engine.dir/input/InputLoader.cpp.obj"
@@ -25,6 +27,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/engine.dir/platform/SDLWindow.cpp.obj.d"
   "CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj"
   "CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj.d"
+  "CMakeFiles/engine.dir/render/FogOfWarRenderer.cpp.obj"
+  "CMakeFiles/engine.dir/render/FogOfWarRenderer.cpp.obj.d"
   "libengine.a"
   "libengine.pdb"
 )

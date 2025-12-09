@@ -46,6 +46,7 @@
 #include "systems/HotzoneSystem.h"
 #include "../engine/gameplay/FogOfWar.h"
 #include "../engine/render/FogOfWarRenderer.h"
+#include "../engine/platform/SDLTexture.h"
 #include <cmath>
 
 namespace Game {
@@ -154,6 +155,7 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     loadGridTextures();
     loadEnemyDefinitions();
     loadPickupTextures();
+    loadProjectileTextures();
     itemCatalog_ = defaultItemCatalog();
     goldCatalog_ = goldShopCatalog();
     // capture baseline fire interval for attack speed stacking
@@ -1058,18 +1060,20 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             if (heroTf) {
                 Engine::Vec2 dir{};
                 bool haveTarget = false;
+                float visionRange = heroVisionRadiusTiles_ * static_cast<float>(fogTileSize_ > 0 ? fogTileSize_ : 32);
+                float allowedRange = std::min(visionRange, autoFireBaseRange_ + autoFireRangeBonus_);
+                float allowedRange2 = allowedRange * allowedRange;
                 if (actions.primaryFire) {
                     dir = {mouseWorld_.x - heroTf->position.x, mouseWorld_.y - heroTf->position.y};
                     float len2 = dir.x * dir.x + dir.y * dir.y;
-                    if (len2 > 0.0001f) {
+                    if (len2 <= allowedRange2 && len2 > 0.0001f) {
                         float inv = 1.0f / std::sqrt(len2);
                         dir.x *= inv;
                         dir.y *= inv;
                         haveTarget = true;
                     }
                 } else if (autoAttackEnabled_) {
-                    float range = projectileSpeed_ * projectileLifetime_ + autoFireRangeBonus_;
-                    float range2 = range * range;
+                    float range2 = allowedRange2;
                     float best = range2;
                     Engine::Vec2 target{};
                     registry_.view<Engine::ECS::Transform, Engine::ECS::EnemyTag>(
@@ -1098,9 +1102,15 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     registry_.emplace<Engine::ECS::Velocity>(proj, Engine::Vec2{0.0f, 0.0f});
                     const float halfSize = projectileHitboxSize_ * 0.5f;
                     registry_.emplace<Engine::ECS::AABB>(proj, Engine::ECS::AABB{Engine::Vec2{halfSize, halfSize}});
-                    registry_.emplace<Engine::ECS::Renderable>(proj,
-                                                               Engine::ECS::Renderable{Engine::Vec2{projectileSize_, projectileSize_},
-                                                                                       Engine::Color{255, 230, 90, 255}});
+                float sz = projectileSize_;
+                if (projectileTexRed_) {
+                    // Use native tex size to avoid squish; scale by size_ factor.
+                    sz = static_cast<float>(projectileTexRed_->width());
+                }
+                registry_.emplace<Engine::ECS::Renderable>(proj,
+                                                           Engine::ECS::Renderable{Engine::Vec2{sz, sz},
+                                                                                   Engine::Color{255, 230, 90, 255},
+                                                                                   projectileTexRed_});
                     float zoneDmgMul = hotzoneSystem_ ? hotzoneSystem_->damageMultiplier() : 1.0f;
                     float dmgMul = rageDamageBuff_ * zoneDmgMul;
                     Engine::Gameplay::DamageEvent dmgEvent{};
@@ -1274,9 +1284,12 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 registry_.emplace<Engine::ECS::Velocity>(proj, Engine::Vec2{0.0f, 0.0f});
                 const float halfSize = projectileHitboxSize_ * 0.5f;
                 registry_.emplace<Engine::ECS::AABB>(proj, Engine::ECS::AABB{Engine::Vec2{halfSize, halfSize}});
+                float sz = projectileSize_;
+                if (projectileTexRed_) sz = static_cast<float>(projectileTexRed_->width());
                 registry_.emplace<Engine::ECS::Renderable>(proj,
-                                                           Engine::ECS::Renderable{Engine::Vec2{projectileSize_, projectileSize_},
-                                                                                   Engine::Color{120, 220, 255, 230}});
+                                                           Engine::ECS::Renderable{Engine::Vec2{sz, sz},
+                                                                                   Engine::Color{120, 220, 255, 230},
+                                                                                   projectileTexRed_});
                 Engine::Gameplay::DamageEvent dmgEvent{};
                 dmgEvent.baseDamage = projectileDamage_ * 0.8f;
                 dmgEvent.type = Engine::Gameplay::DamageType::Normal;
@@ -1358,38 +1371,49 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     float r = rad(rng_);
                     return Engine::Vec2{base.x + std::cos(a) * r, base.y + std::sin(a) * r};
                 };
-    auto spawnPickupEntity = [&](const Pickup& payload, const Engine::Vec2& pos, Engine::Color color,
-                                 float size, float amp, float speed) {
-        auto drop = registry_.create();
-        registry_.emplace<Engine::ECS::Transform>(drop, pos);
-        Engine::TexturePtr tex{};
-        bool animated = false;
-        if (payload.kind == Pickup::Kind::Copper) tex = pickupCopperTex_, animated = true;
-                    if (payload.kind == Pickup::Kind::Gold) tex = pickupGoldTex_, animated = true;
+                auto spawnPickupEntity = [&](const Pickup& payload, const Engine::Vec2& pos, Engine::Color color,
+                                             float size, float amp, float speed) {
+                    auto drop = registry_.create();
+                    registry_.emplace<Engine::ECS::Transform>(drop, pos);
+                    Engine::TexturePtr tex{};
+                    bool animated = false;
+                    float scale = 1.0f;
+                    if (payload.kind == Pickup::Kind::Copper) { tex = pickupCopperTex_; animated = true; scale = 1.75f; }
+                    if (payload.kind == Pickup::Kind::Gold)   { tex = pickupGoldTex_;   animated = true; scale = 1.75f; }
                     if (payload.kind == Pickup::Kind::Powerup) {
                         switch (payload.powerup) {
                             case Pickup::Powerup::Heal: tex = pickupHealTex_; break;
                             case Pickup::Powerup::Kaboom: tex = pickupKaboomTex_; break;
                             case Pickup::Powerup::Recharge: tex = pickupRechargeTex_; break;
                             case Pickup::Powerup::Frenzy: tex = pickupFrenzyTex_; break;
-                            case Pickup::Powerup::Immortal: tex = pickupImmortalTex_; break;
+                            case Pickup::Powerup::Immortal: tex = pickupImmortalTex_; animated = true; break;
                             default: break;
                         }
                     }
-        if (payload.kind == Pickup::Kind::Item && payload.item.effect == ItemEffect::Turret) {
-            tex = pickupTurretTex_;
-        }
-        Engine::Vec2 rendSize{size, size};
-        registry_.emplace<Engine::ECS::Renderable>(drop,
-            Engine::ECS::Renderable{rendSize, color, tex});
-        registry_.emplace<Engine::ECS::AABB>(drop, Engine::ECS::AABB{Engine::Vec2{size * 0.5f, size * 0.5f}});
-        registry_.emplace<Game::Pickup>(drop, payload);
-        registry_.emplace<Game::PickupBob>(drop, Game::PickupBob{pos, 0.0f, amp, speed});
-        registry_.emplace<Engine::ECS::PickupTag>(drop, Engine::ECS::PickupTag{});
-        if (animated && tex) {
-            registry_.emplace<Engine::ECS::SpriteAnimation>(drop, Engine::ECS::SpriteAnimation{16, 16, 6, 0.08f});
-        }
-    };
+                    if (payload.kind == Pickup::Kind::Item && payload.item.effect == ItemEffect::Turret) {
+                        tex = pickupTurretTex_;
+                    }
+                    Engine::Vec2 rendSize{size, size};
+                    float aabbHalf = size * 0.5f;
+                    if (tex) {
+                        if (animated) {
+                            rendSize = Engine::Vec2{16.0f * scale, 16.0f * scale};
+                        } else {
+                            rendSize = Engine::Vec2{static_cast<float>(tex->width()) * scale,
+                                                    static_cast<float>(tex->height()) * scale};
+                        }
+                        aabbHalf = std::max(rendSize.x, rendSize.y) * 0.5f;
+                    }
+                    registry_.emplace<Engine::ECS::Renderable>(drop,
+                        Engine::ECS::Renderable{rendSize, color, tex});
+                    registry_.emplace<Engine::ECS::AABB>(drop, Engine::ECS::AABB{Engine::Vec2{aabbHalf, aabbHalf}});
+                    registry_.emplace<Game::Pickup>(drop, payload);
+                    registry_.emplace<Game::PickupBob>(drop, Game::PickupBob{pos, 0.0f, amp, speed});
+                    registry_.emplace<Engine::ECS::PickupTag>(drop, Engine::ECS::PickupTag{});
+                    if (animated && tex) {
+                        registry_.emplace<Engine::ECS::SpriteAnimation>(drop, Engine::ECS::SpriteAnimation{16, 16, 6, 0.08f});
+                    }
+                };
                 auto pickItemByKind = [&](ItemKind kind) -> std::optional<ItemDefinition> {
                     std::vector<ItemDefinition> pool;
                     for (const auto& def : itemCatalog_) {
@@ -2544,6 +2568,37 @@ void GameRoot::loadPickupTextures() {
     pickupTurretTex_ = loadTextureOptional("assets/Sprites/Misc/turretdeployable.png");
 }
 
+void GameRoot::loadProjectileTextures() {
+    projectileTextures_.clear();
+    projectileTexRed_ = {};
+    if (!sdlRenderer_) return;
+    SDL_Surface* sheet = IMG_Load("assets/Sprites/Misc/projectiles.png");
+    if (!sheet) {
+        Engine::logWarn(std::string("Failed to load projectile sheet: ") + IMG_GetError());
+        return;
+    }
+    const int frameW = 16;
+    const int frameH = 16;
+    const int frames = 4;
+    for (int i = 0; i < frames; ++i) {
+        SDL_Rect src{0, i * frameH, frameW, frameH};
+        SDL_Surface* sub = SDL_CreateRGBSurfaceWithFormat(0, frameW, frameH, 32, sheet->format->format);
+        if (!sub) continue;
+        SDL_BlitSurface(sheet, &src, sub, nullptr);
+        SDL_Texture* tex = SDL_CreateTextureFromSurface(sdlRenderer_, sub);
+        SDL_FreeSurface(sub);
+        if (tex) {
+            projectileTextures_.push_back(std::make_shared<Engine::SDLTexture>(tex));
+        }
+    }
+    SDL_FreeSurface(sheet);
+    if (projectileTextures_.size() >= 4) {
+        projectileTexRed_ = projectileTextures_[3];  // bottom (red)
+    } else if (!projectileTextures_.empty()) {
+        projectileTexRed_ = projectileTextures_.back();
+    }
+}
+
 void GameRoot::startNewGame() {
     applyDifficultyPreset();
     applyArchetypePreset();
@@ -2684,7 +2739,7 @@ void GameRoot::updateMenuInput(const Engine::ActionState& actions, const Engine:
             } else if (menuSelection_ == 2 || menuSelection_ == 3) {
                 // Up/down do nothing for Start/Back
             }
-            // Mouse hover select and click for lists
+            // Mouse click to select entries (hover should not auto-select)
             const float panelW = 260.0f;
             const float gap = 30.0f;
             const float listStartY = topY + 80.0f;
@@ -2693,18 +2748,24 @@ void GameRoot::updateMenuInput(const Engine::ActionState& actions, const Engine:
             const float entryH = 26.0f;
             for (std::size_t i = 0; i < archetypes_.size(); ++i) {
                 float y = listStartY + 32.0f + static_cast<float>(i) * entryH;
-                if (inside(mx, my, leftX + 8.0f, y, panelW - 16.0f, entryH - 4.0f)) {
-                    selectedArchetype_ = static_cast<int>(i);
-                    applyArchetypePreset();
-                    menuSelection_ = 0;
+                bool hovered = inside(mx, my, leftX + 8.0f, y, panelW - 16.0f, entryH - 4.0f);
+                if (hovered) {
+                    menuSelection_ = 0;  // move focus but wait for click to lock choice
+                    if (clickEdge) {
+                        selectedArchetype_ = static_cast<int>(i);
+                        applyArchetypePreset();
+                    }
                 }
             }
             for (std::size_t i = 0; i < difficulties_.size(); ++i) {
                 float y = listStartY + 32.0f + static_cast<float>(i) * entryH;
-                if (inside(mx, my, rightX + 8.0f, y, panelW - 16.0f, entryH - 4.0f)) {
-                    selectedDifficulty_ = static_cast<int>(i);
-                    applyDifficultyPreset();
+                bool hovered = inside(mx, my, rightX + 8.0f, y, panelW - 16.0f, entryH - 4.0f);
+                if (hovered) {
                     menuSelection_ = 1;
+                    if (clickEdge) {
+                        selectedDifficulty_ = static_cast<int>(i);
+                        applyDifficultyPreset();
+                    }
                 }
             }
             float summaryY = listStartY + 220.0f + 18.0f;

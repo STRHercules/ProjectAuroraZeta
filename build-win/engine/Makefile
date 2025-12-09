@@ -274,6 +274,30 @@ core/Logger.cpp.s:
 	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/core/Logger.cpp.s
 .PHONY : core/Logger.cpp.s
 
+gameplay/FogOfWar.obj: gameplay/FogOfWar.cpp.obj
+.PHONY : gameplay/FogOfWar.obj
+
+# target to build an object file
+gameplay/FogOfWar.cpp.obj:
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/gameplay/FogOfWar.cpp.obj
+.PHONY : gameplay/FogOfWar.cpp.obj
+
+gameplay/FogOfWar.i: gameplay/FogOfWar.cpp.i
+.PHONY : gameplay/FogOfWar.i
+
+# target to preprocess a source file
+gameplay/FogOfWar.cpp.i:
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/gameplay/FogOfWar.cpp.i
+.PHONY : gameplay/FogOfWar.cpp.i
+
+gameplay/FogOfWar.s: gameplay/FogOfWar.cpp.s
+.PHONY : gameplay/FogOfWar.s
+
+# target to generate assembly for a file
+gameplay/FogOfWar.cpp.s:
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/gameplay/FogOfWar.cpp.s
+.PHONY : gameplay/FogOfWar.cpp.s
+
 input/ActionMapper.obj: input/ActionMapper.cpp.obj
 .PHONY : input/ActionMapper.obj
 
@@ -442,6 +466,30 @@ render/BitmapTextRenderer.cpp.s:
 	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.s
 .PHONY : render/BitmapTextRenderer.cpp.s
 
+render/FogOfWarRenderer.obj: render/FogOfWarRenderer.cpp.obj
+.PHONY : render/FogOfWarRenderer.obj
+
+# target to build an object file
+render/FogOfWarRenderer.cpp.obj:
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/render/FogOfWarRenderer.cpp.obj
+.PHONY : render/FogOfWarRenderer.cpp.obj
+
+render/FogOfWarRenderer.i: render/FogOfWarRenderer.cpp.i
+.PHONY : render/FogOfWarRenderer.i
+
+# target to preprocess a source file
+render/FogOfWarRenderer.cpp.i:
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/render/FogOfWarRenderer.cpp.i
+.PHONY : render/FogOfWarRenderer.cpp.i
+
+render/FogOfWarRenderer.s: render/FogOfWarRenderer.cpp.s
+.PHONY : render/FogOfWarRenderer.s
+
+# target to generate assembly for a file
+render/FogOfWarRenderer.cpp.s:
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/render/FogOfWarRenderer.cpp.s
+.PHONY : render/FogOfWarRenderer.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -469,6 +517,9 @@ help:
 	@echo "... core/Logger.obj"
 	@echo "... core/Logger.i"
 	@echo "... core/Logger.s"
+	@echo "... gameplay/FogOfWar.obj"
+	@echo "... gameplay/FogOfWar.i"
+	@echo "... gameplay/FogOfWar.s"
 	@echo "... input/ActionMapper.obj"
 	@echo "... input/ActionMapper.i"
 	@echo "... input/ActionMapper.s"
@@ -490,6 +541,9 @@ help:
 	@echo "... render/BitmapTextRenderer.obj"
 	@echo "... render/BitmapTextRenderer.i"
 	@echo "... render/BitmapTextRenderer.s"
+	@echo "... render/FogOfWarRenderer.obj"
+	@echo "... render/FogOfWarRenderer.i"
+	@echo "... render/FogOfWarRenderer.s"
 .PHONY : help
 
 

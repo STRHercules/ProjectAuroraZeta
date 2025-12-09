@@ -62,6 +62,7 @@ game/CMakeFiles/zeta_game.dir/Game.cpp.obj
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/Entity.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/Registry.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/AABB.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/CombatStats.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Health.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Projectile.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Renderable.h
@@ -71,16 +72,19 @@ game/CMakeFiles/zeta_game.dir/Game.cpp.obj
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Velocity.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/InputState.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/CameraUtil.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/gameplay/Combat.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/gameplay/InputHelpers.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/ActionMapper.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/ActionState.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/InputBinding.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/InputLoader.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLRenderDevice.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLTexture.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/math/Vec2.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/BitmapTextRenderer.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/Camera2D.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/Color.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/FogOfWarRenderer.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/RenderDevice.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/TextRenderer.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/Game.h
@@ -89,18 +93,20 @@ game/CMakeFiles/zeta_game.dir/Game.cpp.obj
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/EnemyAttributes.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/EventMarker.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/Invulnerable.h
- /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/Pickup.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/PickupBob.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/Shopkeeper.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/Spawner.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/meta/ItemDefs.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/meta/SaveManager.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/gameplay/FogOfWar.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/Facing.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/RenderSystem.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/core/Time.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/EnemyDefinition.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/EventActive.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/Pickup.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/AnimationSystem.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/BuffSystem.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/CameraSystem.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/CollisionSystem.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/DamageNumberSystem.h
@@ -163,6 +169,7 @@ game/CMakeFiles/zeta_game.dir/Game.cpp.obj
  /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_video.h
  /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/begin_code.h
  /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/close_code.h
+ /home/zach/winlibs/sdl/SDL2_image-2.8.2/x86_64-w64-mingw32/include/SDL2/SDL_image.h
  /home/zach/winlibs/sdl/SDL2_ttf-2.22.0/x86_64-w64-mingw32/include/SDL2/SDL_ttf.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/adxintrin.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/ammintrin.h
@@ -616,6 +623,8 @@ game/CMakeFiles/zeta_game.dir/GameAbilities.cpp.obj
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/Entity.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/Registry.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/AABB.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/CombatStats.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Health.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Projectile.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Renderable.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Tags.h
@@ -623,6 +632,7 @@ game/CMakeFiles/zeta_game.dir/GameAbilities.cpp.obj
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Velocity.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/InputState.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/CameraUtil.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/gameplay/Combat.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/gameplay/InputHelpers.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/ActionMapper.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/ActionState.h
@@ -632,17 +642,21 @@ game/CMakeFiles/zeta_game.dir/GameAbilities.cpp.obj
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/BitmapTextRenderer.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/Camera2D.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/Color.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/FogOfWarRenderer.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/RenderDevice.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/TextRenderer.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/Game.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/meta/ItemDefs.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/meta/SaveManager.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/gameplay/FogOfWar.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/Facing.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/RenderSystem.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/core/Time.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/EnemyDefinition.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/EventActive.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/Pickup.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/AnimationSystem.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/BuffSystem.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/CameraSystem.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/CollisionSystem.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/DamageNumberSystem.h
@@ -1532,11 +1546,15 @@ game/CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.obj
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/ComponentStorage.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/Entity.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/Registry.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/gameplay/Combat.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/CombatStats.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Health.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Renderable.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/SpriteAnimation.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Tags.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Transform.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Velocity.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/gameplay/FogOfWar.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/math/Vec2.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/BitmapFont.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/BitmapTextRenderer.h
@@ -1545,11 +1563,14 @@ game/CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.obj
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/Color.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/RenderDevice.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/TextRenderer.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/meta/ItemDefs.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/DamageNumber.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/Facing.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/HitFlash.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/Pickup.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/PickupBob.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/core/Time.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/BuffSystem.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/RenderSystem.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/algorithm
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/array
@@ -2211,9 +2232,11 @@ game/CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.obj
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/Entity.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/Registry.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/Texture.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/gameplay/Combat.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/math/Vec2.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/Color.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/AABB.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/CombatStats.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Health.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Projectile.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Renderable.h
@@ -2223,10 +2246,13 @@ game/CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.obj
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/DamageNumber.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/HitFlash.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/Invulnerable.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/BuffSystem.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/CollisionSystem.h
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/algorithm
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/backward/auto_ptr.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/backward/binders.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bit
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/algorithmfwd.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/align.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/alloc_traits.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/allocated_ptr.h
@@ -2276,6 +2302,7 @@ game/CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.obj
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/predefined_ops.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ptr_traits.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/range_access.h
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_algo.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_algobase.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_base.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_cmp.h
@@ -2289,6 +2316,7 @@ game/CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.obj
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/specfun.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/std_abs.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/std_mutex.h
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_algo.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_algobase.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_bvector.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_construct.h
@@ -2309,6 +2337,7 @@ game/CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.obj
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/streambuf_iterator.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/string_view.tcc
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stringfwd.h
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/uniform_int_dist.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/unique_ptr.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/unordered_map.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/uses_allocator.h
@@ -2347,6 +2376,7 @@ game/CMakeFiles/zeta_game.dir/systems/CollisionSystem.cpp.obj
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/numbers
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ostream
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/execution_defs.h
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/glue_algorithm_defs.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/glue_memory_defs.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/pstl_config.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/queue
@@ -2860,8 +2890,10 @@ game/CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.obj
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/Entity.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/Registry.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/Texture.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/gameplay/Combat.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/Color.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/AABB.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/CombatStats.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Health.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Renderable.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Tags.h
@@ -3529,14 +3561,18 @@ game/CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.obj
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/ComponentStorage.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/Entity.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/Registry.h
- /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/math/Vec2.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/AABB.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Tags.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Transform.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Velocity.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/math/Vec2.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/Facing.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/MovementSystem.h
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/algorithm
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/backward/auto_ptr.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/backward/binders.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bit
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/algorithmfwd.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/align.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/alloc_traits.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/allocated_ptr.h
@@ -3586,6 +3622,7 @@ game/CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.obj
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/predefined_ops.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ptr_traits.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/range_access.h
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_algo.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_algobase.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_base.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_cmp.h
@@ -3599,6 +3636,7 @@ game/CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.obj
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/specfun.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/std_abs.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/std_mutex.h
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_algo.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_algobase.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_bvector.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_construct.h
@@ -3619,6 +3657,7 @@ game/CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.obj
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/streambuf_iterator.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/string_view.tcc
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stringfwd.h
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/uniform_int_dist.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/unique_ptr.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/unordered_map.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/uses_allocator.h
@@ -3657,6 +3696,7 @@ game/CMakeFiles/zeta_game.dir/systems/MovementSystem.cpp.obj
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/numbers
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ostream
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/execution_defs.h
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/glue_algorithm_defs.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/glue_memory_defs.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/pstl_config.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/queue
@@ -3752,12 +3792,15 @@ game/CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.obj
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Tags.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Transform.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/math/Vec2.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/meta/ItemDefs.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/Pickup.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/PickupBob.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/PickupSystem.h
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/array
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/backward/auto_ptr.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/backward/binders.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bit
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/algorithmfwd.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/align.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/alloc_traits.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/allocated_ptr.h
@@ -3819,7 +3862,9 @@ game/CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.obj
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/shared_ptr_base.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/specfun.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/std_abs.h
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/std_function.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/std_mutex.h
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_algo.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_algobase.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_bvector.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_construct.h
@@ -3840,6 +3885,7 @@ game/CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.obj
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/streambuf_iterator.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/string_view.tcc
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stringfwd.h
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/uniform_int_dist.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/unique_ptr.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/unordered_map.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/uses_allocator.h
@@ -3869,6 +3915,7 @@ game/CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.obj
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ext/numeric_traits.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ext/string_conversions.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ext/type_traits.h
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/functional
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/initializer_list
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ios
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/iosfwd
@@ -3969,13 +4016,16 @@ game/CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.obj
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/ComponentStorage.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/Entity.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/Registry.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/gameplay/Combat.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/math/Vec2.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Projectile.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Transform.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/ProjectileSystem.h
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/algorithm
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/backward/auto_ptr.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/backward/binders.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bit
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/algorithmfwd.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/align.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/alloc_traits.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/allocated_ptr.h
@@ -4025,6 +4075,7 @@ game/CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.obj
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/predefined_ops.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ptr_traits.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/range_access.h
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_algo.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_algobase.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_base.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_cmp.h
@@ -4037,6 +4088,7 @@ game/CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.obj
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/shared_ptr_base.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/std_abs.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/std_mutex.h
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_algo.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_algobase.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_bvector.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_construct.h
@@ -4057,6 +4109,7 @@ game/CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.obj
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/streambuf_iterator.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/string_view.tcc
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stringfwd.h
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/uniform_int_dist.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/unique_ptr.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/unordered_map.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/uses_allocator.h
@@ -4093,6 +4146,7 @@ game/CMakeFiles/zeta_game.dir/systems/ProjectileSystem.cpp.obj
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/numbers
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ostream
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/execution_defs.h
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/glue_algorithm_defs.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/glue_memory_defs.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/pstl_config.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/queue
@@ -4290,21 +4344,25 @@ game/CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.obj
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/math/Vec2.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/Color.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/AABB.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/CombatStats.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Health.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Renderable.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/SpriteAnimation.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Tags.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Transform.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/components/Velocity.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/gameplay/Combat.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/EnemyDefinition.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/BountyTag.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/EnemyAttributes.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/Facing.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/PickupBob.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/WaveSystem.h
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/algorithm
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/backward/auto_ptr.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/backward/binders.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bit
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/algorithmfwd.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/align.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/alloc_traits.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/allocated_ptr.h
@@ -4356,6 +4414,7 @@ game/CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.obj
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/random.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/random.tcc
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/range_access.h
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_algo.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_algobase.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_base.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_cmp.h
@@ -4369,6 +4428,7 @@ game/CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.obj
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/specfun.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/std_abs.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/std_mutex.h
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_algo.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_algobase.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_bvector.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_construct.h
@@ -4430,6 +4490,7 @@ game/CMakeFiles/zeta_game.dir/systems/WaveSystem.cpp.obj
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/numeric
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ostream
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/execution_defs.h
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/glue_algorithm_defs.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/glue_memory_defs.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/glue_numeric_defs.h
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/pstl_config.h

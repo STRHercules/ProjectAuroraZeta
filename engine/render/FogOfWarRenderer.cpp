@@ -1,6 +1,7 @@
 #include "FogOfWarRenderer.h"
 
 #include <algorithm>
+#include <cmath>
 
 #include "CameraUtil.h"
 

@@ -67,6 +67,7 @@ CMakeFiles/zeta.dir/src/main.cpp.obj
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/Entity.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/Registry.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/CameraUtil.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/gameplay/Combat.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/gameplay/InputHelpers.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/ActionMapper.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/ActionState.h
@@ -74,15 +75,19 @@ CMakeFiles/zeta.dir/src/main.cpp.obj
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/InputLoader.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/BitmapTextRenderer.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/Camera2D.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/FogOfWarRenderer.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/TextRenderer.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/Game.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/meta/ItemDefs.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/meta/SaveManager.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/gameplay/FogOfWar.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/Facing.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/RenderSystem.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/EnemyDefinition.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/EventActive.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/Pickup.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/AnimationSystem.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/BuffSystem.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/CameraSystem.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/CollisionSystem.h
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/DamageNumberSystem.h

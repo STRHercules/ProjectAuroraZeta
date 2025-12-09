@@ -90,6 +90,7 @@ void EventSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep
                          bool inCombat, const Engine::Vec2& heroPos, int salvageReward) {
     lastSuccess_ = false;
     lastFail_ = false;
+    std::vector<int> completedEventIds;
     // Trigger every 5th wave once.
     if (wave > 0 && wave % 5 == 0 && wave != lastEventWave_ && !eventActive_) {
         int eventId = nextEventId_++;
@@ -128,11 +129,13 @@ void EventSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep
                     }
                     toDestroy.push_back(e);
                     lastSuccess_ = true;
+                    completedEventIds.push_back(ev.id);
                 } else if (ev.timer <= 0.0f && inCombat) {
                     ev.failed = true;
                     rend->color = Engine::Color{255, 80, 80, 255};
                     toDestroy.push_back(e);
                     lastFail_ = true;
+                    completedEventIds.push_back(ev.id);
                 } else {
                     // Pulse color to draw attention.
                     float t = std::clamp(ev.timer / ev.maxTimer, 0.0f, 1.0f);
@@ -149,26 +152,41 @@ void EventSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep
                 ev.success = true;
                 toDestroy.push_back(e);
                 lastSuccess_ = true;
+                completedEventIds.push_back(ev.id);
             } else if (ev.timer <= 0.0f && inCombat) {
                 ev.failed = true;
                 toDestroy.push_back(e);
                 lastFail_ = true;
+                completedEventIds.push_back(ev.id);
             }
         } else {  // Spawner hunt
             if (ev.requiredKills <= 0) {
                 ev.success = true;
                 toDestroy.push_back(e);
                 lastSuccess_ = true;
+                completedEventIds.push_back(ev.id);
             } else if (ev.timer <= 0.0f && inCombat) {
                 ev.failed = true;
                 toDestroy.push_back(e);
                 lastFail_ = true;
+                completedEventIds.push_back(ev.id);
             }
         }
     });
 
     for (auto e : toDestroy) {
         registry.destroy(e);
+    }
+    // Clean up spawners related to completed/failed events to avoid endless spawns.
+    if (!completedEventIds.empty()) {
+        registry.view<Game::Spawner>([&](Engine::ECS::Entity e, Game::Spawner& sp) {
+            for (int id : completedEventIds) {
+                if (sp.eventId == id) {
+                    registry.destroy(e);
+                    break;
+                }
+            }
+        });
     }
     // Update active flag (true if any EventActive remain).
     eventActive_ = false;

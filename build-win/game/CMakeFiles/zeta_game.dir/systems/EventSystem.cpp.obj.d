@@ -237,5 +237,7 @@ game/CMakeFiles/zeta_game.dir/systems/EventSystem.cpp.obj: \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/ecs/components/AABB.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/ecs/components/Tags.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/ecs/components/Health.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/ecs/components/CombatStats.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/ecs/components/../../gameplay/Combat.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../components/EnemyAttributes.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../components/BountyTag.h

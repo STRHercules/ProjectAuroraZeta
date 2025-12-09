@@ -199,6 +199,7 @@ game/CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.obj: \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/render/../math/Vec2.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/render/RenderDevice.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/render/Color.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/gameplay/FogOfWar.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/assets/Texture.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../components/Facing.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cmath \
@@ -226,14 +227,20 @@ game/CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.obj: \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/ecs/components/Renderable.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/ecs/components/Transform.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/ecs/components/Velocity.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/ecs/components/Health.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/ecs/components/CombatStats.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/ecs/components/../../gameplay/Combat.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/render/CameraUtil.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/ecs/components/SpriteAnimation.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../components/HitFlash.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../components/DamageNumber.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../components/Pickup.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../components/../meta/ItemDefs.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../components/PickupBob.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/render/BitmapTextRenderer.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/render/TextRenderer.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/render/BitmapFont.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/array \
- /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/ecs/components/Tags.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/ecs/components/Tags.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../systems/BuffSystem.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../systems/../../engine/core/Time.h

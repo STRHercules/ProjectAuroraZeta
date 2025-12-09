@@ -219,11 +219,41 @@ engine/CMakeFiles/engine.dir/assets/FontLoader.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/engine.dir/assets/FontLoader.cpp.s"
 	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/FontLoader.cpp -o CMakeFiles/engine.dir/assets/FontLoader.cpp.s
 
+engine/CMakeFiles/engine.dir/gameplay/FogOfWar.cpp.obj: engine/CMakeFiles/engine.dir/flags.make
+engine/CMakeFiles/engine.dir/gameplay/FogOfWar.cpp.obj: engine/CMakeFiles/engine.dir/includes_CXX.rsp
+engine/CMakeFiles/engine.dir/gameplay/FogOfWar.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/gameplay/FogOfWar.cpp
+engine/CMakeFiles/engine.dir/gameplay/FogOfWar.cpp.obj: engine/CMakeFiles/engine.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object engine/CMakeFiles/engine.dir/gameplay/FogOfWar.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/gameplay/FogOfWar.cpp.obj -MF CMakeFiles/engine.dir/gameplay/FogOfWar.cpp.obj.d -o CMakeFiles/engine.dir/gameplay/FogOfWar.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/gameplay/FogOfWar.cpp
+
+engine/CMakeFiles/engine.dir/gameplay/FogOfWar.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/engine.dir/gameplay/FogOfWar.cpp.i"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/gameplay/FogOfWar.cpp > CMakeFiles/engine.dir/gameplay/FogOfWar.cpp.i
+
+engine/CMakeFiles/engine.dir/gameplay/FogOfWar.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/engine.dir/gameplay/FogOfWar.cpp.s"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/gameplay/FogOfWar.cpp -o CMakeFiles/engine.dir/gameplay/FogOfWar.cpp.s
+
+engine/CMakeFiles/engine.dir/render/FogOfWarRenderer.cpp.obj: engine/CMakeFiles/engine.dir/flags.make
+engine/CMakeFiles/engine.dir/render/FogOfWarRenderer.cpp.obj: engine/CMakeFiles/engine.dir/includes_CXX.rsp
+engine/CMakeFiles/engine.dir/render/FogOfWarRenderer.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/FogOfWarRenderer.cpp
+engine/CMakeFiles/engine.dir/render/FogOfWarRenderer.cpp.obj: engine/CMakeFiles/engine.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object engine/CMakeFiles/engine.dir/render/FogOfWarRenderer.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/render/FogOfWarRenderer.cpp.obj -MF CMakeFiles/engine.dir/render/FogOfWarRenderer.cpp.obj.d -o CMakeFiles/engine.dir/render/FogOfWarRenderer.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/FogOfWarRenderer.cpp
+
+engine/CMakeFiles/engine.dir/render/FogOfWarRenderer.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/engine.dir/render/FogOfWarRenderer.cpp.i"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/FogOfWarRenderer.cpp > CMakeFiles/engine.dir/render/FogOfWarRenderer.cpp.i
+
+engine/CMakeFiles/engine.dir/render/FogOfWarRenderer.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/engine.dir/render/FogOfWarRenderer.cpp.s"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/FogOfWarRenderer.cpp -o CMakeFiles/engine.dir/render/FogOfWarRenderer.cpp.s
+
 engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj: engine/CMakeFiles/engine.dir/flags.make
 engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj: engine/CMakeFiles/engine.dir/includes_CXX.rsp
 engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/BitmapTextRenderer.cpp
 engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj: engine/CMakeFiles/engine.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj"
 	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj -MF CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj.d -o CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/BitmapTextRenderer.cpp
 
 engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.i: cmake_force
@@ -238,7 +268,7 @@ engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.obj: engine/CMakeFiles/engin
 engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.obj: engine/CMakeFiles/engine.dir/includes_CXX.rsp
 engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/ActionMapper.cpp
 engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.obj: engine/CMakeFiles/engine.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.obj"
 	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.obj -MF CMakeFiles/engine.dir/input/ActionMapper.cpp.obj.d -o CMakeFiles/engine.dir/input/ActionMapper.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/ActionMapper.cpp
 
 engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.i: cmake_force
@@ -253,7 +283,7 @@ engine/CMakeFiles/engine.dir/input/InputLoader.cpp.obj: engine/CMakeFiles/engine
 engine/CMakeFiles/engine.dir/input/InputLoader.cpp.obj: engine/CMakeFiles/engine.dir/includes_CXX.rsp
 engine/CMakeFiles/engine.dir/input/InputLoader.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/InputLoader.cpp
 engine/CMakeFiles/engine.dir/input/InputLoader.cpp.obj: engine/CMakeFiles/engine.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object engine/CMakeFiles/engine.dir/input/InputLoader.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object engine/CMakeFiles/engine.dir/input/InputLoader.cpp.obj"
 	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/input/InputLoader.cpp.obj -MF CMakeFiles/engine.dir/input/InputLoader.cpp.obj.d -o CMakeFiles/engine.dir/input/InputLoader.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/InputLoader.cpp
 
 engine/CMakeFiles/engine.dir/input/InputLoader.cpp.i: cmake_force
@@ -276,6 +306,8 @@ engine_OBJECTS = \
 "CMakeFiles/engine.dir/assets/TextureManager.cpp.obj" \
 "CMakeFiles/engine.dir/assets/AssetManifest.cpp.obj" \
 "CMakeFiles/engine.dir/assets/FontLoader.cpp.obj" \
+"CMakeFiles/engine.dir/gameplay/FogOfWar.cpp.obj" \
+"CMakeFiles/engine.dir/render/FogOfWarRenderer.cpp.obj" \
 "CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj" \
 "CMakeFiles/engine.dir/input/ActionMapper.cpp.obj" \
 "CMakeFiles/engine.dir/input/InputLoader.cpp.obj"
@@ -293,12 +325,14 @@ engine/libengine.a: engine/CMakeFiles/engine.dir/assets/TextureLoader.cpp.obj
 engine/libengine.a: engine/CMakeFiles/engine.dir/assets/TextureManager.cpp.obj
 engine/libengine.a: engine/CMakeFiles/engine.dir/assets/AssetManifest.cpp.obj
 engine/libengine.a: engine/CMakeFiles/engine.dir/assets/FontLoader.cpp.obj
+engine/libengine.a: engine/CMakeFiles/engine.dir/gameplay/FogOfWar.cpp.obj
+engine/libengine.a: engine/CMakeFiles/engine.dir/render/FogOfWarRenderer.cpp.obj
 engine/libengine.a: engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj
 engine/libengine.a: engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.obj
 engine/libengine.a: engine/CMakeFiles/engine.dir/input/InputLoader.cpp.obj
 engine/libengine.a: engine/CMakeFiles/engine.dir/build.make
 engine/libengine.a: engine/CMakeFiles/engine.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Linking CXX static library libengine.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Linking CXX static library libengine.a"
 	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && $(CMAKE_COMMAND) -P CMakeFiles/engine.dir/cmake_clean_target.cmake
 	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/engine.dir/link.txt --verbose=$(VERBOSE)
 

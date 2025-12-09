@@ -196,6 +196,14 @@ game/CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_relops.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/ecs/Entity.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/core/Time.h \
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/functional \
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/std_function.h \
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/array \
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_algo.h \
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/algorithmfwd.h \
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/uniform_int_dist.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../components/Pickup.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../components/../meta/ItemDefs.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cmath \
  /usr/share/mingw-w64/include/math.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/specfun.h \
@@ -212,7 +220,6 @@ game/CMakeFiles/zeta_game.dir/systems/PickupSystem.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/poly_hermite.tcc \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/poly_laguerre.tcc \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/riemann_zeta.tcc \
- /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../components/Pickup.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../components/PickupBob.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../components/../../engine/math/Vec2.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../../engine/ecs/components/Transform.h \

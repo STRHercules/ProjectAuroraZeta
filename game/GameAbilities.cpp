@@ -116,8 +116,11 @@ void GameRoot::executeAbility(int index) {
         float sz = projectileSize_ * sizeMul;
         float hb = projectileHitboxSize_ * sizeMul * 0.5f;
         registry_.emplace<Engine::ECS::AABB>(p, Engine::ECS::AABB{Engine::Vec2{hb, hb}});
+        if (projectileTexRed_) {
+            sz = static_cast<float>(projectileTexRed_->width()) * sizeMul;
+        }
         registry_.emplace<Engine::ECS::Renderable>(p,
-            Engine::ECS::Renderable{Engine::Vec2{sz, sz}, Engine::Color{255, 220, 140, 255}});
+            Engine::ECS::Renderable{Engine::Vec2{sz, sz}, Engine::Color{255, 220, 140, 255}, projectileTexRed_});
         registry_.emplace<Engine::ECS::Projectile>(p, Engine::ECS::Projectile{dir * speed, dmgEvent, projectileLifetime_, lifestealPercent_, chainBounces_});
         registry_.emplace<Engine::ECS::ProjectileTag>(p, Engine::ECS::ProjectileTag{});
     };

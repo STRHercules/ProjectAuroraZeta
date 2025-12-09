@@ -374,6 +374,13 @@ game/CMakeFiles/zeta_game.dir/Game.cpp.obj: \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/../engine/assets/../render/BitmapFont.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/../engine/render/BitmapTextRenderer.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/../engine/render/TextRenderer.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/../engine/gameplay/Combat.h \
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/algorithm \
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_algo.h \
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/algorithmfwd.h \
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/uniform_int_dist.h \
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_algo.h \
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/glue_algorithm_defs.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/random \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cmath \
  /usr/share/mingw-w64/include/math.h \
@@ -392,7 +399,6 @@ game/CMakeFiles/zeta_game.dir/Game.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/poly_laguerre.tcc \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/riemann_zeta.tcc \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/random.h \
- /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/uniform_int_dist.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/opt_random.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/random.tcc \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/numeric \
@@ -406,11 +412,6 @@ game/CMakeFiles/zeta_game.dir/Game.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/c++io.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/fstream.tcc \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/json.hpp \
- /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/algorithm \
- /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_algo.h \
- /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/algorithmfwd.h \
- /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_algo.h \
- /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/glue_algorithm_defs.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/functional \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/std_function.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/iterator \
@@ -510,6 +511,7 @@ game/CMakeFiles/zeta_game.dir/Game.cpp.obj: \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/../engine/input/InputBinding.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/../engine/input/InputLoader.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/RenderSystem.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../../engine/gameplay/FogOfWar.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/../components/Facing.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/meta/ItemDefs.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/MovementSystem.h \
@@ -525,10 +527,13 @@ game/CMakeFiles/zeta_game.dir/Game.cpp.obj: \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/DamageNumberSystem.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/ShopSystem.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/PickupSystem.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../components/Pickup.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/EventSystem.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/../components/EventActive.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/HotzoneSystem.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/BuffSystem.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/meta/SaveManager.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/../engine/render/FogOfWarRenderer.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/../engine/core/Application.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/../engine/core/../platform/Window.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/../engine/core/Logger.h \
@@ -544,15 +549,18 @@ game/CMakeFiles/zeta_game.dir/Game.cpp.obj: \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/../engine/ecs/components/SpriteAnimation.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/../engine/ecs/components/AABB.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/../engine/ecs/components/Health.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/../engine/ecs/components/CombatStats.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/../engine/ecs/components/Projectile.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/../engine/ecs/components/Tags.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/../engine/platform/SDLRenderDevice.h \
+ /home/zach/winlibs/sdl/SDL2_image-2.8.2/x86_64-w64-mingw32/include/SDL2/SDL_image.h \
+ /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_version.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/DamageNumber.h \
- /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/Pickup.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/PickupBob.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/BountyTag.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/EnemyAttributes.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/EventMarker.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/Spawner.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/Invulnerable.h \
- /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/Shopkeeper.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/Shopkeeper.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/game/../engine/platform/SDLTexture.h

@@ -1,6 +1,11 @@
 {
   "enemy": {
     "hp": 40.0,
+    "shields": 20.0,
+    "healthArmor": 0.0,
+    "shieldArmor": 0.0,
+    "shieldRegen": 0.0,
+    "regenDelay": 0.0,
     "speed": 80.0,
     "contactDamage": 10.0,
     "size": 18.0,
@@ -8,6 +13,12 @@
   },
   "hero": {
     "hp": 100.0,
+    "shields": 0.0,
+    "healthArmor": 0.0,
+    "shieldArmor": 0.0,
+    "shieldRegen": 0.0,
+    "healthRegen": 0.0,
+    "regenDelay": 0.0,
     "moveSpeed": 200.0,
     "size": 24.0
   },
@@ -30,14 +41,31 @@
     "waveClearBonus": 20,
     "bountyBonus": 40
   },
+  "gold": {
+    "boss": 3,
+    "event": 1
+  },
   "xp": {
     "perKill": 8,
     "perWave": 5,
+    "perDamageDealt": 0.04,
+    "perDamageTaken": 0.02,
+    "perEvent": 50,
     "baseToLevel": 60,
     "growth": 1.35,
     "hpBonus": 12.0,
     "damageBonus": 2.5,
     "speedBonus": 5.0
+  },
+  "rounds": {
+    "baseWaves": 2,
+    "wavesPerRoundGrowthInterval": 2,
+    "spawnBatchInterval": 5
+  },
+  "energy": {
+    "baseMax": 100.0,
+    "regenPerSecond": 14.0,
+    "intermissionRegenPerSecond": 26.0
   },
   "ui": {
     "enemyLowThreshold": 5
@@ -50,8 +78,28 @@
     "hpBonus": 20.0,
     "speedBonus": 20.0
   },
+  "abilityShop": {
+    "baseCost": 8,
+    "costGrowth": 1.18,
+    "damagePerLevel": 1.0,
+    "attackSpeedPerLevel": 0.05,
+    "rangePerLevel": 60.0,
+    "visionPerLevel": 1.0,
+    "healthPerLevel": 5.0,
+    "armorPerLevel": 1.0,
+    "rangeMax": 5,
+    "visionMax": 5
+  },
   "events": {
     "salvageReward": 30
+  },
+  "drops": {
+    "pickupChance": 0.25,
+    "powerupShare": 0.35,
+    "copperMin": 4,
+    "copperMax": 10,
+    "bossCopper": 160,
+    "miniBossCopper": 80
   },
   "dash": {
     "speedMultiplier": 3.5,

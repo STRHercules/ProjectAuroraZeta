@@ -378,6 +378,13 @@ CMakeFiles/zeta.dir/src/main.cpp.obj: \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/assets/../render/BitmapFont.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/render/BitmapTextRenderer.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/render/TextRenderer.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/gameplay/Combat.h \
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/algorithm \
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_algo.h \
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/algorithmfwd.h \
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/uniform_int_dist.h \
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_algo.h \
+ /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/glue_algorithm_defs.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/random \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cmath \
  /usr/share/mingw-w64/include/math.h \
@@ -396,7 +403,6 @@ CMakeFiles/zeta.dir/src/main.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/poly_laguerre.tcc \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/riemann_zeta.tcc \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/random.h \
- /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/uniform_int_dist.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/opt_random.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/random.tcc \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/numeric \
@@ -410,11 +416,6 @@ CMakeFiles/zeta.dir/src/main.cpp.obj: \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/c++io.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/fstream.tcc \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/_deps/nlohmann_json-src/include/nlohmann/json.hpp \
- /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/algorithm \
- /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_algo.h \
- /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/algorithmfwd.h \
- /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_algo.h \
- /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/glue_algorithm_defs.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/functional \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/std_function.h \
  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/iterator \
@@ -514,6 +515,7 @@ CMakeFiles/zeta.dir/src/main.cpp.obj: \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/input/InputBinding.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/input/InputLoader.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/render/RenderSystem.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/render/../../engine/gameplay/FogOfWar.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/render/../components/Facing.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/meta/ItemDefs.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/MovementSystem.h \
@@ -528,7 +530,10 @@ CMakeFiles/zeta.dir/src/main.cpp.obj: \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/DamageNumberSystem.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/ShopSystem.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/PickupSystem.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/../components/Pickup.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/EventSystem.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/../components/EventActive.h \
  /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/HotzoneSystem.h \
- /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/meta/SaveManager.h
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/systems/BuffSystem.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/meta/SaveManager.h \
+ /home/zach/Documents/GitHub/ProjectAuroraZeta/src/../game/../engine/render/FogOfWarRenderer.h

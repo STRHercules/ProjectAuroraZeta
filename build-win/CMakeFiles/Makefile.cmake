@@ -71,6 +71,7 @@ set(CMAKE_MAKEFILE_PRODUCTS
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/zeta.dir/DependInfo.cmake"
+  "CMakeFiles/combat_tests.dir/DependInfo.cmake"
   "engine/CMakeFiles/engine.dir/DependInfo.cmake"
   "game/CMakeFiles/zeta_game.dir/DependInfo.cmake"
   )

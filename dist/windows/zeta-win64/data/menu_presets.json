@@ -110,7 +110,7 @@
     {
       "id": "torment",
       "name": "Torment I",
-      "description": "200% enemy HP, starts at wave 60 (placeholder target).",
+      "description": "200% enemy HP, starts at wave 60.",
       "enemyHpMul": 2.0,
       "startWave": 60
     }
