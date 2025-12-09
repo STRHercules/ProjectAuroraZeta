@@ -91,6 +91,7 @@ private:
     void applyPowerupPickup(Pickup::Powerup type);
     void loadGridTextures();
     void loadEnemyDefinitions();
+    void loadPickupTextures();
     Engine::TexturePtr loadTextureOptional(const std::string& path);
     void spawnShopkeeper(const Engine::Vec2& aroundPos);
     void despawnShopkeeper();
@@ -168,6 +169,15 @@ private:
     std::vector<Engine::TexturePtr> gridTileTexturesWeighted_;
     std::vector<Engine::TexturePtr> gridTileTextures_{};
     Engine::TexturePtr shopTexture_{};
+    // Pickup textures
+    Engine::TexturePtr pickupCopperTex_{};
+    Engine::TexturePtr pickupGoldTex_{};
+    Engine::TexturePtr pickupHealTex_{};
+    Engine::TexturePtr pickupKaboomTex_{};
+    Engine::TexturePtr pickupRechargeTex_{};
+    Engine::TexturePtr pickupFrenzyTex_{};
+    Engine::TexturePtr pickupImmortalTex_{};
+    Engine::TexturePtr pickupTurretTex_{};
     SDL_Cursor* customCursor_{nullptr};
     std::string heroTexturePath_{};
     std::unique_ptr<Engine::BitmapTextRenderer> debugText_;
@@ -443,6 +453,7 @@ private:
         Engine::Vec2 pos;
         float timer{0.0f};
         float fireCooldown{0.0f};
+        Engine::ECS::Entity visEntity{Engine::ECS::kInvalidEntity};
     };
     std::vector<TurretInstance> turrets_;
 

@@ -153,6 +153,7 @@ bool GameRoot::onInitialize(Engine::Application& app) {
 
     loadGridTextures();
     loadEnemyDefinitions();
+    loadPickupTextures();
     itemCatalog_ = defaultItemCatalog();
     goldCatalog_ = goldShopCatalog();
     // capture baseline fire interval for attack speed stacking
@@ -1008,6 +1009,12 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                             if (const auto* tf = registry_.get<Engine::ECS::Transform>(hero_)) t.pos = tf->position;
                             t.timer = inst.def.value;
                             t.fireCooldown = 0.0f;
+                            t.visEntity = registry_.create();
+                            registry_.emplace<Engine::ECS::Transform>(t.visEntity, t.pos);
+                            Engine::TexturePtr tex = pickupTurretTex_;
+                            Engine::Vec2 size{16.0f, 16.0f};
+                            registry_.emplace<Engine::ECS::Renderable>(t.visEntity,
+                                Engine::ECS::Renderable{size, Engine::Color{255, 255, 255, 255}, tex});
                             turrets_.push_back(t);
                             break;
                         }
@@ -1216,6 +1223,9 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         it->timer -= static_cast<float>(step.deltaSeconds);
         it->fireCooldown = std::max(0.0f, it->fireCooldown - static_cast<float>(step.deltaSeconds));
         if (it->timer <= 0.0f) {
+            if (it->visEntity != Engine::ECS::kInvalidEntity && registry_.has<Engine::ECS::Transform>(it->visEntity)) {
+                registry_.destroy(it->visEntity);
+            }
             it = turrets_.erase(it);
         } else {
             ++it;
@@ -1276,6 +1286,12 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                                                                                                  dir.y * projectileSpeed_},
                                                                                    dmgEvent, projectileLifetime_, lifestealPercent_, chainBounces_});
                 registry_.emplace<Engine::ECS::ProjectileTag>(proj, Engine::ECS::ProjectileTag{});
+            }
+            // keep turret marker on its position
+            if (t.visEntity != Engine::ECS::kInvalidEntity) {
+                if (auto* tf = registry_.get<Engine::ECS::Transform>(t.visEntity)) {
+                    tf->position = t.pos;
+                }
             }
         }
     }
@@ -1342,17 +1358,38 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     float r = rad(rng_);
                     return Engine::Vec2{base.x + std::cos(a) * r, base.y + std::sin(a) * r};
                 };
-                auto spawnPickupEntity = [&](const Pickup& payload, const Engine::Vec2& pos, Engine::Color color,
-                                             float size, float amp, float speed) {
-                    auto drop = registry_.create();
-                    registry_.emplace<Engine::ECS::Transform>(drop, pos);
-                    registry_.emplace<Engine::ECS::Renderable>(drop,
-                        Engine::ECS::Renderable{Engine::Vec2{size, size}, color});
-                    registry_.emplace<Engine::ECS::AABB>(drop, Engine::ECS::AABB{Engine::Vec2{size * 0.5f, size * 0.5f}});
-                    registry_.emplace<Game::Pickup>(drop, payload);
-                    registry_.emplace<Game::PickupBob>(drop, Game::PickupBob{pos, 0.0f, amp, speed});
-                    registry_.emplace<Engine::ECS::PickupTag>(drop, Engine::ECS::PickupTag{});
-                };
+    auto spawnPickupEntity = [&](const Pickup& payload, const Engine::Vec2& pos, Engine::Color color,
+                                 float size, float amp, float speed) {
+        auto drop = registry_.create();
+        registry_.emplace<Engine::ECS::Transform>(drop, pos);
+        Engine::TexturePtr tex{};
+        bool animated = false;
+        if (payload.kind == Pickup::Kind::Copper) tex = pickupCopperTex_, animated = true;
+                    if (payload.kind == Pickup::Kind::Gold) tex = pickupGoldTex_, animated = true;
+                    if (payload.kind == Pickup::Kind::Powerup) {
+                        switch (payload.powerup) {
+                            case Pickup::Powerup::Heal: tex = pickupHealTex_; break;
+                            case Pickup::Powerup::Kaboom: tex = pickupKaboomTex_; break;
+                            case Pickup::Powerup::Recharge: tex = pickupRechargeTex_; break;
+                            case Pickup::Powerup::Frenzy: tex = pickupFrenzyTex_; break;
+                            case Pickup::Powerup::Immortal: tex = pickupImmortalTex_; break;
+                            default: break;
+                        }
+                    }
+        if (payload.kind == Pickup::Kind::Item && payload.item.effect == ItemEffect::Turret) {
+            tex = pickupTurretTex_;
+        }
+        Engine::Vec2 rendSize{size, size};
+        registry_.emplace<Engine::ECS::Renderable>(drop,
+            Engine::ECS::Renderable{rendSize, color, tex});
+        registry_.emplace<Engine::ECS::AABB>(drop, Engine::ECS::AABB{Engine::Vec2{size * 0.5f, size * 0.5f}});
+        registry_.emplace<Game::Pickup>(drop, payload);
+        registry_.emplace<Game::PickupBob>(drop, Game::PickupBob{pos, 0.0f, amp, speed});
+        registry_.emplace<Engine::ECS::PickupTag>(drop, Engine::ECS::PickupTag{});
+        if (animated && tex) {
+            registry_.emplace<Engine::ECS::SpriteAnimation>(drop, Engine::ECS::SpriteAnimation{16, 16, 6, 0.08f});
+        }
+    };
                 auto pickItemByKind = [&](ItemKind kind) -> std::optional<ItemDefinition> {
                     std::vector<ItemDefinition> pool;
                     for (const auto& def : itemCatalog_) {
@@ -2494,6 +2531,17 @@ void GameRoot::loadEnemyDefinitions() {
     } else {
         Engine::logInfo("Loaded " + std::to_string(enemyDefs_.size()) + " enemy archetypes from sprites.");
     }
+}
+
+void GameRoot::loadPickupTextures() {
+    pickupCopperTex_ = loadTextureOptional("assets/Sprites/Misc/copperpickup.png");
+    pickupGoldTex_ = loadTextureOptional("assets/Sprites/Misc/goldpickup.png");
+    pickupHealTex_ = loadTextureOptional("assets/Sprites/Misc/healthpickup.png");
+    pickupKaboomTex_ = loadTextureOptional("assets/Sprites/Misc/kaboompickup.png");
+    pickupRechargeTex_ = loadTextureOptional("assets/Sprites/Misc/rechargepickup2.png");
+    pickupFrenzyTex_ = loadTextureOptional("assets/Sprites/Misc/frenzypickup.png");
+    pickupImmortalTex_ = loadTextureOptional("assets/Sprites/Misc/immortalpickup.png");
+    pickupTurretTex_ = loadTextureOptional("assets/Sprites/Misc/turretdeployable.png");
 }
 
 void GameRoot::startNewGame() {
