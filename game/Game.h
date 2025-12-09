@@ -43,6 +43,8 @@
 #include "systems/BuffSystem.h"
 #include "meta/SaveManager.h"
 #include "EnemyDefinition.h"
+#include "../engine/gameplay/FogOfWar.h"
+#include "../engine/render/FogOfWarRenderer.h"
 
 namespace Game {
 
@@ -91,6 +93,8 @@ private:
     Engine::TexturePtr loadTextureOptional(const std::string& path);
     void spawnShopkeeper(const Engine::Vec2& aroundPos);
     void despawnShopkeeper();
+    void rebuildFogLayer();
+    void updateFogVision();
 
     enum class MenuPage { Main, Stats, Options, CharacterSelect };
     enum class LevelChoiceType { Damage, Health, Speed };
@@ -381,6 +385,17 @@ private:
         float fireCooldown{0.0f};
     };
     std::vector<TurretInstance> turrets_;
+
+    // Fog of war state
+    std::unique_ptr<Engine::Gameplay::FogOfWarLayer> fogLayer_{};
+    std::vector<Engine::Gameplay::Unit> fogUnits_{};
+    int fogTileSize_{32};
+    int fogWidthTiles_{256};
+    int fogHeightTiles_{256};
+    float fogOriginOffsetX_{0.0f};
+    float fogOriginOffsetY_{0.0f};
+    float heroVisionRadiusTiles_{6.0f};
+    SDL_Texture* fogTexture_{nullptr};
 };
 
 }  // namespace Game

@@ -9,6 +9,8 @@ set(ENGINE_SOURCES
     assets/TextureManager.cpp
     assets/AssetManifest.cpp
     assets/FontLoader.cpp
+    gameplay/FogOfWar.h
+    gameplay/FogOfWar.cpp
     ecs/ComponentStorage.h
     ecs/Entity.h
     ecs/Registry.h
@@ -28,6 +30,8 @@ set(ENGINE_SOURCES
     render/Color.h
     render/Camera2D.h
     render/CameraUtil.h
+    render/FogOfWarRenderer.h
+    render/FogOfWarRenderer.cpp
     render/TextRenderer.h
     render/BitmapFont.h
     render/BitmapTextRenderer.h

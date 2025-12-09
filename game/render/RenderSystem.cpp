@@ -37,14 +37,17 @@ uint32_t hashCoords(int x, int y) {
 
 void RenderSystem::draw(const Engine::ECS::Registry& registry, const Engine::Camera2D& camera, int viewportW,
                         int viewportH, const Engine::Texture* gridTexture,
-                        const std::vector<Engine::TexturePtr>* gridVariants) {
-    drawGrid(camera, viewportW, viewportH, gridTexture, gridVariants);
+                        const std::vector<Engine::TexturePtr>* gridVariants,
+                        const Engine::Gameplay::FogOfWarLayer* fog, int fogTileSize,
+                        float fogOriginOffsetX, float fogOriginOffsetY) {
+    drawGrid(camera, viewportW, viewportH, gridTexture, gridVariants, fog, fogTileSize, fogOriginOffsetX,
+             fogOriginOffsetY);
 
     const Engine::Vec2 center{static_cast<float>(viewportW) * 0.5f, static_cast<float>(viewportH) * 0.5f};
     registry.view<Engine::ECS::Transform, Engine::ECS::Renderable>(
-        [this, center, &camera, viewportW, viewportH, &registry](Engine::ECS::Entity e,
-                                                                 const Engine::ECS::Transform& tf,
-                                                                 const Engine::ECS::Renderable& rend) {
+        [this, center, &camera, viewportW, viewportH, &registry, fog, fogTileSize, fogOriginOffsetX,
+         fogOriginOffsetY](Engine::ECS::Entity e, const Engine::ECS::Transform& tf,
+                          const Engine::ECS::Renderable& rend) {
             Engine::Vec2 screenPos =
                 Engine::worldToScreen(tf.position, camera, static_cast<float>(viewportW), static_cast<float>(viewportH));
             screenPos.x -= rend.size.x * 0.5f * camera.zoom;
@@ -55,6 +58,19 @@ void RenderSystem::draw(const Engine::ECS::Registry& registry, const Engine::Cam
                 screenPos.x + scaledSize.x < -cullMargin || screenPos.y + scaledSize.y < -cullMargin) {
                 return;  // simple frustum cull
             }
+
+            // Fog culling: hide enemies when tile not visible to player.
+            if (fog && fogTileSize > 0 &&
+                (registry.has<Engine::ECS::EnemyTag>(e) || registry.has<Engine::ECS::BossTag>(e))) {
+                const int tileX = static_cast<int>(
+                    std::floor((tf.position.x + fogOriginOffsetX) / static_cast<float>(fogTileSize)));
+                const int tileY = static_cast<int>(
+                    std::floor((tf.position.y + fogOriginOffsetY) / static_cast<float>(fogTileSize)));
+                if (fog->getState(tileX, tileY) != Engine::Gameplay::FogState::Visible) {
+                    return;
+                }
+            }
+
             Engine::Color color = rend.color;
             // Pulse color for pickups.
             if (registry.has<Game::Pickup>(e)) {
@@ -154,7 +170,9 @@ void RenderSystem::draw(const Engine::ECS::Registry& registry, const Engine::Cam
 
 void RenderSystem::drawGrid(const Engine::Camera2D& camera, int viewportW, int viewportH,
                             const Engine::Texture* gridTexture,
-                            const std::vector<Engine::TexturePtr>* gridVariants) {
+                            const std::vector<Engine::TexturePtr>* gridVariants,
+                            const Engine::Gameplay::FogOfWarLayer* fog, int fogTileSize,
+                            float /*fogOriginOffsetX*/, float /*fogOriginOffsetY*/) {
     const float viewWidth = viewportW / camera.zoom;
     const float viewHeight = viewportH / camera.zoom;
     const float left = camera.position.x - viewWidth * 0.5f;

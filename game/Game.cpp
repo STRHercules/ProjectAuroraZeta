@@ -42,6 +42,8 @@
 #include "meta/SaveManager.h"
 #include "meta/ItemDefs.h"
 #include "systems/HotzoneSystem.h"
+#include "../engine/gameplay/FogOfWar.h"
+#include "../engine/render/FogOfWarRenderer.h"
 #include <cmath>
 
 namespace Game {
@@ -370,6 +372,8 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     fireIntervalBase_ = fireInterval_;
     fireCooldown_ = 0.0;
     if (collisionSystem_) collisionSystem_->setContactDamage(contactDamage_);
+
+    rebuildFogLayer();
 
     // Attempt to load a placeholder sprite for hero (optional).
     if (render_ && textureManager_) {
@@ -1265,6 +1269,9 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
     handleHeroDeath();
     processDefeatInput(actions, input);
 
+    // Update fog-of-war visibility before rendering.
+    updateFogVision();
+
     // Render all rectangles.
     if (render_) {
         render_->clear({12, 12, 18, 255});
@@ -1282,7 +1289,8 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             const std::vector<Engine::TexturePtr>* gridVariants =
                 gridTileTexturesWeighted_.empty() ? (gridTileTextures_.empty() ? nullptr : &gridTileTextures_)
                                                   : &gridTileTexturesWeighted_;
-            renderSystem_->draw(registry_, cameraShaken, viewportWidth_, viewportHeight_, gridPtr, gridVariants);
+            renderSystem_->draw(registry_, cameraShaken, viewportWidth_, viewportHeight_, gridPtr, gridVariants,
+                                fogLayer_.get(), fogTileSize_, fogOriginOffsetX_, fogOriginOffsetY_);
         }
 
         // Dash trail rendering (simple rectangles).
@@ -1305,6 +1313,12 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                                         Engine::Vec2{size * 0.7f, size * 0.7f}, cInner);
                 ++it;
             }
+        }
+
+        // Fog overlay drawn after world elements, before UI.
+        if (fogLayer_ && fogTexture_ && sdlRenderer_) {
+            Engine::renderFog(sdlRenderer_, *fogLayer_, fogTileSize_, fogOriginOffsetX_, fogOriginOffsetY_,
+                              cameraShaken, viewportWidth_, viewportHeight_, fogTexture_);
         }
 
         // Off-screen pickup indicator for nearest pickup.
@@ -1699,6 +1713,10 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
 
 void GameRoot::onShutdown() {
     saveProgress();
+    if (fogTexture_) {
+        SDL_DestroyTexture(fogTexture_);
+        fogTexture_ = nullptr;
+    }
     if (customCursor_) {
         SDL_FreeCursor(customCursor_);
         customCursor_ = nullptr;
@@ -1859,6 +1877,59 @@ Engine::TexturePtr GameRoot::loadTextureOptional(const std::string& path) {
     auto tex = textureManager_->getOrLoadBMP(path);
     if (!tex) return {};
     return *tex;
+}
+
+void GameRoot::rebuildFogLayer() {
+    // Derive tile size from grid texture if available; fallback to 32 px.
+    if (!gridTileTextures_.empty() && gridTileTextures_[0]) {
+        fogTileSize_ = std::max(1, gridTileTextures_[0]->width());
+    } else if (gridTexture_) {
+        fogTileSize_ = std::max(1, gridTexture_->width());
+    } else {
+        fogTileSize_ = 32;
+    }
+
+    // Generous extent to cover normal play space; outside bounds render as unexplored black.
+    const int minTiles = 256;
+    const float desiredWorld = hotzoneMapRadius_ * 3.0f;  // cover beyond combat space
+    const int tilesNeeded = static_cast<int>(std::ceil(desiredWorld / static_cast<float>(fogTileSize_)));
+    fogWidthTiles_ = std::max(minTiles, tilesNeeded);
+    fogHeightTiles_ = fogWidthTiles_;
+
+    fogLayer_ = std::make_unique<Engine::Gameplay::FogOfWarLayer>(fogWidthTiles_, fogHeightTiles_);
+    fogUnits_.clear();
+    fogOriginOffsetX_ = static_cast<float>(fogWidthTiles_ * fogTileSize_) * 0.5f;
+    fogOriginOffsetY_ = static_cast<float>(fogHeightTiles_ * fogTileSize_) * 0.5f;
+
+    // Create simple 1x1 white texture for fog overlay if missing.
+    if (!fogTexture_ && sdlRenderer_) {
+        fogTexture_ = SDL_CreateTexture(sdlRenderer_, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, 1, 1);
+        if (fogTexture_) {
+            const Uint32 pixel = 0xFFFFFFFFu;
+            SDL_UpdateTexture(fogTexture_, nullptr, &pixel, sizeof(pixel));
+            SDL_SetTextureBlendMode(fogTexture_, SDL_BLENDMODE_BLEND);
+        } else {
+            Engine::logWarn(std::string("Failed to create fog texture: ") + SDL_GetError());
+        }
+    }
+}
+
+void GameRoot::updateFogVision() {
+    if (!fogLayer_) return;
+    fogUnits_.clear();
+
+    if (hero_ != Engine::ECS::kInvalidEntity) {
+        const auto* tf = registry_.get<Engine::ECS::Transform>(hero_);
+        const auto* hp = registry_.get<Engine::ECS::Health>(hero_);
+        const bool alive = !hp || hp->currentHealth > 0.0f;
+        if (tf) {
+            fogUnits_.push_back(Engine::Gameplay::Unit{tf->position.x + fogOriginOffsetX_,
+                                                       tf->position.y + fogOriginOffsetY_,
+                                                       heroVisionRadiusTiles_, alive, 0});
+        }
+    }
+
+    Engine::Gameplay::updateFogOfWar(*fogLayer_, fogUnits_, 0, fogTileSize_);
 }
 
 void GameRoot::spawnShopkeeper(const Engine::Vec2& aroundPos) {
@@ -3027,6 +3098,8 @@ void GameRoot::resetRun() {
     interactPrev_ = false;
     useItemPrev_ = false;
     chainBounces_ = 0;
+
+    rebuildFogLayer();
 
     if (waveSystem_) {
         waveSystem_ = std::make_unique<WaveSystem>(rng_, waveSettingsBase_);
