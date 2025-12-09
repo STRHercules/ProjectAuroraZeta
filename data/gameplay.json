@@ -41,6 +41,10 @@
     "waveClearBonus": 20,
     "bountyBonus": 40
   },
+  "gold": {
+    "boss": 3,
+    "event": 1
+  },
   "xp": {
     "perKill": 8,
     "perWave": 5,
@@ -74,8 +78,28 @@
     "hpBonus": 20.0,
     "speedBonus": 20.0
   },
+  "abilityShop": {
+    "baseCost": 8,
+    "costGrowth": 1.18,
+    "damagePerLevel": 1.0,
+    "attackSpeedPerLevel": 0.05,
+    "rangePerLevel": 60.0,
+    "visionPerLevel": 1.0,
+    "healthPerLevel": 5.0,
+    "armorPerLevel": 1.0,
+    "rangeMax": 5,
+    "visionMax": 5
+  },
   "events": {
     "salvageReward": 30
+  },
+  "drops": {
+    "pickupChance": 0.25,
+    "powerupShare": 0.35,
+    "copperMin": 4,
+    "copperMax": 10,
+    "bossCopper": 160,
+    "miniBossCopper": 80
   },
   "dash": {
     "speedMultiplier": 3.5,

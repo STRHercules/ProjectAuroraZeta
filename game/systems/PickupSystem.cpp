@@ -18,7 +18,7 @@ bool aabbOverlap(const Engine::ECS::Transform& ta, const Engine::ECS::AABB& aa, 
 
 namespace Game {
 
-void PickupSystem::update(Engine::ECS::Registry& registry, Engine::ECS::Entity hero, int& credits) {
+void PickupSystem::update(Engine::ECS::Registry& registry, Engine::ECS::Entity hero, CollectFn onCollect) {
     const auto* heroTf = registry.get<Engine::ECS::Transform>(hero);
     const auto* heroBox = registry.get<Engine::ECS::AABB>(hero);
     if (!heroTf || !heroBox) return;
@@ -38,8 +38,8 @@ void PickupSystem::update(Engine::ECS::Registry& registry, Engine::ECS::Entity h
         [&](Engine::ECS::Entity e, Engine::ECS::Transform& tf, Engine::ECS::AABB& box, Game::Pickup& pickup,
             Engine::ECS::PickupTag&) {
             if (aabbOverlap(*heroTf, *heroBox, tf, box)) {
-                if (pickup.type == Game::Pickup::Type::Credits) {
-                    credits += pickup.amount;
+                if (onCollect) {
+                    onCollect(pickup);
                 }
                 collected.push_back(e);
             }

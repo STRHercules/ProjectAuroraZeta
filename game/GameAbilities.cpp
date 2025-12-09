@@ -5,6 +5,7 @@
 #include "../engine/ecs/components/Velocity.h"
 #include "../engine/ecs/components/Renderable.h"
 #include "../engine/ecs/components/AABB.h"
+#include "../engine/ecs/components/Health.h"
 #include "../engine/ecs/components/Projectile.h"
 #include "../engine/ecs/components/Tags.h"
 #include "../engine/gameplay/Combat.h"
@@ -23,11 +24,11 @@ void GameRoot::upgradeFocusedAbility() {
     auto& st = abilityStates_[idx];
     if (slot.level >= slot.maxLevel) return;
     int cost = slot.upgradeCost + (slot.level - 1) * (slot.upgradeCost / 2);
-    if (credits_ < cost) {
-        shopNoCreditTimer_ = 0.6;
+    if (copper_ < cost) {
+        shopNoFundsTimer_ = 0.6;
         return;
     }
-    credits_ -= cost;
+    copper_ -= cost;
     slot.level += 1;
     st.level = slot.level;
     // Scale power for known types
@@ -36,6 +37,47 @@ void GameRoot::upgradeFocusedAbility() {
     } else if (slot.type == "rage") {
         slot.powerScale *= 1.1f;
         slot.cooldownMax = std::max(4.0f, slot.cooldownMax * 0.92f);
+    }
+}
+
+void GameRoot::applyPowerupPickup(Pickup::Powerup type) {
+    switch (type) {
+        case Pickup::Powerup::Heal: {
+            if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
+                hp->currentHealth = hp->maxHealth;
+                hp->currentShields = hp->maxShields;
+                hp->regenDelay = 0.0f;
+            }
+            break;
+        }
+        case Pickup::Powerup::Kaboom: {
+            registry_.view<Engine::ECS::Health, Engine::ECS::EnemyTag>(
+                [](Engine::ECS::Entity, Engine::ECS::Health& hp, Engine::ECS::EnemyTag&) {
+                    hp.currentHealth = 0.0f;
+                    hp.currentShields = 0.0f;
+                });
+            break;
+        }
+        case Pickup::Powerup::Recharge: {
+            if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
+                hp->currentShields = hp->maxShields;
+                hp->regenDelay = 0.0f;
+            }
+            energy_ = energyMax_;
+            break;
+        }
+        case Pickup::Powerup::Frenzy: {
+            frenzyTimer_ = 30.0f;
+            frenzyRateBuff_ = 1.25f;
+            break;
+        }
+        case Pickup::Powerup::Immortal: {
+            immortalTimer_ = 30.0f;
+            // Component refresh handled in main update loop.
+            break;
+        }
+        default:
+            break;
     }
 }
 
@@ -55,13 +97,15 @@ void GameRoot::executeAbility(int index) {
     float zoneDmgMul = hotzoneSystem_ ? hotzoneSystem_->damageMultiplier() : 1.0f;
 
     auto setCooldown = [&](float cd) {
-        slot.cooldown = cd;
-        slot.cooldownMax = std::max(slot.cooldownMax, cd);
-        st.cooldown = cd;
+        float adjusted = cd * abilityCooldownMul_;
+        slot.cooldown = adjusted;
+        slot.cooldownMax = std::max(slot.cooldownMax, adjusted);
+        st.cooldown = adjusted;
     };
     auto spendEnergy = [&]() {
         if (slot.energyCost > 0.0f) {
-            energy_ = std::max(0.0f, energy_ - slot.energyCost);
+            float cost = slot.energyCost * abilityVitalCostMul_;
+            energy_ = std::max(0.0f, energy_ - cost);
         }
     };
 

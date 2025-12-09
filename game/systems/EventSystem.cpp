@@ -86,7 +86,7 @@ void EventSystem::spawnSpireHunt(Engine::ECS::Registry& registry, const Engine::
         Game::EventActive{eventId, Game::EventType::SpawnerHunt, 45.0f, 45.0f, false, false, false, false, count});
 }
 
-void EventSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep& step, int wave, int& credits,
+void EventSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep& step, int wave, int& gold,
                          bool inCombat, const Engine::Vec2& heroPos, int salvageReward) {
     lastSuccess_ = false;
     lastFail_ = false;
@@ -123,7 +123,7 @@ void EventSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep
                 if (ev.success) {
                     rend->color = Engine::Color{120, 255, 160, 255};
                     if (!ev.rewardGranted) {
-                        credits += salvageReward;
+                        gold += salvageReward;
                         ev.rewardGranted = true;
                     }
                     toDestroy.push_back(e);

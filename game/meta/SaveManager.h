@@ -8,10 +8,11 @@
 namespace Game {
 
 struct SaveData {
-    int version{1};
+    int version{2};
     int totalRuns{0};
     int bestWave{0};
     int totalKills{0};
+    int movementMode{0};  // 0 = Modern, 1 = RTS
 };
 
 class SaveManager {

@@ -71,12 +71,12 @@ private:
     void applyLevelChoice(int index);
     void drawLevelChoiceOverlay();
     void drawItemShopOverlay();
-    void drawStatShopOverlay();
+    void drawAbilityShopOverlay();
     void drawInventoryOverlay();
     void drawPauseOverlay();
     void refreshShopInventory();
     bool addItemToInventory(const ItemDefinition& def);
-    bool sellItemFromInventory(std::size_t idx, int& creditsOut);
+    bool sellItemFromInventory(std::size_t idx, int& copperOut);
     void clampInventorySelection();
     void loadMenuPresets();
     void applyDifficultyPreset();
@@ -88,6 +88,7 @@ private:
     void drawAbilityPanel();
     void executeAbility(int index);
     void upgradeFocusedAbility();
+    void applyPowerupPickup(Pickup::Powerup type);
     void loadGridTextures();
     void loadEnemyDefinitions();
     Engine::TexturePtr loadTextureOptional(const std::string& path);
@@ -97,6 +98,7 @@ private:
     void updateFogVision();
 
     enum class MenuPage { Main, Stats, Options, CharacterSelect };
+    enum class MovementMode { Modern, RTS };
     enum class LevelChoiceType { Damage, Health, Speed };
     struct LevelChoice {
         LevelChoiceType type{LevelChoiceType::Damage};
@@ -181,16 +183,23 @@ private:
     float projectileLifetime_{1.5f};
     double waveInterval_{2.5};
     double graceDuration_{1.0};
-    int currencyPerKill_{5};
+    int copperPerKill_{5};
     int waveClearBonus_{20};
     int enemyLowThreshold_{5};
     double combatDuration_{90.0};
     double intermissionDuration_{30.0};
-    int bountyBonus_{40};
+    int bountyGoldBonus_{40};
+    int eventGoldReward_{1};
     int bossWave_{20};
     float bossHpMultiplier_{12.0f};
     float bossSpeedMultiplier_{0.8f};
-    int bossKillBonus_{60};
+    int bossGoldBonus_{60};
+    int bossCopperDrop_{160};
+    int miniBossCopperDrop_{80};
+    float pickupDropChance_{0.25f};
+    float pickupPowerupShare_{0.35f};
+    int copperPickupMin_{4};
+    int copperPickupMax_{10};
     int salvageReward_{20};
     // Hotzones
     float hotzoneMapRadius_{900.0f};
@@ -206,6 +215,22 @@ private:
     float shopDamageBonus_{5.0f};
     float shopHpBonus_{20.0f};
     float shopSpeedBonus_{20.0f};  // flat bonus to move speed
+    int abilityShopBaseCost_{8};
+    float abilityShopCostGrowth_{1.18f};
+    float abilityDamagePerLevel_{1.0f};
+    float abilityAttackSpeedPerLevel_{0.05f};
+    float abilityRangePerLevel_{60.0f};  // world units of extra range per level
+    float abilityVisionPerLevel_{1.0f};
+    float abilityHealthPerLevel_{5.0f};
+    float abilityArmorPerLevel_{1.0f};
+    int abilityRangeMaxBonus_{5};
+    int abilityVisionMaxBonus_{5};
+    int abilityDamageLevel_{0};
+    int abilityAttackSpeedLevel_{0};
+    int abilityRangeLevel_{0};
+    int abilityVisionLevel_{0};
+    int abilityHealthLevel_{0};
+    int abilityArmorLevel_{0};
     // Shop click edge detectors (declared once)
     bool shopLeftPrev_{false};
     bool shopRightPrev_{false};
@@ -213,6 +238,8 @@ private:
     bool shopUIClickPrev_{false};
     double fireInterval_{0.2};
     double fireIntervalBase_{0.2};
+    float autoFireRangeBonus_{0.0f};
+    bool autoAttackEnabled_{true};
     float contactDamage_{10.0f};
     double fireCooldown_{0.0};
     float heroMoveSpeed_{200.0f};
@@ -244,7 +271,8 @@ private:
     Engine::Vec2 dashDir_{};
     std::deque<std::pair<Engine::Vec2, float>> dashTrail_;
     int kills_{0};
-    int credits_{0};
+    int copper_{0};
+    int gold_{0};
     int level_{1};
     int xp_{0};
     int xpToNext_{60};
@@ -293,6 +321,12 @@ private:
     bool menuClickPrev_{false};
     bool pauseClickPrev_{false};
     double menuPulse_{0.0};
+    MovementMode movementMode_{MovementMode::Modern};
+    bool moveCommandPrev_{false};
+    bool moveTargetActive_{false};
+    Engine::Vec2 moveTarget_{};
+    float moveArriveRadius_{10.0f};
+    float moveMarkerTimer_{0.0f};
     bool showDamageNumbers_{true};
     bool screenShake_{true};
     // Session stats
@@ -310,7 +344,7 @@ private:
     bool defeatClickPrev_{false};
     std::vector<ItemDefinition> shopInventory_;
     std::vector<ItemDefinition> shopPool_;
-    double shopNoCreditTimer_{0.0};
+    double shopNoFundsTimer_{0.0};
     bool dashPrev_{false};
     std::unique_ptr<Game::MovementSystem> movementSystem_;
     std::unique_ptr<Game::CameraSystem> cameraSystem_;
@@ -331,9 +365,9 @@ private:
     SDL_Renderer* sdlRenderer_{nullptr};
     bool restartPrev_{false};
     bool itemShopOpen_{false};
-    bool statShopOpen_{false};
+    bool abilityShopOpen_{false};
+    bool travelShopUnlocked_{false};
     bool waveClearedPending_{false};
-    double shopUnavailableTimer_{0.0};
     bool paused_{false};
     bool userPaused_{false};
     bool pauseTogglePrev_{false};
@@ -377,6 +411,13 @@ private:
     float rageTimer_{0.0f};
     float rageDamageBuff_{1.0f};
     float rageRateBuff_{1.0f};
+    float frenzyTimer_{0.0f};
+    float frenzyRateBuff_{1.0f};
+    float immortalTimer_{0.0f};
+    int reviveCharges_{0};
+    float abilityCooldownMul_{1.0f};
+    float abilityVitalCostMul_{1.0f};
+    int abilityChargesBonus_{0};
     // Character/difficulty presets
     std::vector<ArchetypeDef> archetypes_;
     std::vector<DifficultyDef> difficulties_;
@@ -387,6 +428,7 @@ private:
     int startWaveBase_{1};
     std::vector<EnemyDefinition> enemyDefs_{};
     std::vector<ItemDefinition> itemCatalog_;
+    std::vector<ItemDefinition> goldCatalog_;
     // Inventory
     std::vector<ItemInstance> inventory_;
     int inventoryCapacity_{16};
@@ -412,6 +454,7 @@ private:
     int fogHeightTiles_{512};
     float fogOriginOffsetX_{0.0f};
     float fogOriginOffsetY_{0.0f};
+    float heroVisionRadiusBaseTiles_{6.0f};
     float heroVisionRadiusTiles_{6.0f};
     SDL_Texture* fogTexture_{nullptr};
 };

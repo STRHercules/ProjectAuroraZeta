@@ -29,4 +29,26 @@ std::vector<ItemDefinition> defaultItemCatalog() {
     return items;
 }
 
+std::vector<ItemDefinition> goldShopCatalog() {
+    std::vector<ItemDefinition> items;
+    int id = 1000;
+    items.push_back({id++, "Cataclysm Rounds", "Increase all damage by 50%.", ItemKind::Unique,
+                     ItemRarity::Legendary, 4, ItemEffect::DamagePercent, 0.5f});
+    items.push_back({id++, "Survey Optics", "Increase weapon and vision range by 3.", ItemKind::Unique,
+                     ItemRarity::Legendary, 4, ItemEffect::RangeVision, 3.0f});
+    items.push_back({id++, "Temporal Accelerator", "Increase attack speed by 50%.", ItemKind::Unique,
+                     ItemRarity::Legendary, 4, ItemEffect::AttackSpeedPercent, 0.5f});
+    items.push_back({id++, "Speed Boots", "Increase movement speed by 1.", ItemKind::Unique,
+                     ItemRarity::Legendary, 3, ItemEffect::MoveSpeedFlat, 1.0f});
+    items.push_back({id++, "Nanite Surge", "Increase HP, Shields, Energy by 25%.", ItemKind::Unique,
+                     ItemRarity::Legendary, 5, ItemEffect::BonusVitalsPercent, 0.25f});
+    items.push_back({id++, "Cooldown Nexus", "Abilities cooldown 25% faster.", ItemKind::Unique,
+                     ItemRarity::Legendary, 5, ItemEffect::CooldownFaster, 0.25f});
+    items.push_back({id++, "Charge Matrix", "Abilities that use charges get +1 max.", ItemKind::Unique,
+                     ItemRarity::Legendary, 4, ItemEffect::AbilityCharges, 1.0f});
+    items.push_back({id++, "Vital Austerity", "Abilities that cost vitals cost 25% less.", ItemKind::Unique,
+                     ItemRarity::Legendary, 4, ItemEffect::VitalCostReduction, 0.25f});
+    return items;
+}
+
 }  // namespace Game

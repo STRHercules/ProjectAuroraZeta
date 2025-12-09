@@ -12,7 +12,7 @@ public:
     const std::vector<ItemDefinition>& items() const { return items_; }
 
     // Attempt purchase; returns true if bought and outputs purchased item.
-    bool tryPurchase(int index, int& credits, float& projDamage, float& heroHp, float& heroMove,
+    bool tryPurchase(int index, int& gold, float& projDamage, float& heroHp, float& heroMove,
                      float& heroHpCurrent, ItemDefinition& purchasedOut);
 
 private:

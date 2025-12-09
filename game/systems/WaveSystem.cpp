@@ -22,6 +22,15 @@ WaveSystem::WaveSystem(std::mt19937& rng, WaveSettings settings) : rng_(rng), se
 
 const EnemyDefinition* WaveSystem::pickEnemyDef() {
     if (!enemyDefs_ || enemyDefs_->empty()) return nullptr;
+    std::vector<const EnemyDefinition*> textured;
+    textured.reserve(enemyDefs_->size());
+    for (const auto& def : *enemyDefs_) {
+        if (def.texture) textured.push_back(&def);
+    }
+    if (!textured.empty()) {
+        std::uniform_int_distribution<std::size_t> dist(0, textured.size() - 1);
+        return textured[dist(rng_)];
+    }
     std::uniform_int_distribution<std::size_t> dist(0, enemyDefs_->size() - 1);
     return &((*enemyDefs_)[dist(rng_)]);
 }
@@ -65,15 +74,27 @@ bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
         float hpVal = settings_.enemyHp;
         float speedVal = settings_.enemySpeed;
         float sizeMul = 1.0f;
+        Engine::TexturePtr tex{};
         if (def) {
             hpVal *= def->hpMultiplier;
             speedVal *= def->speedMultiplier;
             sizeMul = def->sizeMultiplier;
+            tex = def->texture;
+        }
+        if (speedVal < 5.0f) speedVal = settings_.enemySpeed * 0.6f;
+        // If no texture available, fall back to any textured enemy or leave empty.
+        if (!tex && enemyDefs_) {
+            for (const auto& d : *enemyDefs_) {
+                if (d.texture) {
+                    tex = d.texture;
+                    break;
+                }
+            }
         }
         float size = settings_.enemySize * sizeMul;
         registry.emplace<Engine::ECS::Renderable>(e, Engine::ECS::Renderable{Engine::Vec2{size, size},
                                                                               Engine::Color{255, 255, 255, 255},
-                                                                              def ? def->texture : Engine::TexturePtr{}});
+                                                                              tex});
         const float hb = settings_.enemyHitbox * 0.5f * sizeMul;
         registry.emplace<Engine::ECS::AABB>(e, Engine::ECS::AABB{Engine::Vec2{hb, hb}});
         registry.emplace<Engine::ECS::Health>(e, Engine::ECS::Health{hpVal, hpVal});
@@ -89,7 +110,7 @@ bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
         }
         registry.emplace<Engine::ECS::EnemyTag>(e, Engine::ECS::EnemyTag{});
         registry.emplace<Game::EnemyAttributes>(e, Game::EnemyAttributes{speedVal});
-        if (def && def->texture) {
+        if (tex) {
             registry.emplace<Engine::ECS::SpriteAnimation>(e, Engine::ECS::SpriteAnimation{def->frameWidth,
                                                                                            def->frameHeight,
                                                                                            4,
@@ -111,9 +132,16 @@ bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
         float size = 24.0f * sizeMul;
         float hpVal = settings_.enemyHp * 3.0f * (def ? def->hpMultiplier : 1.0f);
         float speedVal = settings_.enemySpeed * 1.1f * (def ? def->speedMultiplier : 1.0f);
+        if (speedVal < 8.0f) speedVal = settings_.enemySpeed * 0.8f;
+        Engine::TexturePtr tex = def ? def->texture : Engine::TexturePtr{};
+        if (!tex && enemyDefs_) {
+            for (const auto& d : *enemyDefs_) {
+                if (d.texture) { tex = d.texture; break; }
+            }
+        }
         registry.emplace<Engine::ECS::Renderable>(e, Engine::ECS::Renderable{Engine::Vec2{size, size},
                                                                               Engine::Color{255, 170, 60, 255},
-                                                                              def ? def->texture : Engine::TexturePtr{}});
+                                                                              tex});
         registry.emplace<Engine::ECS::AABB>(e, Engine::ECS::AABB{Engine::Vec2{size * 0.5f, size * 0.5f}});
         registry.emplace<Engine::ECS::Health>(e, Engine::ECS::Health{hpVal, hpVal});
         if (auto* hp = registry.get<Engine::ECS::Health>(e)) {
@@ -128,7 +156,7 @@ bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
         }
         registry.emplace<Engine::ECS::EnemyTag>(e, Engine::ECS::EnemyTag{});
         registry.emplace<Game::EnemyAttributes>(e, Game::EnemyAttributes{speedVal});
-        if (def && def->texture) {
+        if (tex) {
             registry.emplace<Engine::ECS::SpriteAnimation>(e, Engine::ECS::SpriteAnimation{def->frameWidth,
                                                                                            def->frameHeight,
                                                                                            4,
@@ -152,9 +180,16 @@ bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
         float size = 34.0f * sizeMul;
         float hpVal = settings_.enemyHp * bossHpMul_ * (def ? def->hpMultiplier : 1.0f);
         float speedVal = settings_.enemySpeed * bossSpeedMul_ * (def ? def->speedMultiplier : 1.0f);
+        if (speedVal < 10.0f) speedVal = std::max(speedVal, settings_.enemySpeed * 0.6f);
+        Engine::TexturePtr tex = def ? def->texture : Engine::TexturePtr{};
+        if (!tex && enemyDefs_) {
+            for (const auto& d : *enemyDefs_) {
+                if (d.texture) { tex = d.texture; break; }
+            }
+        }
         registry.emplace<Engine::ECS::Renderable>(e, Engine::ECS::Renderable{Engine::Vec2{size, size},
                                                                               Engine::Color{200, 80, 200, 255},
-                                                                              def ? def->texture : Engine::TexturePtr{}});
+                                                                              tex});
         registry.emplace<Engine::ECS::AABB>(e, Engine::ECS::AABB{Engine::Vec2{size * 0.5f, size * 0.5f}});
         registry.emplace<Engine::ECS::Health>(e, Engine::ECS::Health{hpVal, hpVal});
         if (auto* hp = registry.get<Engine::ECS::Health>(e)) {
@@ -170,7 +205,7 @@ bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
         registry.emplace<Engine::ECS::EnemyTag>(e, Engine::ECS::EnemyTag{});
         registry.emplace<Engine::ECS::BossTag>(e, Engine::ECS::BossTag{});
         registry.emplace<Game::EnemyAttributes>(e, Game::EnemyAttributes{speedVal});
-        if (def && def->texture) {
+        if (tex) {
             registry.emplace<Engine::ECS::SpriteAnimation>(e, Engine::ECS::SpriteAnimation{def->frameWidth,
                                                                                            def->frameHeight,
                                                                                            4,

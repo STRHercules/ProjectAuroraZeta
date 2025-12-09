@@ -3,12 +3,16 @@
 
 #include "../../engine/ecs/Registry.h"
 #include "../../engine/core/Time.h"
+#include <functional>
+#include "../components/Pickup.h"
 
 namespace Game {
 
 class PickupSystem {
 public:
-    void update(Engine::ECS::Registry& registry, Engine::ECS::Entity hero, int& credits);
+    using CollectFn = std::function<void(const Game::Pickup&)>;
+
+    void update(Engine::ECS::Registry& registry, Engine::ECS::Entity hero, CollectFn onCollect);
 };
 
 }  // namespace Game

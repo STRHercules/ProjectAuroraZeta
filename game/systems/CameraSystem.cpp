@@ -31,7 +31,8 @@ void CameraSystem::update(Engine::Camera2D& camera, const Engine::ECS::Registry&
 
         // Edge panning with mouse near screen borders.
         const int edge = 20;
-        const float edgeSpeed = 400.0f * static_cast<float>(step.deltaSeconds);
+        // Faster edge panning for RTS feel.
+        const float edgeSpeed = 900.0f * static_cast<float>(step.deltaSeconds);
         if (input.mouseX() < edge) camMove.x -= edgeSpeed;
         if (input.mouseX() > viewportW - edge) camMove.x += edgeSpeed;
         if (input.mouseY() < edge) camMove.y -= edgeSpeed;

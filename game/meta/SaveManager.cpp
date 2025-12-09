@@ -69,6 +69,7 @@ std::vector<uint8_t> SaveManager::serialize(const SaveData& data) const {
     j["totalRuns"] = data.totalRuns;
     j["bestWave"] = data.bestWave;
     j["totalKills"] = data.totalKills;
+    j["movementMode"] = data.movementMode;
     auto str = j.dump();
     return std::vector<uint8_t>(str.begin(), str.end());
 }
@@ -81,6 +82,7 @@ bool SaveManager::deserialize(const std::vector<uint8_t>& bytes, SaveData& outDa
         outData.totalRuns = j.value("totalRuns", 0);
         outData.bestWave = j.value("bestWave", 0);
         outData.totalKills = j.value("totalKills", 0);
+        outData.movementMode = j.value("movementMode", 0);
         return true;
     } catch (...) {
         return false;
