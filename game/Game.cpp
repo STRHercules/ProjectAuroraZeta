@@ -1890,7 +1890,7 @@ void GameRoot::rebuildFogLayer() {
     }
 
     // Generous extent to cover normal play space; outside bounds render as unexplored black.
-    const int minTiles = 256;
+    const int minTiles = 512;
     const float desiredWorld = hotzoneMapRadius_ * 3.0f;  // cover beyond combat space
     const int tilesNeeded = static_cast<int>(std::ceil(desiredWorld / static_cast<float>(fogTileSize_)));
     fogWidthTiles_ = std::max(minTiles, tilesNeeded);
@@ -1898,8 +1898,13 @@ void GameRoot::rebuildFogLayer() {
 
     fogLayer_ = std::make_unique<Engine::Gameplay::FogOfWarLayer>(fogWidthTiles_, fogHeightTiles_);
     fogUnits_.clear();
-    fogOriginOffsetX_ = static_cast<float>(fogWidthTiles_ * fogTileSize_) * 0.5f;
-    fogOriginOffsetY_ = static_cast<float>(fogHeightTiles_ * fogTileSize_) * 0.5f;
+    const float halfWidth = static_cast<float>(fogWidthTiles_ * fogTileSize_) * 0.5f;
+    const float halfHeight = static_cast<float>(fogHeightTiles_ * fogTileSize_) * 0.5f;
+    fogOriginOffsetX_ = halfWidth;
+    fogOriginOffsetY_ = halfHeight;
+    if (movementSystem_) {
+        movementSystem_->setBounds({-halfWidth, -halfHeight}, {halfWidth, halfHeight});
+    }
 
     // Create simple 1x1 white texture for fog overlay if missing.
     if (!fogTexture_ && sdlRenderer_) {

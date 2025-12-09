@@ -390,8 +390,8 @@ private:
     std::unique_ptr<Engine::Gameplay::FogOfWarLayer> fogLayer_{};
     std::vector<Engine::Gameplay::Unit> fogUnits_{};
     int fogTileSize_{32};
-    int fogWidthTiles_{256};
-    int fogHeightTiles_{256};
+    int fogWidthTiles_{512};
+    int fogHeightTiles_{512};
     float fogOriginOffsetX_{0.0f};
     float fogOriginOffsetY_{0.0f};
     float heroVisionRadiusTiles_{6.0f};
