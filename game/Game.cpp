@@ -20,6 +20,7 @@
 #include "../engine/ecs/components/Health.h"
 #include "../engine/ecs/components/Projectile.h"
 #include "../engine/ecs/components/Tags.h"
+#include "../engine/gameplay/Combat.h"
 #include "../engine/input/InputState.h"
 #include "../engine/render/RenderDevice.h"
 #include "../engine/render/BitmapTextRenderer.h"
@@ -37,6 +38,7 @@
 #include "components/Spawner.h"
 #include "components/Invulnerable.h"
 #include "components/Shopkeeper.h"
+#include "systems/BuffSystem.h"
 #include "meta/SaveManager.h"
 #include "meta/ItemDefs.h"
 #include "systems/HotzoneSystem.h"
@@ -91,6 +93,7 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     animationSystem_ = std::make_unique<AnimationSystem>();
     hitFlashSystem_ = std::make_unique<HitFlashSystem>();
     damageNumberSystem_ = std::make_unique<DamageNumberSystem>();
+    buffSystem_ = std::make_unique<BuffSystem>();
     shopSystem_ = std::make_unique<ShopSystem>();
     pickupSystem_ = std::make_unique<PickupSystem>();
     eventSystem_ = std::make_unique<EventSystem>();
@@ -158,6 +161,12 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     float contactDamage = 10.0f;
     float heroMoveSpeed = heroMoveSpeed_;
     float heroHp = heroMaxHp_;
+    float heroShields = heroShield_;
+    float heroHealthArmor = heroHealthArmor_;
+    float heroShieldArmor = heroShieldArmor_;
+    float heroShieldRegen = heroShieldRegen_;
+    float heroHealthRegen = heroHealthRegen_;
+    float heroRegenDelay = heroRegenDelay_;
     float heroSize = heroSize_;
     float projectileSize = projectileSize_;
     float projectileHitbox = projectileHitboxSize_;
@@ -202,6 +211,11 @@ bool GameRoot::onInitialize(Engine::Application& app) {
             gp >> j;
             if (j.contains("enemy")) {
                 waveSettings.enemyHp = j["enemy"].value("hp", waveSettings.enemyHp);
+                waveSettings.enemyShields = j["enemy"].value("shields", waveSettings.enemyShields);
+                waveSettings.enemyHealthArmor = j["enemy"].value("healthArmor", waveSettings.enemyHealthArmor);
+                waveSettings.enemyShieldArmor = j["enemy"].value("shieldArmor", waveSettings.enemyShieldArmor);
+                waveSettings.enemyShieldRegen = j["enemy"].value("shieldRegen", waveSettings.enemyShieldRegen);
+                waveSettings.enemyRegenDelay = j["enemy"].value("regenDelay", waveSettings.enemyRegenDelay);
                 waveSettings.enemySpeed = j["enemy"].value("speed", waveSettings.enemySpeed);
                 contactDamage = j["enemy"].value("contactDamage", contactDamage);
                 waveSettings.enemySize = j["enemy"].value("size", waveSettings.enemySize);
@@ -219,6 +233,12 @@ bool GameRoot::onInitialize(Engine::Application& app) {
                 heroHp = j["hero"].value("hp", heroHp);
                 heroMoveSpeed = j["hero"].value("moveSpeed", heroMoveSpeed);
                 heroSize = j["hero"].value("size", heroSize);
+                heroShields = j["hero"].value("shields", heroShields);
+                heroHealthArmor = j["hero"].value("healthArmor", heroHealthArmor);
+                heroShieldArmor = j["hero"].value("shieldArmor", heroShieldArmor);
+                heroShieldRegen = j["hero"].value("shieldRegen", heroShieldRegen);
+                heroHealthRegen = j["hero"].value("healthRegen", heroHealthRegen);
+                heroRegenDelay = j["hero"].value("regenDelay", heroRegenDelay);
             }
             if (j.contains("spawner")) {
                 waveSettings.interval = j["spawner"].value("interval", waveSettings.interval);
@@ -283,6 +303,7 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     waveSystem_ = std::make_unique<WaveSystem>(rng_, waveSettings);
     waveSystem_->setBossConfig(bossWave_, bossHpMultiplier_, bossSpeedMultiplier_);
     waveSystem_->setEnemyDefinitions(&enemyDefs_);
+    waveSystem_->setBaseArmor(Engine::Gameplay::BaseStats{waveSettings.enemyHealthArmor, waveSettings.enemyShieldArmor});
     waveSettings.contactDamage = contactDamage;
     waveSettingsBase_ = waveSettings;
     waveSettingsDefault_ = waveSettings;
@@ -299,6 +320,15 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     heroMaxHpBase_ = heroHp;
     heroMaxHpPreset_ = heroMaxHp_;
     heroMoveSpeedPreset_ = heroMoveSpeed_;
+    heroShield_ = heroShields;
+    heroShieldBase_ = heroShields;
+    heroShieldPreset_ = heroShields;
+    heroBaseStats_ = Engine::Gameplay::BaseStats{heroHealthArmor, heroShieldArmor};
+    heroHealthArmor_ = heroHealthArmor;
+    heroShieldArmor_ = heroShieldArmor;
+    heroShieldRegen_ = heroShieldRegen;
+    heroHealthRegen_ = heroHealthRegen;
+    heroRegenDelay_ = heroRegenDelay;
     projectileDamagePreset_ = projectileDamage_;
     heroSize_ = heroSize;
     waveWarmupBase_ = initialWarmup;
@@ -610,8 +640,18 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     else { shopNoCreditTimer_ = 0.6; }
                 }
                 if (rightClick && !shopRightPrev_) {
-                    if (credits_ >= shopHpCost_) { credits_ -= shopHpCost_; heroMaxHp_ += shopHpBonus_; if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) { hp->max = heroMaxHp_; hp->current = std::min(hp->current + shopHpBonus_, hp->max); } }
-                    else { shopNoCreditTimer_ = 0.6; }
+                    if (credits_ >= shopHpCost_) {
+                        credits_ -= shopHpCost_;
+                        heroMaxHp_ += shopHpBonus_;
+                        if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
+                            hp->maxHealth = heroMaxHp_;
+                            hp->currentHealth = std::min(hp->currentHealth + shopHpBonus_, hp->maxHealth);
+                            heroUpgrades_.groundArmorLevel += 1;
+                            Engine::Gameplay::applyUpgradesToUnit(*hp, heroBaseStats_, heroUpgrades_, false);
+                        }
+                    } else {
+                        shopNoCreditTimer_ = 0.6;
+                    }
                 }
                 if (midClick && !shopMiddlePrev_) {
                     if (credits_ >= shopSpeedCost_) { credits_ -= shopSpeedCost_; heroMoveSpeed_ += shopSpeedBonus_; }
@@ -619,7 +659,6 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 }
                 if (leftClick && !shopUIClickPrev_) {
                     // Card hit-test
-                    const float panelW = 520.0f;
                     const float cardW = 150.0f;
                     const float cardH = 110.0f;
                     const float gap = 18.0f;
@@ -632,7 +671,16 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                         float x = startX + i * (cardW + gap);
                         if (mx >= x && mx <= x + cardW && my >= y && my <= y + cardH) {
                             if (i == 0 && credits_ >= shopDamageCost_) { credits_ -= shopDamageCost_; projectileDamage_ += shopDamageBonus_; }
-                            if (i == 1 && credits_ >= shopHpCost_) { credits_ -= shopHpCost_; heroMaxHp_ += shopHpBonus_; if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) { hp->max = heroMaxHp_; hp->current = std::min(hp->current + shopHpBonus_, hp->max); } }
+                            if (i == 1 && credits_ >= shopHpCost_) {
+                                credits_ -= shopHpCost_;
+                                heroMaxHp_ += shopHpBonus_;
+                                if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
+                                    hp->maxHealth = heroMaxHp_;
+                                    hp->currentHealth = std::min(hp->currentHealth + shopHpBonus_, hp->maxHealth);
+                                    heroUpgrades_.groundArmorLevel += 1;
+                                    Engine::Gameplay::applyUpgradesToUnit(*hp, heroBaseStats_, heroUpgrades_, false);
+                                }
+                            }
                             if (i == 2 && credits_ >= shopSpeedCost_) { credits_ -= shopSpeedCost_; heroMoveSpeed_ += shopSpeedBonus_; }
                             break;
                         }
@@ -664,7 +712,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     float x = startX + static_cast<float>(i) * (cardW + gap);
                     if (mx >= x && mx <= x + cardW && my >= y && my <= y + cardH) {
                         float heroHpCurrent = 0.0f;
-                        if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) heroHpCurrent = hp->current;
+                        if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) heroHpCurrent = hp->currentHealth;
                         int creditsBefore = credits_;
                         ItemDefinition purchased{};
                         bool bought = shopSystem_->tryPurchase(static_cast<int>(i), credits_, projectileDamage_,
@@ -675,8 +723,13 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                                 credits_ += purchased.cost;
                             }
                             if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
-                                hp->max = heroMaxHp_;
-                                hp->current = std::min(hp->max, heroHpCurrent);
+                                hp->maxHealth = heroMaxHp_;
+                                hp->currentHealth = std::min(hp->maxHealth, heroHpCurrent);
+                                // Purchasing health items also improves armor slightly.
+                                if (purchased.effect == ItemEffect::Health) {
+                                    heroUpgrades_.groundArmorLevel += 1;
+                                    Engine::Gameplay::applyUpgradesToUnit(*hp, heroBaseStats_, heroUpgrades_, false);
+                                }
                             }
                         } else if (credits_ == creditsBefore) {
                             shopNoCreditTimer_ = 0.6;
@@ -744,7 +797,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     switch (inst.def.effect) {
                         case ItemEffect::Heal: {
                             if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
-                                hp->current = std::min(hp->max, hp->current + inst.def.value * hp->max);
+                                hp->currentHealth = std::min(hp->maxHealth, hp->currentHealth + inst.def.value * hp->maxHealth);
                             }
                             break;
                         }
@@ -820,10 +873,14 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                                                                                    Engine::Color{255, 230, 90, 255}});
                 float zoneDmgMul = hotzoneSystem_ ? hotzoneSystem_->damageMultiplier() : 1.0f;
                 float dmgMul = rageDamageBuff_ * zoneDmgMul;
+                Engine::Gameplay::DamageEvent dmgEvent{};
+                dmgEvent.baseDamage = projectileDamage_ * dmgMul;
+                dmgEvent.type = Engine::Gameplay::DamageType::Normal;
+                dmgEvent.bonusVsTag[Engine::Gameplay::Tag::Biological] = 1.0f;
                 registry_.emplace<Engine::ECS::Projectile>(proj,
                                                            Engine::ECS::Projectile{Engine::Vec2{dir.x * projectileSpeed_,
                                                                                                  dir.y * projectileSpeed_},
-                                                                                     projectileDamage_ * dmgMul, projectileLifetime_, lifestealPercent_, chainBounces_});
+                                                                                   dmgEvent, projectileLifetime_, lifestealPercent_, chainBounces_});
                 registry_.emplace<Engine::ECS::ProjectileTag>(proj, Engine::ECS::ProjectileTag{});
                 float rateMul = rageRateBuff_ * (hotzoneSystem_ ? hotzoneSystem_->rateMultiplier() : 1.0f);
                 fireCooldown_ = fireInterval_ / std::max(0.1f, rateMul);
@@ -954,10 +1011,14 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 registry_.emplace<Engine::ECS::Renderable>(proj,
                                                            Engine::ECS::Renderable{Engine::Vec2{projectileSize_, projectileSize_},
                                                                                    Engine::Color{120, 220, 255, 230}});
+                Engine::Gameplay::DamageEvent dmgEvent{};
+                dmgEvent.baseDamage = projectileDamage_ * 0.8f;
+                dmgEvent.type = Engine::Gameplay::DamageType::Normal;
+                dmgEvent.bonusVsTag[Engine::Gameplay::Tag::Light] = 1.0f;
                 registry_.emplace<Engine::ECS::Projectile>(proj,
                                                            Engine::ECS::Projectile{Engine::Vec2{dir.x * projectileSpeed_,
                                                                                                  dir.y * projectileSpeed_},
-                                                                                     projectileDamage_ * 0.8f, projectileLifetime_, lifestealPercent_, chainBounces_});
+                                                                                   dmgEvent, projectileLifetime_, lifestealPercent_, chainBounces_});
                 registry_.emplace<Engine::ECS::ProjectileTag>(proj, Engine::ECS::ProjectileTag{});
             }
         }
@@ -1061,6 +1122,10 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         combatTimer_ -= step.deltaSeconds * stepScale;
         if (waveSystem_) {
                 if (!waveSpawned_) {
+                    // Scale enemy armor upgrades over time.
+                    enemyUpgrades_.groundArmorLevel = wave_ / 5;
+                    enemyUpgrades_.shieldArmorLevel = wave_ / 8;
+                    waveSystem_->setUpgrades(enemyUpgrades_);
                     bool newWave = waveSystem_->update(registry_, step, hero_, wave_);
                     waveWarmup_ = std::max(0.0, waveSystem_->timeToNext());
                     if (newWave) {
@@ -1129,6 +1194,17 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             pickupSystem_->update(registry_, hero_, credits_);
         }
 
+        // Shields/health regeneration ticks.
+        if (!paused_) {
+            const float dt = static_cast<float>(step.deltaSeconds);
+            registry_.view<Engine::ECS::Health>([dt](Engine::ECS::Entity, Engine::ECS::Health& hp) {
+                Engine::Gameplay::updateRegen(hp, dt);
+            });
+            if (buffSystem_) {
+                buffSystem_->update(registry_, step);
+            }
+        }
+
     if (eventSystem_ && !paused_ && !levelChoiceOpen_) {
         Engine::Vec2 heroPos{0.0f, 0.0f};
         if (const auto* tf = registry_.get<Engine::ECS::Transform>(hero_)) {
@@ -1157,12 +1233,13 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
     // Camera shake when hero takes damage.
     if (hero_ != Engine::ECS::kInvalidEntity) {
         if (const auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
-            if (lastHeroHp_ < 0.0f) lastHeroHp_ = hp->current;
-            if (hp->current < lastHeroHp_ && screenShake_) {
+            float total = hp->currentHealth + hp->currentShields;
+            if (lastHeroHp_ < 0.0f) lastHeroHp_ = total;
+            if (total < lastHeroHp_ && screenShake_) {
                 shakeTimer_ = 0.25f;
                 shakeMagnitude_ = 6.0f;
             }
-            lastHeroHp_ = hp->current;
+            lastHeroHp_ = total;
         }
     }
     if (shakeTimer_ > 0.0f) {
@@ -1297,7 +1374,9 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         dbg << " | Cam " << (cameraSystem_ && cameraSystem_->followEnabled() ? "Follow" : "Free");
         dbg << " | Zoom " << std::setprecision(2) << camera_.zoom;
             if (const auto* heroHealth = registry_.get<Engine::ECS::Health>(hero_)) {
-                dbg << " | HP " << std::setprecision(0) << heroHealth->current << "/" << heroHealth->max;
+                float maxPool = heroHealth->maxHealth + heroHealth->maxShields;
+                float currPool = heroHealth->currentHealth + heroHealth->currentShields;
+                dbg << " | HP " << std::setprecision(0) << currPool << "/" << maxPool;
             }
             dbg << " | Wave " << wave_ << " | Kills " << kills_;
             dbg << " | Credits " << credits_;
@@ -1413,15 +1492,25 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 }
 
                 // HP bar
-                float hpRatio = 1.0f;
+                float hpRatio = 0.0f;
+                float shieldRatio = 0.0f;
                 if (const auto* heroHealth = registry_.get<Engine::ECS::Health>(hero_)) {
-                    hpRatio = heroHealth->max > 0.0f ? heroHealth->current / heroHealth->max : 0.0f;
-                    hpRatio = std::clamp(hpRatio, 0.0f, 1.0f);
+                    float maxPool = heroHealth->maxHealth + heroHealth->maxShields;
+                    if (maxPool > 0.0f) {
+                        hpRatio = std::clamp(heroHealth->currentHealth / maxPool, 0.0f, 1.0f);
+                        shieldRatio = std::clamp(heroHealth->currentShields / maxPool, 0.0f, 1.0f);
+                    }
                 }
                 render_->drawFilledRect(origin, Engine::Vec2{barW, hpH}, Engine::Color{50, 30, 30, 200});
-                render_->drawFilledRect(origin, Engine::Vec2{barW * hpRatio, hpH}, Engine::Color{200, 80, 80, 230});
+                if (shieldRatio > 0.0f) {
+                    render_->drawFilledRect(origin, Engine::Vec2{barW * shieldRatio, hpH}, Engine::Color{90, 140, 240, 230});
+                }
+                if (hpRatio > 0.0f) {
+                    render_->drawFilledRect(origin, Engine::Vec2{barW * hpRatio, hpH}, Engine::Color{200, 80, 80, 230});
+                }
                 std::ostringstream hpTxt;
-                hpTxt << "HP " << static_cast<int>(std::round(hpRatio * 100)) << "%";
+                float totalRatio = std::clamp(hpRatio + shieldRatio, 0.0f, 1.0f);
+                hpTxt << "HP " << static_cast<int>(std::round(totalRatio * 100)) << "%";
                 drawTextUnified(hpTxt.str(), Engine::Vec2{origin.x + 8.0f, origin.y + 2.0f}, 0.9f,
                                 Engine::Color{255, 230, 230, 240});
 
@@ -1527,14 +1616,23 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         if (!hasTTF() && !debugText_) {
             const float barW = 200.0f;
             const float barH = 12.0f;
-            float hpRatio = 1.0f;
+            float hpRatio = 0.0f;
+            float shieldRatio = 0.0f;
             if (const auto* heroHealth = registry_.get<Engine::ECS::Health>(hero_)) {
-                hpRatio = heroHealth->max > 0.0f ? heroHealth->current / heroHealth->max : 0.0f;
-                hpRatio = std::clamp(hpRatio, 0.0f, 1.0f);
+                float maxPool = heroHealth->maxHealth + heroHealth->maxShields;
+                if (maxPool > 0.0f) {
+                    hpRatio = std::clamp(heroHealth->currentHealth / maxPool, 0.0f, 1.0f);
+                    shieldRatio = std::clamp(heroHealth->currentShields / maxPool, 0.0f, 1.0f);
+                }
             }
             Engine::Vec2 pos{10.0f, static_cast<float>(viewportHeight_) - 24.0f};
             render_->drawFilledRect(pos, Engine::Vec2{barW, barH}, Engine::Color{50, 50, 60, 220});
-            render_->drawFilledRect(pos, Engine::Vec2{barW * hpRatio, barH}, Engine::Color{120, 220, 120, 240});
+            if (shieldRatio > 0.0f) {
+                render_->drawFilledRect(pos, Engine::Vec2{barW * shieldRatio, barH}, Engine::Color{80, 140, 240, 220});
+            }
+            if (hpRatio > 0.0f) {
+                render_->drawFilledRect(pos, Engine::Vec2{barW * hpRatio, barH}, Engine::Color{120, 220, 120, 240});
+            }
             // Shop unavailable and wave-clear cues.
             if (shopUnavailableTimer_ > 0.0 && waveWarmup_ <= waveInterval_) {
                 float pulse = 0.5f + 0.5f * std::sin(static_cast<float>(shopUnavailableTimer_) * 12.0f);
@@ -1617,7 +1715,7 @@ void GameRoot::onShutdown() {
 
 void GameRoot::handleHeroDeath() {
     auto* hp = registry_.get<Engine::ECS::Health>(hero_);
-    if (hp && hp->current <= 0.0f && !defeated_) {
+    if (hp && hp->currentHealth <= 0.0f && !defeated_) {
         defeated_ = true;
         paused_ = true;
         itemShopOpen_ = false;
@@ -2306,7 +2404,7 @@ void GameRoot::loadMenuPresets() {
 
     auto addArchetype = [&](const std::string& id, const std::string& name, const std::string& desc, float hp,
                             float spd, float dmg, Engine::Color col) {
-        ArchetypeDef def{id, name, desc, hp, spd, dmg, col};
+        ArchetypeDef def{id, name, desc, hp, spd, dmg, col, ""};
         archetypes_.push_back(def);
     };
     if (archetypes_.empty()) {
@@ -2356,6 +2454,7 @@ void GameRoot::rebuildWaveSettings() {
     float hpGrowth = std::pow(1.08f, static_cast<float>(startWaveBase_ - 1));
     float speedGrowth = std::pow(1.01f, static_cast<float>(startWaveBase_ - 1));
     waveSettingsBase_.enemyHp *= hpMul * hpGrowth;
+    waveSettingsBase_.enemyShields *= hpMul * hpGrowth;
     waveSettingsBase_.enemySpeed *= speedGrowth;
     int batchIncrease = (startWaveBase_ - 1) / 2;
     waveSettingsBase_.batchSize = std::min(12, waveSettingsBase_.batchSize + batchIncrease);
@@ -2375,6 +2474,7 @@ void GameRoot::applyArchetypePreset() {
     selectedArchetype_ = std::clamp(selectedArchetype_, 0, static_cast<int>(archetypes_.size() - 1));
     activeArchetype_ = archetypes_[selectedArchetype_];
     heroMaxHpPreset_ = heroMaxHpBase_ * activeArchetype_.hpMul;
+    heroShieldPreset_ = heroShieldBase_ * activeArchetype_.hpMul;
     heroMoveSpeedPreset_ = heroMoveSpeedBase_ * activeArchetype_.speedMul;
     projectileDamagePreset_ = projectileDamageBase_ * activeArchetype_.damageMul;
     heroColorPreset_ = activeArchetype_.color;
@@ -2519,8 +2619,10 @@ void GameRoot::applyLevelChoice(int index) {
         case LevelChoiceType::Health:
             heroMaxHp_ += choice.amount;
             if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
-                hp->max = heroMaxHp_;
-                hp->current = std::min(hp->max, hp->current + choice.amount * 0.5f);
+                hp->maxHealth = heroMaxHp_;
+                hp->currentHealth = std::min(hp->maxHealth, hp->currentHealth + choice.amount * 0.5f);
+                heroUpgrades_.groundArmorLevel += 1;
+                Engine::Gameplay::applyUpgradesToUnit(*hp, heroBaseStats_, heroUpgrades_, false);
             }
             break;
         case LevelChoiceType::Speed:
@@ -2720,7 +2822,16 @@ void GameRoot::drawStatShopOverlay() {
         if (credits_ >= shopDamageCost_) { credits_ -= shopDamageCost_; projectileDamage_ += shopDamageBonus_; }
     }};
     cards[1] = {"Health", "+" + std::to_string(static_cast<int>(shopHpBonus_)) + " HP", shopHpCost_, [&]() {
-        if (credits_ >= shopHpCost_) { credits_ -= shopHpCost_; heroMaxHp_ += shopHpBonus_; if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) { hp->max = heroMaxHp_; hp->current = std::min(hp->current + shopHpBonus_, hp->max); } }
+        if (credits_ >= shopHpCost_) {
+            credits_ -= shopHpCost_;
+            heroMaxHp_ += shopHpBonus_;
+            if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
+                hp->maxHealth = heroMaxHp_;
+                hp->currentHealth = std::min(hp->currentHealth + shopHpBonus_, hp->maxHealth);
+                heroUpgrades_.groundArmorLevel += 1;
+                Engine::Gameplay::applyUpgradesToUnit(*hp, heroBaseStats_, heroUpgrades_, false);
+            }
+        }
     }};
     cards[2] = {"Speed", "+" + std::to_string(static_cast<int>(shopSpeedBonus_)) + " move", shopSpeedCost_, [&]() {
         if (credits_ >= shopSpeedCost_) { credits_ -= shopSpeedCost_; heroMoveSpeed_ += shopSpeedBonus_; }
@@ -2841,6 +2952,17 @@ void GameRoot::spawnHero() {
     const float heroHalf = heroSize_ * 0.5f;
     registry_.emplace<Engine::ECS::AABB>(hero_, Engine::ECS::AABB{Engine::Vec2{heroHalf, heroHalf}});
     registry_.emplace<Engine::ECS::Health>(hero_, Engine::ECS::Health{heroMaxHp_, heroMaxHp_});
+    if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
+        hp->tags = {Engine::Gameplay::Tag::Biological, Engine::Gameplay::Tag::Light};
+        hp->maxShields = heroShield_;
+        hp->currentShields = heroShield_;
+        hp->healthArmor = heroHealthArmor_;
+        hp->shieldArmor = heroShieldArmor_;
+        hp->shieldRegenRate = heroShieldRegen_;
+        hp->healthRegenRate = heroHealthRegen_;
+        hp->regenDelay = heroRegenDelay_;
+        Engine::Gameplay::applyUpgradesToUnit(*hp, heroBaseStats_, heroUpgrades_, false);
+    }
     registry_.emplace<Engine::ECS::HeroTag>(hero_, Engine::ECS::HeroTag{});
 
     // Apply sprite if loaded.
@@ -2870,6 +2992,8 @@ void GameRoot::resetRun() {
     xp_ = 0;
     xpToNext_ = xpBaseToLevel_;
     heroMaxHp_ = heroMaxHpPreset_;
+    heroUpgrades_ = {};
+    heroShield_ = heroShieldPreset_;
     heroMoveSpeed_ = heroMoveSpeedPreset_;
     projectileDamage_ = projectileDamagePreset_;
     wave_ = std::max(0, startWaveBase_ - 1);

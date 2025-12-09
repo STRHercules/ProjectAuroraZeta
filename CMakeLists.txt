@@ -21,6 +21,10 @@ add_executable(zeta src/main.cpp)
 target_link_libraries(zeta PRIVATE zeta_game engine)
 target_include_directories(zeta PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
+add_executable(combat_tests tests/CombatTests.cpp)
+target_link_libraries(combat_tests PRIVATE engine)
+target_include_directories(combat_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
 if (WIN32)
     target_link_options(zeta PRIVATE -mconsole)
 endif()

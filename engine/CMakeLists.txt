@@ -16,10 +16,12 @@ set(ENGINE_SOURCES
     ecs/components/Velocity.h
     ecs/components/Renderable.h
     ecs/components/SpriteAnimation.h
+    ecs/components/CombatStats.h
     ecs/components/Health.h
     ecs/components/Projectile.h
     ecs/components/AABB.h
     ecs/components/Tags.h
+    gameplay/Combat.h
     math/Vec2.h
     render/RenderDevice.h
     render/NullRenderDevice.h

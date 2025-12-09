@@ -7,6 +7,8 @@
 #include "../engine/ecs/components/AABB.h"
 #include "../engine/ecs/components/Projectile.h"
 #include "../engine/ecs/components/Tags.h"
+#include "../engine/gameplay/Combat.h"
+#include "systems/BuffSystem.h"
 #include "../engine/math/Vec2.h"
 #include <cmath>
 #include <random>
@@ -54,7 +56,7 @@ void GameRoot::executeAbility(int index) {
         st.cooldown = cd;
     };
 
-    auto spawnProjectile = [&](const Engine::Vec2& dir, float speed, float dmg, float sizeMul = 1.0f) {
+    auto spawnProjectile = [&](const Engine::Vec2& dir, float speed, Engine::Gameplay::DamageEvent dmgEvent, float sizeMul = 1.0f) {
         auto p = registry_.create();
         registry_.emplace<Engine::ECS::Transform>(p, heroTf->position);
         registry_.emplace<Engine::ECS::Velocity>(p, Engine::Vec2{0.0f, 0.0f});
@@ -63,7 +65,7 @@ void GameRoot::executeAbility(int index) {
         registry_.emplace<Engine::ECS::AABB>(p, Engine::ECS::AABB{Engine::Vec2{hb, hb}});
         registry_.emplace<Engine::ECS::Renderable>(p,
             Engine::ECS::Renderable{Engine::Vec2{sz, sz}, Engine::Color{255, 220, 140, 255}});
-        registry_.emplace<Engine::ECS::Projectile>(p, Engine::ECS::Projectile{dir * speed, dmg, projectileLifetime_, lifestealPercent_, chainBounces_});
+        registry_.emplace<Engine::ECS::Projectile>(p, Engine::ECS::Projectile{dir * speed, dmgEvent, projectileLifetime_, lifestealPercent_, chainBounces_});
         registry_.emplace<Engine::ECS::ProjectileTag>(p, Engine::ECS::ProjectileTag{});
     };
 
@@ -75,13 +77,27 @@ void GameRoot::executeAbility(int index) {
             float ang = std::atan2(mouseWorld_.y - heroTf->position.y, mouseWorld_.x - heroTf->position.x);
             ang += spread(rng);
             Engine::Vec2 dir{std::cos(ang), std::sin(ang)};
-            spawnProjectile(dir, projectileSpeed_ * 0.8f, projectileDamage_ * 0.7f * slot.powerScale * zoneDmgMul, 0.9f);
+            Engine::Gameplay::DamageEvent dmgEvent{};
+            dmgEvent.baseDamage = projectileDamage_ * 0.7f * slot.powerScale * zoneDmgMul;
+            dmgEvent.type = Engine::Gameplay::DamageType::Normal;
+            // Cone spray: bonus vs Armored to differentiate.
+            dmgEvent.bonusVsTag[Engine::Gameplay::Tag::Armored] = 2.0f;
+            spawnProjectile(dir, projectileSpeed_ * 0.8f, dmgEvent, 0.9f);
         }
         setCooldown(std::max(0.5f, slot.cooldownMax));
     } else if (slot.type == "rage") {
         rageDamageBuff_ = 1.2f * slot.powerScale;
         rageRateBuff_ = 1.15f * slot.powerScale;
         rageTimer_ = 5.0f + slot.level * 0.6f;
+        // Apply a brief defensive buff.
+        Engine::Gameplay::BuffState buff{};
+        buff.healthArmorBonus = 1.0f;
+        buff.shieldArmorBonus = 1.0f;
+        buff.damageTakenMultiplier = 0.9f;
+        if (registry_.has<Game::ArmorBuff>(hero_)) {
+            registry_.remove<Game::ArmorBuff>(hero_);
+        }
+        registry_.emplace<Game::ArmorBuff>(hero_, Game::ArmorBuff{buff, rageTimer_});
         setCooldown(std::max(3.0f, slot.cooldownMax));
     } else if (slot.type == "nova") {
         int count = 12 + slot.level * 2;
@@ -90,7 +106,10 @@ void GameRoot::executeAbility(int index) {
         for (int i = 0; i < count; ++i) {
             float ang = (6.2831853f * i) / static_cast<float>(count);
             Engine::Vec2 dir{std::cos(ang), std::sin(ang)};
-            spawnProjectile(dir, speed, dmg, 1.2f);
+            Engine::Gameplay::DamageEvent dmgEvent{};
+            dmgEvent.baseDamage = dmg;
+            dmgEvent.type = Engine::Gameplay::DamageType::Normal;
+            spawnProjectile(dir, speed, dmgEvent, 1.2f);
         }
         setCooldown(std::max(2.0f, slot.cooldownMax));
     } else if (slot.type == "ultimate") {
@@ -98,12 +117,15 @@ void GameRoot::executeAbility(int index) {
         for (int w = 0; w < waves; ++w) {
             int count = 20 + slot.level * 2;
             float speed = projectileSpeed_ * (0.8f + 0.1f * w);
-            float dmg = projectileDamage_ * (2.0f + 0.2f * w) * slot.powerScale * zoneDmgMul;
-            for (int i = 0; i < count; ++i) {
-                float ang = (6.2831853f * i) / static_cast<float>(count);
-                Engine::Vec2 dir{std::cos(ang), std::sin(ang)};
-                spawnProjectile(dir, speed, dmg, 1.3f);
-            }
+                float dmg = projectileDamage_ * (2.0f + 0.2f * w) * slot.powerScale * zoneDmgMul;
+                for (int i = 0; i < count; ++i) {
+                    float ang = (6.2831853f * i) / static_cast<float>(count);
+                    Engine::Vec2 dir{std::cos(ang), std::sin(ang)};
+                    Engine::Gameplay::DamageEvent dmgEvent{};
+                    dmgEvent.baseDamage = dmg;
+                    dmgEvent.type = Engine::Gameplay::DamageType::Normal;
+                    spawnProjectile(dir, speed, dmgEvent, 1.3f);
+                }
         }
         setCooldown(std::max(8.0f, slot.cooldownMax));
     } else {

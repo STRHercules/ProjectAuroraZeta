@@ -17,6 +17,7 @@
 #include "../engine/assets/AssetManifest.h"
 #include "../engine/assets/FontLoader.h"
 #include "../engine/render/BitmapTextRenderer.h"
+#include "../engine/gameplay/Combat.h"
 #include <random>
 #include <fstream>
 #include <nlohmann/json.hpp>
@@ -39,6 +40,7 @@
 #include "systems/PickupSystem.h"
 #include "systems/EventSystem.h"
 #include "systems/HotzoneSystem.h"
+#include "systems/BuffSystem.h"
 #include "meta/SaveManager.h"
 #include "EnemyDefinition.h"
 
@@ -210,10 +212,20 @@ private:
     double fireCooldown_{0.0};
     float heroMoveSpeed_{200.0f};
     float heroMaxHp_{100.0f};
+    float heroShield_{0.0f};
+    float heroHealthArmor_{0.0f};
+    float heroShieldArmor_{0.0f};
+    float heroShieldRegen_{0.0f};
+    float heroHealthRegen_{0.0f};
+    float heroRegenDelay_{0.0f};
     float heroMoveSpeedBase_{200.0f};
     float heroMaxHpBase_{100.0f};
+    float heroShieldBase_{0.0f};
     float heroMoveSpeedPreset_{200.0f};
     float heroMaxHpPreset_{100.0f};
+    float heroShieldPreset_{0.0f};
+    Engine::Gameplay::UpgradeState heroUpgrades_{};
+    Engine::Gameplay::BaseStats heroBaseStats_{};
     float projectileDamagePreset_{15.0f};
     Engine::Color heroColorPreset_{90, 200, 255, 255};
     float heroSize_{24.0f};
@@ -243,6 +255,7 @@ private:
     int enemiesAlive_{0};
     Game::WaveSettings waveSettingsDefault_{};
     Game::WaveSettings waveSettingsBase_{};
+    Engine::Gameplay::UpgradeState enemyUpgrades_{};
     double waveWarmup_{1.5};
     double waveWarmupBase_{1.5};
     bool defeated_{false};
@@ -294,6 +307,7 @@ private:
     std::unique_ptr<Game::AnimationSystem> animationSystem_;
     std::unique_ptr<Game::HitFlashSystem> hitFlashSystem_;
     std::unique_ptr<Game::DamageNumberSystem> damageNumberSystem_;
+    std::unique_ptr<Game::BuffSystem> buffSystem_;
     std::unique_ptr<Game::ShopSystem> shopSystem_;
     std::unique_ptr<Game::PickupSystem> pickupSystem_;
     std::unique_ptr<Game::EventSystem> eventSystem_;

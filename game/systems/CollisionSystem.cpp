@@ -1,5 +1,6 @@
 #include "CollisionSystem.h"
 
+#include <algorithm>
 #include <cmath>
 
 #include "../../engine/ecs/components/AABB.h"
@@ -9,6 +10,8 @@
 #include "../../engine/ecs/components/Tags.h"
 #include "../../engine/ecs/components/Renderable.h"
 #include "../../engine/ecs/components/Velocity.h"
+#include "../../engine/gameplay/Combat.h"
+#include "BuffSystem.h"
 #include "../components/HitFlash.h"
 #include "../components/DamageNumber.h"
 #include "../components/Invulnerable.h"
@@ -35,15 +38,28 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                     Engine::ECS::AABB& tgtBox, Engine::ECS::EnemyTag&) {
                     if (!health.alive()) return;
                     if (aabbOverlap(projTf, projBox, tgtTf, tgtBox)) {
-                        health.current -= proj.damage;
+                        const float preHealth = health.currentHealth;
+                        const float preShields = health.currentShields;
+
+                        Engine::Gameplay::BuffState buff{};
+                        if (auto* armorBuff = registry.get<Game::ArmorBuff>(targetEnt)) {
+                            buff = armorBuff->state;
+                        }
+                        Engine::Gameplay::applyDamage(health, proj.damage, buff);
+
+                        const float postHealth = health.currentHealth;
+                        const float postShields = health.currentShields;
+                        float dealt = (preHealth + preShields) - (postHealth + postShields);
+                        if (dealt > 0.0f && dealt < Engine::Gameplay::MIN_DAMAGE_PER_HIT) {
+                            dealt = Engine::Gameplay::MIN_DAMAGE_PER_HIT;
+                        }
                         deadProjectiles.push_back(projEnt);
-                        if (health.current < 0.0f) health.current = 0.0f;
                         // Lifesteal to hero if applicable.
                         if (proj.lifesteal > 0.0f) {
                             registry.view<Engine::ECS::Health, Engine::ECS::HeroTag>(
                                 [&](Engine::ECS::Entity, Engine::ECS::Health& heroHp, Engine::ECS::HeroTag&) {
-                                    float heal = proj.damage * proj.lifesteal;
-                                    heroHp.current = std::min(heroHp.max, heroHp.current + heal);
+                                    float heal = dealt * proj.lifesteal;
+                                    heroHp.currentHealth = std::min(heroHp.maxHealth, heroHp.currentHealth + heal);
                                 });
                         }
                         // Chain bounce.
@@ -78,9 +94,12 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                                     registry.emplace<Engine::ECS::Renderable>(np,
                                         Engine::ECS::Renderable{Engine::Vec2{projBox.halfExtents.x * 2.0f, projBox.halfExtents.y * 2.0f},
                                                                 Engine::Color{255, 230, 140, 220}});
+                                    Engine::Gameplay::DamageEvent bounceDmg = proj.damage;
+                                    bounceDmg.baseDamage *= 0.8f;
                                     registry.emplace<Engine::ECS::Projectile>(np,
                                         Engine::ECS::Projectile{Engine::Vec2{dir.x * speed, dir.y * speed},
-                                                                proj.damage * 0.8f, proj.lifetime,
+                                                                bounceDmg,
+                                                                proj.lifetime,
                                                                 proj.lifesteal, proj.chain - 1});
                                     registry.emplace<Engine::ECS::ProjectileTag>(np, Engine::ECS::ProjectileTag{});
                                 }
@@ -95,7 +114,7 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                         // Spawn a floating damage number.
                         auto dn = registry.create();
                         registry.emplace<Engine::ECS::Transform>(dn, tgtTf.position);
-                        registry.emplace<Game::DamageNumber>(dn, Game::DamageNumber{proj.damage, 0.8f, {0.0f, -30.0f}});
+                        registry.emplace<Game::DamageNumber>(dn, Game::DamageNumber{dealt, 0.8f, {0.0f, -30.0f}});
                     }
                 });
         });
@@ -112,8 +131,23 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                         if (inv->timer > 0.0f) return;
                     }
                     if (aabbOverlap(enemyTf, enemyBox, heroTf, heroBox)) {
-                        heroHp.current -= contactDamage_;
-                        if (heroHp.current < 0.0f) heroHp.current = 0.0f;
+                        const float preHealth = heroHp.currentHealth;
+                        const float preShields = heroHp.currentShields;
+                        Engine::Gameplay::DamageEvent contact{};
+                        contact.baseDamage = contactDamage_;
+                        Engine::Gameplay::BuffState buff{};
+                        if (auto* armorBuff = registry.get<Game::ArmorBuff>(heroEnt)) {
+                            buff = armorBuff->state;
+                        }
+                        Engine::Gameplay::applyDamage(heroHp, contact, buff);
+                        float dealt = (preHealth + preShields) - (heroHp.currentHealth + heroHp.currentShields);
+                        if (dealt > 0.0f) {
+                            if (auto* flash = registry.get<Game::HitFlash>(heroEnt)) {
+                                flash->timer = 0.12f;
+                            } else {
+                                registry.emplace<Game::HitFlash>(heroEnt, Game::HitFlash{0.12f});
+                            }
+                        }
                     }
                 });
         });

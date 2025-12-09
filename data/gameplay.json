@@ -1,6 +1,11 @@
 {
   "enemy": {
     "hp": 40.0,
+    "shields": 20.0,
+    "healthArmor": 0.0,
+    "shieldArmor": 0.0,
+    "shieldRegen": 0.0,
+    "regenDelay": 0.0,
     "speed": 80.0,
     "contactDamage": 10.0,
     "size": 18.0,
@@ -8,6 +13,12 @@
   },
   "hero": {
     "hp": 100.0,
+    "shields": 0.0,
+    "healthArmor": 0.0,
+    "shieldArmor": 0.0,
+    "shieldRegen": 0.0,
+    "healthRegen": 0.0,
+    "regenDelay": 0.0,
     "moveSpeed": 200.0,
     "size": 24.0
   },

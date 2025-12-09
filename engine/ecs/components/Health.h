@@ -1,12 +1,8 @@
-// Health component for damageable entities.
+// Backward-compatible alias to the richer CombatStats component.
 #pragma once
 
+#include "CombatStats.h"
+
 namespace Engine::ECS {
-
-struct Health {
-    float current{100.0f};
-    float max{100.0f};
-    bool alive() const { return current > 0.0f; }
-};
-
+using Health = CombatStats;
 }  // namespace Engine::ECS

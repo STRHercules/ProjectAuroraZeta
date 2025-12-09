@@ -10,6 +10,7 @@
 #include "../../engine/ecs/components/Tags.h"
 #include "../../engine/ecs/components/SpriteAnimation.h"
 #include "../../engine/math/Vec2.h"
+#include "../../engine/gameplay/Combat.h"
 #include "../components/EnemyAttributes.h"
 #include "../components/PickupBob.h"
 #include "../components/BountyTag.h"
@@ -33,6 +34,7 @@ bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
     wave++;
     // Simple scaling: every wave increase HP and batch.
     settings_.enemyHp *= 1.08f;
+    settings_.enemyShields *= 1.08f;
     settings_.enemySpeed *= 1.01f;
     if (wave % 2 == 0 && settings_.batchSize < 12) settings_.batchSize += 1;
 
@@ -68,6 +70,16 @@ bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
         const float hb = settings_.enemyHitbox * 0.5f * sizeMul;
         registry.emplace<Engine::ECS::AABB>(e, Engine::ECS::AABB{Engine::Vec2{hb, hb}});
         registry.emplace<Engine::ECS::Health>(e, Engine::ECS::Health{hpVal, hpVal});
+        if (auto* hp = registry.get<Engine::ECS::Health>(e)) {
+            Engine::Gameplay::applyUpgradesToUnit(*hp, baseStats_, upgrades_, false);
+            hp->tags = {Engine::Gameplay::Tag::Biological};
+            hp->maxShields = settings_.enemyShields;
+            hp->currentShields = settings_.enemyShields;
+            hp->healthArmor = settings_.enemyHealthArmor;
+            hp->shieldArmor = settings_.enemyShieldArmor;
+            hp->shieldRegenRate = settings_.enemyShieldRegen;
+            hp->regenDelay = settings_.enemyRegenDelay;
+        }
         registry.emplace<Engine::ECS::EnemyTag>(e, Engine::ECS::EnemyTag{});
         registry.emplace<Game::EnemyAttributes>(e, Game::EnemyAttributes{speedVal});
         if (def && def->texture) {
@@ -97,6 +109,16 @@ bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
                                                                               def ? def->texture : Engine::TexturePtr{}});
         registry.emplace<Engine::ECS::AABB>(e, Engine::ECS::AABB{Engine::Vec2{size * 0.5f, size * 0.5f}});
         registry.emplace<Engine::ECS::Health>(e, Engine::ECS::Health{hpVal, hpVal});
+        if (auto* hp = registry.get<Engine::ECS::Health>(e)) {
+            Engine::Gameplay::applyUpgradesToUnit(*hp, baseStats_, upgrades_, false);
+            hp->tags = {Engine::Gameplay::Tag::Biological, Engine::Gameplay::Tag::Armored};
+            hp->maxShields = settings_.enemyShields;
+            hp->currentShields = settings_.enemyShields;
+            hp->healthArmor = settings_.enemyHealthArmor + 1.0f;  // elites slightly tougher
+            hp->shieldArmor = settings_.enemyShieldArmor;
+            hp->shieldRegenRate = settings_.enemyShieldRegen;
+            hp->regenDelay = settings_.enemyRegenDelay;
+        }
         registry.emplace<Engine::ECS::EnemyTag>(e, Engine::ECS::EnemyTag{});
         registry.emplace<Game::EnemyAttributes>(e, Game::EnemyAttributes{speedVal});
         if (def && def->texture) {
@@ -128,6 +150,16 @@ bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
                                                                               def ? def->texture : Engine::TexturePtr{}});
         registry.emplace<Engine::ECS::AABB>(e, Engine::ECS::AABB{Engine::Vec2{size * 0.5f, size * 0.5f}});
         registry.emplace<Engine::ECS::Health>(e, Engine::ECS::Health{hpVal, hpVal});
+        if (auto* hp = registry.get<Engine::ECS::Health>(e)) {
+            Engine::Gameplay::applyUpgradesToUnit(*hp, baseStats_, upgrades_, false);
+            hp->tags = {Engine::Gameplay::Tag::Biological, Engine::Gameplay::Tag::Armored};
+            hp->healthArmor = settings_.enemyHealthArmor + 1.5f;
+            hp->shieldArmor = settings_.enemyShieldArmor + 1.0f;
+            hp->maxShields = settings_.enemyShields * 1.5f;
+            hp->currentShields = hp->maxShields;
+            hp->shieldRegenRate = settings_.enemyShieldRegen * 1.1f;
+            hp->regenDelay = settings_.enemyRegenDelay;
+        }
         registry.emplace<Engine::ECS::EnemyTag>(e, Engine::ECS::EnemyTag{});
         registry.emplace<Engine::ECS::BossTag>(e, Engine::ECS::BossTag{});
         registry.emplace<Game::EnemyAttributes>(e, Game::EnemyAttributes{speedVal});

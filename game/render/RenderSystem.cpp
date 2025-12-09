@@ -8,6 +8,7 @@
 #include "../../engine/ecs/components/Renderable.h"
 #include "../../engine/ecs/components/Transform.h"
 #include "../../engine/ecs/components/Velocity.h"
+#include "../../engine/ecs/components/Health.h"
 #include "../../engine/render/CameraUtil.h"
 #include "../../engine/render/Color.h"
 #include "../../engine/ecs/components/SpriteAnimation.h"
@@ -18,6 +19,7 @@
 #include "../components/PickupBob.h"
 #include "../../engine/render/BitmapTextRenderer.h"
 #include "../../engine/ecs/components/Tags.h"
+#include "../systems/BuffSystem.h"
 
 namespace Game {
 
@@ -95,6 +97,57 @@ void RenderSystem::draw(const Engine::ECS::Registry& registry, const Engine::Cam
                 }
             } else {
                 device_.drawFilledRect(screenPos, scaledSize, color);
+            }
+
+            // Floating health/shield bars for enemies.
+            if (registry.has<Engine::ECS::EnemyTag>(e) || registry.has<Engine::ECS::BossTag>(e)) {
+                if (const auto* hp = registry.get<Engine::ECS::Health>(e)) {
+                    const float barW = std::clamp(rend.size.x * camera.zoom, 18.0f, 60.0f);
+                    const float barH = 3.0f;
+                    const float left = screenPos.x + (scaledSize.x - barW) * 0.5f;
+                    const float shieldY = screenPos.y - 8.0f;
+                    const float healthY = screenPos.y - 3.5f;
+                    Engine::Gameplay::BuffState buff{};
+                    if (const auto* armorBuff = registry.get<Game::ArmorBuff>(e)) {
+                        buff = armorBuff->state;
+                    }
+
+                    // Shield bar (top)
+                    if (hp->maxShields > 0.0f) {
+                        float sFrac = std::clamp(hp->currentShields / hp->maxShields, 0.0f, 1.0f);
+                        device_.drawFilledRect(Engine::Vec2{left, shieldY}, Engine::Vec2{barW, barH},
+                                               Engine::Color{30, 40, 60, 170});
+                        if (sFrac > 0.0f) {
+                            device_.drawFilledRect(Engine::Vec2{left, shieldY},
+                                                   Engine::Vec2{barW * sFrac, barH},
+                                                   Engine::Color{90, 150, 240, 230});
+                        }
+                        float armorLen = std::min(barW, (hp->shieldArmor + buff.shieldArmorBonus) * 4.0f);
+                        if (armorLen > 0.5f) {
+                            device_.drawFilledRect(Engine::Vec2{left, shieldY - 1.0f},
+                                                   Engine::Vec2{armorLen, 1.0f},
+                                                   Engine::Color{40, 50, 60, 220});
+                        }
+                    }
+
+                    // Health bar (bottom)
+                    if (hp->maxHealth > 0.0f) {
+                        float hFrac = std::clamp(hp->currentHealth / hp->maxHealth, 0.0f, 1.0f);
+                        device_.drawFilledRect(Engine::Vec2{left, healthY}, Engine::Vec2{barW, barH},
+                                               Engine::Color{60, 30, 30, 170});
+                        if (hFrac > 0.0f) {
+                            device_.drawFilledRect(Engine::Vec2{left, healthY},
+                                                   Engine::Vec2{barW * hFrac, barH},
+                                                   Engine::Color{200, 80, 80, 230});
+                        }
+                        float armorLen = std::min(barW, (hp->healthArmor + buff.healthArmorBonus) * 4.0f);
+                        if (armorLen > 0.5f) {
+                            device_.drawFilledRect(Engine::Vec2{left, healthY - 1.0f},
+                                                   Engine::Vec2{armorLen, 1.0f},
+                                                   Engine::Color{50, 40, 30, 220});
+                        }
+                    }
+                }
             }
         });
 }
