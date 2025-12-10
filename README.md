@@ -78,8 +78,6 @@ Loaded from `data/input_bindings.json`; fully remappable via file override.
    - `Join`: enter player name and password, direct connect or browse, then auto-sync to host settings.
 3) Use hotkeys above; open shop during intermission; survive as many waves as possible.
 
-For deeper design notes, see `docs/GAME_SPEC.md` and `docs/Gameplay_Loop.md`.***
-
 ## Building on Linux for Linux
 ```bash
 # Requisites
