@@ -36,6 +36,9 @@ jobs:
         shell: pwsh
         run: |
           if (-not $env:VCPKG_ROOT) { $env:VCPKG_ROOT = "C:\vcpkg" }
+          if (-not (Test-Path $env:VCPKG_ROOT)) {
+            git clone https://github.com/microsoft/vcpkg $env:VCPKG_ROOT
+          }
           & "$env:VCPKG_ROOT\bootstrap-vcpkg.bat" -disableMetrics
           $triplet = "x64-windows"
           & "$env:VCPKG_ROOT\vcpkg.exe" install sdl2 sdl2-image sdl2-ttf --triplet $triplet
@@ -47,7 +50,7 @@ jobs:
         run: |
           cmake -S . -B build `
             -DCMAKE_BUILD_TYPE=Release `
-            -DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake `
+            -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" `
             -DVCPKG_TARGET_TRIPLET=x64-windows `
             -A x64
 
