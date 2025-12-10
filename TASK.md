@@ -1,53 +1,45 @@
-# Currencies
-* There will be two currencies:
-    * Copper
-        * Used for ability upgrades
-        * Gained from completing rounds
-        * Gained from killing enemies
-    * Gold
-        * Used to purchase things from the traveling shop
-        * Gained from defeating Bosses/Mini-Bosses
-        * Gained from completing challenges/events
+You will assume the role of a C++ gaming network engineer and develop out all the necessary backend
+systems, netcode, functions, etc in order to accomplish full multiplayer support.
 
-# Powerups / Pickups
-* Monsters will sometimes drop powerups that will empower the entire team at once.
-    * Heal - Full heal the entire team.
-    * Kaboom - Kill everything alive in the current wave.
-    * Recharge - Refill Mana/Energy/Armor/Shields.
-    * Frenzy - 25% Attack Speed Increase for 30 seconds for entire team.
-    * Immortal - Entire team is immortal for 30 seconds.
-* Bosses/Mini-Bosses will always drop pickups.
-    * Money - Massive Copper and/or Large Gold drop.
-    * Unique Items - Items dropped only from specific bosses with unique bonuses.
-    * Ability Items - Items that when held grant special abilities.
-    * Resurrection Tome - Used to bring a dead player back to life, if they are out of lives.
-* Characters will automatically attack the nearest target within their weapon range.
-* Traveling Shop will not appear until after the player has defeted a boss and gained Gold.
+## Multiplayer Features:
+ 
+* The game will support 2-6 players in multiplayer.
+* The general plan is to have players all join a 'Lobby' before initiating the game.
+* Netcode should keep all clients in sync with eachother. This means enemies, waves, rounds, etc.
+* When in multiplayer, the amount of enemies per wave should increase per each player.
+* When in multiplayer, the amount of bosses spawned should mirror the amount of players.
+* When in multiplayer, experience should not be pooled.
+* When in multiplayer, when a player dies they will revive the next round as a base level character with 0 upgrades.
+* When in multiplayer, the match ends when all players are dead.
+* When in multiplayer, a players stats are still tracked and added to their stat window.
 
-# Shop Changes
-* The ability to purchase upgrades to your abilities will be available at all times.
-* A dedicated GUI will house all relevant ability upgrades.
-
-    ### Ability Shop (Copper - Cheap, Compounding Pricing):
-    * Increase Weapon Damage by 1 Per Level
-    * Increase Attack Speed by 0.05% Per Level
-    * Increase Weapon Range by 1 Per Level to a maximum of +5
-    * Increase Sight Range by 1 Per Level to a maximum of +5
-    * Increase Max Health by 5 Per Level
-    * Increase Armor by 1 Per Level
-
-    ### Optional Ability Purchase Ideas (Copper - Expensive):
-    * Projectiles now produce splash damage.
-    * Stimpack - Consume health to shoot faster and stronger for X seconds.
-    * Stun Grenage - Throw grenade that stuns all targets in detonation area.
-
-    ### Traveling Shop Purchases (Gold - Very Expensive):
-    * Damage: Increases damages dealt by 50% no matter the damage type 
-    * Range & Vision: Increases both your weapon range and sight range by 3 
-    * Attack Speed: Increases attack speed by 50%
-    * Speed Boots: Increases movement speed by 1
-    * Bonus Vitals: Increases the Life, Shield and Energy of your hero by 25% 
-    * Ability Cooldowns:
-        * [1] Abilities cooldowns are 25% faster
-        * [2] Abilities that use charges get +1 max
-        * [3] Abilities that cost vitals (life, shields, energy) cost 25% less vitals
+## Main Menu Redesign to Support Multiplayer:
+* Main Menu:
+    * New Game:
+        * Enters Char/Difficulty Select.
+    * Host:
+        * Opens Host Window:
+            * Host Window will have numerous fields;
+                * Lobby Name.
+                * Optional Password Protection.
+                * Max Player Count.
+                * Difficulty Selector.
+            * Host Window will output the player's external IP to give to friends.
+            * Host Window will lead to the Lobby Window.
+                * Lobby Window:
+                    * Lobby Window will be where players can select their characters before the game begins.
+                    * Players will be able to chat with eachother in the Lobby Window.
+                    * All currently open matches will be listed in the Server Browser.
+    * Join:
+        * Opens a selection menu to select between:
+            * Direct
+                * Opens box to input IP Address and optional Password.
+                    * If a connection is successful, proceed to Lobby Window for that match.
+            * Server Browser
+                * Opens a Window that will display all active matches to potentially join.
+    * Stats:
+        * Does what it already does.
+    * Options:
+        * Does what it already does.
+    * Quit"
+        * Does what it already does.

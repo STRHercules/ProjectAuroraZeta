@@ -2,9 +2,6 @@
 * Integrate Discord SDK to achieve Rich Discord Presence when playing Zeta
     * Rich Presence should display Character, Round, Total Kills, Time Elapsed
 
-# Multiplayer
-* Create method for players to host/connect to matches.
-
 # Menu Flow
 * Main Menu:
     * New Game

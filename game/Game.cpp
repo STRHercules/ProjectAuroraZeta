@@ -10,6 +10,10 @@
 #include <functional>
 #include <optional>
 #include <array>
+#include <unordered_set>
+#include <ifaddrs.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 #include "../engine/core/Application.h"
 #include "../engine/core/Logger.h"
@@ -55,6 +59,8 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     Engine::logInfo("GameRoot initialized. Spawning placeholder hero entity.");
     app_ = &app;
     render_ = &app.renderer();
+    SDL_StartTextInput();
+    detectLocalIp();
     if (auto* sdl = dynamic_cast<Engine::SDLRenderDevice*>(render_)) {
         sdlRenderer_ = sdl->rawRenderer();
     }
@@ -108,6 +114,9 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     // Wave settings loaded later from gameplay config.
     textureManager_ = std::make_unique<Engine::TextureManager>(*render_);
     loadProgress();
+    netSession_ = std::make_unique<Game::Net::NetSession>();
+    netSession_->setSnapshotProvider([this]() { return this->collectNetSnapshot(); });
+    netSession_->setSnapshotConsumer([this](const Game::Net::SnapshotMsg& snap) { this->applyRemoteSnapshot(snap); });
 
     // Load bindings from data file; fallback to defaults.
     auto loaded = Engine::InputLoader::loadFromFile("data/input_bindings.json");
@@ -456,6 +465,9 @@ bool GameRoot::onInitialize(Engine::Application& app) {
         }
     }
     loadMenuPresets();
+    hostConfig_.difficultyId = activeDifficulty_.id;
+    hostConfig_.lobbyName = "Zeta Lobby";
+    localLobbyHeroId_ = activeArchetype_.id;
     // Start in main menu; actual run spawns on New Game.
     resetRun();
     inMenu_ = true;
@@ -480,6 +492,25 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
 
     // Sample high-level actions.
     Engine::ActionState actions = actionMapper_.sample(input);
+    updateNetwork(step.deltaSeconds);
+    if (multiplayerEnabled_) {
+        bool remoteAlive = false;
+        for (const auto& [id, state] : remoteStates_) {
+            (void)id;
+            if (state.alive) {
+                remoteAlive = true;
+                break;
+            }
+        }
+        bool localAlive = true;
+        if (const auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
+            localAlive = hp->currentHealth > 0.0f;
+        }
+        if (!localAlive && !remoteAlive && !defeated_) {
+            defeated_ = true;
+            paused_ = true;
+        }
+    }
 
         const bool restartPressed = actions.restart && !restartPrev_;
         restartPrev_ = actions.restart;
@@ -614,6 +645,9 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 paused_ = itemShopOpen_ || abilityShopOpen_ || levelChoiceOpen_;
                 pauseMenuBlink_ = 0.0;
             } else if (inside(resumeX, quitY)) {
+                bool hostQuit = netSession_ && netSession_->isHost();
+                leaveNetworkSession(hostQuit);
+                resetRun();
                 inMenu_ = true;
                 menuPage_ = MenuPage::Main;
                 menuSelection_ = 0;
@@ -1523,6 +1557,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         double stepScale = freezeTimer_ > 0.0 ? 0.0 : 1.0;
         combatTimer_ -= step.deltaSeconds * stepScale;
         if (waveSystem_) {
+                waveSystem_->setPlayerCount(currentPlayerCount());
                 if (!waveSpawned_) {
                     // Scale enemy armor upgrades over time.
                     enemyUpgrades_.groundArmorLevel = wave_ / 5;
@@ -1552,6 +1587,9 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 abilityShopOpen_ = false;
                 paused_ = userPaused_;
                 refreshShopInventory();
+                if (multiplayerEnabled_ && reviveNextRound_) {
+                    reviveLocalPlayer();
+                }
                 Engine::Vec2 heroPos{0.0f, 0.0f};
                 if (const auto* tf = registry_.get<Engine::ECS::Transform>(hero_)) heroPos = tf->position;
                 if (travelShopUnlocked_ && gold_ > 0) {
@@ -2184,6 +2222,9 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
 }
 
 void GameRoot::onShutdown() {
+    if (netSession_) {
+        netSession_->stop();
+    }
     saveProgress();
     if (fogTexture_) {
         SDL_DestroyTexture(fogTexture_);
@@ -2203,6 +2244,70 @@ void GameRoot::onShutdown() {
     Engine::logInfo("GameRoot shutdown.");
 }
 
+void GameRoot::reviveLocalPlayer() {
+    level_ = 1;
+    xp_ = 0;
+    xpToNext_ = xpBaseToLevel_;
+    heroUpgrades_ = {};
+    projectileDamage_ = projectileDamageBase_;
+    heroMoveSpeed_ = heroMoveSpeedBase_;
+    heroMaxHp_ = heroMaxHpBase_;
+    heroShield_ = heroShieldBase_;
+    heroHealthArmor_ = heroBaseStats_.baseHealthArmor;
+    heroShieldArmor_ = heroBaseStats_.baseShieldArmor;
+    if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
+        hp->maxHealth = heroMaxHp_;
+        hp->currentHealth = heroMaxHp_;
+        hp->maxShields = heroShield_;
+        hp->currentShields = heroShield_;
+        hp->healthArmor = heroHealthArmor_;
+        hp->shieldArmor = heroShieldArmor_;
+    }
+    reviveNextRound_ = false;
+    Engine::logInfo("Revived for next round (multiplayer).");
+}
+
+void GameRoot::leaveNetworkSession(bool isHostQuit) {
+    if (netSession_) {
+        if (isHostQuit && netSession_->isHost()) {
+            netSession_->broadcastGoodbyeHost();
+        }
+        netSession_->stop();
+    }
+    // Destroy any remote entities immediately.
+    for (auto& kv : remoteEntities_) {
+        registry_.destroy(kv.second);
+    }
+    remoteEntities_.clear();
+    remoteStates_.clear();
+    remoteTargets_.clear();
+    multiplayerEnabled_ = false;
+    isHosting_ = false;
+    menuPage_ = MenuPage::Main;
+    inMenu_ = true;
+}
+
+void GameRoot::detectLocalIp() {
+    hostLocalIp_ = "0.0.0.0";
+    struct ifaddrs* ifaddr = nullptr;
+    if (getifaddrs(&ifaddr) == -1) {
+        return;
+    }
+    for (struct ifaddrs* ifa = ifaddr; ifa; ifa = ifa->ifa_next) {
+        if (!ifa->ifa_addr || ifa->ifa_addr->sa_family != AF_INET) continue;
+        struct sockaddr_in* sa = reinterpret_cast<struct sockaddr_in*>(ifa->ifa_addr);
+        char buf[INET_ADDRSTRLEN];
+        if (inet_ntop(AF_INET, &sa->sin_addr, buf, sizeof(buf))) {
+            std::string ip(buf);
+            if (ip != "127.0.0.1") {
+                hostLocalIp_ = ip;
+                break;
+            }
+        }
+    }
+    freeifaddrs(ifaddr);
+}
+
 void GameRoot::handleHeroDeath() {
     auto* hp = registry_.get<Engine::ECS::Health>(hero_);
     if (hp && hp->currentHealth <= 0.0f && !defeated_) {
@@ -2213,6 +2318,20 @@ void GameRoot::handleHeroDeath() {
             hp->regenDelay = 0.0f;
             immortalTimer_ = std::max(immortalTimer_, 2.5f);
             Engine::logInfo("Resurrection Tome consumed. You are back in the fight.");
+            return;
+        }
+        bool remoteAlive = false;
+        if (multiplayerEnabled_) {
+            for (const auto& [id, state] : remoteStates_) {
+                if (id != localPlayerId_ && state.alive) {
+                    remoteAlive = true;
+                    break;
+                }
+            }
+        }
+        if (multiplayerEnabled_ && remoteAlive) {
+            reviveNextRound_ = true;
+            Engine::logInfo("You are down. Awaiting next round revive (teammates still alive).");
             return;
         }
         defeated_ = true;
@@ -2319,6 +2438,9 @@ void GameRoot::processDefeatInput(const Engine::ActionState& actions, const Engi
         abilityShopOpen_ = false;
         levelChoiceOpen_ = false;
         runStarted_ = false;
+        // Leave network session appropriately.
+        bool hostQuit = netSession_ && netSession_->isHost();
+        leaveNetworkSession(hostQuit);
         resetRun();
     };
 
@@ -2600,6 +2722,7 @@ void GameRoot::loadProjectileTextures() {
 }
 
 void GameRoot::startNewGame() {
+    applyLocalHeroFromLobby();
     applyDifficultyPreset();
     applyArchetypePreset();
     inMenu_ = false;
@@ -2632,8 +2755,24 @@ void GameRoot::updateMenuInput(const Engine::ActionState& actions, const Engine:
 
     bool pauseEdge = actions.pause && !menuPausePrev_;
     menuPausePrev_ = actions.pause;
+    bool menuBackEdge = actions.menuBack && !menuBackPrev_;
+    menuBackPrev_ = actions.menuBack;
     bool clickEdge = leftClick && !menuClickPrev_;
     menuClickPrev_ = leftClick;
+
+    auto processTextField = [&](bool& editing, std::string& value, int maxLen) {
+        if (!editing) return;
+        if (!input.textInput().empty() && static_cast<int>(value.size()) < maxLen) {
+            value.append(input.textInput().substr(0, std::max(0, maxLen - static_cast<int>(value.size()))));
+        }
+        if (input.backspacePressed() && !value.empty()) {
+            value.pop_back();
+        }
+        if (input.enterPressed()) {
+            editing = false;
+            SDL_StopTextInput();
+        }
+    };
 
     auto advanceSelection = [&](int count) {
         const int maxIndex = count - 1;
@@ -2650,11 +2789,17 @@ void GameRoot::updateMenuInput(const Engine::ActionState& actions, const Engine:
     const float topY = 140.0f;
     int mx = input.mouseX();
     int my = input.mouseY();
+    // Process ongoing text edits every frame.
+    processTextField(editingLobbyName_, hostConfig_.lobbyName, 24);
+    processTextField(editingLobbyPassword_, hostConfig_.password, 24);
+    processTextField(editingJoinPassword_, joinPassword_, 24);
+    processTextField(editingHostPlayerName_, hostPlayerName_, 24);
+    processTextField(editingJoinPlayerName_, joinPlayerName_, 24);
+    processTextField(editingDirectIp_, directConnectIp_, 48);
 
     if (inMenu_) {
         if (menuPage_ == MenuPage::Main) {
-            const int itemCount = 4;
-            // Hover to select
+            const int itemCount = 6;
             for (int i = 0; i < itemCount; ++i) {
                 float y = topY + 80.0f + i * 38.0f;
                 float x = centerX - 120.0f;
@@ -2665,10 +2810,12 @@ void GameRoot::updateMenuInput(const Engine::ActionState& actions, const Engine:
             advanceSelection(itemCount);
             if (confirmEdge) {
                 switch (menuSelection_) {
-                    case 0: menuPage_ = MenuPage::CharacterSelect; menuSelection_ = 0; return;
-                    case 1: menuPage_ = MenuPage::Stats; menuSelection_ = 0; return;
-                    case 2: menuPage_ = MenuPage::Options; menuSelection_ = 0; return;
-                    case 3: if (app_) app_->requestQuit("Exit from main menu"); return;
+                    case 0: menuPage_ = MenuPage::CharacterSelect; menuSelection_ = 0; return;  // Solo
+                    case 1: menuPage_ = MenuPage::HostConfig; menuSelection_ = 0; return;
+                    case 2: menuPage_ = MenuPage::JoinSelect; menuSelection_ = 0; return;
+                    case 3: menuPage_ = MenuPage::Stats; menuSelection_ = 0; return;
+                    case 4: menuPage_ = MenuPage::Options; menuSelection_ = 0; return;
+                    case 5: if (app_) app_->requestQuit("Exit from main menu"); return;
                 }
             }
             if (pauseEdge && app_) {
@@ -2797,6 +2944,261 @@ void GameRoot::updateMenuInput(const Engine::ActionState& actions, const Engine:
                 menuPage_ = MenuPage::Main;
                 menuSelection_ = 0;
             }
+        } else if (menuPage_ == MenuPage::HostConfig) {
+            // Mouse primary; allow A/D to cycle selected dropdowns.
+            float boxYPlayer = topY + 104.0f;
+            float boxYName = topY + 134.0f;
+            float boxYPass = topY + 164.0f;
+            float boxYMax = topY + 194.0f;
+            float boxYDiff = topY + 224.0f;
+            float startBtnY = topY + 254.0f;
+            float boxX = centerX - 190.0f;
+            float boxW = 380.0f;
+            auto hoverBox = [&](float y) { return inside(mx, my, boxX, y, boxW, 26.0f); };
+
+            if (clickEdge) {
+                if (hoverBox(boxYPlayer)) {
+                    editingHostPlayerName_ = true;
+                    editingLobbyName_ = editingLobbyPassword_ = false;
+                    SDL_StartTextInput();
+                    menuSelection_ = 0;
+                } else if (hoverBox(boxYName)) {
+                    editingLobbyName_ = true;
+                    editingLobbyPassword_ = false;
+                    editingHostPlayerName_ = false;
+                    SDL_StartTextInput();
+                    menuSelection_ = 1;
+                } else if (hoverBox(boxYPass)) {
+                    editingLobbyPassword_ = true;
+                    editingLobbyName_ = false;
+                    editingHostPlayerName_ = false;
+                    SDL_StartTextInput();
+                    menuSelection_ = 2;
+                } else if (hoverBox(boxYMax)) {
+                    editingLobbyName_ = editingLobbyPassword_ = false;
+                    editingHostPlayerName_ = false;
+                    menuSelection_ = 3;
+                    if (mx < boxX + boxW * 0.5f) hostConfig_.maxPlayers = std::max(2, hostConfig_.maxPlayers - 1);
+                    else hostConfig_.maxPlayers = std::min(6, hostConfig_.maxPlayers + 1);
+                } else if (hoverBox(boxYDiff)) {
+                    editingLobbyName_ = editingLobbyPassword_ = false;
+                    editingHostPlayerName_ = false;
+                    menuSelection_ = 4;
+                    if (!difficulties_.empty()) {
+                        int dir = (mx < boxX + boxW * 0.5f) ? -1 : 1;
+                        selectedDifficulty_ = (selectedDifficulty_ + dir + static_cast<int>(difficulties_.size())) %
+                                              static_cast<int>(difficulties_.size());
+                        applyDifficultyPreset();
+                        hostConfig_.difficultyId = activeDifficulty_.id;
+                    }
+                } else if (inside(mx, my, centerX - 110.0f, startBtnY, 220.0f, 32.0f)) {
+                    menuSelection_ = 5;
+                    editingLobbyName_ = editingLobbyPassword_ = false;
+                    editingHostPlayerName_ = false;
+                    connectHost();
+                    menuPage_ = MenuPage::Lobby;
+                    menuSelection_ = 0;
+                    return;
+                }
+            }
+            // A/D carousel behavior for max players and difficulty.
+            auto cycleDifficulty = [&](int dir) {
+                if (difficulties_.empty()) return;
+                selectedDifficulty_ = (selectedDifficulty_ + dir + static_cast<int>(difficulties_.size())) %
+                                      static_cast<int>(difficulties_.size());
+                applyDifficultyPreset();
+                hostConfig_.difficultyId = activeDifficulty_.id;
+            };
+            if ((leftEdge || rightEdge) && !editingLobbyName_ && !editingLobbyPassword_) {
+                // Prefer the currently hovered row; fallback to selected row.
+                int dir = rightEdge ? 1 : -1;
+                if (hoverBox(boxYMax) || menuSelection_ == 3) {
+                    hostConfig_.maxPlayers = std::clamp(hostConfig_.maxPlayers + dir, 2, 6);
+                    menuSelection_ = 3;
+                } else if (hoverBox(boxYDiff) || menuSelection_ == 4) {
+                    cycleDifficulty(dir);
+                    menuSelection_ = 4;
+                }
+            }
+            // no keyboard confirm here
+            confirmEdge = false;
+            if (pauseEdge || menuBackEdge) {
+                editingLobbyName_ = editingLobbyPassword_ = false;
+                SDL_StopTextInput();
+                menuPage_ = MenuPage::Main;
+                menuSelection_ = 0;
+            }
+        } else if (menuPage_ == MenuPage::JoinSelect) {
+            const int itemCount = 3;  // direct, browser, back
+            // Point-click only; ignore keyboard navigation.
+            upEdge = downEdge = leftEdge = rightEdge = false;
+            // Only trigger confirm when the click is inside a button; otherwise ignore.
+            confirmEdge = false;
+            // Precompute hitboxes
+            const float nameX = centerX - 150.0f;
+            const float nameY = topY + 110.0f;
+            const float nameW = 300.0f;
+            const float nameH = 26.0f;
+            auto buttonRect = [&](int idx) {
+                float y = topY + 150.0f + idx * 38.0f;
+                return std::tuple<float, float, float, float>{centerX - 130.0f, y, 260.0f, 30.0f};
+            };
+            const float passX = centerX - 150.0f;
+            const float passY = topY + 270.0f;
+            const float passW = 300.0f;
+            const float passH = 26.0f;
+
+            if (clickEdge) {
+                if (inside(mx, my, nameX, nameY, nameW, nameH)) {
+                    editingJoinPlayerName_ = true;
+                    editingJoinPassword_ = false;
+                    SDL_StartTextInput();
+                } else {
+                    editingJoinPlayerName_ = false;
+                }
+                if (inside(mx, my, passX, passY, passW, passH)) {
+                    editingJoinPassword_ = true;
+                    editingJoinPlayerName_ = false;
+                    SDL_StartTextInput();
+                } else if (!editingJoinPlayerName_) {
+                    editingJoinPassword_ = false;
+                }
+                // Buttons (only if not clicking text fields)
+                if (!editingJoinPlayerName_ && !editingJoinPassword_) {
+                    for (int i = 0; i < itemCount; ++i) {
+                        auto [bx, by, bw, bh] = buttonRect(i);
+                        if (inside(mx, my, bx, by, bw, bh)) {
+                            menuSelection_ = i;
+                            if (i == 0) {
+                                // Open direct connect popup instead of immediate connect.
+                                directConnectPopup_ = true;
+                                editingDirectIp_ = true;
+                                SDL_StartTextInput();
+                            } else {
+                                confirmEdge = true;
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+            // Handle direct connect popup interactions
+            if (directConnectPopup_) {
+                if (input.enterPressed()) {
+                    connectDirectAddress(directConnectIp_);
+                    directConnectPopup_ = false;
+                    editingDirectIp_ = false;
+                }
+                if (pauseEdge || menuBackEdge) {
+                    directConnectPopup_ = false;
+                    editingDirectIp_ = false;
+                }
+                if (clickEdge) {
+                    float pw = 420.0f;
+                    float ph = 160.0f;
+                    float px = centerX - pw * 0.5f;
+                    float py = topY + 120.0f;
+                    float ipX = px + 14.0f;
+                    float ipY = py + 40.0f;
+                    float ipW = pw - 28.0f;
+                    float ipH = 26.0f;
+                    float btnW = 140.0f;
+                    float btnH = 32.0f;
+                    float gapBtns = 20.0f;
+                    float btnX = px + pw - (btnW * 2 + gapBtns + 14.0f);
+                    float btnY = py + ph - 48.0f;
+                    if (inside(mx, my, ipX, ipY, ipW, ipH)) {
+                        editingDirectIp_ = true;
+                        SDL_StartTextInput();
+                    } else if (inside(mx, my, btnX, btnY, btnW, btnH)) {
+                        // Cancel
+                        directConnectPopup_ = false;
+                        editingDirectIp_ = false;
+                        SDL_StopTextInput();
+                    } else if (inside(mx, my, btnX + btnW + gapBtns, btnY, btnW, btnH)) {
+                        connectDirectAddress(directConnectIp_);
+                        directConnectPopup_ = false;
+                        editingDirectIp_ = false;
+                        SDL_StopTextInput();
+                    }
+                }
+                // Suppress other actions while popup open
+                confirmEdge = false;
+                // Skip rest of JoinSelect handling
+                goto join_popup_block_end;
+            }
+            if (confirmEdge) {
+                switch (menuSelection_) {
+                    case 0: connectDirect(); menuPage_ = MenuPage::Lobby; menuSelection_ = 0; return;
+                    case 1: menuPage_ = MenuPage::ServerBrowser; menuSelection_ = 0; return;
+                    case 2: menuPage_ = MenuPage::Main; menuSelection_ = 0; return;
+                }
+            }
+            if (pauseEdge) {
+                menuPage_ = MenuPage::Main;
+                menuSelection_ = 0;
+            }
+        join_popup_block_end:
+            ;
+        } else if (menuPage_ == MenuPage::Lobby) {
+            const int itemCount = 2;  // ready/start, leave
+            if (upEdge) menuSelection_ = (menuSelection_ - 1 + itemCount) % itemCount;
+            if (downEdge) menuSelection_ = (menuSelection_ + 1) % itemCount;
+            // Local hero picker clicks
+            float pickerX = centerX - 360.0f;
+            float pickerY = topY + 100.0f;
+            float pickerW = 180.0f;
+            float pickerH = 30.0f;
+            if (clickEdge) {
+                for (std::size_t i = 0; i < archetypes_.size(); ++i) {
+                    float y = pickerY + static_cast<float>(i) * (pickerH + 6.0f);
+                    if (y > pickerY + 200.0f) break;
+                    if (inside(mx, my, pickerX, y, pickerW, pickerH)) {
+                        localLobbyHeroId_ = archetypes_[i].id;
+                        // send selection
+                        if (netSession_) {
+                            if (netSession_->isHost()) {
+                                netSession_->updateHostHero(localLobbyHeroId_);
+                            } else {
+                                netSession_->sendHeroSelect(localLobbyHeroId_);
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+            if (confirmEdge) {
+                if (menuSelection_ == 0) {
+                    if (isHosting_) {
+                        if (netSession_) netSession_->beginMatch();
+                        startNewGame();
+                        return;
+                    }
+                } else if (menuSelection_ == 1) {
+                    if (netSession_) netSession_->stop();
+                    multiplayerEnabled_ = false;
+                    isHosting_ = false;
+                    menuPage_ = MenuPage::Main;
+                    return;
+                }
+            }
+            if (pauseEdge || menuBackEdge) {
+    if (netSession_) {
+        if (!isHosting_) {
+            netSession_->sendGoodbye();
+        }
+        netSession_->stop();
+    }
+    remoteEntities_.clear();
+    remoteStates_.clear();
+    remoteTargets_.clear();
+    menuSelection_ = 0;
+            }
+        } else if (menuPage_ == MenuPage::ServerBrowser) {
+            if (confirmEdge || pauseEdge) {
+                menuPage_ = MenuPage::JoinSelect;
+                menuSelection_ = 0;
+            }
         }
     }
 }
@@ -2807,8 +3209,13 @@ void GameRoot::renderMenu() {
 
     const float centerX = static_cast<float>(viewportWidth_) * 0.5f;
     const float topY = 140.0f;
+    int mx = lastMouseX_;
+    int my = lastMouseY_;
+    auto inside = [](int mx, int my, float x, float y, float w, float h) {
+        return mx >= x && mx <= x + w && my >= y && my <= y + h;
+    };
     drawTextUnified("    PROJECT ZETA", Engine::Vec2{centerX - 140.0f, topY}, 1.7f, Engine::Color{180, 230, 255, 240});
-    drawTextUnified("Pre-Alpha | Modern: WASD move | RTS: RMB move + WASD pan | Mouse aim | B shop | Esc pause",
+    drawTextUnified("Pre-Alpha | Modern: WASD move | RTS: RMB move + WASD pan | B shop | Esc pause",
                     Engine::Vec2{centerX - 260.0f, topY + 28.0f},
                     0.85f, Engine::Color{150, 200, 230, 220});
 
@@ -2825,13 +3232,15 @@ void GameRoot::renderMenu() {
     };
 
     if (menuPage_ == MenuPage::Main) {
-        drawButton("New Game", 0);
-        drawButton("Stats", 1);
-        drawButton("Options", 2);
-        drawButton("Exit", 3);
+        drawButton("New Game (Solo)", 0);
+        drawButton("Host", 1);
+        drawButton("Join", 2);
+        drawButton("Stats", 3);
+        drawButton("Options", 4);
+        drawButton("Exit", 5);
         float pulse = 0.6f + 0.4f * std::sin(static_cast<float>(menuPulse_) * 2.0f);
         Engine::Color hint{static_cast<uint8_t>(180 + 40 * pulse), 220, 255, 220};
-        drawTextUnified("          A Major Bonghit Production", Engine::Vec2{centerX - 160.0f, topY + 240.0f},
+        drawTextUnified("          A Major Bonghit Production", Engine::Vec2{centerX - 160.0f, topY + 300.0f},
                         0.9f, hint);
     } else if (menuPage_ == MenuPage::Stats) {
         Engine::Color c{200, 230, 255, 240};
@@ -2956,6 +3365,146 @@ void GameRoot::renderMenu() {
         Engine::Color hint{180, 210, 240, 220};
         drawTextUnified("Left/Right to switch panels | Up/Down to change selection | Enter/Click to confirm",
                         Engine::Vec2{centerX - 260.0f, summaryY + 142.0f}, 0.85f, hint);
+    } else if (menuPage_ == MenuPage::HostConfig) {
+        Engine::Color c{200, 230, 255, 240};
+        drawTextUnified("Host Multiplayer", Engine::Vec2{centerX - 120.0f, topY + 50.0f}, 1.25f, c);
+        const float boxW = 420.0f;
+        Engine::Color panel{26, 36, 52, 220};
+        // Extend height to cover all rows plus buttons.
+        render_->drawFilledRect(Engine::Vec2{centerX - boxW * 0.5f, topY + 90.0f}, Engine::Vec2{boxW, 210.0f}, panel);
+        auto drawRow = [&](const std::string& label, const std::string& value, int idx, float yOff) {
+            bool focused = (menuSelection_ == idx);
+            Engine::Color col = focused ? Engine::Color{230, 255, 255, 255} : Engine::Color{200, 220, 240, 230};
+            drawTextUnified(label, Engine::Vec2{centerX - boxW * 0.5f + 16.0f, yOff}, 1.0f, col);
+            drawTextUnified(value, Engine::Vec2{centerX + 40.0f, yOff}, 1.0f, col);
+        };
+        drawRow("Player Name", hostPlayerName_, 0, topY + 110.0f);
+        drawRow("Lobby Name", hostConfig_.lobbyName, 1, topY + 140.0f);
+        std::string maskedPass(hostConfig_.password.size(), '*');
+        drawRow("Password", maskedPass.empty() ? "<optional>" : maskedPass, 2, topY + 170.0f);
+        drawRow("Max Players", std::to_string(hostConfig_.maxPlayers), 3, topY + 200.0f);
+        drawRow("Difficulty", activeDifficulty_.name, 4, topY + 230.0f);
+        Engine::Color startCol = (menuSelection_ == 5) ? Engine::Color{200, 255, 200, 255} : Engine::Color{190, 230, 200, 230};
+        drawTextUnified("Start Hosting", Engine::Vec2{centerX - 110.0f, topY + 260.0f}, 1.05f, startCol);
+        std::ostringstream hostIpLine;
+        hostIpLine << "Direct IP: " << hostLocalIp_ << ":" << hostConfig_.port;
+        // place at bottom-right inside the host panel
+        float ipX = centerX + 17.0f;
+        drawTextUnified(hostIpLine.str(), Engine::Vec2{ipX, topY + 278.0f}, 0.9f,
+                        Engine::Color{180, 210, 240, 220});
+        drawTextUnified("Esc to cancel", Engine::Vec2{centerX - 90.0f, topY + 296.0f}, 0.9f,
+                        Engine::Color{180, 200, 220, 220});
+    } else if (menuPage_ == MenuPage::JoinSelect) {
+        Engine::Color c{200, 230, 255, 240};
+        drawTextUnified("Join Multiplayer", Engine::Vec2{centerX - 120.0f, topY + 60.0f}, 1.25f, c);
+        // Player name box (top)
+        render_->drawFilledRect(Engine::Vec2{centerX - 150.0f, topY + 110.0f}, Engine::Vec2{300.0f, 26.0f},
+                                Engine::Color{28, 38, 52, 220});
+        bool nameFocus = editingJoinPlayerName_;
+        Engine::Color nameCol = nameFocus ? Engine::Color{220, 255, 255, 255} : Engine::Color{200, 220, 240, 220};
+        drawTextUnified("Player Name: " + (joinPlayerName_.empty() ? "<enter name>" : joinPlayerName_),
+                        Engine::Vec2{centerX - 140.0f, topY + 114.0f}, 0.95f, nameCol);
+        const char* options[3] = {"Direct Connect", "Server Browser", "Back"};
+        for (int i = 0; i < 3; ++i) {
+            bool focused = (menuSelection_ == i);
+            Engine::Color col = focused ? Engine::Color{230, 255, 255, 255} : Engine::Color{200, 220, 240, 230};
+            render_->drawFilledRect(Engine::Vec2{centerX - 130.0f, topY + 150.0f + i * 38.0f},
+                                    Engine::Vec2{260.0f, 30.0f}, Engine::Color{30, 42, 56, 220});
+            drawTextUnified(options[i], Engine::Vec2{centerX - 110.0f, topY + 154.0f + i * 38.0f}, 1.0f, col);
+        }
+        std::string passMask(joinPassword_.size(), '*');
+        if (passMask.empty()) passMask = "<password>";
+        bool passFocus = editingJoinPassword_;
+        Engine::Color passCol = passFocus ? Engine::Color{220, 255, 255, 255} : Engine::Color{200, 220, 240, 220};
+        render_->drawFilledRect(Engine::Vec2{centerX - 150.0f, topY + 270.0f}, Engine::Vec2{300.0f, 26.0f},
+                                Engine::Color{28, 38, 52, 220});
+        drawTextUnified("Password: " + passMask, Engine::Vec2{centerX - 140.0f, topY + 274.0f}, 0.95f, passCol);
+
+        // Direct connect popup
+        if (directConnectPopup_) {
+            Engine::Color overlay{0, 0, 0, 180};
+            render_->drawFilledRect(Engine::Vec2{0, 0}, Engine::Vec2{static_cast<float>(viewportWidth_), static_cast<float>(viewportHeight_)}, overlay);
+            float pw = 420.0f;
+            float ph = 160.0f;
+            float px = centerX - pw * 0.5f;
+            float py = topY + 120.0f;
+            render_->drawFilledRect(Engine::Vec2{px, py}, Engine::Vec2{pw, ph}, Engine::Color{24, 34, 48, 235});
+            drawTextUnified("Direct Connect", Engine::Vec2{px + 14.0f, py + 10.0f}, 1.05f,
+                            Engine::Color{200, 230, 255, 240});
+            render_->drawFilledRect(Engine::Vec2{px + 14.0f, py + 40.0f}, Engine::Vec2{pw - 28.0f, 26.0f},
+                                    Engine::Color{32, 46, 66, 230});
+            Engine::Color ipCol = editingDirectIp_ ? Engine::Color{220, 255, 255, 255} : Engine::Color{200, 220, 240, 220};
+            drawTextUnified("IP: " + directConnectIp_, Engine::Vec2{px + 20.0f, py + 44.0f}, 0.95f, ipCol);
+            // Buttons
+            float btnW = 140.0f;
+            float btnH = 32.0f;
+            float gapBtns = 20.0f;
+            float btnX = px + pw - (btnW * 2 + gapBtns + 14.0f);
+            float btnY = py + ph - 48.0f;
+            render_->drawFilledRect(Engine::Vec2{btnX, btnY}, Engine::Vec2{btnW, btnH}, Engine::Color{34, 48, 64, 230});
+            render_->drawFilledRect(Engine::Vec2{btnX + btnW + gapBtns, btnY}, Engine::Vec2{btnW, btnH},
+                                    Engine::Color{34, 48, 64, 230});
+            drawTextUnified("Cancel", Engine::Vec2{btnX + 26.0f, btnY + 6.0f}, 0.98f, Engine::Color{210, 220, 230, 230});
+            drawTextUnified("Connect", Engine::Vec2{btnX + btnW + gapBtns + 18.0f, btnY + 6.0f}, 0.98f,
+                            Engine::Color{200, 255, 200, 230});
+        }
+    } else if (menuPage_ == MenuPage::Lobby) {
+        Engine::Color c{200, 230, 255, 240};
+        drawTextUnified("Lobby: " + lobbyCache_.lobbyName, Engine::Vec2{centerX - 150.0f, topY + 50.0f}, 1.2f, c);
+        drawTextUnified("Players (" + std::to_string(lobbyCache_.players.size()) + "/" + std::to_string(lobbyCache_.maxPlayers) + ")",
+                        Engine::Vec2{centerX - 140.0f, topY + 80.0f}, 0.95f, c);
+        // Local hero picker panel (left side)
+        float pickerX = centerX - 400.0f;
+        float pickerY = topY + 100.0f;
+        float pickerW = 180.0f;
+        float pickerH = 30.0f;
+        Engine::Color panel{26, 36, 52, 220};
+        float panelHeight = std::min(260.0f, static_cast<float>(archetypes_.size()) * (pickerH + 6.0f) + 34.0f);
+        render_->drawFilledRect(Engine::Vec2{pickerX - 10.0f, pickerY - 12.0f}, Engine::Vec2{pickerW + 20.0f, panelHeight}, panel);
+        drawTextUnified("Select Hero", Engine::Vec2{pickerX, pickerY - 10.0f}, 0.95f, Engine::Color{200, 230, 255, 235});
+        float optionStartY = pickerY + 10.0f;
+        for (std::size_t i = 0; i < archetypes_.size(); ++i) {
+            float y = optionStartY + static_cast<float>(i) * (pickerH + 6.0f);
+            if (y > pickerY + 200.0f) break;
+            bool selected = archetypes_[i].id == localLobbyHeroId_;
+            Engine::Color bg = selected ? Engine::Color{40, 80, 110, 230} : Engine::Color{32, 48, 64, 210};
+            render_->drawFilledRect(Engine::Vec2{pickerX, y}, Engine::Vec2{pickerW, pickerH}, bg);
+            drawTextUnified(archetypes_[i].name, Engine::Vec2{pickerX + 8.0f, y + 6.0f}, 0.9f,
+                            selected ? Engine::Color{220, 255, 255, 255} : Engine::Color{200, 220, 240, 230});
+        }
+
+        float listY = topY + 110.0f;
+        const float rowH = 26.0f;
+        for (std::size_t i = 0; i < lobbyCache_.players.size(); ++i) {
+            const auto& p = lobbyCache_.players[i];
+            Engine::Color row{28, 40, 54, 220};
+            render_->drawFilledRect(Engine::Vec2{centerX - 190.0f, listY + static_cast<float>(i) * rowH},
+                                    Engine::Vec2{380.0f, rowH - 2.0f}, row);
+            std::ostringstream line;
+            line << (p.isHost ? "[H] " : "") << p.name << " (" << (p.heroId.empty() ? "hero?" : p.heroId) << ") - "
+                 << (p.ready ? "Ready" : "Not Ready");
+            drawTextUnified(line.str(), Engine::Vec2{centerX - 180.0f, listY + static_cast<float>(i) * rowH + 4.0f},
+                            0.95f, Engine::Color{210, 230, 250, 230});
+        }
+        Engine::Color btnColStart = (menuSelection_ == 0) ? Engine::Color{200, 255, 200, 255} : Engine::Color{180, 220, 200, 230};
+        Engine::Color btnColBack = (menuSelection_ == 1) ? Engine::Color{230, 200, 200, 255} : Engine::Color{210, 190, 190, 230};
+        float btnY = topY + 220.0f;
+        Engine::Vec2 startPos{centerX - 190.0f, btnY};
+        Engine::Vec2 leavePos{centerX + 10.0f, btnY};
+        Engine::Vec2 btnSize{180.0f, 32.0f};
+        bool hoverStart = inside(mx, my, startPos.x, startPos.y, btnSize.x, btnSize.y);
+        bool hoverLeave = inside(mx, my, leavePos.x, leavePos.y, btnSize.x, btnSize.y);
+        if (hoverStart) menuSelection_ = 0;
+        if (hoverLeave) menuSelection_ = 1;
+        render_->drawFilledRect(startPos, btnSize, Engine::Color{34, 48, 60, 220});
+        render_->drawFilledRect(leavePos, btnSize, Engine::Color{34, 48, 60, 220});
+        drawTextUnified(isHosting_ ? "Start Match" : "Waiting...", Engine::Vec2{startPos.x + 20.0f, btnY + 4.0f}, 0.98f, btnColStart);
+        drawTextUnified("Leave Lobby", Engine::Vec2{leavePos.x + 30.0f, btnY + 4.0f}, 0.98f, btnColBack);
+    } else if (menuPage_ == MenuPage::ServerBrowser) {
+        Engine::Color c{200, 230, 255, 240};
+        drawTextUnified("Server Browser (placeholder)", Engine::Vec2{centerX - 180.0f, topY + 60.0f}, 1.2f, c);
+        drawTextUnified("No broadcasts yet. Press Enter/Esc to go back.", Engine::Vec2{centerX - 210.0f, topY + 100.0f},
+                        0.95f, Engine::Color{190, 210, 230, 230});
     }
 }
 
@@ -3081,6 +3630,240 @@ void GameRoot::loadMenuPresets() {
     applyArchetypePreset();
 }
 
+void GameRoot::buildNetSession() {
+    if (!netSession_) {
+        netSession_ = std::make_unique<Game::Net::NetSession>();
+    }
+    netSession_->setSnapshotProvider([this]() { return collectNetSnapshot(); });
+    netSession_->setSnapshotConsumer([this](const Game::Net::SnapshotMsg& snap) { applyRemoteSnapshot(snap); });
+}
+
+void GameRoot::connectHost() {
+    buildNetSession();
+    if (!netSession_) return;
+    hostConfig_.maxPlayers = std::clamp(hostConfig_.maxPlayers, 2, 6);
+    hostConfig_.playerName = hostPlayerName_.empty() ? "Host" : hostPlayerName_;
+    bool ok = netSession_->host(hostConfig_);
+    if (ok) {
+        multiplayerEnabled_ = true;
+        isHosting_ = true;
+        localPlayerId_ = netSession_->localPlayerId();
+        lobbyCache_ = netSession_->lobby();
+        Engine::logInfo("Lobby hosted: " + hostConfig_.lobbyName);
+    } else {
+        Engine::logError("Failed to host lobby.");
+    }
+}
+
+void GameRoot::connectDirect() {
+    buildNetSession();
+    if (!netSession_) return;
+    std::ostringstream ip;
+    ip << joinIpSegments_[0] << "." << joinIpSegments_[1] << "." << joinIpSegments_[2] << "." << joinIpSegments_[3];
+    std::string playerName = joinPlayerName_.empty() ? "Player" : joinPlayerName_;
+    bool ok = netSession_->join(ip.str(), joinPort_, joinPassword_, playerName);
+    if (ok) {
+        multiplayerEnabled_ = true;
+        isHosting_ = false;
+        Engine::logInfo("Joining host at " + ip.str() + ":" + std::to_string(joinPort_));
+    } else {
+        Engine::logError("Failed to join host.");
+    }
+}
+
+void GameRoot::connectDirectAddress(const std::string& address) {
+    std::string host = address;
+    uint16_t port = joinPort_;
+    auto pos = address.find(':');
+    if (pos != std::string::npos) {
+        host = address.substr(0, pos);
+        try {
+            port = static_cast<uint16_t>(std::stoi(address.substr(pos + 1)));
+        } catch (...) {
+            port = joinPort_;
+        }
+    }
+    buildNetSession();
+    if (!netSession_) return;
+    std::string playerName = joinPlayerName_.empty() ? "Player" : joinPlayerName_;
+    bool ok = netSession_->join(host, port, joinPassword_, playerName);
+    if (ok) {
+        multiplayerEnabled_ = true;
+        isHosting_ = false;
+        Engine::logInfo("Joining host at " + host + ":" + std::to_string(port));
+    } else {
+        Engine::logError("Failed to join host.");
+    }
+}
+
+void GameRoot::updateNetwork(double dt) {
+    if (!netSession_) return;
+    netSession_->update(dt);
+    lobbyCache_ = netSession_->lobby();
+    localPlayerId_ = netSession_->localPlayerId();
+    // Align difficulty with lobby host
+    for (std::size_t i = 0; i < difficulties_.size(); ++i) {
+        if (difficulties_[i].id == lobbyCache_.difficultyId) {
+            selectedDifficulty_ = static_cast<int>(i);
+            applyDifficultyPreset();
+            break;
+        }
+    }
+    if (multiplayerEnabled_ && netSession_->inMatch() && inMenu_) {
+        inMenu_ = false;
+        applyLocalHeroFromLobby();
+        startNewGame();
+    }
+    // Transition client from Join page into Lobby once welcome/lobby info arrives.
+    if (multiplayerEnabled_ && netSession_->inLobby() && menuPage_ == MenuPage::JoinSelect && netSession_->localPlayerId() != 0) {
+        menuPage_ = MenuPage::Lobby;
+        menuSelection_ = 0;
+    }
+    // Remove stale remote avatars not present in lobby (host) or peers list (client).
+    std::unordered_set<uint32_t> liveIds;
+    for (const auto& p : lobbyCache_.players) liveIds.insert(p.id);
+    for (auto it = remoteEntities_.begin(); it != remoteEntities_.end();) {
+        uint32_t rid = it->first;
+        if (liveIds.find(rid) == liveIds.end()) {
+            registry_.destroy(it->second);
+            remoteStates_.erase(rid);
+            remoteTargets_.erase(rid);
+            it = remoteEntities_.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+std::vector<Game::Net::PlayerNetState> GameRoot::collectNetSnapshot() {
+    std::vector<Game::Net::PlayerNetState> out;
+    Game::Net::PlayerNetState self{};
+    self.id = localPlayerId_ == 0 ? 1 : localPlayerId_;
+    self.heroId = activeArchetype_.id;
+    if (auto* tf = registry_.get<Engine::ECS::Transform>(hero_)) {
+        self.x = tf->position.x;
+        self.y = tf->position.y;
+    }
+    if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
+        self.hp = hp->currentHealth;
+        self.shields = hp->currentShields;
+        self.alive = hp->currentHealth > 0.0f;
+    } else {
+        self.hp = 0.0f;
+        self.alive = false;
+    }
+    self.level = level_;
+    out.push_back(self);
+    for (const auto& [id, state] : remoteStates_) {
+        if (id == self.id) continue;
+        out.push_back(state);
+    }
+    return out;
+}
+
+void GameRoot::applyRemoteSnapshot(const Game::Net::SnapshotMsg& snap) {
+    for (const auto& p : snap.players) {
+        remoteStates_[p.id] = p;
+        if (p.id == localPlayerId_) continue;
+        Engine::ECS::Entity ent = Engine::ECS::kInvalidEntity;
+        auto it = remoteEntities_.find(p.id);
+        if (it != remoteEntities_.end()) {
+            ent = it->second;
+        } else {
+            ent = registry_.create();
+            float size = heroSize_;
+            registry_.emplace<Engine::ECS::Transform>(ent, Engine::Vec2{p.x, p.y});
+            registry_.emplace<Engine::ECS::Velocity>(ent, Engine::Vec2{0.0f, 0.0f});
+            registry_.emplace<Engine::ECS::Renderable>(ent,
+                                                       Engine::ECS::Renderable{Engine::Vec2{size, size},
+                                                                               Engine::Color{120, 210, 255, 220},
+                                                                               Engine::TexturePtr{}});
+            registry_.emplace<Engine::ECS::AABB>(ent, Engine::ECS::AABB{Engine::Vec2{size * 0.5f, size * 0.5f}});
+            registry_.emplace<Engine::ECS::Health>(ent, Engine::ECS::Health{p.hp, std::max(1.0f, p.hp)});
+            registry_.emplace<Engine::ECS::SpriteAnimation>(ent,
+                                                            Engine::ECS::SpriteAnimation{16, 16, 4, 0.14f});
+            remoteEntities_[p.id] = ent;
+        }
+        if (auto* tf = registry_.get<Engine::ECS::Transform>(ent)) {
+            Engine::Vec2 target{p.x, p.y};
+            Engine::Vec2 current = tf->position;
+            Engine::Vec2 delta = target - current;
+            remoteTargets_[p.id] = target;
+            // Smooth toward target over ~80ms; clamp to avoid warp.
+            float smoothTime = 0.08f;
+            Engine::Vec2 vel = (smoothTime > 0.0f) ? delta * (1.0f / smoothTime) : Engine::Vec2{};
+            const float maxSpeed = 900.0f;
+            float magSq = vel.x * vel.x + vel.y * vel.y;
+            if (magSq > maxSpeed * maxSpeed) {
+                float mag = std::sqrt(magSq);
+                float scale = (mag > 0.0001f) ? (maxSpeed / mag) : 0.0f;
+                vel = vel * scale;
+            }
+            if (auto* v = registry_.get<Engine::ECS::Velocity>(ent)) {
+                v->value = vel;
+            }
+            // Snap if very close.
+            if (std::abs(delta.x) < 2.0f && std::abs(delta.y) < 2.0f) {
+                tf->position = target;
+                if (auto* v = registry_.get<Engine::ECS::Velocity>(ent)) v->value = {0.0f, 0.0f};
+            }
+        }
+        if (auto* hp = registry_.get<Engine::ECS::Health>(ent)) {
+            hp->maxHealth = std::max(hp->maxHealth, p.hp);
+            hp->currentHealth = p.hp;
+            hp->maxShields = std::max(hp->maxShields, p.shields);
+            hp->currentShields = p.shields;
+        }
+        // Update appearance based on heroId
+        if (auto* rend = registry_.get<Engine::ECS::Renderable>(ent)) {
+            Engine::TexturePtr tex{};
+            if (textureManager_) {
+                const ArchetypeDef* def = findArchetypeById(p.heroId);
+                std::string texPath = def ? resolveArchetypeTexture(*def) : manifest_.heroTexture;
+                if (!texPath.empty()) tex = loadTextureOptional(texPath);
+                if (def) {
+                    rend->color = def->color;
+                }
+            }
+            if (tex) rend->texture = tex;
+        }
+    }
+}
+
+int GameRoot::currentPlayerCount() const {
+    if (!netSession_) return 1;
+    int players = netSession_->playerCount();
+    return std::max(1, players);
+}
+
+void GameRoot::applyLocalHeroFromLobby() {
+    // Find our lobby entry and set archetype accordingly.
+    uint32_t me = localPlayerId_;
+    for (const auto& p : lobbyCache_.players) {
+        if (p.id == me) {
+            localLobbyHeroId_ = p.heroId.empty() ? localLobbyHeroId_ : p.heroId;
+            break;
+        }
+    }
+    if (!localLobbyHeroId_.empty()) {
+        for (std::size_t i = 0; i < archetypes_.size(); ++i) {
+            if (archetypes_[i].id == localLobbyHeroId_) {
+                selectedArchetype_ = static_cast<int>(i);
+                activeArchetype_ = archetypes_[i];
+                applyArchetypePreset();
+                break;
+            }
+        }
+    }
+}
+
+const GameRoot::ArchetypeDef* GameRoot::findArchetypeById(const std::string& id) const {
+    for (const auto& a : archetypes_) {
+        if (a.id == id) return &a;
+    }
+    return nullptr;
+}
+
 void GameRoot::rebuildWaveSettings() {
     waveSettingsBase_ = waveSettingsDefault_;
     startWaveBase_ = std::max(1, activeDifficulty_.startWave);
@@ -3092,6 +3875,7 @@ void GameRoot::rebuildWaveSettings() {
     waveSettingsBase_.enemySpeed *= speedGrowth;
     int batchIncrease = (startWaveBase_ - 1) / 2;
     waveSettingsBase_.batchSize = std::min(12, waveSettingsBase_.batchSize + batchIncrease);
+    waveBatchBase_ = waveSettingsBase_.batchSize;
     contactDamage_ = waveSettingsBase_.contactDamage;
     if (collisionSystem_) collisionSystem_->setContactDamage(contactDamage_);
 }
@@ -3704,6 +4488,9 @@ void GameRoot::resetRun() {
     Engine::logInfo("Resetting run state.");
     registry_ = {};
     hero_ = Engine::ECS::kInvalidEntity;
+    remoteEntities_.clear();
+    remoteStates_.clear();
+    remoteTargets_.clear();
     kills_ = 0;
     copper_ = 0;
     gold_ = 0;

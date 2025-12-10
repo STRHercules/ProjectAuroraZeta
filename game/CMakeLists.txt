@@ -17,6 +17,7 @@ set(GAME_SOURCES
     systems/ShopSystem.cpp
     meta/ItemDefs.cpp
     meta/SaveManager.cpp
+    net/NetSession.cpp
 )
 
 add_library(zeta_game ${GAME_SOURCES})

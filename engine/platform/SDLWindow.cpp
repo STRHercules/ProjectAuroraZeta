@@ -69,6 +69,11 @@ void SDLWindow::pollEvents(Application& app, InputState& input) {
                         break;
                     case SDLK_BACKSPACE:
                         input.setKeyDown(InputKey::Restart, true);
+                        input.markBackspace();
+                        break;
+                    case SDLK_RETURN:
+                    case SDLK_KP_ENTER:
+                        input.markEnter();
                         break;
                     case SDLK_w:
                         input.setKeyDown(InputKey::Forward, true);
@@ -216,6 +221,9 @@ void SDLWindow::pollEvents(Application& app, InputState& input) {
                 if (evt.button.button == SDL_BUTTON_LEFT) input.setMouseButtonDown(0, false);
                 if (evt.button.button == SDL_BUTTON_MIDDLE) input.setMouseButtonDown(1, false);
                 if (evt.button.button == SDL_BUTTON_RIGHT) input.setMouseButtonDown(2, false);
+                break;
+            case SDL_TEXTINPUT:
+                input.addText(evt.text.text);
                 break;
             default:
                 break;

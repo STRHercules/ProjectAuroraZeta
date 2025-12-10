@@ -43,6 +43,7 @@ public:
         bossHpMul_ = hpMul;
         bossSpeedMul_ = speedMul;
     }
+    void setPlayerCount(int players) { playerCount_ = std::max(1, players); }
     void setEnemyDefinitions(const std::vector<EnemyDefinition>* defs) { enemyDefs_ = defs; }
     void setUpgrades(const Engine::Gameplay::UpgradeState& upgrades) { upgrades_ = upgrades; }
     void setBaseArmor(const Engine::Gameplay::BaseStats& base) { baseStats_ = base; }
@@ -59,6 +60,7 @@ private:
     int bossWave_{20};
     float bossHpMul_{12.0f};
     float bossSpeedMul_{0.8f};
+    int playerCount_{1};
     const std::vector<EnemyDefinition>* enemyDefs_{nullptr};
     Engine::Gameplay::UpgradeState upgrades_{};
     Engine::Gameplay::BaseStats baseStats_{};

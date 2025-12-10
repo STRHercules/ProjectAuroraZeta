@@ -43,6 +43,13 @@ set(ENGINE_SOURCES
     input/InputBinding.h
     input/InputLoader.h
     input/InputLoader.cpp
+    net/NetAddress.h
+    net/NetPacket.h
+    net/NetSerializer.h
+    net/UdpSocket.h
+    net/UdpSocket.cpp
+    net/NetTransport.h
+    net/NetTransport.cpp
 )
 
 add_library(engine ${ENGINE_SOURCES})

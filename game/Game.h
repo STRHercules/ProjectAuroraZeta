@@ -20,6 +20,9 @@
 #include "../engine/gameplay/Combat.h"
 #include <random>
 #include <fstream>
+#include <array>
+#include <deque>
+#include <unordered_map>
 #include <nlohmann/json.hpp>
 #include "../engine/input/ActionMapper.h"
 #include "../engine/input/ActionState.h"
@@ -45,6 +48,10 @@
 #include "EnemyDefinition.h"
 #include "../engine/gameplay/FogOfWar.h"
 #include "../engine/render/FogOfWarRenderer.h"
+#include "net/NetSession.h"
+#include "net/LobbyState.h"
+#include "net/SessionConfig.h"
+#include "net/NetMessages.h"
 
 namespace Game {
 
@@ -79,6 +86,18 @@ private:
     bool sellItemFromInventory(std::size_t idx, int& copperOut);
     void clampInventorySelection();
     void loadMenuPresets();
+    void reviveLocalPlayer();
+    void buildNetSession();
+    void connectHost();
+    void connectDirect();
+    void connectDirectAddress(const std::string& address);
+    void updateNetwork(double dt);
+    void detectLocalIp();
+    std::vector<Game::Net::PlayerNetState> collectNetSnapshot();
+    void applyRemoteSnapshot(const Game::Net::SnapshotMsg& snap);
+    void leaveNetworkSession(bool isHostQuit);
+    void applyLocalHeroFromLobby();
+    int currentPlayerCount() const;
     void applyDifficultyPreset();
     void applyArchetypePreset();
     void loadProgress();
@@ -99,7 +118,7 @@ private:
     void rebuildFogLayer();
     void updateFogVision();
 
-    enum class MenuPage { Main, Stats, Options, CharacterSelect };
+    enum class MenuPage { Main, Stats, Options, CharacterSelect, HostConfig, JoinSelect, Lobby, ServerBrowser };
     enum class MovementMode { Modern, RTS };
     enum class LevelChoiceType { Damage, Health, Speed };
     struct LevelChoice {
@@ -128,6 +147,7 @@ private:
         int startWave{1};
     };
     std::string resolveArchetypeTexture(const ArchetypeDef& def) const;
+    const ArchetypeDef* findArchetypeById(const std::string& id) const;
     struct AbilitySlot {
         std::string name;
         std::string description;
@@ -308,6 +328,7 @@ private:
     int wavesPerRoundBase_{2};
     int wavesPerRoundGrowthInterval_{2};
     int spawnBatchRoundInterval_{5};
+    int waveBatchBase_{2};
     int enemiesAlive_{0};
     Game::WaveSettings waveSettingsDefault_{};
     Game::WaveSettings waveSettingsBase_{};
@@ -347,10 +368,40 @@ private:
     int totalRuns_{0};
     int bestWave_{0};
     int totalKillsAccum_{0};
+    // Multiplayer state
+    std::unique_ptr<Game::Net::NetSession> netSession_;
+    Game::Net::SessionConfig hostConfig_{};
+    Game::Net::LobbyState lobbyCache_{};
+    bool multiplayerEnabled_{false};
+    bool isHosting_{false};
+    uint32_t localPlayerId_{0};
+    int hostLobbyNameIndex_{0};
+    std::string hostLocalIp_{"0.0.0.0"};
+    std::unordered_map<uint32_t, Engine::ECS::Entity> remoteEntities_;
+    std::unordered_map<uint32_t, Game::Net::PlayerNetState> remoteStates_;
+    std::unordered_map<uint32_t, Engine::Vec2> remoteTargets_;
+    std::vector<uint32_t> remoteToRemove_;
+    std::array<int, 4> joinIpSegments_{127, 0, 0, 1};
+    uint16_t joinPort_{37015};
+    int joinIpCursor_{3};
+    bool directConnectPopup_{false};
+    bool editingDirectIp_{false};
+    std::string directConnectIp_{"127.0.0.1"};
+    // Text input state
+    bool editingLobbyName_{false};
+    bool editingLobbyPassword_{false};
+    bool editingJoinPassword_{false};
+    bool editingHostPlayerName_{false};
+    bool editingJoinPlayerName_{false};
+    std::string hostPlayerName_{"Host"};
+    std::string joinPlayerName_{"Player"};
+    std::string joinPassword_{};
+    std::string localLobbyHeroId_{};
     // Persistence
     std::string savePath_{"saves/profile.dat"};
     Game::SaveData saveData_{};
     bool runStarted_{false};
+    bool reviveNextRound_{false};
     // Level-up choice overlay
     bool levelChoiceOpen_{false};
     LevelChoice levelChoices_[3];

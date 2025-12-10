@@ -38,6 +38,14 @@ public:
     void addScroll(int delta) { scrollDelta_ += delta; }
     int scrollDelta() const { return scrollDelta_; }
 
+    // Text input helpers (cleared each frame via nextFrame).
+    void addText(const char* text) { textInput_ += text; }
+    const std::string& textInput() const { return textInput_; }
+    bool backspacePressed() const { return backspaceEdge_; }
+    bool enterPressed() const { return enterEdge_; }
+    void markBackspace() { backspaceEdge_ = true; }
+    void markEnter() { enterEdge_ = true; }
+
     void setMousePosition(int x, int y) {
         mouseX_ = x;
         mouseY_ = y;
@@ -57,11 +65,19 @@ public:
         return false;
     }
 
-    void nextFrame() { scrollDelta_ = 0; }
+    void nextFrame() {
+        scrollDelta_ = 0;
+        textInput_.clear();
+        backspaceEdge_ = false;
+        enterEdge_ = false;
+    }
 
 private:
     std::array<bool, static_cast<int>(InputKey::Count)> keys_{};
     int scrollDelta_{0};
+    std::string textInput_;
+    bool backspaceEdge_{false};
+    bool enterEdge_{false};
     int mouseX_{0};
     int mouseY_{0};
     std::array<bool, 3> mouseButtons_{};  // 0: left, 1: middle, 2: right

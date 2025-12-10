@@ -1,5 +1,6 @@
 #include "WaveSystem.h"
 
+#include <algorithm>
 #include <cmath>
 
 #include "../../engine/ecs/components/Transform.h"
@@ -61,7 +62,8 @@ bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
     std::uniform_real_distribution<float> angleDist(0.0f, 6.28318f);
     std::uniform_real_distribution<float> radiusDist(240.0f, 320.0f);
 
-    for (int i = 0; i < settings_.batchSize; ++i) {
+    int batchCount = std::clamp(settings_.batchSize * std::max(1, playerCount_), 1, 128);
+    for (int i = 0; i < batchCount; ++i) {
         float ang = angleDist(rng_);
         float rad = radiusDist(rng_);
         Engine::Vec2 pos{center.x + std::cos(ang) * rad, center.y + std::sin(ang) * rad};
@@ -170,46 +172,50 @@ bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
     if (wave == bossWave_) {
         float ang = angleDist(rng_);
         float rad = 260.0f;
-        Engine::Vec2 pos{center.x + std::cos(ang) * rad, center.y + std::sin(ang) * rad};
-        auto e = registry.create();
-        registry.emplace<Engine::ECS::Transform>(e, pos);
-        registry.emplace<Engine::ECS::Velocity>(e, Engine::Vec2{0.0f, 0.0f});
-        registry.emplace<Game::Facing>(e, Game::Facing{1});
-        const EnemyDefinition* def = pickEnemyDef();
-        float sizeMul = def ? def->sizeMultiplier * 1.6f : 2.0f;
-        float size = 34.0f * sizeMul;
-        float hpVal = settings_.enemyHp * bossHpMul_ * (def ? def->hpMultiplier : 1.0f);
-        float speedVal = settings_.enemySpeed * bossSpeedMul_ * (def ? def->speedMultiplier : 1.0f);
-        if (speedVal < 10.0f) speedVal = std::max(speedVal, settings_.enemySpeed * 0.6f);
-        Engine::TexturePtr tex = def ? def->texture : Engine::TexturePtr{};
-        if (!tex && enemyDefs_) {
-            for (const auto& d : *enemyDefs_) {
-                if (d.texture) { tex = d.texture; break; }
+        int bosses = std::max(1, playerCount_);
+        for (int i = 0; i < bosses; ++i) {
+            float offsetAng = ang + static_cast<float>(i) * (6.28318f / static_cast<float>(bosses));
+            Engine::Vec2 pos{center.x + std::cos(offsetAng) * rad, center.y + std::sin(offsetAng) * rad};
+            auto e = registry.create();
+            registry.emplace<Engine::ECS::Transform>(e, pos);
+            registry.emplace<Engine::ECS::Velocity>(e, Engine::Vec2{0.0f, 0.0f});
+            registry.emplace<Game::Facing>(e, Game::Facing{1});
+            const EnemyDefinition* def = pickEnemyDef();
+            float sizeMul = def ? def->sizeMultiplier * 1.6f : 2.0f;
+            float size = 34.0f * sizeMul;
+            float hpVal = settings_.enemyHp * bossHpMul_ * (def ? def->hpMultiplier : 1.0f);
+            float speedVal = settings_.enemySpeed * bossSpeedMul_ * (def ? def->speedMultiplier : 1.0f);
+            if (speedVal < 10.0f) speedVal = std::max(speedVal, settings_.enemySpeed * 0.6f);
+            Engine::TexturePtr tex = def ? def->texture : Engine::TexturePtr{};
+            if (!tex && enemyDefs_) {
+                for (const auto& d : *enemyDefs_) {
+                    if (d.texture) { tex = d.texture; break; }
+                }
             }
-        }
-        registry.emplace<Engine::ECS::Renderable>(e, Engine::ECS::Renderable{Engine::Vec2{size, size},
-                                                                              Engine::Color{200, 80, 200, 255},
-                                                                              tex});
-        registry.emplace<Engine::ECS::AABB>(e, Engine::ECS::AABB{Engine::Vec2{size * 0.5f, size * 0.5f}});
-        registry.emplace<Engine::ECS::Health>(e, Engine::ECS::Health{hpVal, hpVal});
-        if (auto* hp = registry.get<Engine::ECS::Health>(e)) {
-            Engine::Gameplay::applyUpgradesToUnit(*hp, baseStats_, upgrades_, false);
-            hp->tags = {Engine::Gameplay::Tag::Biological, Engine::Gameplay::Tag::Armored};
-            hp->healthArmor = settings_.enemyHealthArmor + 1.5f;
-            hp->shieldArmor = settings_.enemyShieldArmor + 1.0f;
-            hp->maxShields = settings_.enemyShields * 1.5f;
-            hp->currentShields = hp->maxShields;
-            hp->shieldRegenRate = settings_.enemyShieldRegen * 1.1f;
-            hp->regenDelay = settings_.enemyRegenDelay;
-        }
-        registry.emplace<Engine::ECS::EnemyTag>(e, Engine::ECS::EnemyTag{});
-        registry.emplace<Engine::ECS::BossTag>(e, Engine::ECS::BossTag{});
-        registry.emplace<Game::EnemyAttributes>(e, Game::EnemyAttributes{speedVal});
-        if (tex) {
-            registry.emplace<Engine::ECS::SpriteAnimation>(e, Engine::ECS::SpriteAnimation{def->frameWidth,
-                                                                                           def->frameHeight,
-                                                                                           4,
-                                                                                           def->frameDuration});
+            registry.emplace<Engine::ECS::Renderable>(e, Engine::ECS::Renderable{Engine::Vec2{size, size},
+                                                                                  Engine::Color{200, 80, 200, 255},
+                                                                                  tex});
+            registry.emplace<Engine::ECS::AABB>(e, Engine::ECS::AABB{Engine::Vec2{size * 0.5f, size * 0.5f}});
+            registry.emplace<Engine::ECS::Health>(e, Engine::ECS::Health{hpVal, hpVal});
+            if (auto* hp = registry.get<Engine::ECS::Health>(e)) {
+                Engine::Gameplay::applyUpgradesToUnit(*hp, baseStats_, upgrades_, false);
+                hp->tags = {Engine::Gameplay::Tag::Biological, Engine::Gameplay::Tag::Armored};
+                hp->healthArmor = settings_.enemyHealthArmor + 1.5f;
+                hp->shieldArmor = settings_.enemyShieldArmor + 1.0f;
+                hp->maxShields = settings_.enemyShields * 1.5f;
+                hp->currentShields = hp->maxShields;
+                hp->shieldRegenRate = settings_.enemyShieldRegen * 1.1f;
+                hp->regenDelay = settings_.enemyRegenDelay;
+            }
+            registry.emplace<Engine::ECS::EnemyTag>(e, Engine::ECS::EnemyTag{});
+            registry.emplace<Engine::ECS::BossTag>(e, Engine::ECS::BossTag{});
+            registry.emplace<Game::EnemyAttributes>(e, Game::EnemyAttributes{speedVal});
+            if (tex) {
+                registry.emplace<Engine::ECS::SpriteAnimation>(e, Engine::ECS::SpriteAnimation{def->frameWidth,
+                                                                                               def->frameHeight,
+                                                                                               4,
+                                                                                               def->frameDuration});
+            }
         }
     }
 
