@@ -1,3 +1,19 @@
+# Increase Sprite Size
+
+# Procedurally Generated Maps
+* Obstacles
+    * Trees
+    * Rocks
+    * Cliffs
+    * Lakes
+    * Holes
+
+# Static Maps
+* Maps designed with Tiled
+
+# Android Port
+* According to Google, Android supports Raw C++ using SDL.
+
 # Discord Rich Presence
 * Integrate Discord SDK to achieve Rich Discord Presence when playing Zeta
     * Rich Presence should display Character, Round, Total Kills, Time Elapsed
