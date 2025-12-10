@@ -2,32 +2,6 @@
 * Integrate Discord SDK to achieve Rich Discord Presence when playing Zeta
     * Rich Presence should display Character, Round, Total Kills, Time Elapsed
 
-# Menu Flow
-* Main Menu:
-    * New Game
-        * Enters Char/Difficulty Select
-    * Host
-        * Opens Host Window
-            * Host Window will have numerous fields;
-                * Lobby Name
-                * Optional Password Protection
-                * Max Player Count
-                * Difficulty Selector
-            * Host Window will output the player's external IP to give to friends
-            * Host Window will lead to the Lobby Page
-                * Lobby Window
-                    * Lobby Window will be where players can select their characters before the game begins.
-                    * Players will be able to chat with eachother in the Lobby Window
-    * Join
-        * Opens box to input IP Address and optional Password
-            * If a connection is successful, proceed to Lobby Window for that match.
-    * Stats
-        * Does what it already does
-    * Options
-        * Does what it already does
-    * Quit
-        * Does what it already does
-
 # Gameplay
 * Lives
     * When playing by yourself, the player will have 2 lives by default.
