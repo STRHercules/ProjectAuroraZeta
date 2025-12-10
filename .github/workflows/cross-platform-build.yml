@@ -1,0 +1,103 @@
+name: Cross-Platform Builds
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake pkg-config libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev
+
+      - name: Install dependencies (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew update
+          brew install cmake pkg-config sdl2 sdl2_image sdl2_ttf
+
+      - name: Install dependencies (Windows via vcpkg)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          git clone https://github.com/microsoft/vcpkg $env:VCPKG_INSTALLATION_ROOT
+          & "$env:VCPKG_INSTALLATION_ROOT\bootstrap-vcpkg.bat" -disableMetrics
+          $triplet = "x64-windows"
+          & "$env:VCPKG_INSTALLATION_ROOT\vcpkg.exe" install sdl2 sdl2-image sdl2-ttf --triplet $triplet
+
+      - name: Configure (CMake)
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            cmake -S . -B build `
+              -DCMAKE_BUILD_TYPE=Release `
+              -DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake `
+              -DVCPKG_TARGET_TRIPLET=x64-windows `
+              -A x64
+          else
+            cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          fi
+        shell: bash
+
+      - name: Build
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            cmake --build build --config Release --parallel
+          else
+            cmake --build build --config Release --parallel
+          fi
+        shell: bash
+
+      - name: Package artifact (Linux/macOS)
+        if: matrix.os != 'windows-latest'
+        run: |
+          set -e
+          OUT_DIR="dist/${{ matrix.os }}"
+          mkdir -p "$OUT_DIR"
+          # Copy the built binary (zeta)
+          BIN_PATH=$(find build -maxdepth 3 -type f -name zeta | head -n 1)
+          cp "$BIN_PATH" "$OUT_DIR/"
+          chmod +x "$OUT_DIR/zeta"
+          # Bundle game content
+          cp -R data "$OUT_DIR/data"
+          cp -R assets "$OUT_DIR/assets"
+        shell: bash
+
+      - name: Package artifact (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $OutDir = "dist/windows"
+          New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
+
+          $bin = Get-ChildItem -Recurse -File -Filter "zeta.exe" -Path build | Select-Object -First 1
+          Copy-Item $bin.FullName $OutDir\zeta.exe
+
+          # Copy required SDL runtime DLLs from vcpkg
+          $dllSource = Join-Path $env:VCPKG_INSTALLATION_ROOT "installed/x64-windows/bin"
+          Copy-Item "$dllSource/*.dll" $OutDir -Force
+
+          Copy-Item data $OutDir/data -Recurse
+          Copy-Item assets $OutDir/assets -Recurse
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: zeta-${{ matrix.os }}
+          path: |
+            dist/${{ matrix.os }}
+          if-no-files-found: error
