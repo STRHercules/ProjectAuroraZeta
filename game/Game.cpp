@@ -3740,12 +3740,16 @@ void GameRoot::updateNetwork(double dt) {
     netSession_->update(dt);
     lobbyCache_ = netSession_->lobby();
     localPlayerId_ = netSession_->localPlayerId();
-    // Align difficulty with lobby host
-    for (std::size_t i = 0; i < difficulties_.size(); ++i) {
-        if (difficulties_[i].id == lobbyCache_.difficultyId) {
-            selectedDifficulty_ = static_cast<int>(i);
-            applyDifficultyPreset();
-            break;
+    // Align difficulty with lobby host only when we're actually in a multiplayer lobby.
+    // Without this guard, the local menu would snap back to the lobby default ("normal")
+    // even while browsing Solo/Host setup screens before a session exists.
+    if (multiplayerEnabled_ && netSession_->inLobby()) {
+        for (std::size_t i = 0; i < difficulties_.size(); ++i) {
+            if (difficulties_[i].id == lobbyCache_.difficultyId) {
+                selectedDifficulty_ = static_cast<int>(i);
+                applyDifficultyPreset();
+                break;
+            }
         }
     }
     if (multiplayerEnabled_ && netSession_->inMatch() && inMenu_) {
