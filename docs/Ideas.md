@@ -37,6 +37,7 @@
         * Players will gain the ability to extend their maximum lives.
     * Playing with 2 or more players, each player starts with 1 life by default.
         * Resurrecting players requires defeating bosses and getting and then using Resurrection Tomes.
+            * One resurrection tome drops every other boss death
     * Some Characters may grant extra or a defecit of lives.
     * When all players have exhausted all lives, the game ends.
 
