@@ -8,57 +8,6 @@ The current build includes:
 - Basic hero kits, abilities, and data-driven tuning files.
 - SDL2 rendering/input, bitmap text, ECS, and networking scaffold.
 
-## Building on Linux for Linux
-```bash
-# Requisites
-sudo apt install -y build-essential cmake libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev
-
-# cd to the root of the repo
-# Build the Project
-cmake -S . -B build
-cmake --build build
-
-# Run Zeta
-./build/zeta
-```
-
-## Building on Linux For Windows
-
-```bash
-# Make sure we have the requisites
-sudo apt install -y build-essential cmake libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev mingw-w64 zip
-
-# Create and navigate to the right folder
-mkdir -p ~/winlibs/sdl
-cd ~/winlibs/sdl
-
-# Grab SDL2 base
-wget https://www.libsdl.org/release/SDL2-devel-2.30.9-mingw.zip
-
-# Grab SDL2_ttf
-wget https://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-devel-2.22.0-mingw.zip
-
-# Grab SDL2_image
-wget https://www.libsdl.org/projects/SDL_image/release/SDL2_image-devel-2.8.2-mingw.zip
-
-# Extract the .zips
-unzip SDL2-devel-2.30.9-mingw.zip
-unzip SDL2_ttf-devel-2.22.0-mingw.zip
-unzip SDL2_image-devel-2.8.2-mingw.zip
-
-# Navigate back to the root directory of the repo
-# This will vary depending on your setup
-# Execute the Windows Build
-./scripts/build-win.sh
-
-# Package the Win64 Build and everything needed to run on Windows into a .zip
-./scripts/package-win.sh
-
-# Build & Package AIO
-./scripts/build-win.sh && ./scripts/package-win.sh
-```
-
-The distributable zip is written to `dist/windows/zeta-win64.zip` and contains `zeta.exe`, required SDL DLLs, data, and a `start.bat` launcher.
 
 ## Controls & Hotkeys (defaults)
 Loaded from `data/input_bindings.json`; fully remappable via file override.
@@ -130,3 +79,55 @@ Loaded from `data/input_bindings.json`; fully remappable via file override.
 3) Use hotkeys above; open shop during intermission; survive as many waves as possible.
 
 For deeper design notes, see `docs/GAME_SPEC.md` and `docs/Gameplay_Loop.md`.***
+
+## Building on Linux for Linux
+```bash
+# Requisites
+sudo apt install -y build-essential cmake libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev
+
+# cd to the root of the repo
+# Build the Project
+cmake -S . -B build
+cmake --build build
+
+# Run Zeta
+./build/zeta
+```
+
+## Building on Linux For Windows
+
+```bash
+# Make sure we have the requisites
+sudo apt install -y build-essential cmake libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev mingw-w64 zip
+
+# Create and navigate to the right folder
+mkdir -p ~/winlibs/sdl
+cd ~/winlibs/sdl
+
+# Grab SDL2 base
+wget https://www.libsdl.org/release/SDL2-devel-2.30.9-mingw.zip
+
+# Grab SDL2_ttf
+wget https://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-devel-2.22.0-mingw.zip
+
+# Grab SDL2_image
+wget https://www.libsdl.org/projects/SDL_image/release/SDL2_image-devel-2.8.2-mingw.zip
+
+# Extract the .zips
+unzip SDL2-devel-2.30.9-mingw.zip
+unzip SDL2_ttf-devel-2.22.0-mingw.zip
+unzip SDL2_image-devel-2.8.2-mingw.zip
+
+# Navigate back to the root directory of the repo
+# This will vary depending on your setup
+# Execute the Windows Build
+./scripts/build-win.sh
+
+# Package the Win64 Build and everything needed to run on Windows into a .zip
+./scripts/package-win.sh
+
+# Build & Package AIO
+./scripts/build-win.sh && ./scripts/package-win.sh
+```
+
+The distributable zip is written to `dist/windows/zeta-win64.zip` and contains `zeta.exe`, required SDL DLLs, data, and a `start.bat` launcher.
