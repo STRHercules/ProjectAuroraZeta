@@ -7,6 +7,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/zeta_game.dir/meta/ItemDefs.cpp.obj.d"
   "CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.obj"
   "CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.obj.d"
+  "CMakeFiles/zeta_game.dir/net/NetSession.cpp.obj"
+  "CMakeFiles/zeta_game.dir/net/NetSession.cpp.obj.d"
   "CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.obj"
   "CMakeFiles/zeta_game.dir/render/RenderSystem.cpp.obj.d"
   "CMakeFiles/zeta_game.dir/systems/AnimationSystem.cpp.obj"

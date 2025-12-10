@@ -5,8 +5,8 @@
 #include <cstring>
 
 #ifdef _WIN32
-#    include <WinSock2.h>
-#    include <Ws2tcpip.h>
+#    include <winsock2.h>
+#    include <ws2tcpip.h>
 #else
 #    include <arpa/inet.h>
 #    include <fcntl.h>

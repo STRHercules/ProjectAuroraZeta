@@ -346,6 +346,54 @@ input/InputLoader.cpp.s:
 	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/input/InputLoader.cpp.s
 .PHONY : input/InputLoader.cpp.s
 
+net/NetTransport.obj: net/NetTransport.cpp.obj
+.PHONY : net/NetTransport.obj
+
+# target to build an object file
+net/NetTransport.cpp.obj:
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/net/NetTransport.cpp.obj
+.PHONY : net/NetTransport.cpp.obj
+
+net/NetTransport.i: net/NetTransport.cpp.i
+.PHONY : net/NetTransport.i
+
+# target to preprocess a source file
+net/NetTransport.cpp.i:
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/net/NetTransport.cpp.i
+.PHONY : net/NetTransport.cpp.i
+
+net/NetTransport.s: net/NetTransport.cpp.s
+.PHONY : net/NetTransport.s
+
+# target to generate assembly for a file
+net/NetTransport.cpp.s:
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/net/NetTransport.cpp.s
+.PHONY : net/NetTransport.cpp.s
+
+net/UdpSocket.obj: net/UdpSocket.cpp.obj
+.PHONY : net/UdpSocket.obj
+
+# target to build an object file
+net/UdpSocket.cpp.obj:
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/net/UdpSocket.cpp.obj
+.PHONY : net/UdpSocket.cpp.obj
+
+net/UdpSocket.i: net/UdpSocket.cpp.i
+.PHONY : net/UdpSocket.i
+
+# target to preprocess a source file
+net/UdpSocket.cpp.i:
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/net/UdpSocket.cpp.i
+.PHONY : net/UdpSocket.cpp.i
+
+net/UdpSocket.s: net/UdpSocket.cpp.s
+.PHONY : net/UdpSocket.s
+
+# target to generate assembly for a file
+net/UdpSocket.cpp.s:
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f engine/CMakeFiles/engine.dir/build.make engine/CMakeFiles/engine.dir/net/UdpSocket.cpp.s
+.PHONY : net/UdpSocket.cpp.s
+
 platform/NullWindow.obj: platform/NullWindow.cpp.obj
 .PHONY : platform/NullWindow.obj
 
@@ -526,6 +574,12 @@ help:
 	@echo "... input/InputLoader.obj"
 	@echo "... input/InputLoader.i"
 	@echo "... input/InputLoader.s"
+	@echo "... net/NetTransport.obj"
+	@echo "... net/NetTransport.i"
+	@echo "... net/NetTransport.s"
+	@echo "... net/UdpSocket.obj"
+	@echo "... net/UdpSocket.i"
+	@echo "... net/UdpSocket.s"
 	@echo "... platform/NullWindow.obj"
 	@echo "... platform/NullWindow.i"
 	@echo "... platform/NullWindow.s"

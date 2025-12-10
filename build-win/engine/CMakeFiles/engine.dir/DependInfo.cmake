@@ -17,6 +17,8 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/gameplay/FogOfWar.cpp" "engine/CMakeFiles/engine.dir/gameplay/FogOfWar.cpp.obj" "gcc" "engine/CMakeFiles/engine.dir/gameplay/FogOfWar.cpp.obj.d"
   "/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/ActionMapper.cpp" "engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.obj" "gcc" "engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.obj.d"
   "/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/InputLoader.cpp" "engine/CMakeFiles/engine.dir/input/InputLoader.cpp.obj" "gcc" "engine/CMakeFiles/engine.dir/input/InputLoader.cpp.obj.d"
+  "/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/net/NetTransport.cpp" "engine/CMakeFiles/engine.dir/net/NetTransport.cpp.obj" "gcc" "engine/CMakeFiles/engine.dir/net/NetTransport.cpp.obj.d"
+  "/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/net/UdpSocket.cpp" "engine/CMakeFiles/engine.dir/net/UdpSocket.cpp.obj" "gcc" "engine/CMakeFiles/engine.dir/net/UdpSocket.cpp.obj.d"
   "/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/platform/NullWindow.cpp" "engine/CMakeFiles/engine.dir/platform/NullWindow.cpp.obj" "gcc" "engine/CMakeFiles/engine.dir/platform/NullWindow.cpp.obj.d"
   "/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLRenderDevice.cpp" "engine/CMakeFiles/engine.dir/platform/SDLRenderDevice.cpp.obj" "gcc" "engine/CMakeFiles/engine.dir/platform/SDLRenderDevice.cpp.obj.d"
   "/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLTexture.cpp" "engine/CMakeFiles/engine.dir/platform/SDLTexture.cpp.obj" "gcc" "engine/CMakeFiles/engine.dir/platform/SDLTexture.cpp.obj.d"

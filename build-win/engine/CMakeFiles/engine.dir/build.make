@@ -294,6 +294,36 @@ engine/CMakeFiles/engine.dir/input/InputLoader.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/engine.dir/input/InputLoader.cpp.s"
 	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/InputLoader.cpp -o CMakeFiles/engine.dir/input/InputLoader.cpp.s
 
+engine/CMakeFiles/engine.dir/net/UdpSocket.cpp.obj: engine/CMakeFiles/engine.dir/flags.make
+engine/CMakeFiles/engine.dir/net/UdpSocket.cpp.obj: engine/CMakeFiles/engine.dir/includes_CXX.rsp
+engine/CMakeFiles/engine.dir/net/UdpSocket.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/net/UdpSocket.cpp
+engine/CMakeFiles/engine.dir/net/UdpSocket.cpp.obj: engine/CMakeFiles/engine.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object engine/CMakeFiles/engine.dir/net/UdpSocket.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/net/UdpSocket.cpp.obj -MF CMakeFiles/engine.dir/net/UdpSocket.cpp.obj.d -o CMakeFiles/engine.dir/net/UdpSocket.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/net/UdpSocket.cpp
+
+engine/CMakeFiles/engine.dir/net/UdpSocket.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/engine.dir/net/UdpSocket.cpp.i"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/net/UdpSocket.cpp > CMakeFiles/engine.dir/net/UdpSocket.cpp.i
+
+engine/CMakeFiles/engine.dir/net/UdpSocket.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/engine.dir/net/UdpSocket.cpp.s"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/net/UdpSocket.cpp -o CMakeFiles/engine.dir/net/UdpSocket.cpp.s
+
+engine/CMakeFiles/engine.dir/net/NetTransport.cpp.obj: engine/CMakeFiles/engine.dir/flags.make
+engine/CMakeFiles/engine.dir/net/NetTransport.cpp.obj: engine/CMakeFiles/engine.dir/includes_CXX.rsp
+engine/CMakeFiles/engine.dir/net/NetTransport.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/net/NetTransport.cpp
+engine/CMakeFiles/engine.dir/net/NetTransport.cpp.obj: engine/CMakeFiles/engine.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object engine/CMakeFiles/engine.dir/net/NetTransport.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT engine/CMakeFiles/engine.dir/net/NetTransport.cpp.obj -MF CMakeFiles/engine.dir/net/NetTransport.cpp.obj.d -o CMakeFiles/engine.dir/net/NetTransport.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/net/NetTransport.cpp
+
+engine/CMakeFiles/engine.dir/net/NetTransport.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/engine.dir/net/NetTransport.cpp.i"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/net/NetTransport.cpp > CMakeFiles/engine.dir/net/NetTransport.cpp.i
+
+engine/CMakeFiles/engine.dir/net/NetTransport.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/engine.dir/net/NetTransport.cpp.s"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/net/NetTransport.cpp -o CMakeFiles/engine.dir/net/NetTransport.cpp.s
+
 # Object files for target engine
 engine_OBJECTS = \
 "CMakeFiles/engine.dir/core/Application.cpp.obj" \
@@ -310,7 +340,9 @@ engine_OBJECTS = \
 "CMakeFiles/engine.dir/render/FogOfWarRenderer.cpp.obj" \
 "CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj" \
 "CMakeFiles/engine.dir/input/ActionMapper.cpp.obj" \
-"CMakeFiles/engine.dir/input/InputLoader.cpp.obj"
+"CMakeFiles/engine.dir/input/InputLoader.cpp.obj" \
+"CMakeFiles/engine.dir/net/UdpSocket.cpp.obj" \
+"CMakeFiles/engine.dir/net/NetTransport.cpp.obj"
 
 # External object files for target engine
 engine_EXTERNAL_OBJECTS =
@@ -330,9 +362,11 @@ engine/libengine.a: engine/CMakeFiles/engine.dir/render/FogOfWarRenderer.cpp.obj
 engine/libengine.a: engine/CMakeFiles/engine.dir/render/BitmapTextRenderer.cpp.obj
 engine/libengine.a: engine/CMakeFiles/engine.dir/input/ActionMapper.cpp.obj
 engine/libengine.a: engine/CMakeFiles/engine.dir/input/InputLoader.cpp.obj
+engine/libengine.a: engine/CMakeFiles/engine.dir/net/UdpSocket.cpp.obj
+engine/libengine.a: engine/CMakeFiles/engine.dir/net/NetTransport.cpp.obj
 engine/libengine.a: engine/CMakeFiles/engine.dir/build.make
 engine/libengine.a: engine/CMakeFiles/engine.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Linking CXX static library libengine.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Linking CXX static library libengine.a"
 	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && $(CMAKE_COMMAND) -P CMakeFiles/engine.dir/cmake_clean_target.cmake
 	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/engine && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/engine.dir/link.txt --verbose=$(VERBOSE)
 

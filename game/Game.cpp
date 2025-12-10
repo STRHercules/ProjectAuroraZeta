@@ -11,9 +11,14 @@
 #include <optional>
 #include <array>
 #include <unordered_set>
-#include <ifaddrs.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#ifdef _WIN32
+#    include <winsock2.h>
+#    include <ws2tcpip.h>
+#else
+#    include <ifaddrs.h>
+#    include <netinet/in.h>
+#    include <arpa/inet.h>
+#endif
 
 #include "../engine/core/Application.h"
 #include "../engine/core/Logger.h"
@@ -2289,6 +2294,36 @@ void GameRoot::leaveNetworkSession(bool isHostQuit) {
 
 void GameRoot::detectLocalIp() {
     hostLocalIp_ = "0.0.0.0";
+#ifdef _WIN32
+    WSADATA wsaData{};
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+        hostLocalIp_ = "127.0.0.1";
+        return;
+    }
+
+    char hostname[256];
+    if (gethostname(hostname, sizeof(hostname)) == 0) {
+        addrinfo hints{};
+        hints.ai_family = AF_INET;
+        hints.ai_socktype = SOCK_STREAM;
+        addrinfo* info = nullptr;
+        if (getaddrinfo(hostname, nullptr, &hints, &info) == 0) {
+            for (addrinfo* p = info; p; p = p->ai_next) {
+                auto* sa = reinterpret_cast<sockaddr_in*>(p->ai_addr);
+                std::string ip = inet_ntoa(sa->sin_addr);
+                if (ip != "127.0.0.1") {
+                    hostLocalIp_ = ip;
+                    break;
+                }
+                if (hostLocalIp_ == "0.0.0.0") {
+                    hostLocalIp_ = ip;  // fallback to loopback if nothing else
+                }
+            }
+            freeaddrinfo(info);
+        }
+    }
+    WSACleanup();
+#else
     struct ifaddrs* ifaddr = nullptr;
     if (getifaddrs(&ifaddr) == -1) {
         return;
@@ -2306,6 +2341,7 @@ void GameRoot::detectLocalIp() {
         }
     }
     freeifaddrs(ifaddr);
+#endif
 }
 
 void GameRoot::handleHeroDeath() {

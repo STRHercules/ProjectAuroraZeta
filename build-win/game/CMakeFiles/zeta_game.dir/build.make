@@ -339,6 +339,21 @@ game/CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.s"
 	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/game/meta/SaveManager.cpp -o CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.s
 
+game/CMakeFiles/zeta_game.dir/net/NetSession.cpp.obj: game/CMakeFiles/zeta_game.dir/flags.make
+game/CMakeFiles/zeta_game.dir/net/NetSession.cpp.obj: game/CMakeFiles/zeta_game.dir/includes_CXX.rsp
+game/CMakeFiles/zeta_game.dir/net/NetSession.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZeta/game/net/NetSession.cpp
+game/CMakeFiles/zeta_game.dir/net/NetSession.cpp.obj: game/CMakeFiles/zeta_game.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building CXX object game/CMakeFiles/zeta_game.dir/net/NetSession.cpp.obj"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT game/CMakeFiles/zeta_game.dir/net/NetSession.cpp.obj -MF CMakeFiles/zeta_game.dir/net/NetSession.cpp.obj.d -o CMakeFiles/zeta_game.dir/net/NetSession.cpp.obj -c /home/zach/Documents/GitHub/ProjectAuroraZeta/game/net/NetSession.cpp
+
+game/CMakeFiles/zeta_game.dir/net/NetSession.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/zeta_game.dir/net/NetSession.cpp.i"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/zach/Documents/GitHub/ProjectAuroraZeta/game/net/NetSession.cpp > CMakeFiles/zeta_game.dir/net/NetSession.cpp.i
+
+game/CMakeFiles/zeta_game.dir/net/NetSession.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/zeta_game.dir/net/NetSession.cpp.s"
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && /usr/bin/x86_64-w64-mingw32-g++-posix $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/zach/Documents/GitHub/ProjectAuroraZeta/game/net/NetSession.cpp -o CMakeFiles/zeta_game.dir/net/NetSession.cpp.s
+
 # Object files for target zeta_game
 zeta_game_OBJECTS = \
 "CMakeFiles/zeta_game.dir/Game.cpp.obj" \
@@ -358,7 +373,8 @@ zeta_game_OBJECTS = \
 "CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.obj" \
 "CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.obj" \
 "CMakeFiles/zeta_game.dir/meta/ItemDefs.cpp.obj" \
-"CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.obj"
+"CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.obj" \
+"CMakeFiles/zeta_game.dir/net/NetSession.cpp.obj"
 
 # External object files for target zeta_game
 zeta_game_EXTERNAL_OBJECTS =
@@ -381,9 +397,10 @@ game/libzeta_game.a: game/CMakeFiles/zeta_game.dir/systems/HotzoneSystem.cpp.obj
 game/libzeta_game.a: game/CMakeFiles/zeta_game.dir/systems/ShopSystem.cpp.obj
 game/libzeta_game.a: game/CMakeFiles/zeta_game.dir/meta/ItemDefs.cpp.obj
 game/libzeta_game.a: game/CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.obj
+game/libzeta_game.a: game/CMakeFiles/zeta_game.dir/net/NetSession.cpp.obj
 game/libzeta_game.a: game/CMakeFiles/zeta_game.dir/build.make
 game/libzeta_game.a: game/CMakeFiles/zeta_game.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Linking CXX static library libzeta_game.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Linking CXX static library libzeta_game.a"
 	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && $(CMAKE_COMMAND) -P CMakeFiles/zeta_game.dir/cmake_clean_target.cmake
 	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win/game && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/zeta_game.dir/link.txt --verbose=$(VERBOSE)
 

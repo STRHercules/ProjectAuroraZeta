@@ -79,6 +79,15 @@ CMakeFiles/zeta.dir/src/main.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZ
   /home/zach/Documents/GitHub/ProjectAuroraZeta/game/Game.h \
   /home/zach/Documents/GitHub/ProjectAuroraZeta/game/meta/ItemDefs.h \
   /home/zach/Documents/GitHub/ProjectAuroraZeta/game/meta/SaveManager.h \
+  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/net/NetAddress.h \
+  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/net/NetPacket.h \
+  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/net/NetSerializer.h \
+  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/net/NetTransport.h \
+  /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/net/UdpSocket.h \
+  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/net/LobbyState.h \
+  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/net/NetMessages.h \
+  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/net/NetSession.h \
+  /home/zach/Documents/GitHub/ProjectAuroraZeta/game/net/SessionConfig.h \
   /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/gameplay/FogOfWar.h \
   /home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/Facing.h \
   /home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/RenderSystem.h \
@@ -196,6 +205,7 @@ CMakeFiles/zeta.dir/src/main.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZ
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/algorithm \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/any \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/array \
+  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/atomic \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/backward/auto_ptr.h \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/backward/binders.h \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bit \
@@ -206,6 +216,7 @@ CMakeFiles/zeta.dir/src/main.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZ
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/allocator.h \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/atomic_base.h \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/atomic_lockfree_defines.h \
+  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/atomic_timed_wait.h \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/atomic_wait.h \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/basic_ios.h \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/basic_ios.tcc \
@@ -214,6 +225,7 @@ CMakeFiles/zeta.dir/src/main.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZ
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/char_traits.h \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/charconv.h \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/chrono.h \
+  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/chrono_io.h \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/codecvt.h \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/concept_check.h \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/cpp_type_traits.h \
@@ -278,6 +290,7 @@ CMakeFiles/zeta.dir/src/main.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZ
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_util.h \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/refwrap.h \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/requires_hosted.h \
+  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/semaphore_base.h \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/shared_ptr.h \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/shared_ptr_atomic.h \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/shared_ptr_base.h \
@@ -287,6 +300,7 @@ CMakeFiles/zeta.dir/src/main.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZ
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/std_abs.h \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/std_function.h \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/std_mutex.h \
+  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/std_thread.h \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_algo.h \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_algobase.h \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_bvector.h \
@@ -313,7 +327,9 @@ CMakeFiles/zeta.dir/src/main.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZ
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/streambuf_iterator.h \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/string_view.tcc \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stringfwd.h \
+  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/this_thread_sleep.h \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/uniform_int_dist.h \
+  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/unique_lock.h \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/unique_ptr.h \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/unordered_map.h \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/uses_allocator.h \
@@ -327,6 +343,8 @@ CMakeFiles/zeta.dir/src/main.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZ
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cassert \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cctype \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cerrno \
+  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/charconv \
+  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/chrono \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/clocale \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cmath \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/codecvt \
@@ -352,6 +370,7 @@ CMakeFiles/zeta.dir/src/main.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZ
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ext/string_conversions.h \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ext/type_traits.h \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/filesystem \
+  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/format \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/forward_list \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/fstream \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/functional \
@@ -365,6 +384,7 @@ CMakeFiles/zeta.dir/src/main.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZ
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/locale \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/map \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/memory \
+  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/mutex \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/new \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/numbers \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/numeric \
@@ -379,14 +399,17 @@ CMakeFiles/zeta.dir/src/main.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZ
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/random \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ranges \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ratio \
+  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/semaphore \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/span \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/sstream \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/stdexcept \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/stdlib.h \
+  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/stop_token \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/streambuf \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/string \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/string_view \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/system_error \
+  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/thread \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/bessel_function.tcc \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/beta_function.tcc \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/ell_integral.tcc \
@@ -406,6 +429,7 @@ CMakeFiles/zeta.dir/src/main.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZ
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/unordered_map \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/utility \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/valarray \
+  /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/variant \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/vector \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/version \
   /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/atomic_word.h \
@@ -520,6 +544,7 @@ CMakeFiles/zeta.dir/src/main.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZ
   /usr/share/mingw-w64/include/sec_api/string_s.h \
   /usr/share/mingw-w64/include/sec_api/sys/timeb_s.h \
   /usr/share/mingw-w64/include/sec_api/wchar_s.h \
+  /usr/share/mingw-w64/include/semaphore.h \
   /usr/share/mingw-w64/include/setjmp.h \
   /usr/share/mingw-w64/include/signal.h \
   /usr/share/mingw-w64/include/stdarg.h \
@@ -539,1074 +564,1124 @@ CMakeFiles/zeta.dir/src/main.cpp.obj: /home/zach/Documents/GitHub/ProjectAuroraZ
   /usr/share/mingw-w64/include/winsdkver.h
 
 
-/usr/share/mingw-w64/include/winapifamily.h:
-
-/usr/share/mingw-w64/include/sys/types.h:
-
-/usr/share/mingw-w64/include/string.h:
-
-/usr/share/mingw-w64/include/stdlib.h:
-
-/usr/share/mingw-w64/include/stdio.h:
-
-/usr/share/mingw-w64/include/stddef.h:
-
-/usr/share/mingw-w64/include/stdarg.h:
-
-/usr/share/mingw-w64/include/signal.h:
-
-/usr/share/mingw-w64/include/sec_api/wchar_s.h:
-
-/usr/share/mingw-w64/include/sec_api/string_s.h:
-
-/usr/share/mingw-w64/include/sec_api/stdlib_s.h:
-
-/usr/share/mingw-w64/include/sdks/_mingw_ddk.h:
-
-/usr/share/mingw-w64/include/sec_api/sys/timeb_s.h:
-
-/usr/share/mingw-w64/include/pthread_signal.h:
-
-/usr/share/mingw-w64/include/psdk_inc/intrin-impl.h:
-
-/usr/share/mingw-w64/include/math.h:
-
-/usr/share/mingw-w64/include/malloc.h:
-
-/usr/share/mingw-w64/include/limits.h:
-
-/usr/share/mingw-w64/include/ctype.h:
-
-/usr/share/mingw-w64/include/corecrt_stdio_config.h:
-
-/usr/share/mingw-w64/include/assert.h:
-
-/usr/share/mingw-w64/include/_mingw_stdarg.h:
-
-/usr/share/mingw-w64/include/_mingw_off_t.h:
-
-/usr/share/mingw-w64/include/_mingw_mac.h:
-
-/usr/share/mingw-w64/include/_mingw.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/xtestintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/xsaveoptintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/xsaveintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/wmmintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/syslimits.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/vpclmulqdqintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/stdarg.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/shaintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/rtmintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/raointintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/prfchiintrin.h:
-
 /usr/share/mingw-w64/include/winsdkver.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/popcntintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/mwaitxintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/movdirintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/lwpintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/limits.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/tbmintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/keylockerintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/fma4intrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/f16cintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/emmintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/cldemoteintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/os_defines.h:
-
-/usr/share/mingw-w64/include/pthread_time.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/messages_members.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/ctype_inline.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/ctype_base.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/opt_random.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/c++locale.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/fxsrintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/atomic_word.h:
-
-/usr/share/mingw-w64/include/pthread.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/version:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/valarray:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/typeinfo:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/typeindex:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/type_traits:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/special_function_util.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/legendre_function.tcc:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/hypergeometric.tcc:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/ell_integral.tcc:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/bessel_function.tcc:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/string_view:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/streambuf:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/sstream:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ratio:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/glue_memory_defs.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/glue_algorithm_defs.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tuple:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/execution_defs.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/time_members.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/optional:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/fmaintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/new:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/locale:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/limits:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/istream:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/filesystem:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ext/type_traits.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ext/string_conversions.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ext/numeric_traits.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/enqcmdintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ext/concurrence.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/unordered_map:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/fstream:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/exception:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/deque:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/debug/debug.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cwctype:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cwchar:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/queue:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cstdio:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/numbers:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cstdint:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/concepts:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/compare:
-
-/usr/share/mingw-w64/include/_mingw_stat64.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/codecvt:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cmath:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/clocale:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/forward_list:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cctype:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cassert:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/vector.tcc:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/valarray_array.tcc:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/valarray_after.h:
-
-/usr/share/mingw-w64/include/_timeval.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/uses_allocator_args.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/uses_allocator.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/unique_ptr.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ostream:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/uniform_int_dist.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stringfwd.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stream_iterator.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/debug/assertions.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_uninitialized.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_raw_storage_iter.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_queue.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_pair.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/gthr.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_map.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/x86intrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/stdlib.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_iterator_base_funcs.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/lzcntintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/cmpccxaddintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_heap.h:
-
-/usr/share/mingw-w64/include/vadefs.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/wbnoinvdintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_function.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/waitpkgintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_deque.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_construct.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_algobase.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/std_mutex.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/stdint.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/smmintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/system_error:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/std_function.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/sstream.tcc:
-
-/usr/share/mingw-w64/include/stdint.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/slice_array.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/gfniintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/requires_hosted.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/std_abs.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_util.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/pmmintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/quoted_string.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/mm3dnow.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ptr_traits.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/streambuf_iterator.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/predefined_ops.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/random:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/postypes.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ostream_insert.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/clwbintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ostream.tcc:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/new_allocator.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/deque.tcc:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_metal.h:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/EventActive.h:
-
-_deps/nlohmann_json-src/include/nlohmann/ordered_map.hpp:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bit:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_messagebox.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/map:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/array:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/error_constants.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/concept_check.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/gamma.tcc:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_keycode.h:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_hidapi.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/backward/binders.h:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_events.h:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_cpuinfo.h:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_endian.h:
-
-/usr/share/mingw-w64/include/pthread_unistd.h:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_clipboard.h:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_atomic.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/c++allocator.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/valarray_array.h:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_assert.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512vnniintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/initializer_list:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL.h:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/ProjectileSystem.h:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/gameplay/InputHelpers.h:
-
-/usr/share/mingw-w64/include/sdkddkver.h:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_gesture.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/functexcept.h:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/MovementSystem.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/fs_path.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/iterator:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/EnemyAISystem.h:
-
-_deps/nlohmann_json-src/include/nlohmann/detail/value_t.hpp:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/CameraSystem.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/xsavesintrin.h:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_audio.h:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/DamageNumberSystem.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_multimap.h:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/game/EnemyDefinition.h:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/BuffSystem.h:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/game/meta/SaveManager.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/erase_if.h:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_log.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_base.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/charconv.h:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/game/Game.h:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_loadso.h:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/Pickup.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/istream.tcc:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/TextRenderer.h:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLWindow.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512vpopcntdqvlintrin.h:
-
-/usr/share/mingw-w64/include/process.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ios:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avxneconvertintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/pstl_config.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_algo.h:
-
-_deps/nlohmann_json-src/include/nlohmann/detail/input/lexer.hpp:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/CameraUtil.h:
-
-_deps/nlohmann_json-src/include/nlohmann/detail/output/binary_writer.hpp:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureManager.h:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureLoader.h:
-
-/usr/share/mingw-w64/include/intrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/utility.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/memoryfwd.h:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_main.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_numeric.h:
-
-_deps/nlohmann_json-src/include/nlohmann/detail/macro_scope.hpp:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/immintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/beta_function.tcc:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/allocated_ptr.h:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/gameplay/Combat.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/gthr-default.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512ifmaintrin.h:
-
-/usr/share/mingw-w64/include/swprintf.inl:
-
-_deps/nlohmann_json-src/include/nlohmann/thirdparty/hedley/hedley.hpp:
-
-/usr/share/mingw-w64/include/setjmp.h:
-
-_deps/nlohmann_json-src/include/nlohmann/detail/json_ref.hpp:
-
-_deps/nlohmann_json-src/include/nlohmann/detail/meta/cpp_future.hpp:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/rdseedintrin.h:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/BitmapFont.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512vp2intersectvlintrin.h:
-
-_deps/nlohmann_json-src/include/nlohmann/detail/conversions/from_json.hpp:
-
-_deps/nlohmann_json-src/include/nlohmann/detail/meta/std_fs.hpp:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/adxintrin.h:
-
-/usr/share/mingw-w64/include/corecrt_startup.h:
-
-_deps/nlohmann_json-src/include/nlohmann/detail/iterators/primitive_iterator.hpp:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ranges:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/glue_numeric_defs.h:
-
-_deps/nlohmann_json-src/include/nlohmann/detail/iterators/iterator_traits.hpp:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/Registry.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/xopintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/cpu_defines.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/exp_integral.tcc:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/numeric:
-
-_deps/nlohmann_json-src/include/nlohmann/detail/iterators/iteration_proxy.hpp:
-
-/usr/share/mingw-w64/include/corecrt_wstdlib.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/specfun.h:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/ActionState.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_relops.h:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/core/Application.h:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/Entity.h:
-
-_deps/nlohmann_json-src/include/nlohmann/detail/abi_macros.hpp:
-
-_deps/nlohmann_json-src/include/nlohmann/detail/iterators/internal_iterator.hpp:
-
-_deps/nlohmann_json-src/include/nlohmann/detail/meta/call_std/end.hpp:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/allocator.h:
-
-_deps/nlohmann_json-src/include/nlohmann/detail/meta/call_std/begin.hpp:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/RenderSystem.h:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/WaveSystem.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ext/atomicity.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_bvector.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/align.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/serializeintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/valarray_before.h:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/core/ApplicationListener.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/tmmintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/sgxintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/chrono.h:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/src/main.cpp:
-
-_deps/nlohmann_json-src/include/nlohmann/detail/hash.hpp:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_mouse.h:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_version.h:
-
-/usr/share/mingw-w64/include/time.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/mm_malloc.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avxvnniint8intrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/random.tcc:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512vbmi2vlintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/functional_hash.h:
-
-/usr/share/mingw-w64/include/wchar.h:
-
-_deps/nlohmann_json-src/include/nlohmann/adl_serializer.hpp:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/pkuintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/iomanip:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/FontLoader.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/functional:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/begin_code.h:
-
-_deps/nlohmann_json-src/include/nlohmann/detail/conversions/to_json.hpp:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/InputLoader.h:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/Color.h:
-
-_deps/nlohmann_json-src/include/nlohmann/byte_container_with_subtype.hpp:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_keyboard.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/c++config.h:
-
-_deps/nlohmann_json-src/include/nlohmann/thirdparty/hedley/hedley_undef.hpp:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_guid.h:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/CollisionSystem.h:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/math/Vec2.h:
-
-_deps/nlohmann_json-src/include/nlohmann/detail/conversions/to_chars.hpp:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512bitalgintrin.h:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_filesystem.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_iterator_base_types.h:
-
-_deps/nlohmann_json-src/include/nlohmann/detail/meta/type_traits.hpp:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/ammintrin.h:
 
 /usr/share/mingw-w64/include/wctype.h:
 
-/usr/share/mingw-w64/include/locale.h:
+/usr/share/mingw-w64/include/wchar.h:
 
-_deps/nlohmann_json-src/include/nlohmann/detail/macro_unscope.hpp:
+/usr/share/mingw-w64/include/vadefs.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_vector.h:
+/usr/share/mingw-w64/include/sys/timeb.h:
 
-_deps/nlohmann_json-src/include/nlohmann/detail/string_escape.hpp:
+/usr/share/mingw-w64/include/string.h:
 
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_power.h:
+/usr/share/mingw-w64/include/stdio.h:
 
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_config.h:
+/usr/share/mingw-w64/include/stdint.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cstdlib:
+/usr/share/mingw-w64/include/stddef.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/fs_dir.h:
+/usr/share/mingw-w64/include/signal.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/exception.h:
+/usr/share/mingw-w64/include/setjmp.h:
 
-_deps/nlohmann_json-src/include/nlohmann/detail/string_concat.hpp:
+/usr/share/mingw-w64/include/sec_api/wchar_s.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/move.h:
+/usr/share/mingw-w64/include/sec_api/sys/timeb_s.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_uninitialized.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/locale_classes.tcc:
 
-_deps/nlohmann_json-src/include/nlohmann/detail/exceptions.hpp:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ios_base.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512bf16intrin.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cstddef:
 
-/home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/PickupSystem.h:
+/usr/share/mingw-w64/include/semaphore.h:
 
-_deps/nlohmann_json-src/include/nlohmann/json.hpp:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/indirect_array.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/basic_ios.h:
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/gameplay/FogOfWar.h:
 
-_deps/nlohmann_json-src/include/nlohmann/detail/input/input_adapters.hpp:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/poly_laguerre.tcc:
 
-/usr/share/mingw-w64/include/errno.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/hash_bytes.h:
 
-/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/Camera2D.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/span:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/ia32intrin.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/c++io.h:
 
-_deps/nlohmann_json-src/include/nlohmann/detail/input/binary_reader.hpp:
+/usr/share/mingw-w64/include/_mingw_secapi.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/xmmintrin.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/random.h:
 
-_deps/nlohmann_json-src/include/nlohmann/detail/input/json_sax.hpp:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/enable_special_members.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/basic_file.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/hashtable.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/string:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/basic_string.tcc:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/streambuf.tcc:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/memory:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/locale_classes.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/basic_ios.tcc:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/parse_numbers.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/basic_string.h:
 
-_deps/nlohmann_json-src/include/nlohmann/detail/json_pointer.hpp:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/backward/auto_ptr.h:
 
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_locale.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/any:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/amxcomplexintrin.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/range_access.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/algorithmfwd.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avxintrin.h:
 
-/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/BitmapTextRenderer.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/fs_fwd.h:
 
-_deps/nlohmann_json-src/include/nlohmann/detail/iterators/json_reverse_iterator.hpp:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/alloc_traits.h:
 
-_deps/nlohmann_json-src/include/nlohmann/detail/meta/identity_tag.hpp:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avxifmaintrin.h:
 
-/home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/AnimationSystem.h:
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_gamecontroller.h:
 
-_deps/nlohmann_json-src/include/nlohmann/detail/meta/is_sax.hpp:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/uintrintrin.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/algorithm:
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_mutex.h:
 
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_error.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/hresetintrin.h:
 
-/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/InputState.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512vp2intersectintrin.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_algobase.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/chrono:
 
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_haptic.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512vnnivlintrin.h:
 
-_deps/nlohmann_json-src/include/nlohmann/detail/meta/void_t.hpp:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/clflushoptintrin.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/node_handle.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/forward_list.tcc:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/cpp_type_traits.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/bmiintrin.h:
 
-/home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/EventSystem.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/vector:
 
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_hints.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512fp16vlintrin.h:
 
-_deps/nlohmann_json-src/include/nlohmann/detail/meta/detected.hpp:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512vlintrin.h:
 
-/usr/share/mingw-w64/include/corecrt.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512vldqintrin.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/shared_ptr.h:
+_deps/nlohmann_json-src/include/nlohmann/json_fwd.hpp:
 
-/home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/Facing.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/clzerointrin.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/atomic_base.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512vbmivlintrin.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/char_traits.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/bmi2intrin.h:
 
-/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/platform/Window.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/refwrap.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/utility:
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/Texture.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx5124vnniwintrin.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512fp16intrin.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cerrno:
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_blendmode.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512bwintrin.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ext/alloc_traits.h:
 
-/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/core/Time.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/iosfwd:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/vaesintrin.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512erintrin.h:
 
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_joystick.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512vbmi2intrin.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/stdexcept:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512ifmavlintrin.h:
 
-_deps/nlohmann_json-src/include/nlohmann/detail/output/output_adapters.hpp:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512dqintrin.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/locale_conv.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/amxtileintrin.h:
 
-/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/RenderDevice.h:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/InputBinding.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512pfintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/tsxldtrkintrin.h:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/FogOfWarRenderer.h:
-
-_deps/nlohmann_json-src/include/nlohmann/detail/input/parser.hpp:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_pixels.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/shared_ptr_atomic.h:
-
-_deps/nlohmann_json-src/include/nlohmann/detail/iterators/iter_impl.hpp:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/max_size_type.h:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_platform.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/exception_ptr.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/modified_bessel_func.tcc:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx2intrin.h:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_rect.h:
-
-/usr/share/mingw-w64/include/crtdefs.h:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_render.h:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/HitFlashSystem.h:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_rwops.h:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_scancode.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/locale_facets.tcc:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ctime:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_tree.h:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_sensor.h:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_shape.h:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_stdinc.h:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_surface.h:
-
-_deps/nlohmann_json-src/include/nlohmann/detail/input/position_t.hpp:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_system.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512vlbwintrin.h:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_thread.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx5124fmapsintrin.h:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_timer.h:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_touch.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/xsavecintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/gslice.h:
-
-_deps/nlohmann_json-src/include/nlohmann/detail/output/serializer.hpp:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_video.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/cetintrin.h:
-
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/close_code.h:
-
-/home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/ShopSystem.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512fintrin.h:
-
-/home/zach/winlibs/sdl/SDL2_ttf-2.22.0/x86_64-w64-mingw32/include/SDL2/SDL_ttf.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/poly_hermite.tcc:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_tempbuf.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/atomic_wait.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cstring:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/cxxabi_forced.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/amxbf16intrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/amxfp16intrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/amxint8intrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512bf16vlintrin.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ext/aligned_buffer.h:
 
 /home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_misc.h:
 
 /home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/ComponentStorage.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512cdintrin.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/amxint8intrin.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/amxtileintrin.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/amxfp16intrin.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512dqintrin.h:
+/usr/share/mingw-w64/include/stdlib.h:
 
-/usr/share/mingw-w64/include/sys/timeb.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/atomic_timed_wait.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512ifmavlintrin.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/amxbf16intrin.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512vbmi2intrin.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/cxxabi_forced.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512erintrin.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/atomic_wait.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/riemann_zeta.tcc:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/poly_hermite.tcc:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/iosfwd:
+/home/zach/winlibs/sdl/SDL2_ttf-2.22.0/x86_64-w64-mingw32/include/SDL2/SDL_ttf.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ext/alloc_traits.h:
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/close_code.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_iterator.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/cetintrin.h:
 
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_blendmode.h:
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_video.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512fp16intrin.h:
+_deps/nlohmann_json-src/include/nlohmann/detail/output/serializer.hpp:
 
-/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/Texture.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/gslice.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/exception_defines.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/xsavecintrin.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512vbmiintrin.h:
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_timer.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/refwrap.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx5124fmapsintrin.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/bmi2intrin.h:
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_system.h:
 
-/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/ActionMapper.h:
+_deps/nlohmann_json-src/include/nlohmann/detail/input/position_t.hpp:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512vbmivlintrin.h:
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_surface.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/cpuid.h:
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_shape.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/clzerointrin.h:
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_sensor.h:
 
-_deps/nlohmann_json-src/include/nlohmann/json_fwd.hpp:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ctime:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512vldqintrin.h:
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_scancode.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512vlintrin.h:
-
-/usr/share/mingw-w64/include/pthread_compat.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512fp16vlintrin.h:
-
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/bmiintrin.h:
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_rwops.h:
 
 /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/x86gprintrin.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/forward_list.tcc:
+/home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/HitFlashSystem.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/clflushoptintrin.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_tempbuf.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512vnnivlintrin.h:
+/usr/share/mingw-w64/include/crtdefs.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512vp2intersectintrin.h:
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/net/UdpSocket.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/hresetintrin.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx2intrin.h:
 
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_mutex.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/modified_bessel_func.tcc:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512vpopcntdqintrin.h:
+_deps/nlohmann_json-src/include/nlohmann/detail/input/parser.hpp:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/uintrintrin.h:
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_stdinc.h:
 
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_gamecontroller.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/tsxldtrkintrin.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avxifmaintrin.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512pfintrin.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/alloc_traits.h:
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/InputBinding.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/fs_fwd.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/deque.tcc:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/locale_facets_nonio.h:
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_mouse.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avxintrin.h:
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_version.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/range_access.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cstring:
 
-/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/AssetManifest.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/array:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avxvnniintrin.h:
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_messagebox.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/vector:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_base.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/any:
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_log.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/backward/auto_ptr.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/amxcomplexintrin.h:
 
-/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_quit.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512bitalgintrin.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/basic_string.h:
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_loadso.h:
 
-/usr/share/mingw-w64/include/sec_api/stdio_s.h:
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/RenderDevice.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/stddef.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/locale_conv.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/atomic_lockfree_defines.h:
+_deps/nlohmann_json-src/include/nlohmann/detail/output/output_adapters.hpp:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/pconfigintrin.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/stdexcept:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/basic_ios.tcc:
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_joystick.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/memory:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/vaesintrin.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/basic_string.tcc:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/c++config.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_cmp.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/error_constants.h:
 
-/home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/HotzoneSystem.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx5124vnniwintrin.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/core/Time.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/platform/Window.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/Facing.h:
+
+/usr/share/mingw-w64/include/corecrt.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cerrno:
+
+_deps/nlohmann_json-src/include/nlohmann/detail/meta/detected.hpp:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/EventSystem.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/node_handle.h:
+
+_deps/nlohmann_json-src/include/nlohmann/detail/meta/void_t.hpp:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_algobase.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/InputState.h:
+
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_error.h:
+
+_deps/nlohmann_json-src/include/nlohmann/detail/meta/is_sax.hpp:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/AnimationSystem.h:
+
+_deps/nlohmann_json-src/include/nlohmann/detail/meta/identity_tag.hpp:
+
+_deps/nlohmann_json-src/include/nlohmann/detail/iterators/json_reverse_iterator.hpp:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/utility:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/BitmapTextRenderer.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/algorithmfwd.h:
+
+_deps/nlohmann_json-src/include/nlohmann/detail/json_pointer.hpp:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/locale_classes.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/cpp_type_traits.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/streambuf.tcc:
 
 /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/codecvt.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/hashtable.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/basic_file.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/mwaitintrin.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/xmmintrin.h:
+
+_deps/nlohmann_json-src/include/nlohmann/detail/input/binary_reader.hpp:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/ia32intrin.h:
+
+/usr/share/mingw-w64/include/errno.h:
+
+_deps/nlohmann_json-src/include/nlohmann/detail/input/input_adapters.hpp:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/basic_ios.h:
+
+_deps/nlohmann_json-src/include/nlohmann/json.hpp:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/PickupSystem.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512bf16intrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/pconfigintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/std_thread.h:
+
+_deps/nlohmann_json-src/include/nlohmann/detail/exceptions.hpp:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/charconv.h:
+
+_deps/nlohmann_json-src/include/nlohmann/detail/string_concat.hpp:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/ActionMapper.h:
+
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_haptic.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/exception.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/fs_dir.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cstdlib:
+
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_config.h:
+
+_deps/nlohmann_json-src/include/nlohmann/detail/string_escape.hpp:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/stop_token:
+
+_deps/nlohmann_json-src/include/nlohmann/thirdparty/hedley/hedley_undef.hpp:
+
+_deps/nlohmann_json-src/include/nlohmann/detail/macro_unscope.hpp:
+
+/usr/share/mingw-w64/include/locale.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/ammintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_iterator_base_types.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_cmp.h:
+
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_rect.h:
+
+_deps/nlohmann_json-src/include/nlohmann/detail/conversions/to_chars.hpp:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/math/Vec2.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_vector.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/CollisionSystem.h:
+
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_keyboard.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/exception_ptr.h:
+
+_deps/nlohmann_json-src/include/nlohmann/byte_container_with_subtype.hpp:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/Color.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/InputLoader.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512bwintrin.h:
+
+_deps/nlohmann_json-src/include/nlohmann/detail/conversions/to_json.hpp:
+
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/begin_code.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/functional:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/FontLoader.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/iomanip:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/pkuintrin.h:
+
+_deps/nlohmann_json-src/include/nlohmann/adl_serializer.hpp:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/stddef.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/functional_hash.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512vbmi2vlintrin.h:
+
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_filesystem.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avxvnniint8intrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/mm_malloc.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/src/main.cpp:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/chrono.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/map:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/sgxintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/tmmintrin.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/core/ApplicationListener.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/valarray_before.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/atomic_lockfree_defines.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/align.h:
+
+/usr/share/mingw-w64/include/sys/types.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_bvector.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ext/atomicity.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/WaveSystem.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/algorithm:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/game/render/RenderSystem.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/allocator.h:
+
+_deps/nlohmann_json-src/include/nlohmann/detail/iterators/internal_iterator.hpp:
+
+_deps/nlohmann_json-src/include/nlohmann/detail/abi_macros.hpp:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/Entity.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/core/Application.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_relops.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/specfun.h:
+
+/usr/share/mingw-w64/include/corecrt_wstdlib.h:
+
+_deps/nlohmann_json-src/include/nlohmann/detail/iterators/iteration_proxy.hpp:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/numeric:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/exp_integral.tcc:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/ShopSystem.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/istream.tcc:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/atomic_base.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/cpu_defines.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/xopintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/serializeintrin.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/ecs/Registry.h:
+
+_deps/nlohmann_json-src/include/nlohmann/detail/iterators/iterator_traits.hpp:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/unordered_map.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/glue_numeric_defs.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ranges:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/exception_defines.h:
+
+_deps/nlohmann_json-src/include/nlohmann/detail/iterators/iter_impl.hpp:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/HotzoneSystem.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/shared_ptr_atomic.h:
+
+_deps/nlohmann_json-src/include/nlohmann/detail/iterators/primitive_iterator.hpp:
+
+/usr/share/mingw-w64/include/corecrt_startup.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512vlbwintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/adxintrin.h:
+
+_deps/nlohmann_json-src/include/nlohmann/detail/meta/std_fs.hpp:
+
+/usr/share/mingw-w64/include/winapifamily.h:
 
 _deps/nlohmann_json-src/include/nlohmann/detail/json_custom_base_class.hpp:
 
 /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/cxxabi_init_exception.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/forward_list.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/mwaitintrin.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ext/aligned_buffer.h:
+_deps/nlohmann_json-src/include/nlohmann/detail/conversions/from_json.hpp:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/enable_special_members.h:
+_deps/nlohmann_json-src/include/nlohmann/detail/hash.hpp:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/random.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512vp2intersectvlintrin.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/fs_ops.h:
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/BitmapFont.h:
 
-/usr/share/mingw-w64/include/_mingw_secapi.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/rdseedintrin.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/unordered_map.h:
+_deps/nlohmann_json-src/include/nlohmann/detail/json_ref.hpp:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/fstream.tcc:
+_deps/nlohmann_json-src/include/nlohmann/thirdparty/hedley/hedley.hpp:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/c++io.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/allocated_ptr.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/string_view.tcc:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/beta_function.tcc:
 
-/home/zach/Documents/GitHub/ProjectAuroraZeta/game/meta/ItemDefs.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/immintrin.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/gslice_array.h:
+_deps/nlohmann_json-src/include/nlohmann/detail/macro_scope.hpp:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/span:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_numeric.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/hash_bytes.h:
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureLoader.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/poly_laguerre.tcc:
+/home/zach/Documents/GitHub/ProjectAuroraZeta/game/net/NetSession.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/random.tcc:
+
+_deps/nlohmann_json-src/include/nlohmann/detail/output/binary_writer.hpp:
+
+_deps/nlohmann_json-src/include/nlohmann/detail/input/lexer.hpp:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_algo.h:
 
 /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/hashtable_policy.h:
 
-/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/gameplay/FogOfWar.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/pstl_config.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/indirect_array.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avxneconvertintrin.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/invoke.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_uninitialized.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cstddef:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ios:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ios_base.h:
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/platform/SDLWindow.h:
+
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_keycode.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/TextRenderer.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/input/ActionState.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/game/Game.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/erase_if.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/game/meta/SaveManager.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/BuffSystem.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/forward_list.h:
 
 /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/iterator_concepts.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/locale_classes.tcc:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512ifmaintrin.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/shared_ptr_base.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/gthr-default.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/gameplay/Combat.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/this_thread_sleep.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/game/net/NetMessages.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/backward/binders.h:
+
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_hidapi.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/game/net/SessionConfig.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/xsaveintrin.h:
+
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_audio.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/xsavesintrin.h:
+
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_power.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/game/EnemyDefinition.h:
+
+_deps/nlohmann_json-src/include/nlohmann/detail/meta/type_traits.hpp:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_multimap.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bit:
+
+_deps/nlohmann_json-src/include/nlohmann/ordered_map.hpp:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/CameraSystem.h:
+
+_deps/nlohmann_json-src/include/nlohmann/detail/value_t.hpp:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/EnemyAISystem.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/iterator:
+
+/usr/share/mingw-w64/include/process.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/MovementSystem.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/functexcept.h:
+
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_gesture.h:
+
+/usr/share/mingw-w64/include/sdkddkver.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/net/NetSerializer.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/mwaitxintrin.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/gameplay/InputHelpers.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/ProjectileSystem.h:
+
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_guid.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/chrono_io.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/ell_integral.tcc:
+
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_metal.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/game/net/LobbyState.h:
+
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/AssetManifest.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/initializer_list:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512vnniintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512fintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/valarray_array.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/c++allocator.h:
+
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_clipboard.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_iterator.h:
+
+/usr/share/mingw-w64/include/pthread_unistd.h:
+
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_endian.h:
+
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_cpuinfo.h:
+
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_thread.h:
+
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_events.h:
 
 /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/locale_facets.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_algo.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/locale_facets.tcc:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/locale_facets_nonio.h:
 
 /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/locale_facets_nonio.tcc:
 
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_algo.h:
+
 /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/localefwd.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/Pickup.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/compare:
 
 /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/mask_array.h:
 
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_locale.h:
+
 /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/prfchwintrin.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/memory_resource.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/memoryfwd.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/utility.h:
+
+/usr/share/mingw-w64/include/intrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/move.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/nested_exception.h:
 
 /usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/mmintrin.h:
 
-/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/nested_exception.h:
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/new_allocator.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ostream.tcc:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/clwbintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ostream_insert.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/atomic:
+
+_deps/nlohmann_json-src/include/nlohmann/detail/meta/call_std/begin.hpp:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/postypes.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/random:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/predefined_ops.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/streambuf_iterator.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512bf16vlintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ptr_traits.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/mm3dnow.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/quoted_string.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/pmmintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/ranges_util.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/std_abs.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/FogOfWarRenderer.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/requires_hosted.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/gfniintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/semaphore_base.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/slice_array.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/sstream.tcc:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/std_function.h:
+
+_deps/nlohmann_json-src/include/nlohmann/detail/meta/call_std/end.hpp:
+
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_assert.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/system_error:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/net/NetPacket.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/smmintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/stdint.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/gamma.tcc:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/std_mutex.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/game/components/EventActive.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_algobase.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_construct.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_deque.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/waitpkgintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_function.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/net/NetAddress.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/wbnoinvdintrin.h:
+
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_atomic.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/cmpccxaddintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/lzcntintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_iterator_base_funcs.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/stdlib.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/x86intrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_map.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_pair.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_queue.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/invoke.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_raw_storage_iter.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_uninitialized.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stream_iterator.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stringfwd.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/unique_lock.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/parse_numbers.h:
+
+_deps/nlohmann_json-src/include/nlohmann/detail/input/json_sax.hpp:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/unique_ptr.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/uses_allocator.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/uses_allocator_args.h:
+
+/usr/share/mingw-w64/include/_timeval.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/valarray_after.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/valarray_array.tcc:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/vector.tcc:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cassert:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/forward_list:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/charconv:
+
+/usr/share/mingw-w64/include/sec_api/stdio_s.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/clocale:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cmath:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/codecvt:
+
+/usr/share/mingw-w64/include/_mingw_stat64.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/concepts:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cstdint:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/game/meta/ItemDefs.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/numbers:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/string:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cstdio:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/gslice_array.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/queue:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/max_size_type.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cwchar:
+
+/usr/share/mingw-w64/include/pthread_compat.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/riemann_zeta.tcc:
+
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_platform.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/game/systems/DamageNumberSystem.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cwctype:
+
+/usr/share/mingw-w64/include/stdarg.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/debug/debug.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/deque:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512vpopcntdqvlintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/exception:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/fstream:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512cdintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/unordered_map:
+
+/usr/share/mingw-w64/include/swprintf.inl:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/enqcmdintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ext/numeric_traits.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512vbmiintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ext/string_conversions.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ext/type_traits.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/filesystem:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/istream:
+
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_render.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ostream:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/limits:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/locale:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/mutex:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/new:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/fmaintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/optional:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/time_members.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/execution_defs.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tuple:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/cctype:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/glue_algorithm_defs.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ext/concurrence.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/pstl/glue_memory_defs.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/ratio:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/semaphore:
+
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_hints.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/sstream:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/streambuf:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/fs_ops.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/string_view:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/thread:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/uniform_int_dist.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/bessel_function.tcc:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/hypergeometric.tcc:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/net/NetTransport.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/debug/assertions.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/legendre_function.tcc:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/assets/TextureManager.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/tr1/special_function_util.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/shared_ptr.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/type_traits:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/typeindex:
+
+/usr/share/mingw-w64/include/time.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/typeinfo:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/shared_ptr_base.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/valarray:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/variant:
+
+/usr/share/mingw-w64/include/pthread_signal.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/version:
+
+/usr/share/mingw-w64/include/pthread.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/atomic_word.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/fxsrintrin.h:
+
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_main.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/c++locale.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/opt_random.h:
+
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_quit.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/ctype_base.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/ctype_inline.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/messages_members.h:
+
+/usr/share/mingw-w64/include/pthread_time.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/os_defines.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avxvnniintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/cldemoteintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/emmintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/fs_path.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/f16cintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/avx512vpopcntdqintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/fma4intrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/char_traits.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/keylockerintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/tbmintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/concept_check.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/limits.h:
+
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_pixels.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/lwpintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/fstream.tcc:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/popcntintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/string_view.tcc:
+
+_deps/nlohmann_json-src/include/nlohmann/detail/meta/cpp_future.hpp:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/raointintrin.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/CameraUtil.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/rtmintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/shaintrin.h:
+
+/home/zach/winlibs/sdl/SDL2-2.30.9/x86_64-w64-mingw32/include/SDL2/SDL_touch.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/stdarg.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/movdirintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/vpclmulqdqintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/syslimits.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/wmmintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/xsaveoptintrin.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/xtestintrin.h:
+
+/usr/share/mingw-w64/include/_mingw.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/x86_64-w64-mingw32/bits/gthr.h:
+
+/usr/share/mingw-w64/include/_mingw_mac.h:
+
+/usr/share/mingw-w64/include/_mingw_off_t.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_tree.h:
+
+/usr/share/mingw-w64/include/_mingw_stdarg.h:
+
+/usr/share/mingw-w64/include/assert.h:
+
+/usr/share/mingw-w64/include/corecrt_stdio_config.h:
+
+/home/zach/Documents/GitHub/ProjectAuroraZeta/engine/render/Camera2D.h:
+
+/usr/share/mingw-w64/include/ctype.h:
+
+/usr/share/mingw-w64/include/limits.h:
+
+/usr/share/mingw-w64/include/malloc.h:
+
+/usr/share/mingw-w64/include/math.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/stl_heap.h:
+
+/usr/share/mingw-w64/include/psdk_inc/intrin-impl.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/cpuid.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/format:
+
+/usr/share/mingw-w64/include/sdks/_mingw_ddk.h:
+
+/usr/share/mingw-w64/include/sec_api/stdlib_s.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/c++/bits/memory_resource.h:
+
+/usr/lib/gcc/x86_64-w64-mingw32/13-posix/include/prfchiintrin.h:
+
+/usr/share/mingw-w64/include/sec_api/string_s.h:

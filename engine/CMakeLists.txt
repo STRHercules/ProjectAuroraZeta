@@ -73,6 +73,10 @@ else()
     target_link_libraries(engine PUBLIC SDL2::SDL2 SDL2_ttf::SDL2_ttf nlohmann_json::nlohmann_json)
 endif()
 
+if (WIN32)
+    target_link_libraries(engine PUBLIC ws2_32)
+endif()
+
 if (MSVC)
     target_compile_options(engine PRIVATE /W4 /permissive-)
 else()

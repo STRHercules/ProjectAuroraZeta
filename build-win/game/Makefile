@@ -226,6 +226,30 @@ meta/SaveManager.cpp.s:
 	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/meta/SaveManager.cpp.s
 .PHONY : meta/SaveManager.cpp.s
 
+net/NetSession.obj: net/NetSession.cpp.obj
+.PHONY : net/NetSession.obj
+
+# target to build an object file
+net/NetSession.cpp.obj:
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/net/NetSession.cpp.obj
+.PHONY : net/NetSession.cpp.obj
+
+net/NetSession.i: net/NetSession.cpp.i
+.PHONY : net/NetSession.i
+
+# target to preprocess a source file
+net/NetSession.cpp.i:
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/net/NetSession.cpp.i
+.PHONY : net/NetSession.cpp.i
+
+net/NetSession.s: net/NetSession.cpp.s
+.PHONY : net/NetSession.s
+
+# target to generate assembly for a file
+net/NetSession.cpp.s:
+	cd /home/zach/Documents/GitHub/ProjectAuroraZeta/build-win && $(MAKE) $(MAKESILENT) -f game/CMakeFiles/zeta_game.dir/build.make game/CMakeFiles/zeta_game.dir/net/NetSession.cpp.s
+.PHONY : net/NetSession.cpp.s
+
 render/RenderSystem.obj: render/RenderSystem.cpp.obj
 .PHONY : render/RenderSystem.obj
 
@@ -583,6 +607,9 @@ help:
 	@echo "... meta/SaveManager.obj"
 	@echo "... meta/SaveManager.i"
 	@echo "... meta/SaveManager.s"
+	@echo "... net/NetSession.obj"
+	@echo "... net/NetSession.i"
+	@echo "... net/NetSession.s"
 	@echo "... render/RenderSystem.obj"
 	@echo "... render/RenderSystem.i"
 	@echo "... render/RenderSystem.s"
