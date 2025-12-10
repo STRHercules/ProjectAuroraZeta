@@ -76,10 +76,14 @@ jobs:
           set -e
           OUT_DIR="dist/${{ matrix.os }}"
           mkdir -p "$OUT_DIR"
-          # Copy the built binary (zeta)
-          BIN_PATH=$(find build -maxdepth 3 -type f -name zeta | head -n 1)
+          # Copy the built binary ("Project Aurora Zeta")
+          BIN_PATH=$(find build -maxdepth 3 -type f \( -name "Project Aurora Zeta" -o -name "Project Aurora Zeta.exe" \) | head -n 1)
+          if [[ -z "$BIN_PATH" ]]; then
+            echo "Built binary not found" >&2
+            exit 1
+          fi
           cp "$BIN_PATH" "$OUT_DIR/"
-          chmod +x "$OUT_DIR/zeta"
+          chmod +x "$OUT_DIR/$(basename "$BIN_PATH")"
           # Bundle game content
           cp -R data "$OUT_DIR/data"
           cp -R assets "$OUT_DIR/assets"
@@ -92,8 +96,9 @@ jobs:
           $OutDir = "dist/windows-latest"
           New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
 
-          $bin = Get-ChildItem -Recurse -File -Filter "zeta.exe" -Path build | Select-Object -First 1
-          Copy-Item $bin.FullName "$OutDir/zeta.exe"
+          $bin = Get-ChildItem -Recurse -File -Filter "Project Aurora Zeta.exe" -Path build | Select-Object -First 1
+          if (-not $bin) { throw "Built binary not found" }
+          Copy-Item $bin.FullName "$OutDir/Project Aurora Zeta.exe"
 
           # Copy required SDL runtime DLLs from vcpkg
           $dllSource = Join-Path $env:VCPKG_ROOT "installed/x64-windows/bin"
@@ -105,7 +110,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: zeta-${{ matrix.os }}
+          name: project-aurora-zeta-${{ matrix.os }}
           path: |
             dist/${{ matrix.os }}
           if-no-files-found: error
