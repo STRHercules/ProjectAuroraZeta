@@ -1,6 +1,6 @@
 # GAME_SPEC.md
 
-Title: **Project Zeta** (working title)
+Title: **Project Aurora Zeta** (working title)
 
 > This document consolidates the narrative, gameplay, and systems design from the original “Gameplay Overview” and “Gameplay Loop” documents into an implementation-facing spec for a custom C++ or C# codebase, with no reliance on engines like Unity/Unreal. Libraries for windowing/input/rendering (e.g., SDL2, SFML, OpenGL/DirectX/Vulkan bindings) are allowed, but no full game engines.
 

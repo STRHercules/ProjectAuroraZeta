@@ -241,7 +241,7 @@ That is the C++ core that mirrors the SC2-style logic in a clean, reusable way.
 
 ---
 
-## 4.1 Data hooks used in Project Zeta
+## 4.1 Data hooks used in Project Aurora Zeta
 
 - `data/gameplay.json` now exposes shield/armor/regen knobs for both `enemy` and `hero` blocks: `shields`, `healthArmor`, `shieldArmor`, `shieldRegen`, `healthRegen` (hero only), and `regenDelay`.
 - Wave spawns and hero init read these values and populate `Engine::ECS::Health` (alias of `CombatStats`), so tuning is fully data-driven.

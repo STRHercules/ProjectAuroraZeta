@@ -71,7 +71,7 @@ Loaded from `data/input_bindings.json`; fully remappable via file override.
 - `src/` — `main()` entry and platform glue.
 
 ## Quickstart (Playing)
-1) Build and run (`./build/zeta` or `dist/windows/zeta.exe`).
+1) Build and run (`./build/Project Aurora Zeta` or `dist/windows/Project Aurora Zeta.exe`).
 2) From **Main Menu** choose:
    - `New Game (Solo)`: pick archetype + difficulty, then `Start Run`.
    - `Host`: set player name, lobby name/password, max players, and difficulty; start hosting then wait in lobby.
@@ -89,7 +89,7 @@ cmake -S . -B build
 cmake --build build
 
 # Run Zeta
-./build/zeta
+./build/"Project Aurora Zeta"
 ```
 
 ## Building on Linux For Windows
@@ -128,4 +128,4 @@ unzip SDL2_image-devel-2.8.2-mingw.zip
 ./scripts/build-win.sh && ./scripts/package-win.sh
 ```
 
-The distributable zip is written to `dist/windows/zeta-win64.zip` and contains `zeta.exe`, required SDL DLLs, data, and a `start.bat` launcher.
+The distributable zip is written to `dist/windows/zeta-win64.zip` and contains `Project Aurora Zeta.exe`, required SDL DLLs, data, and a `start.bat` launcher.

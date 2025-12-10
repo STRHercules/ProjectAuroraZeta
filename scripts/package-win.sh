@@ -9,19 +9,20 @@ WIN_SDL_ROOT="${WIN_SDL_ROOT:-$HOME/winlibs/sdl}"
 DIST_DIR="$ROOT_DIR/dist/windows"
 STAGE_DIR="$DIST_DIR/zeta-win64"
 ZIP_PATH="$DIST_DIR/zeta-win64.zip"
+EXE_NAME="Project Aurora Zeta.exe"
 
 mkdir -p "$DIST_DIR"
 rm -rf "$STAGE_DIR"
 mkdir -p "$STAGE_DIR"
 
 # Prefer single-config MinGW output; fall back to multi-config layout if present.
-EXE_PATH="$BUILD_DIR/zeta.exe"
-if [[ ! -f "$EXE_PATH" && -f "$BUILD_DIR/Release/zeta.exe" ]]; then
-  EXE_PATH="$BUILD_DIR/Release/zeta.exe"
+EXE_PATH="$BUILD_DIR/$EXE_NAME"
+if [[ ! -f "$EXE_PATH" && -f "$BUILD_DIR/Release/$EXE_NAME" ]]; then
+  EXE_PATH="$BUILD_DIR/Release/$EXE_NAME"
 fi
 
 if [[ ! -f "$EXE_PATH" ]]; then
-  echo "zeta.exe not found in $BUILD_DIR. Build first with scripts/build-win.sh" >&2
+  echo "$EXE_NAME not found in $BUILD_DIR. Build first with scripts/build-win.sh" >&2
   exit 1
 fi
 
@@ -59,7 +60,7 @@ done
 cat > "$STAGE_DIR/start.bat" <<'BAT'
 @echo off
 cd /d %~dp0
-start "Project Aurora Zeta" zeta.exe
+start "" "Project Aurora Zeta.exe"
 BAT
 
 rm -f "$ZIP_PATH"

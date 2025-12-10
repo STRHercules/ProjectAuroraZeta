@@ -18,6 +18,7 @@ add_subdirectory(engine)
 add_subdirectory(game)
 
 add_executable(zeta src/main.cpp)
+set_target_properties(zeta PROPERTIES OUTPUT_NAME "Project Aurora Zeta")
 target_link_libraries(zeta PRIVATE zeta_game engine)
 target_include_directories(zeta PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 

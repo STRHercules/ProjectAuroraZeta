@@ -13,7 +13,7 @@ int main() {
     Game::GameRoot game;
     auto window = std::make_unique<Engine::SDLWindow>();
     Engine::WindowConfig config{};
-    config.title = "Project Zeta (Placeholder Backend)";
+    config.title = "Project Aurora Zeta";
 
     Engine::Application app(game, std::move(window), config);
     if (!app.initialize()) {

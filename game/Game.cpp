@@ -3253,9 +3253,9 @@ void GameRoot::renderMenu() {
     auto inside = [](int mx, int my, float x, float y, float w, float h) {
         return mx >= x && mx <= x + w && my >= y && my <= y + h;
     };
-    drawTextUnified("    PROJECT ZETA", Engine::Vec2{centerX - 140.0f, topY}, 1.7f, Engine::Color{180, 230, 255, 240});
-    drawTextUnified("Pre-Alpha | Modern: WASD move | RTS: RMB move + WASD pan | B shop | Esc pause",
-                    Engine::Vec2{centerX - 260.0f, topY + 28.0f},
+    drawTextUnified("PROJECT AURORA ZETA", Engine::Vec2{centerX - 140.0f, topY}, 1.7f, Engine::Color{180, 230, 255, 240});
+    drawTextUnified("Pre-Alpha | Build v0.0.1",
+                    Engine::Vec2{centerX, topY + 28.0f},
                     0.85f, Engine::Color{150, 200, 230, 220});
 
     auto drawButton = [&](const std::string& label, int index) {

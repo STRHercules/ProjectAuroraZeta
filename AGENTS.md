@@ -1,6 +1,6 @@
 # AGENTS.md
 
-This document defines distinct “AI agent” roles for working on **Project Zeta**. Each agent can be instantiated as Codex (or similar) with a specific mandate and scope. The goal is to coordinate multiple specialized assistants on a single codebase.
+This document defines distinct “AI agent” roles for working on **Project Aurora Zeta**. Each agent can be instantiated as Codex (or similar) with a specific mandate and scope. The goal is to coordinate multiple specialized assistants on a single codebase.
 
 ---
 
@@ -222,14 +222,14 @@ All agents must follow these constraints:
 These are examples you (the human) can use when instantiating agents:
 
 - **ArchitectAgent Prompt (Example):**
-  - “You are ArchitectAgent for Project Zeta. Using `GAME_SPEC.md` and `AGENTS.md`, design the ECS component and system structure needed for heroes, enemies, and projectiles. Propose directory layout and class names, then generate the header and source stubs in `/engine/ecs` and `/game/entities`.”
+  - “You are ArchitectAgent for Project Aurora Zeta. Using `GAME_SPEC.md` and `AGENTS.md`, design the ECS component and system structure needed for heroes, enemies, and projectiles. Propose directory layout and class names, then generate the header and source stubs in `/engine/ecs` and `/game/entities`.”
 
 - **EngineAgent Prompt (Example):**
-  - “You are EngineAgent for Project Zeta. Implement the main game loop, window creation, and input handling in C++20 using SDL2, as specified in `GAME_SPEC.md`. Provide compilable code files for `/engine/core/Application.h/.cpp` and `/engine/platform/SDLWindow.h/.cpp`.”
+  - “You are EngineAgent for Project Aurora Zeta. Implement the main game loop, window creation, and input handling in C++20 using SDL2, as specified in `GAME_SPEC.md`. Provide compilable code files for `/engine/core/Application.h/.cpp` and `/engine/platform/SDLWindow.h/.cpp`.”
 
 - **GameplayAgent Prompt (Example):**
-  - “You are GameplayAgent for Project Zeta. Implement the Bulwark hero (Tank) with a magnetic shield dome, taunt pulse, and passive regen as described in `GAME_SPEC.md`. Add data-driven config files and connect them to the existing ability and ECS frameworks.”
+  - “You are GameplayAgent for Project Aurora Zeta. Implement the Bulwark hero (Tank) with a magnetic shield dome, taunt pulse, and passive regen as described in `GAME_SPEC.md`. Add data-driven config files and connect them to the existing ability and ECS frameworks.”
 
 ---
 
-By adhering to these role definitions and shared rules, multiple Codex instances (or similar AI developers) can collaboratively build and maintain the Project Zeta codebase while preserving a coherent architecture and design.
+By adhering to these role definitions and shared rules, multiple Codex instances (or similar AI developers) can collaboratively build and maintain the Project Aurora Zeta codebase while preserving a coherent architecture and design.
