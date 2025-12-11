@@ -500,6 +500,7 @@ private:
     int inventorySelected_{-1};
     bool inventoryScrollLeftPrev_{false};
     bool inventoryScrollRightPrev_{false};
+    bool inventoryCyclePrev_{false};
     Engine::ECS::Entity shopkeeper_{Engine::ECS::kInvalidEntity};
     bool interactPrev_{false};
     bool useItemPrev_{false};

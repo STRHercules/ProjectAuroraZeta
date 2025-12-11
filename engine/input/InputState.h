@@ -18,6 +18,7 @@ enum class InputKey {
     CamRight,
     ToggleFollow,
     ToggleShop,
+    InventoryCycle,
     Pause,
     Dash,
     Interact,

@@ -1,4 +1,9 @@
+# Mod Support
+* Expose as much as possible to make it as easy as possible to mod
+
 # Increase Sprite Size
+* Global Sprite scale increase
+    * Increase ALL sprites globally by 20-40%
 
 # Procedurally Generated Maps
 * Obstacles
@@ -7,9 +12,18 @@
     * Cliffs
     * Lakes
     * Holes
+    * Buildings
 
 # Static Maps
-* Maps designed with Tiled
+* Maps designed with Tiled?
+    * Curent map is 512x512 - would have to make a massive map.
+        * Tiled has an infinite mode..?
+
+# Change Inventory Cycle Hotkey to TAB
+
+# Field Medkit has no asset
+
+# Best Wave should ONLY account for naturally progressed Waves
 
 # Android Port
 * According to Google, Android supports Raw C++ using SDL.
@@ -32,23 +46,31 @@
 * Multiple new Offensive damage type characters:
     * Melee
         * High Armor - High regen melee characters that will take enemies head-on.
-    * Magical
-        * Utilizes Magic Damage that excels in melting Shields.
+    * Plasma
+        * Utilizes Plasma Damage that excels in melting Shields.
     * Thorn Tank
         * Absorbs damage and redirects it back at their target.
-
-# Builder Unit
-* Constructs Buildings
-    * Turrets
-        * Placeable turrets - similar to the item but does not time-out and rather has health/armor/shields
-    * Barracks
-        * Produces mini units that will attack nearest target
-            * Mini Units will be controllable/moveable like RTS units
-    * Bunker
-        * Mini-UNits can bunker down inside to offer protection while combining their firepower
-    * Houses (Unit Supply)
-        * Need houses to act as 'supply' for unit production. Each house increases maximum mini-units count by 2, to a maximum of 10.
-
+    * Builder Unit
+        * Constructs Buildings
+            * Turrets
+                * Placeable turrets - similar to the item but does not time-out and rather has health/armor/shields
+            * Barracks
+                * Produces mini units that will attack nearest target
+                    * Mini Units will be controllable/moveable like RTS units
+            * Bunker
+                * Mini-UNits can bunker down inside to offer protection while combining their firepower
+            * Houses (Unit Supply)
+                * Need houses to act as 'supply' for unit production. Each house increases maximum mini-units count by 2, to a maximum of 10.
+        * Mini-Units will be controllable RTS style:
+            * Click to select a single unit
+            * Double click a unit to select all Mini-Units of that type that is on screen
+            * Click and Drag to draw a selection box
+            * When selected, Mini Units will move via the player's right-click location
+            * Mini Units will automatically attack their nearest enemies
+            * There will be multiple types of Mini Units
+                * Light - Medium Damage, Low HP
+                * Heavy - Low Damage, High HP
+                * Medic - Low Damage, Low HP, Heals other Mini Units
 
 # Status & States
 In Zeta, Characters, Bosses and monsters alike can sometimes perform attacks or spells, or host a passive, applying a special status or state to himself or its target.
@@ -64,6 +86,7 @@ In Zeta, Characters, Bosses and monsters alike can sometimes perform attacks or 
     * Unstoppable: Allow the host to be immune to stuns, slows and most speed impeding effects
 
 # GUI/HUD
+* Move Health/Energy/Dash Bars
 * Mini-Map
     * Mini-Map will be in the top right, will display the players location at the center, and will display small blips wherever enemies are in real-time.
 * Round/Wave Information

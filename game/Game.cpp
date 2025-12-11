@@ -595,19 +595,14 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         return;
     }
 
-    // Inventory selection (arrow keys).
-    bool invLeftEdge = input.isDown(Engine::InputKey::CamLeft) && !inventoryScrollLeftPrev_;
-    bool invRightEdge = input.isDown(Engine::InputKey::CamRight) && !inventoryScrollRightPrev_;
-    inventoryScrollLeftPrev_ = input.isDown(Engine::InputKey::CamLeft);
-    inventoryScrollRightPrev_ = input.isDown(Engine::InputKey::CamRight);
+    // Inventory selection (Tab cycles forward).
+    bool invCycleEdge = input.isDown(Engine::InputKey::InventoryCycle) && !inventoryCyclePrev_;
+    inventoryCyclePrev_ = input.isDown(Engine::InputKey::InventoryCycle);
     if (inventory_.empty()) {
         inventorySelected_ = -1;
     } else {
         clampInventorySelection();
-        if (invLeftEdge) {
-            inventorySelected_ = (inventorySelected_ - 1 + static_cast<int>(inventory_.size())) %
-                                 static_cast<int>(inventory_.size());
-        } else if (invRightEdge) {
+        if (invCycleEdge) {
             inventorySelected_ = (inventorySelected_ + 1) % static_cast<int>(inventory_.size());
         }
     }
@@ -769,7 +764,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         interactPrev_ = actions.interact;
         useItemPrev_ = actions.useItem;
         if (abilityShopOpen_ || itemShopOpen_) {
-            // Ability shop quick-buy (mouse buttons) and cards.
+            // Ability shop point-click purchase: any left click buys the currently selected (hovered) card.
             if (abilityShopOpen_) {
                 auto costForLevel = [&](int level) {
                     return static_cast<int>(std::round(static_cast<float>(abilityShopBaseCost_) *
@@ -849,37 +844,29 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 };
                 auto cards = buildCards();
 
-                // Quick-buy via mouse buttons maps to first three cards.
-                if (leftClick && !shopLeftPrev_) {
-                    if (!cards[0].buy()) shopNoFundsTimer_ = 0.6;
+                // Track hovered card to update selection.
+                const float cardW = 200.0f;
+                const float cardH = 110.0f;
+                const float gap = 14.0f;
+                float cx = static_cast<float>(viewportWidth_) * 0.5f;
+                float cy = static_cast<float>(viewportHeight_) * 0.55f;
+                float startX = cx - (cardW * 3.0f + gap * 2.0f) * 0.5f;
+                float startY = cy - 320.0f * 0.5f + 60.0f;
+                int mx = input.mouseX();
+                int my = input.mouseY();
+                int hoveredCard = -1;
+                for (int i = 0; i < static_cast<int>(cards.size()); ++i) {
+                    float x = startX + (i % 3) * (cardW + gap);
+                    float y = startY + (i / 3) * (cardH + 12.0f);
+                    if (mx >= x && mx <= x + cardW && my >= y && my <= y + cardH) {
+                        hoveredCard = i;
+                        break;
+                    }
                 }
-                if (rightClick && !shopRightPrev_) {
-                    if (!cards[4].buy()) shopNoFundsTimer_ = 0.6;
-                }
-                if (midClick && !shopMiddlePrev_) {
-                    if (!cards[1].buy()) shopNoFundsTimer_ = 0.6;
-                }
-
-                if (leftClick && !shopUIClickPrev_) {
-                    // Card hit-test (matches overlay layout)
-                    const float cardW = 200.0f;
-                    const float cardH = 110.0f;
-                    const float gap = 14.0f;
-                    float cx = static_cast<float>(viewportWidth_) * 0.5f;
-                    float cy = static_cast<float>(viewportHeight_) * 0.55f;
-                    float startX = cx - (cardW * 3.0f + gap * 2.0f) * 0.5f;
-                    float startY = cy - 320.0f * 0.5f + 46.0f;
-                    int mx = input.mouseX();
-                    int my = input.mouseY();
-                    for (int i = 0; i < static_cast<int>(cards.size()); ++i) {
-                        float x = startX + (i % 3) * (cardW + gap);
-                        float y = startY + (i / 3) * (cardH + 12.0f);
-                        if (mx >= x && mx <= x + cardW && my >= y && my <= y + cardH) {
-                            if (!cards[i].buy()) {
-                                shopNoFundsTimer_ = 0.6;
-                            }
-                            break;
-                        }
+                bool leftEdge = leftClick && !shopLeftPrev_;
+                if (leftEdge && hoveredCard >= 0) {
+                    if (!cards[hoveredCard].buy()) {
+                        shopNoFundsTimer_ = 0.6;
                     }
                 }
             }
@@ -2006,7 +1993,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 };
                 if (inventory_.empty()) {
                     inventorySelected_ = -1;
-                    drawTextUnified("Inventory empty (use <-/-> to cycle)", Engine::Vec2{invPos.x + 10.0f, invPos.y + 6.0f},
+                    drawTextUnified("Inventory empty (Tab to cycle)", Engine::Vec2{invPos.x + 10.0f, invPos.y + 6.0f},
                                     0.9f, Engine::Color{200, 220, 240, 220});
                 } else {
                     clampInventorySelection();
@@ -2017,9 +2004,9 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     drawTextUnified(heldText.str(), Engine::Vec2{invPos.x + 10.0f, invPos.y + 2.0f}, 1.0f,
                                     rarityCol(held.def.rarity));
                     std::ostringstream hint;
-                    hint << "<- / -> to cycle   Q to " << (usable ? "use" : "use support item");
-                drawTextUnified(hint.str(), Engine::Vec2{invPos.x + 10.0f, invPos.y + 12.0f},
-                                0.85f, Engine::Color{180, 200, 220, 210});
+                    hint << "Tab to cycle   Q to " << (usable ? "use" : "use support item");
+                    drawTextUnified(hint.str(), Engine::Vec2{invPos.x + 10.0f, invPos.y + 12.0f},
+                                    0.85f, Engine::Color{180, 200, 220, 210});
                 }
 
                 // Wallet
@@ -2385,7 +2372,8 @@ void GameRoot::handleHeroDeath() {
         if (runStarted_) {
             totalRuns_ += 1;
             totalKillsAccum_ += kills_;
-            bestWave_ = std::max(bestWave_, wave_);
+            int naturalWave = std::max(0, wave_ - std::max(0, startWaveBase_ - 1));
+            bestWave_ = std::max(bestWave_, naturalWave);
             runStarted_ = false;
             saveProgress();
         }
@@ -4296,6 +4284,8 @@ void GameRoot::drawAbilityShopOverlay() {
     render_->drawFilledRect(topLeft, Engine::Vec2{panelW, panelH}, Engine::Color{20, 24, 34, 230});
     drawTextUnified("Ability Shop (Copper) - B toggles", Engine::Vec2{topLeft.x + 18.0f, topLeft.y + 12.0f}, 1.0f,
                     Engine::Color{200, 255, 200, 240});
+    drawTextUnified("Hover a card, then click to buy", Engine::Vec2{topLeft.x + 18.0f, topLeft.y + 32.0f},
+                    0.9f, Engine::Color{180, 220, 200, 220});
 
     auto costForLevel = [&](int level) {
         return static_cast<int>(std::round(static_cast<float>(abilityShopBaseCost_) *
@@ -4381,14 +4371,15 @@ void GameRoot::drawAbilityShopOverlay() {
     const float cardH = 110.0f;
     const float gap = 14.0f;
     float startX = cx - (cardW * 3.0f + gap * 2.0f) * 0.5f;
-    float y = topLeft.y + 46.0f;
+    float y = topLeft.y + 60.0f;
     int mx = lastMouseX_;
     int my = lastMouseY_;
     for (int i = 0; i < static_cast<int>(cards.size()); ++i) {
         float x = startX + (i % 3) * (cardW + gap);
         float yRow = y + (i / 3) * (cardH + 12.0f);
         bool hovered = mx >= x && mx <= x + cardW && my >= yRow && my <= yRow + cardH;
-        Engine::Color bg = hovered ? Engine::Color{46, 70, 96, 230} : Engine::Color{34, 46, 66, 220};
+        Engine::Color bg = hovered ? Engine::Color{46, 70, 96, 230}
+                                   : Engine::Color{34, 46, 66, 220};
         render_->drawFilledRect(Engine::Vec2{x, yRow}, Engine::Vec2{cardW, cardH}, bg);
         drawTextUnified(cards[i].title, Engine::Vec2{x + 12.0f, yRow + 10.0f}, 1.0f, Engine::Color{220, 240, 255, 240});
         drawTextUnified(cards[i].desc, Engine::Vec2{x + 12.0f, yRow + 32.0f}, 0.9f, Engine::Color{200, 220, 240, 230});
@@ -4589,6 +4580,7 @@ void GameRoot::resetRun() {
     inventorySelected_ = -1;
     inventoryScrollLeftPrev_ = false;
     inventoryScrollRightPrev_ = false;
+    inventoryCyclePrev_ = false;
     shopkeeper_ = Engine::ECS::kInvalidEntity;
     interactPrev_ = false;
     useItemPrev_ = false;

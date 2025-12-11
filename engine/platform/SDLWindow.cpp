@@ -122,6 +122,9 @@ void SDLWindow::pollEvents(Application& app, InputState& input) {
                     case SDLK_c:
                         input.setKeyDown(InputKey::ToggleFollow, true);
                         break;
+                    case SDLK_TAB:
+                        input.setKeyDown(InputKey::InventoryCycle, true);
+                        break;
                     case SDLK_q:
                         input.setKeyDown(InputKey::UseItem, true);
                         break;
@@ -198,6 +201,9 @@ void SDLWindow::pollEvents(Application& app, InputState& input) {
                         break;
                     case SDLK_c:
                         input.setKeyDown(InputKey::ToggleFollow, false);
+                        break;
+                    case SDLK_TAB:
+                        input.setKeyDown(InputKey::InventoryCycle, false);
                         break;
                     case SDLK_q:
                         input.setKeyDown(InputKey::UseItem, false);

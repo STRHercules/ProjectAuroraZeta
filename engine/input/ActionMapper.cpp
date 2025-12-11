@@ -11,6 +11,7 @@ InputKey toInputKey(const std::string& key) {
     std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
     if (lower.rfind("key:", 0) == 0) {
         auto k = lower.substr(4);
+        if (k == "tab") return InputKey::InventoryCycle;
         if (k == "w") return InputKey::Ability2;
         if (k == "e") return InputKey::Interact;
         if (k == "q") return InputKey::UseItem;
@@ -33,6 +34,7 @@ InputKey toInputKey(const std::string& key) {
     if (lower == "left" || lower == "arrow_left" || lower == "cam_left") return InputKey::CamLeft;
     if (lower == "right" || lower == "arrow_right" || lower == "cam_right") return InputKey::CamRight;
     if (lower == "c" || lower == "toggle_follow") return InputKey::ToggleFollow;
+    if (lower == "tab" || lower == "inventory" || lower == "inventory_cycle") return InputKey::InventoryCycle;
     if (lower == "r" || lower == "restart") return InputKey::Restart;
     if (lower == "b" || lower == "toggle_shop" || lower == "shop") return InputKey::ToggleShop;
     if (lower == "escape" || lower == "pause" || lower == "esc") return InputKey::Pause;
