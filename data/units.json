@@ -1,0 +1,67 @@
+{
+  "miniUnits": {
+    "light": {
+      "hp": 40.0,
+      "shields": 0.0,
+      "moveSpeed": 180.0,
+      "damage": 8.0,
+      "offensiveType": "Ranged",
+      "costCopper": 6,
+      "texture": "assets/Sprites/Enemies/eye.png"
+    },
+    "heavy": {
+      "hp": 120.0,
+      "shields": 20.0,
+      "moveSpeed": 120.0,
+      "damage": 5.0,
+      "offensiveType": "Ranged",
+      "costCopper": 10,
+      "texture": "assets/Sprites/Enemies/monkey.png"
+    },
+    "medic": {
+      "hp": 60.0,
+      "shields": 10.0,
+      "moveSpeed": 160.0,
+      "damage": 2.0,
+      "healPerSecond": 10.0,
+      "offensiveType": "Ranged",
+      "costCopper": 8,
+      "texture": "assets/Sprites/Enemies/chick.png"
+    }
+  },
+  "buildings": {
+    "turret": {
+      "hp": 150.0,
+      "shields": 50.0,
+      "armor": 1.0,
+      "attackRange": 260.0,
+      "attackRate": 1.2,
+      "damage": 15.0,
+      "costCopper": 30
+    },
+    "barracks": {
+      "hp": 200.0,
+      "shields": 40.0,
+      "armor": 1.0,
+      "spawnInterval": 8.0,
+      "maxQueue": 5,
+      "costCopper": 35
+    },
+    "bunker": {
+      "hp": 260.0,
+      "shields": 60.0,
+      "armor": 2.0,
+      "capacity": 4,
+      "damageMultiplierPerUnit": 0.35,
+      "costCopper": 40
+    },
+    "house": {
+      "hp": 120.0,
+      "shields": 0.0,
+      "armor": 0.0,
+      "supplyProvided": 2,
+      "costCopper": 18,
+      "texturePath": "assets/Sprites/Buildings/house1.png"
+    }
+  }
+}

@@ -23,6 +23,7 @@ struct ActionState {
     bool ultimate{false};
     bool reload{false};
     bool menuBack{false};
+    bool buildMenu{false};
 };
 
 }  // namespace Engine

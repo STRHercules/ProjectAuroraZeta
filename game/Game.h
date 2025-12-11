@@ -44,8 +44,13 @@
 #include "systems/EventSystem.h"
 #include "systems/HotzoneSystem.h"
 #include "systems/BuffSystem.h"
+#include "systems/MiniUnitSystem.h"
 #include "meta/SaveManager.h"
 #include "EnemyDefinition.h"
+#include "components/OffensiveType.h"
+#include "components/Building.h"
+#include "components/MiniUnit.h"
+#include "components/MiniUnitCommand.h"
 #include "../engine/gameplay/FogOfWar.h"
 #include "../engine/render/FogOfWarRenderer.h"
 #include "net/NetSession.h"
@@ -62,6 +67,8 @@ public:
     void onShutdown() override;
 
 private:
+    struct MiniUnitDef;
+    struct BuildingDef;
     void handleHeroDeath();
     void showDefeatOverlay();
     void processDefeatInput(const Engine::ActionState& actions, const Engine::InputState& input);
@@ -110,13 +117,22 @@ private:
     void applyPowerupPickup(Pickup::Powerup type);
     void loadGridTextures();
     void loadEnemyDefinitions();
+    void loadUnitDefinitions();
     void loadPickupTextures();
     void loadProjectileTextures();
     Engine::TexturePtr loadTextureOptional(const std::string& path);
+    void drawBuildMenuOverlay(int mouseX, int mouseY, bool leftClickEdge);
+    void beginBuildPreview(Game::BuildingType type);
+    void clearBuildPreview();
+    void selectBuildingAt(const Engine::Vec2& worldPos);
+    void drawSelectedBuildingPanel(int mouseX, int mouseY, bool leftClickEdge);
     void spawnShopkeeper(const Engine::Vec2& aroundPos);
     void despawnShopkeeper();
     void rebuildFogLayer();
     void updateFogVision();
+    bool performRangedAutoFire(const Engine::TimeStep& step, const Engine::ActionState& actions,
+                               Game::OffensiveType offenseType);
+    bool performMeleeAttack(const Engine::TimeStep& step, const Engine::ActionState& actions);
 
     enum class MenuPage { Main, Stats, Options, CharacterSelect, HostConfig, JoinSelect, Lobby, ServerBrowser };
     enum class MovementMode { Modern, RTS };
@@ -138,6 +154,7 @@ private:
         float damageMul{1.0f};
         Engine::Color color{90, 200, 255, 255};
         std::string texturePath;
+        Game::OffensiveType offensiveType{Game::OffensiveType::Ranged};
     };
     struct DifficultyDef {
         std::string id;
@@ -145,6 +162,35 @@ private:
         std::string description;
         float enemyHpMul{1.0f};
         int startWave{1};
+    };
+    struct MiniUnitDef {
+        std::string id;
+        Game::MiniUnitClass cls{Game::MiniUnitClass::Light};
+        float hp{0.0f};
+        float shields{0.0f};
+        float moveSpeed{0.0f};
+        float damage{0.0f};
+        float healPerSecond{0.0f};
+        Game::OffensiveType offensiveType{Game::OffensiveType::Ranged};
+        int costCopper{0};
+        std::string texturePath{};
+    };
+    struct BuildingDef {
+        std::string id;
+        Game::BuildingType type{Game::BuildingType::Turret};
+        float hp{0.0f};
+        float shields{0.0f};
+        float armor{0.0f};
+        float attackRange{0.0f};
+        float attackRate{0.0f};
+        float damage{0.0f};
+        float spawnInterval{0.0f};
+        int maxQueue{0};
+        int capacity{0};
+        float damageMultiplierPerUnit{0.0f};
+        int supplyProvided{0};
+        int costCopper{0};
+        std::string texturePath{};
     };
     std::string resolveArchetypeTexture(const ArchetypeDef& def) const;
     const ArchetypeDef* findArchetypeById(const std::string& id) const;
@@ -176,6 +222,8 @@ private:
         int maxLevel{5};
         float cooldown{0.0f};
     };
+    void placeBuilding(const Engine::Vec2& pos);
+    bool spawnMiniUnit(const MiniUnitDef& def, const Engine::Vec2& pos);
 
     Engine::ECS::Registry registry_{};
     Engine::ECS::Entity hero_{Engine::ECS::kInvalidEntity};
@@ -274,6 +322,29 @@ private:
     float autoFireRangeBonus_{0.0f};
     float autoFireBaseRange_{320.0f};
     bool autoAttackEnabled_{true};
+    struct OffensiveTypeModifier {
+        float healthArmorBonus{0.0f};
+        float shieldArmorBonus{0.0f};
+        float healthRegenBonus{0.0f};
+        float shieldRegenBonus{0.0f};
+    };
+    std::array<OffensiveTypeModifier, 5> offensiveTypeModifiers_{};
+    struct MeleeConfig {
+        float range{40.0f};
+        float arcDegrees{70.0f};
+        float damageMultiplier{1.3f};
+    };
+    struct PlasmaConfig {
+        float shieldDamageMultiplier{1.5f};
+        float healthDamageMultiplier{0.75f};
+    };
+    struct ThornConfig {
+        float reflectPercent{0.25f};
+        float maxReflectPerHit{40.0f};
+    };
+    MeleeConfig meleeConfig_{};
+    PlasmaConfig plasmaConfig_{};
+    ThornConfig thornConfig_{};
     float contactDamage_{10.0f};
     double fireCooldown_{0.0};
     float heroMoveSpeed_{200.0f};
@@ -307,6 +378,9 @@ private:
     int kills_{0};
     int copper_{0};
     int gold_{0};
+    int miniUnitSupplyUsed_{0};
+    int miniUnitSupplyMax_{0};
+    int miniUnitSupplyCap_{10};
     int level_{1};
     int xp_{0};
     int xpToNext_{60};
@@ -415,6 +489,7 @@ private:
     std::unique_ptr<Game::CameraSystem> cameraSystem_;
     std::unique_ptr<Game::ProjectileSystem> projectileSystem_;
     std::unique_ptr<Game::CollisionSystem> collisionSystem_;
+    std::unique_ptr<Game::MiniUnitSystem> miniUnitSystem_;
     std::unique_ptr<Game::EnemyAISystem> enemyAISystem_;
     std::unique_ptr<Game::WaveSystem> waveSystem_;
     std::unique_ptr<Game::AnimationSystem> animationSystem_;
@@ -431,6 +506,12 @@ private:
     bool restartPrev_{false};
     bool itemShopOpen_{false};
     bool abilityShopOpen_{false};
+    bool buildMenuOpen_{false};
+    bool buildMenuPrev_{false};
+    bool buildMenuClickPrev_{false};
+    bool buildPreviewActive_{false};
+    bool buildPreviewClickPrev_{false};
+    bool buildPreviewRightPrev_{false};
     bool travelShopUnlocked_{false};
     bool waveClearedPending_{false};
     bool paused_{false};
@@ -464,6 +545,20 @@ private:
     // Mouse cache
     int lastMouseX_{0};
     int lastMouseY_{0};
+    std::vector<Engine::ECS::Entity> selectedMiniUnits_;
+    bool selectingMiniUnits_{false};
+    bool miniSelectMousePrev_{false};
+    bool miniRightClickPrev_{false};
+    double lastMiniSelectClickTime_{-1.0};
+    Engine::Vec2 selectionStart_{};
+    Engine::Vec2 selectionEnd_{};
+    Engine::ECS::Entity buildPreviewEntity_{Engine::ECS::kInvalidEntity};
+    Game::BuildingType buildPreviewType_{Game::BuildingType::House};
+    Engine::TexturePtr buildPreviewTex_{};
+    Engine::ECS::Entity selectedBuilding_{Engine::ECS::kInvalidEntity};
+    bool buildingPanelClickPrev_{false};
+    bool buildingSelectPrev_{false};
+    bool buildingJustSelected_{false};
     // Abilities
     std::vector<AbilitySlot> abilities_;
     std::vector<AbilityState> abilityStates_;
@@ -492,6 +587,8 @@ private:
     DifficultyDef activeDifficulty_{};
     int startWaveBase_{1};
     std::vector<EnemyDefinition> enemyDefs_{};
+    std::unordered_map<std::string, MiniUnitDef> miniUnitDefs_;
+    std::unordered_map<std::string, BuildingDef> buildingDefs_;
     std::vector<ItemDefinition> itemCatalog_;
     std::vector<ItemDefinition> goldCatalog_;
     // Inventory

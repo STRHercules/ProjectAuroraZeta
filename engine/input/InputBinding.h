@@ -30,6 +30,7 @@ struct InputBindings {
     std::vector<std::string> ultimate;
     std::vector<std::string> reload;
     std::vector<std::string> menuBack;
+    std::vector<std::string> buildMenu;
 };
 
 }  // namespace Engine

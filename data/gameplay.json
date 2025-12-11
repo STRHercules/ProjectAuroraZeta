@@ -22,6 +22,26 @@
     "moveSpeed": 200.0,
     "size": 24.0
   },
+  "offensiveTypes": {
+    "Melee": { "healthArmorBonus": 1.0, "shieldArmorBonus": 0.0, "healthRegenBonus": 2.0, "shieldRegenBonus": 0.0 },
+    "Plasma": { "healthArmorBonus": 0.0, "shieldArmorBonus": 0.0, "healthRegenBonus": 0.0, "shieldRegenBonus": 0.0 },
+    "ThornTank": { "healthArmorBonus": 0.5, "shieldArmorBonus": 0.5, "healthRegenBonus": 1.0, "shieldRegenBonus": 0.5 },
+    "Builder": { "healthArmorBonus": 0.0, "shieldArmorBonus": 0.0, "healthRegenBonus": 0.0, "shieldRegenBonus": 0.0 },
+    "Ranged": { "healthArmorBonus": 0.0, "shieldArmorBonus": 0.0, "healthRegenBonus": 0.0, "shieldRegenBonus": 0.0 }
+  },
+  "melee": {
+    "range": 40.0,
+    "arcDegrees": 70.0,
+    "damageMultiplier": 1.3
+  },
+  "plasma": {
+    "shieldDamageMultiplier": 1.5,
+    "healthDamageMultiplier": 0.75
+  },
+  "thornTank": {
+    "reflectPercent": 0.25,
+    "maxReflectPerHit": 40.0
+  },
   "projectile": {
     "speed": 400.0,
     "damage": 15.0,

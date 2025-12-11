@@ -9,6 +9,10 @@ namespace Game {
 class CollisionSystem {
 public:
     void setContactDamage(float dmg) { contactDamage_ = dmg; }
+    void setThornConfig(float reflectPercent, float maxReflect) {
+        thornReflectPercent_ = reflectPercent;
+        thornMaxReflect_ = maxReflect;
+    }
     void setXpHooks(int* xpPtr, Engine::ECS::Entity hero, float perDamageDealt, float perDamageTaken) {
         xpPtr_ = xpPtr;
         hero_ = hero;
@@ -23,6 +27,8 @@ private:
     Engine::ECS::Entity hero_{Engine::ECS::kInvalidEntity};
     float xpPerDamageDealt_{0.0f};
     float xpPerDamageTaken_{0.0f};
+    float thornReflectPercent_{0.0f};
+    float thornMaxReflect_{0.0f};
 };
 
 }  // namespace Game

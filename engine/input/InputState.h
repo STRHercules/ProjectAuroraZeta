@@ -29,6 +29,7 @@ enum class InputKey {
     Ultimate,
     Reload,
     MenuBack,
+    BuildMenu,
     Count
 };
 

@@ -15,6 +15,7 @@
 #include "../components/HitFlash.h"
 #include "../components/DamageNumber.h"
 #include "../components/Invulnerable.h"
+#include "../components/OffensiveType.h"
 
 namespace {
 bool aabbOverlap(const Engine::ECS::Transform& ta, const Engine::ECS::AABB& aa, const Engine::ECS::Transform& tb,
@@ -125,7 +126,7 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
 
     // Enemy contact damages hero.
     registry.view<Engine::ECS::Transform, Engine::ECS::EnemyTag, Engine::ECS::AABB>(
-        [&](Engine::ECS::Entity /*enemyEnt*/, Engine::ECS::Transform& enemyTf, Engine::ECS::EnemyTag& /*tag*/,
+        [&](Engine::ECS::Entity enemyEnt, Engine::ECS::Transform& enemyTf, Engine::ECS::EnemyTag& /*tag*/,
             Engine::ECS::AABB& enemyBox) {
             registry.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::AABB, Engine::ECS::HeroTag>(
                 [&](Engine::ECS::Entity heroEnt, Engine::ECS::Transform& heroTf, Engine::ECS::Health& heroHp,
@@ -153,6 +154,25 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                             }
                             if (xpPtr_ && heroEnt == hero_) {
                                 *xpPtr_ += static_cast<int>(std::round(dealt * xpPerDamageTaken_));
+                            }
+                            bool thorny = false;
+                            if (auto* ot = registry.get<Game::OffensiveTypeTag>(heroEnt)) {
+                                thorny = ot->type == Game::OffensiveType::ThornTank;
+                            }
+                            if (thorny) {
+                                if (auto* enemyHp = registry.get<Engine::ECS::Health>(enemyEnt)) {
+                                    float reflect = std::min(thornMaxReflect_, dealt * thornReflectPercent_);
+                                    if (reflect > 0.0f) {
+                                        Engine::Gameplay::DamageEvent reflectDmg{};
+                                        reflectDmg.baseDamage = reflect;
+                                        reflectDmg.type = Engine::Gameplay::DamageType::Normal;
+                                        Engine::Gameplay::BuffState enemyBuff{};
+                                        if (auto* armorBuff = registry.get<Game::ArmorBuff>(enemyEnt)) {
+                                            enemyBuff = armorBuff->state;
+                                        }
+                                        Engine::Gameplay::applyDamage(*enemyHp, reflectDmg, enemyBuff);
+                                    }
+                                }
                             }
                         }
                     }

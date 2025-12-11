@@ -15,6 +15,8 @@ set(GAME_SOURCES
     systems/EventSystem.cpp
     systems/HotzoneSystem.cpp
     systems/ShopSystem.cpp
+    systems/MiniUnitSystem.cpp
+    GameSelectedBuilding.cpp
     meta/ItemDefs.cpp
     meta/SaveManager.cpp
     net/NetSession.cpp
