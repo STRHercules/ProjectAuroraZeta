@@ -636,6 +636,5 @@ Once this is complete, any future character or mini-unit can simply set an `offe
   - `game/units/` for RTS-style unit behaviors.
 - Keep **OffensiveType** strictly game-layer; do not introduce Zeta-specific enumerations into `/engine`.
 - Document any newly implemented behaviors in:
-  - `docs/GAME_SPEC.md` (heroes & combat section).
-  - `docs/Ideas.md` (mark Offensive Types points as “implemented / partial” where applicable).
+  - `README.md`
 
