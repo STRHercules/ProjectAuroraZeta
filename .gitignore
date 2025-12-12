@@ -4,6 +4,8 @@
 *.user
 *.log
 
+/build-mac/
+
 # Editor/OS
 .DS_Store
 .vs/
