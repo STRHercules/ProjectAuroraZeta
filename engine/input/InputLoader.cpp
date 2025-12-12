@@ -82,6 +82,9 @@ std::optional<InputBindings> InputLoader::loadFromFile(const std::string& path) 
     if (j.contains("menuBack")) {
         bindings.menuBack = readStrings(j["menuBack"]);
     }
+    if (j.contains("buildMenu")) {
+        bindings.buildMenu = readStrings(j["buildMenu"]);
+    }
 
     return bindings;
 }

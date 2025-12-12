@@ -15,6 +15,9 @@
 #include "../components/HitFlash.h"
 #include "../components/DamageNumber.h"
 #include "../components/Invulnerable.h"
+#include "../components/OffensiveType.h"
+#include "../components/MiniUnit.h"
+#include "../components/Building.h"
 
 namespace {
 bool aabbOverlap(const Engine::ECS::Transform& ta, const Engine::ECS::AABB& aa, const Engine::ECS::Transform& tb,
@@ -125,7 +128,7 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
 
     // Enemy contact damages hero.
     registry.view<Engine::ECS::Transform, Engine::ECS::EnemyTag, Engine::ECS::AABB>(
-        [&](Engine::ECS::Entity /*enemyEnt*/, Engine::ECS::Transform& enemyTf, Engine::ECS::EnemyTag& /*tag*/,
+        [&](Engine::ECS::Entity enemyEnt, Engine::ECS::Transform& enemyTf, Engine::ECS::EnemyTag& /*tag*/,
             Engine::ECS::AABB& enemyBox) {
             registry.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::AABB, Engine::ECS::HeroTag>(
                 [&](Engine::ECS::Entity heroEnt, Engine::ECS::Transform& heroTf, Engine::ECS::Health& heroHp,
@@ -154,6 +157,74 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                             if (xpPtr_ && heroEnt == hero_) {
                                 *xpPtr_ += static_cast<int>(std::round(dealt * xpPerDamageTaken_));
                             }
+                            bool thorny = false;
+                            if (auto* ot = registry.get<Game::OffensiveTypeTag>(heroEnt)) {
+                                thorny = ot->type == Game::OffensiveType::ThornTank;
+                            }
+                            if (thorny) {
+                                if (auto* enemyHp = registry.get<Engine::ECS::Health>(enemyEnt)) {
+                                    float reflect = std::min(thornMaxReflect_, dealt * thornReflectPercent_);
+                                    if (reflect > 0.0f) {
+                                        Engine::Gameplay::DamageEvent reflectDmg{};
+                                        reflectDmg.baseDamage = reflect;
+                                        reflectDmg.type = Engine::Gameplay::DamageType::Normal;
+                                        Engine::Gameplay::BuffState enemyBuff{};
+                                        if (auto* armorBuff = registry.get<Game::ArmorBuff>(enemyEnt)) {
+                                            enemyBuff = armorBuff->state;
+                                        }
+                                        Engine::Gameplay::applyDamage(*enemyHp, reflectDmg, enemyBuff);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+        });
+
+    // Enemy contact damages mini units and turrets.
+    registry.view<Engine::ECS::Transform, Engine::ECS::EnemyTag, Engine::ECS::AABB>(
+        [&](Engine::ECS::Entity enemyEnt, Engine::ECS::Transform& enemyTf, Engine::ECS::EnemyTag& /*tag*/,
+            Engine::ECS::AABB& enemyBox) {
+            // Mini units.
+            registry.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::AABB, Game::MiniUnit>(
+                [&](Engine::ECS::Entity miniEnt, Engine::ECS::Transform& miniTf, Engine::ECS::Health& miniHp,
+                    Engine::ECS::AABB& miniBox, Game::MiniUnit&) {
+                    if (!miniHp.alive()) return;
+                    if (aabbOverlap(enemyTf, enemyBox, miniTf, miniBox)) {
+                        Engine::Gameplay::DamageEvent contact{};
+                        contact.baseDamage = contactDamage_;
+                        contact.type = Engine::Gameplay::DamageType::Normal;
+                        Engine::Gameplay::BuffState buff{};
+                        if (auto* armorBuff = registry.get<Game::ArmorBuff>(miniEnt)) {
+                            buff = armorBuff->state;
+                        }
+                        Engine::Gameplay::applyDamage(miniHp, contact, buff);
+                        if (auto* flash = registry.get<Game::HitFlash>(miniEnt)) {
+                            flash->timer = 0.12f;
+                        } else {
+                            registry.emplace<Game::HitFlash>(miniEnt, Game::HitFlash{0.12f});
+                        }
+                    }
+                });
+            // Turrets only.
+            registry.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::AABB, Game::Building>(
+                [&](Engine::ECS::Entity bEnt, Engine::ECS::Transform& bTf, Engine::ECS::Health& bHp,
+                    Engine::ECS::AABB& bBox, Game::Building& b) {
+                    if (b.type != Game::BuildingType::Turret) return;
+                    if (!bHp.alive()) return;
+                    if (aabbOverlap(enemyTf, enemyBox, bTf, bBox)) {
+                        Engine::Gameplay::DamageEvent contact{};
+                        contact.baseDamage = contactDamage_;
+                        contact.type = Engine::Gameplay::DamageType::Normal;
+                        Engine::Gameplay::BuffState buff{};
+                        if (auto* armorBuff = registry.get<Game::ArmorBuff>(bEnt)) {
+                            buff = armorBuff->state;
+                        }
+                        Engine::Gameplay::applyDamage(bHp, contact, buff);
+                        if (auto* flash = registry.get<Game::HitFlash>(bEnt)) {
+                            flash->timer = 0.12f;
+                        } else {
+                            registry.emplace<Game::HitFlash>(bEnt, Game::HitFlash{0.12f});
                         }
                     }
                 });

@@ -1,9 +1,3 @@
-/* 
-Paste this into your .vscode/launch.json file to set up debugging configurations for Project Aurora Zeta
-Adjust the "program" paths if your build output is located elsewhere 
-or has a different name. 
-*/
-
 {
   "version": "0.2.0",
   "configurations": [
