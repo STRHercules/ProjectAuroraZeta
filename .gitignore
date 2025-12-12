@@ -4,6 +4,8 @@
 *.user
 *.log
 
+/build-mac/
+
 # Editor/OS
 .DS_Store
 .vs/
@@ -14,3 +16,5 @@ discord_social_sdk
 
 # Gamesaves
 saves/profile.dat
+/saves
+
