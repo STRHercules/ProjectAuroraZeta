@@ -288,6 +288,8 @@ bool GameRoot::onInitialize(Engine::Application& app) {
         if (gp.is_open()) {
             nlohmann::json j;
             gp >> j;
+            float globalSpeedMul = j.value("speedMultiplier", 1.0f);
+            globalSpeedMul_ = std::clamp(globalSpeedMul, 0.1f, 3.0f);
             if (j.contains("enemy")) {
                 waveSettings.enemyHp = j["enemy"].value("hp", waveSettings.enemyHp);
                 waveSettings.enemyShields = j["enemy"].value("shields", waveSettings.enemyShields);
@@ -454,6 +456,8 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     waveSystem_->setSpawnBatchInterval(spawnBatchRoundInterval_);
     waveSystem_->setRound(round_);
     waveSettings.contactDamage = contactDamage;
+    waveSettings.enemySpeed *= globalSpeedMul_;
+    heroMoveSpeed *= globalSpeedMul_;
     waveSettingsBase_ = waveSettings;
     waveSettingsDefault_ = waveSettings;
     projectileSpeed_ = projectileSpeed;
@@ -757,15 +761,45 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         return;
     }
 
-    // Mini-unit selection and orders (RTS-style).
-    if (!inMenu_ && !paused_ && movementMode_ == MovementMode::RTS) {
+    // Mini-unit selection and orders (RTS-style). Available in both movement modes.
+    if (!inMenu_ && !paused_) {
         const bool leftDown = input.isMouseButtonDown(0);
         const bool rightDown = input.isMouseButtonDown(2);
         Engine::Vec2 worldMouse = Engine::Gameplay::mouseWorldPosition(input, camera_, viewportWidth_, viewportHeight_);
         const bool leftEdge = leftDown && !miniSelectMousePrev_;
         const bool leftRelease = !leftDown && miniSelectMousePrev_;
 
-        if (leftEdge) {
+        // Avoid starting selection when clicking UI panels.
+        auto pointInRect = [&](int mx, int my, float rx, float ry, float rw, float rh) {
+            return mx >= rx && mx <= rx + rw && my >= ry && my <= ry + rh;
+        };
+        bool mouseOverUI = false;
+        if (buildMenuOpen_ && activeArchetype_.offensiveType == Game::OffensiveType::Builder) {
+            const float panelW = 260.0f;
+            const float panelH = 220.0f;
+            const float rx = 22.0f;
+            const float ry = static_cast<float>(viewportHeight_) - panelH - 22.0f;
+            mouseOverUI |= pointInRect(lastMouseX_, lastMouseY_, rx, ry, panelW, panelH);
+        }
+        if (selectedBuilding_ != Engine::ECS::kInvalidEntity &&
+            registry_.has<Game::Building>(selectedBuilding_) &&
+            registry_.has<Engine::ECS::Health>(selectedBuilding_)) {
+            const auto* b = registry_.get<Game::Building>(selectedBuilding_);
+            const float panelW = 270.0f;
+            const float panelH = (b && b->type == Game::BuildingType::Barracks) ? 170.0f : 120.0f;
+            const float rx = 20.0f;
+            const float ry = static_cast<float>(viewportHeight_) - panelH - 20.0f;
+            mouseOverUI |= pointInRect(lastMouseX_, lastMouseY_, rx, ry, panelW, panelH);
+        }
+        if (!selectedMiniUnits_.empty()) {
+            const float hudW = 300.0f;
+            const float hudH = 70.0f;
+            const float hudX = static_cast<float>(viewportWidth_) * 0.5f - hudW * 0.5f;
+            const float hudY = static_cast<float>(viewportHeight_) - hudH - 18.0f;
+            mouseOverUI |= pointInRect(lastMouseX_, lastMouseY_, hudX, hudY, hudW, hudH);
+        }
+
+        if (leftEdge && !mouseOverUI) {
             selectingMiniUnits_ = true;
             selectionStart_ = worldMouse;
             selectionEnd_ = worldMouse;
@@ -839,10 +873,38 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             }
         }
         miniRightClickPrev_ = rightDown;
+
+        // Selection HUD combat toggle (bottom-center).
+        const float hudW = 300.0f;
+        const float hudH = 70.0f;
+        const float hudX = static_cast<float>(viewportWidth_) * 0.5f - hudW * 0.5f;
+        const float hudY = static_cast<float>(viewportHeight_) - hudH - 18.0f;
+        const float toggleW = 92.0f;
+        const float toggleH = 26.0f;
+        const float toggleX = hudX + hudW - toggleW - 12.0f;
+        const float toggleY = hudY + hudH - toggleH - 10.0f;
+        bool hudLeftEdge = leftDown && !miniHudClickPrev_;
+        if (hudLeftEdge && !selectingMiniUnits_ && !selectedMiniUnits_.empty() &&
+            pointInRect(lastMouseX_, lastMouseY_, toggleX, toggleY, toggleW, toggleH)) {
+            bool anyOff = false;
+            for (auto ent : selectedMiniUnits_) {
+                if (auto* mu = registry_.get<Game::MiniUnit>(ent)) {
+                    if (!mu->combatEnabled) { anyOff = true; break; }
+                }
+            }
+            bool newState = anyOff; // if any are off, turn all on, else turn all off
+            for (auto ent : selectedMiniUnits_) {
+                if (auto* mu = registry_.get<Game::MiniUnit>(ent)) {
+                    mu->combatEnabled = newState;
+                }
+            }
+        }
+        miniHudClickPrev_ = leftDown;
     } else {
         selectingMiniUnits_ = false;
         miniSelectMousePrev_ = false;
         miniRightClickPrev_ = false;
+        miniHudClickPrev_ = false;
     }
 
     // Update hero velocity from actions.
@@ -860,7 +922,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 vel->value = {actions.moveX * heroMoveSpeed_, actions.moveY * heroMoveSpeed_};
             } else {
                 const bool allowCommands = !abilityShopOpen_ && !itemShopOpen_ && !levelChoiceOpen_;
-                const bool moveEdge = allowCommands && rightClick && !moveCommandPrev_;
+                const bool moveEdge = allowCommands && rightClick && !moveCommandPrev_ && selectedMiniUnits_.empty();
                 moveCommandPrev_ = rightClick;
                 if (moveEdge) {
                     moveTarget_ = Engine::Gameplay::mouseWorldPosition(input, camera_, viewportWidth_, viewportHeight_);
@@ -1295,7 +1357,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 auto defIt = buildingDefs_.find(buildingKey(b.type));
                 if (defIt == buildingDefs_.end()) return;
                 const BuildingDef& def = defIt->second;
-                if (b.type == Game::BuildingType::Barracks && def.spawnInterval > 0.0f) {
+                if (b.type == Game::BuildingType::Barracks && def.autoSpawn && def.spawnInterval > 0.0f) {
                     b.spawnTimer -= static_cast<float>(step.deltaSeconds);
                     if (b.spawnTimer <= 0.0f) {
                         auto miniIt = miniUnitDefs_.find("light");
@@ -1465,12 +1527,13 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 registry_.emplace<Engine::ECS::Velocity>(proj, Engine::Vec2{0.0f, 0.0f});
                 const float halfSize = projectileHitboxSize_ * 0.5f;
                 registry_.emplace<Engine::ECS::AABB>(proj, Engine::ECS::AABB{Engine::Vec2{halfSize, halfSize}});
+                Engine::TexturePtr turretTex = projectileTexTurret_ ? projectileTexTurret_ : projectileTexRed_;
                 float sz = projectileSize_;
-                if (projectileTexRed_) sz = static_cast<float>(projectileTexRed_->width());
+                if (turretTex) sz = static_cast<float>(turretTex->width());
                 registry_.emplace<Engine::ECS::Renderable>(proj,
                                                            Engine::ECS::Renderable{Engine::Vec2{sz, sz},
                                                                                    Engine::Color{120, 220, 255, 230},
-                                                                                   projectileTexRed_});
+                                                                                   turretTex});
                 Engine::Gameplay::DamageEvent dmgEvent{};
                 dmgEvent.baseDamage = projectileDamage_ * 0.8f;
                 dmgEvent.type = Engine::Gameplay::DamageType::Normal;
@@ -1488,6 +1551,68 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 }
             }
         }
+    }
+
+    // Placed turret buildings fire at nearest enemy in range.
+    if (!paused_) {
+        registry_.view<Game::Building, Engine::ECS::Transform, Engine::ECS::Health>(
+            [&](Engine::ECS::Entity be, Game::Building& b, Engine::ECS::Transform& tf, Engine::ECS::Health& hp) {
+                if (b.type != Game::BuildingType::Turret) return;
+                if (!hp.alive()) return;
+                auto defIt = buildingDefs_.find(buildingKey(b.type));
+                if (defIt == buildingDefs_.end()) return;
+                const BuildingDef& def = defIt->second;
+                if (def.attackRange <= 0.0f || def.attackRate <= 0.0f || def.damage <= 0.0f) return;
+
+                b.spawnTimer = std::max(0.0f, b.spawnTimer - static_cast<float>(step.deltaSeconds));
+                if (b.spawnTimer > 0.0f) return;
+
+                Engine::Vec2 dir{0.0f, 0.0f};
+                float bestDist2 = def.attackRange * def.attackRange;
+                Engine::Vec2 bestPos{};
+                bool found = false;
+                registry_.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::EnemyTag>(
+                    [&](Engine::ECS::Entity, const Engine::ECS::Transform& etf, const Engine::ECS::Health& ehp, Engine::ECS::EnemyTag&) {
+                        if (!ehp.alive()) return;
+                        float dx = etf.position.x - tf.position.x;
+                        float dy = etf.position.y - tf.position.y;
+                        float d2 = dx * dx + dy * dy;
+                        if (d2 <= bestDist2) {
+                            bestDist2 = d2;
+                            bestPos = etf.position;
+                            found = true;
+                        }
+                    });
+                if (!found || bestDist2 < 0.0001f) {
+                    b.spawnTimer = 0.2f; // retry soon if no target
+                    return;
+                }
+                float inv = 1.0f / std::sqrt(bestDist2);
+                dir = {(bestPos.x - tf.position.x) * inv, (bestPos.y - tf.position.y) * inv};
+
+                auto proj = registry_.create();
+                registry_.emplace<Engine::ECS::Transform>(proj, tf.position);
+                registry_.emplace<Engine::ECS::Velocity>(proj, Engine::Vec2{0.0f, 0.0f});
+                const float halfSize = projectileHitboxSize_ * 0.5f;
+                registry_.emplace<Engine::ECS::AABB>(proj, Engine::ECS::AABB{Engine::Vec2{halfSize, halfSize}});
+                Engine::TexturePtr turretTex = projectileTexTurret_ ? projectileTexTurret_ : projectileTexRed_;
+                float sz = projectileSize_;
+                if (turretTex) sz = static_cast<float>(turretTex->width());
+                registry_.emplace<Engine::ECS::Renderable>(proj,
+                                                           Engine::ECS::Renderable{Engine::Vec2{sz, sz},
+                                                                                   Engine::Color{120, 220, 255, 230},
+                                                                                   turretTex});
+                Engine::Gameplay::DamageEvent dmgEvent{};
+                dmgEvent.baseDamage = def.damage;
+                dmgEvent.type = Engine::Gameplay::DamageType::Normal;
+                dmgEvent.bonusVsTag[Engine::Gameplay::Tag::Light] = 1.0f;
+                registry_.emplace<Engine::ECS::Projectile>(proj,
+                                                           Engine::ECS::Projectile{Engine::Vec2{dir.x * projectileSpeed_,
+                                                                                                 dir.y * projectileSpeed_},
+                                                                                   dmgEvent, projectileLifetime_, 0.0f, 0});
+                registry_.emplace<Engine::ECS::ProjectileTag>(proj, Engine::ECS::ProjectileTag{});
+                b.spawnTimer = def.attackRate;
+            });
     }
 
     // Enemy AI.
@@ -1690,6 +1815,50 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             clearBannerTimer_ = 1.5;
             wavesClearedThisRound_ += 1;
             waveSpawned_ = false;
+        }
+
+        // Cleanup dead mini units and free supply.
+        {
+            std::vector<Engine::ECS::Entity> deadMinis;
+            registry_.view<Game::MiniUnit, Engine::ECS::Health>(
+                [&](Engine::ECS::Entity e, Game::MiniUnit&, Engine::ECS::Health& hp) {
+                    if (!hp.alive()) {
+                        deadMinis.push_back(e);
+                    }
+                });
+            if (!deadMinis.empty()) {
+                for (auto e : deadMinis) {
+                    if (miniUnitSupplyUsed_ > 0) miniUnitSupplyUsed_--;
+                    registry_.destroy(e);
+                }
+            }
+        }
+
+        // Cleanup dead buildings (despawn on destruction).
+        {
+            std::vector<std::pair<Engine::ECS::Entity, Game::BuildingType>> deadBuildings;
+            registry_.view<Game::Building, Engine::ECS::Health>(
+                [&](Engine::ECS::Entity e, const Game::Building& b, Engine::ECS::Health& hp) {
+                    if (!hp.alive()) {
+                        deadBuildings.push_back({e, b.type});
+                    }
+                });
+            if (!deadBuildings.empty()) {
+                for (auto [e, type] : deadBuildings) {
+                    // If a house was providing supply, remove it.
+                    if (type == Game::BuildingType::House) {
+                        auto it = buildingDefs_.find("house");
+                        int supplyProvided = (it != buildingDefs_.end()) ? it->second.supplyProvided : 0;
+                        if (supplyProvided > 0) {
+                            miniUnitSupplyMax_ = std::max(0, miniUnitSupplyMax_ - supplyProvided);
+                            if (miniUnitSupplyUsed_ > miniUnitSupplyMax_) {
+                                miniUnitSupplyUsed_ = miniUnitSupplyMax_;
+                            }
+                        }
+                    }
+                    registry_.destroy(e);
+                }
+            }
         }
         // Fast-forward combat timer when field is empty.
         if (inCombat_ && enemiesAlive_ == 0 && combatTimer_ > 1.0) {
@@ -1963,6 +2132,85 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         if (fogLayer_ && fogTexture_ && sdlRenderer_) {
             Engine::renderFog(sdlRenderer_, *fogLayer_, fogTileSize_, fogOriginOffsetX_, fogOriginOffsetY_,
                               cameraShaken, viewportWidth_, viewportHeight_, fogTexture_);
+        }
+
+        // Mini-unit selection rectangle and selected rings (RTS UI).
+        if (selectingMiniUnits_) {
+            Engine::Vec2 s0 = Engine::worldToScreen(selectionStart_, cameraShaken,
+                                                    static_cast<float>(viewportWidth_),
+                                                    static_cast<float>(viewportHeight_));
+            Engine::Vec2 s1 = Engine::worldToScreen(selectionEnd_, cameraShaken,
+                                                    static_cast<float>(viewportWidth_),
+                                                    static_cast<float>(viewportHeight_));
+            float minX = std::min(s0.x, s1.x);
+            float maxX = std::max(s0.x, s1.x);
+            float minY = std::min(s0.y, s1.y);
+            float maxY = std::max(s0.y, s1.y);
+            const float t = 2.0f;
+            Engine::Color c{120, 220, 255, 200};
+            render_->drawFilledRect(Engine::Vec2{minX, minY}, Engine::Vec2{maxX - minX, t}, c);
+            render_->drawFilledRect(Engine::Vec2{minX, maxY - t}, Engine::Vec2{maxX - minX, t}, c);
+            render_->drawFilledRect(Engine::Vec2{minX, minY}, Engine::Vec2{t, maxY - minY}, c);
+            render_->drawFilledRect(Engine::Vec2{maxX - t, minY}, Engine::Vec2{t, maxY - minY}, c);
+        }
+        if (!selectedMiniUnits_.empty()) {
+            for (auto ent : selectedMiniUnits_) {
+                if (!registry_.has<Engine::ECS::Transform>(ent)) continue;
+                const auto* tf = registry_.get<Engine::ECS::Transform>(ent);
+                if (!tf) continue;
+                Engine::Vec2 sp = Engine::worldToScreen(tf->position, cameraShaken,
+                                                       static_cast<float>(viewportWidth_),
+                                                       static_cast<float>(viewportHeight_));
+                const float r = 10.0f;
+                const float t = 2.0f;
+                Engine::Color ring{90, 255, 160, 220};
+                render_->drawFilledRect(Engine::Vec2{sp.x - r, sp.y - r}, Engine::Vec2{r * 2.0f, t}, ring);
+                render_->drawFilledRect(Engine::Vec2{sp.x - r, sp.y + r - t}, Engine::Vec2{r * 2.0f, t}, ring);
+                render_->drawFilledRect(Engine::Vec2{sp.x - r, sp.y - r}, Engine::Vec2{t, r * 2.0f}, ring);
+                render_->drawFilledRect(Engine::Vec2{sp.x + r - t, sp.y - r}, Engine::Vec2{t, r * 2.0f}, ring);
+            }
+        }
+
+        // Mini-unit selection HUD (bottom-center).
+        if (!selectedMiniUnits_.empty()) {
+            int lightN = 0, heavyN = 0, medicN = 0;
+            bool allCombatOn = true;
+            bool anyCombatOn = false;
+            for (auto ent : selectedMiniUnits_) {
+                if (auto* mu = registry_.get<Game::MiniUnit>(ent)) {
+                    switch (mu->cls) {
+                        case Game::MiniUnitClass::Light: ++lightN; break;
+                        case Game::MiniUnitClass::Heavy: ++heavyN; break;
+                        case Game::MiniUnitClass::Medic: ++medicN; break;
+                    }
+                    allCombatOn &= mu->combatEnabled;
+                    anyCombatOn |= mu->combatEnabled;
+                }
+            }
+            const float hudW = 300.0f;
+            const float hudH = 70.0f;
+            const float hudX = static_cast<float>(viewportWidth_) * 0.5f - hudW * 0.5f;
+            const float hudY = static_cast<float>(viewportHeight_) - hudH - 18.0f;
+            render_->drawFilledRect(Engine::Vec2{hudX, hudY}, Engine::Vec2{hudW, hudH},
+                                    Engine::Color{18, 24, 34, 215});
+            std::ostringstream sel;
+            sel << "Selected: " << selectedMiniUnits_.size()
+                << "  L " << lightN << "  H " << heavyN << "  M " << medicN;
+            drawTextUnified(sel.str(), Engine::Vec2{hudX + 10.0f, hudY + 8.0f}, 0.9f,
+                            Engine::Color{220, 240, 255, 240});
+            std::string combatLabel = allCombatOn ? "Combat: ON" : (anyCombatOn ? "Combat: MIXED" : "Combat: OFF");
+            drawTextUnified(combatLabel, Engine::Vec2{hudX + 10.0f, hudY + 34.0f}, 0.85f,
+                            Engine::Color{200, 230, 240, 230});
+
+            const float toggleW = 92.0f;
+            const float toggleH = 26.0f;
+            const float toggleX = hudX + hudW - toggleW - 12.0f;
+            const float toggleY = hudY + hudH - toggleH - 10.0f;
+            Engine::Color toggleBg = allCombatOn ? Engine::Color{40, 90, 60, 230} : Engine::Color{60, 50, 50, 230};
+            render_->drawFilledRect(Engine::Vec2{toggleX, toggleY}, Engine::Vec2{toggleW, toggleH}, toggleBg);
+            drawTextUnified(allCombatOn ? "Stop" : "Engage",
+                            Engine::Vec2{toggleX + 10.0f, toggleY + 5.0f}, 0.85f,
+                            Engine::Color{240, 255, 240, 240});
         }
 
         // Off-screen pickup indicator for nearest pickup.
@@ -2336,8 +2584,32 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
     buildMenuClickPrev_ = input.isMouseButtonDown(0);
         drawBuildMenuOverlay(lastMouseX_, lastMouseY_, buildLeftEdge);
         // Building selection click in world (when not previewing).
+        // Suppress world-selection when clicking bottom-left UI panels (build menu, selected building panel),
+        // otherwise UI clicks can clear the selection before the panel handles them.
+        auto pointInRect = [&](int mx, int my, float rx, float ry, float rw, float rh) {
+            return mx >= rx && mx <= rx + rw && my >= ry && my <= ry + rh;
+        };
+        bool mouseOverBottomLeftUI = false;
+        if (buildMenuOpen_ && activeArchetype_.offensiveType == Game::OffensiveType::Builder) {
+            const float panelW = 260.0f;
+            const float panelH = 220.0f;
+            const float rx = 22.0f;
+            const float ry = static_cast<float>(viewportHeight_) - panelH - 22.0f;
+            mouseOverBottomLeftUI |= pointInRect(lastMouseX_, lastMouseY_, rx, ry, panelW, panelH);
+        }
+        if (selectedBuilding_ != Engine::ECS::kInvalidEntity &&
+            registry_.has<Game::Building>(selectedBuilding_) &&
+            registry_.has<Engine::ECS::Health>(selectedBuilding_)) {
+            const auto* b = registry_.get<Game::Building>(selectedBuilding_);
+            const float panelW = 270.0f;
+            const float panelH = (b && b->type == Game::BuildingType::Barracks) ? 170.0f : 120.0f;
+            const float rx = 20.0f;
+            const float ry = static_cast<float>(viewportHeight_) - panelH - 20.0f;
+            mouseOverBottomLeftUI |= pointInRect(lastMouseX_, lastMouseY_, rx, ry, panelW, panelH);
+        }
+
         bool worldLeftEdge = input.isMouseButtonDown(0) && !buildPreviewActive_ && !buildingSelectPrev_;
-        if (worldLeftEdge && !inMenu_ && !paused_) {
+        if (worldLeftEdge && !mouseOverBottomLeftUI && !inMenu_ && !paused_) {
             selectBuildingAt(mouseWorld_);
             buildingJustSelected_ = true;
         }
@@ -3097,6 +3369,15 @@ void GameRoot::loadUnitDefinitions() {
             def.moveSpeed = v.value("moveSpeed", 0.0f);
             def.damage = v.value("damage", 0.0f);
             def.healPerSecond = v.value("healPerSecond", 0.0f);
+            def.armor = v.value("armor", 0.0f);
+            def.shieldArmor = v.value("shieldArmor", 0.0f);
+            // Optional tuning knobs for RTS mini-units.
+            def.attackRange = v.value("attackRange", 0.0f);
+            def.attackRate = v.value("attackRate", 0.0f);
+            def.preferredDistance = v.value("preferredDistance", 0.0f);
+            def.tauntRadius = v.value("tauntRadius", 0.0f);
+            def.healRange = v.value("healRange", 0.0f);
+            def.frameDuration = v.value("frameDuration", 0.0f);
             def.offensiveType = offensiveTypeFromString(v.value("offensiveType", std::string("Ranged")));
             def.costCopper = v.value("costCopper", 0);
             def.texturePath = v.value("texture", std::string{});
@@ -3120,6 +3401,7 @@ void GameRoot::loadUnitDefinitions() {
             def.attackRate = v.value("attackRate", 0.0f);
             def.damage = v.value("damage", 0.0f);
             def.spawnInterval = v.value("spawnInterval", 0.0f);
+            def.autoSpawn = v.value("autoSpawn", false);
             def.maxQueue = v.value("maxQueue", 0);
             def.capacity = v.value("capacity", 0);
             def.damageMultiplierPerUnit = v.value("damageMultiplierPerUnit", 0.0f);
@@ -3145,6 +3427,7 @@ void GameRoot::loadPickupTextures() {
 void GameRoot::loadProjectileTextures() {
     projectileTextures_.clear();
     projectileTexRed_ = {};
+    projectileTexTurret_ = {};
     if (!sdlRenderer_) return;
     SDL_Surface* sheet = IMG_Load("assets/Sprites/Misc/projectiles.png");
     if (!sheet) {
@@ -3168,8 +3451,10 @@ void GameRoot::loadProjectileTextures() {
     SDL_FreeSurface(sheet);
     if (projectileTextures_.size() >= 4) {
         projectileTexRed_ = projectileTextures_[3];  // bottom (red)
+        projectileTexTurret_ = projectileTextures_[1]; // second sprite for turrets
     } else if (!projectileTextures_.empty()) {
         projectileTexRed_ = projectileTextures_.back();
+        projectileTexTurret_ = projectileTextures_.front();
     }
 }
 
@@ -3235,12 +3520,47 @@ bool GameRoot::spawnMiniUnit(const MiniUnitDef& def, const Engine::Vec2& pos) {
     }
     registry_.emplace<Engine::ECS::Renderable>(e,
         Engine::ECS::Renderable{Engine::Vec2{size, size}, Engine::Color{160, 240, 200, 255}, tex});
+    if (tex) {
+        int frameW = 16;
+        int frameH = 16;
+        int frames = std::max(1, tex->width() / frameW);
+        float frameDur = def.frameDuration > 0.0f ? def.frameDuration : 0.14f;
+        registry_.emplace<Engine::ECS::SpriteAnimation>(e, Engine::ECS::SpriteAnimation{frameW, frameH, frames, frameDur});
+    }
     Engine::ECS::Health hp{};
     hp.maxHealth = hp.currentHealth = def.hp;
     hp.maxShields = hp.currentShields = def.shields;
+    // Armor per mini unit (defaults by class if not specified).
+    float armor = def.armor;
+    float shieldArmor = def.shieldArmor;
+    if (armor <= 0.0f && def.cls == Game::MiniUnitClass::Heavy) armor = 1.0f;
+    if (shieldArmor <= 0.0f && def.cls == Game::MiniUnitClass::Heavy) shieldArmor = armor;
+    hp.healthArmor = armor;
+    hp.shieldArmor = shieldArmor;
     registry_.emplace<Engine::ECS::Health>(e, hp);
-    registry_.emplace<Game::MiniUnit>(e, Game::MiniUnit{def.cls, 0});
+    registry_.emplace<Game::MiniUnit>(e, Game::MiniUnit{def.cls, 0, false, 0.0f, 0.0f});
     registry_.emplace<Game::MiniUnitCommand>(e, Game::MiniUnitCommand{false, {}});
+    // Cache stats per-unit for data-driven AI/RTS control.
+    Game::MiniUnitStats stats{};
+    stats.moveSpeed = (def.moveSpeed > 0.0f ? def.moveSpeed : 160.0f) * globalSpeedMul_;
+    stats.damage = def.damage;
+    stats.healPerSecond = def.healPerSecond;
+    // Per-class defaults if not specified in json.
+    if (def.cls == Game::MiniUnitClass::Light) {
+        stats.attackRange = def.attackRange > 0.0f ? def.attackRange : 180.0f;
+        stats.attackRate = def.attackRate > 0.0f ? def.attackRate : 0.9f;
+        stats.preferredDistance = def.preferredDistance > 0.0f ? def.preferredDistance : 130.0f;
+    } else if (def.cls == Game::MiniUnitClass::Heavy) {
+        stats.attackRange = def.attackRange > 0.0f ? def.attackRange : 140.0f;
+        stats.attackRate = def.attackRate > 0.0f ? def.attackRate : 1.1f;
+        stats.tauntRadius = def.tauntRadius > 0.0f ? def.tauntRadius : 180.0f;
+        stats.preferredDistance = 0.0f;
+    } else { // Medic
+        stats.attackRange = 0.0f;
+        stats.attackRate = 0.0f;
+        stats.healRange = def.healRange > 0.0f ? def.healRange : 95.0f;
+    }
+    registry_.emplace<Game::MiniUnitStats>(e, stats);
     registry_.emplace<Game::OffensiveTypeTag>(e, Game::OffensiveTypeTag{def.offensiveType});
     return true;
 }
@@ -3276,7 +3596,7 @@ void GameRoot::placeBuilding(const Engine::Vec2& pos) {
     hp.healthArmor = def.armor;
     hp.shieldArmor = def.armor;
     registry_.emplace<Engine::ECS::Health>(e, hp);
-    registry_.emplace<Game::Building>(e, Game::Building{def.type, 0, true, def.spawnInterval});
+    registry_.emplace<Game::Building>(e, Game::Building{def.type, 0, true, def.autoSpawn ? def.spawnInterval : 0.0f});
     if (def.type == Game::BuildingType::House && def.supplyProvided > 0) {
         miniUnitSupplyMax_ = std::min(miniUnitSupplyCap_, miniUnitSupplyMax_ + def.supplyProvided);
     }

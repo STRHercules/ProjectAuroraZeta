@@ -20,6 +20,7 @@
 #include "../../engine/render/BitmapTextRenderer.h"
 #include "../../engine/ecs/components/Tags.h"
 #include "../systems/BuffSystem.h"
+#include "../components/MiniUnit.h"
 
 namespace Game {
 
@@ -115,8 +116,8 @@ void RenderSystem::draw(const Engine::ECS::Registry& registry, const Engine::Cam
                 device_.drawFilledRect(screenPos, scaledSize, color);
             }
 
-            // Floating health/shield bars for enemies.
-            if (registry.has<Engine::ECS::EnemyTag>(e) || registry.has<Engine::ECS::BossTag>(e)) {
+            // Floating health/shield bars for enemies and mini units.
+            if (registry.has<Engine::ECS::EnemyTag>(e) || registry.has<Engine::ECS::BossTag>(e) || registry.has<Game::MiniUnit>(e)) {
                 if (const auto* hp = registry.get<Engine::ECS::Health>(e)) {
                     const float barW = std::clamp(rend.size.x * camera.zoom, 18.0f, 60.0f);
                     const float barH = 3.0f;

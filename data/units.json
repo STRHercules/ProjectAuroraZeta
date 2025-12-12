@@ -7,16 +7,18 @@
       "damage": 8.0,
       "offensiveType": "Ranged",
       "costCopper": 6,
-      "texture": "assets/Sprites/Enemies/eye.png"
+      "texture": "assets/Sprites/Units/LightUnit.png"
     },
     "heavy": {
-      "hp": 120.0,
-      "shields": 20.0,
+      "hp": 220.0,
+      "shields": 40.0,
       "moveSpeed": 120.0,
       "damage": 5.0,
+      "armor": 1.0,
+      "shieldArmor": 1.0,
       "offensiveType": "Ranged",
       "costCopper": 10,
-      "texture": "assets/Sprites/Enemies/monkey.png"
+      "texture": "assets/Sprites/Units/HeavyUnit.png"
     },
     "medic": {
       "hp": 60.0,
@@ -26,18 +28,19 @@
       "healPerSecond": 10.0,
       "offensiveType": "Ranged",
       "costCopper": 8,
-      "texture": "assets/Sprites/Enemies/chick.png"
+      "texture": "assets/Sprites/Units/MedicUnit.png"
     }
   },
   "buildings": {
     "turret": {
-      "hp": 150.0,
-      "shields": 50.0,
-      "armor": 1.0,
+      "hp": 320.0,
+      "shields": 80.0,
+      "armor": 3.0,
       "attackRange": 260.0,
       "attackRate": 1.2,
       "damage": 15.0,
-      "costCopper": 30
+      "costCopper": 30,
+      "texturePath": "assets/Sprites/Buildings/turretsmall.png"
     },
     "barracks": {
       "hp": 200.0,
@@ -45,7 +48,8 @@
       "armor": 1.0,
       "spawnInterval": 8.0,
       "maxQueue": 5,
-      "costCopper": 35
+      "costCopper": 35,
+      "texturePath": "assets/Sprites/Buildings/house3.png"
     },
     "bunker": {
       "hp": 260.0,
@@ -53,7 +57,8 @@
       "armor": 2.0,
       "capacity": 4,
       "damageMultiplierPerUnit": 0.35,
-      "costCopper": 40
+      "costCopper": 40,
+      "texturePath": "assets/Sprites/Buildings/house4.png"
     },
     "house": {
       "hp": 120.0,
@@ -61,7 +66,7 @@
       "armor": 0.0,
       "supplyProvided": 2,
       "costCopper": 18,
-      "texturePath": "assets/Sprites/Buildings/house1.png"
+      "texturePath": "assets/Sprites/Buildings/house2.png"
     }
   }
 }

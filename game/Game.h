@@ -51,6 +51,8 @@
 #include "components/Building.h"
 #include "components/MiniUnit.h"
 #include "components/MiniUnitCommand.h"
+#include "components/MiniUnitStats.h"
+#include "components/TauntTarget.h"
 #include "../engine/gameplay/FogOfWar.h"
 #include "../engine/render/FogOfWarRenderer.h"
 #include "net/NetSession.h"
@@ -171,6 +173,14 @@ private:
         float moveSpeed{0.0f};
         float damage{0.0f};
         float healPerSecond{0.0f};
+        float armor{0.0f};
+        float shieldArmor{0.0f};
+        float attackRange{0.0f};
+        float attackRate{0.0f};
+        float preferredDistance{0.0f};
+        float tauntRadius{0.0f};
+        float healRange{0.0f};
+        float frameDuration{0.0f};
         Game::OffensiveType offensiveType{Game::OffensiveType::Ranged};
         int costCopper{0};
         std::string texturePath{};
@@ -185,6 +195,7 @@ private:
         float attackRate{0.0f};
         float damage{0.0f};
         float spawnInterval{0.0f};
+        bool autoSpawn{false};
         int maxQueue{0};
         int capacity{0};
         float damageMultiplierPerUnit{0.0f};
@@ -249,6 +260,7 @@ private:
     Engine::TexturePtr pickupTurretTex_{};
     std::vector<Engine::TexturePtr> projectileTextures_;
     Engine::TexturePtr projectileTexRed_;
+    Engine::TexturePtr projectileTexTurret_;
     SDL_Cursor* customCursor_{nullptr};
     std::string heroTexturePath_{};
     std::unique_ptr<Engine::BitmapTextRenderer> debugText_;
@@ -380,6 +392,7 @@ private:
     int gold_{0};
     int miniUnitSupplyUsed_{0};
     int miniUnitSupplyMax_{0};
+    float globalSpeedMul_{1.0f};
     int miniUnitSupplyCap_{10};
     int level_{1};
     int xp_{0};
@@ -549,6 +562,7 @@ private:
     bool selectingMiniUnits_{false};
     bool miniSelectMousePrev_{false};
     bool miniRightClickPrev_{false};
+    bool miniHudClickPrev_{false};
     double lastMiniSelectClickTime_{-1.0};
     Engine::Vec2 selectionStart_{};
     Engine::Vec2 selectionEnd_{};

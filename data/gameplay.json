@@ -1,4 +1,5 @@
 {
+  "speedMultiplier": 0.8,
   "enemy": {
     "hp": 40.0,
     "shields": 20.0,
