@@ -1,5 +1,7 @@
 # Project Aurora Zeta
 
+![](/assets/icon512.png)
+
 Survivor-style, wave-based ARPG built in C++20 with a lightweight in-house engine. The project is split cleanly between an engine layer (`/engine`) and game layer (`/game`) to keep systems reusable.
 
 The current build includes:
