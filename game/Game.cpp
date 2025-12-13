@@ -5604,27 +5604,34 @@ void GameRoot::spawnHero() {
     registry_.emplace<Engine::ECS::HeroTag>(hero_, Engine::ECS::HeroTag{});
     registry_.emplace<Game::OffensiveTypeTag>(hero_, Game::OffensiveTypeTag{activeArchetype_.offensiveType});
 
-    // Damage Dealer dual-sheet support (movement + combat).
+    // Dual-sheet character support (movement + combat).
     Engine::TexturePtr moveTex{};
     Engine::TexturePtr combatTex{};
     {
+        auto folder = activeArchetype_.name.empty() ? std::string("Damage Dealer") : activeArchetype_.name;
+        std::string prefix = folder;
+        prefix.erase(std::remove(prefix.begin(), prefix.end(), ' '), prefix.end());  // e.g. "Damage Dealer" -> "DamageDealer"
+
         const char* home = std::getenv("HOME");
         auto tryLoad = [&](const std::string& rel) -> Engine::TexturePtr {
             if (home && *home) {
-                std::filesystem::path p = std::filesystem::path(home) / "assets" / "Sprites" / "Characters" / "Damage Dealer" / rel;
+                std::filesystem::path p = std::filesystem::path(home) / "assets" / "Sprites" / "Characters" / folder / rel;
                 if (std::filesystem::exists(p)) return loadTextureOptional(p.string());
             }
-            std::filesystem::path p = std::filesystem::path("assets") / "Sprites" / "Characters" / "Damage Dealer" / rel;
+            std::filesystem::path p = std::filesystem::path("assets") / "Sprites" / "Characters" / folder / rel;
             if (std::filesystem::exists(p)) return loadTextureOptional(p.string());
             return {};
         };
-        moveTex = tryLoad("DamageDealerMovement.png");
-        combatTex = tryLoad("DamageDealerCombat.png");
+
+        moveTex = tryLoad(prefix + "Movement.png");
+        combatTex = tryLoad(prefix + "Combat.png");
     }
 
     if (moveTex && combatTex) {
         registry_.emplace<Game::HeroSpriteSheets>(hero_, Game::HeroSpriteSheets{moveTex, combatTex, 16, 16, 0.12f, 0.10f});
-        registry_.emplace<Game::HeroAttackCycle>(hero_, Game::HeroAttackCycle{0});
+        if (!registry_.has<Game::HeroAttackCycle>(hero_)) {
+            registry_.emplace<Game::HeroAttackCycle>(hero_, Game::HeroAttackCycle{0});
+        }
         if (auto* rend = registry_.get<Engine::ECS::Renderable>(hero_)) {
             rend->texture = moveTex;
         }
