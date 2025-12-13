@@ -36,6 +36,8 @@
 #include "systems/CollisionSystem.h"
 #include "systems/EnemyAISystem.h"
 #include "systems/WaveSystem.h"
+#include "systems/EnemySpriteStateSystem.h"
+#include "systems/HeroSpriteStateSystem.h"
 #include "systems/AnimationSystem.h"
 #include "systems/HitFlashSystem.h"
 #include "systems/DamageNumberSystem.h"
@@ -53,6 +55,11 @@
 #include "components/MiniUnitCommand.h"
 #include "components/MiniUnitStats.h"
 #include "components/TauntTarget.h"
+#include "components/LookDirection.h"
+#include "components/Dying.h"
+#include "components/HeroSpriteSheets.h"
+#include "components/HeroAttackAnim.h"
+#include "components/HeroPickupAnim.h"
 #include "../engine/gameplay/FogOfWar.h"
 #include "../engine/render/FogOfWarRenderer.h"
 #include "net/NetSession.h"
@@ -71,7 +78,7 @@ public:
 private:
     struct MiniUnitDef;
     struct BuildingDef;
-    void handleHeroDeath();
+    void handleHeroDeath(const Engine::TimeStep& step);
     void showDefeatOverlay();
     void processDefeatInput(const Engine::ActionState& actions, const Engine::InputState& input);
     void resetRun();
@@ -334,6 +341,8 @@ private:
     float autoFireRangeBonus_{0.0f};
     float autoFireBaseRange_{320.0f};
     bool autoAttackEnabled_{true};
+    bool defeatDelayActive_{false};
+    float defeatDelayTimer_{0.0f};
     struct OffensiveTypeModifier {
         float healthArmorBonus{0.0f};
         float shieldArmorBonus{0.0f};
@@ -505,6 +514,8 @@ private:
     std::unique_ptr<Game::MiniUnitSystem> miniUnitSystem_;
     std::unique_ptr<Game::EnemyAISystem> enemyAISystem_;
     std::unique_ptr<Game::WaveSystem> waveSystem_;
+    std::unique_ptr<Game::EnemySpriteStateSystem> enemySpriteStateSystem_;
+    std::unique_ptr<Game::HeroSpriteStateSystem> heroSpriteStateSystem_;
     std::unique_ptr<Game::AnimationSystem> animationSystem_;
     std::unique_ptr<Game::HitFlashSystem> hitFlashSystem_;
     std::unique_ptr<Game::DamageNumberSystem> damageNumberSystem_;

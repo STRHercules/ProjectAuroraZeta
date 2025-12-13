@@ -10,12 +10,14 @@
 #include "../../engine/ecs/components/Tags.h"
 #include "../../engine/ecs/components/Renderable.h"
 #include "../../engine/ecs/components/Velocity.h"
+#include "../../engine/ecs/components/SpriteAnimation.h"
 #include "../../engine/gameplay/Combat.h"
 #include "BuffSystem.h"
 #include "../components/HitFlash.h"
 #include "../components/DamageNumber.h"
 #include "../components/Invulnerable.h"
 #include "../components/OffensiveType.h"
+#include "../components/EnemyAttackSwing.h"
 #include "../components/MiniUnit.h"
 #include "../components/Building.h"
 
@@ -127,17 +129,32 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
         });
 
     // Enemy contact damages hero.
-    registry.view<Engine::ECS::Transform, Engine::ECS::EnemyTag, Engine::ECS::AABB>(
-        [&](Engine::ECS::Entity enemyEnt, Engine::ECS::Transform& enemyTf, Engine::ECS::EnemyTag& /*tag*/,
-            Engine::ECS::AABB& enemyBox) {
+    registry.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::EnemyTag, Engine::ECS::AABB>(
+        [&](Engine::ECS::Entity enemyEnt, Engine::ECS::Transform& enemyTf, Engine::ECS::Health& enemyHp,
+            Engine::ECS::EnemyTag& /*tag*/, Engine::ECS::AABB& enemyBox) {
+            if (!enemyHp.alive()) return;
             registry.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::AABB, Engine::ECS::HeroTag>(
                 [&](Engine::ECS::Entity heroEnt, Engine::ECS::Transform& heroTf, Engine::ECS::Health& heroHp,
                     Engine::ECS::AABB& heroBox, Engine::ECS::HeroTag&) {
                     if (!heroHp.alive()) return;
-                    if (auto* inv = registry.get<Game::Invulnerable>(heroEnt)) {
-                        if (inv->timer > 0.0f) return;
-                    }
                     if (aabbOverlap(enemyTf, enemyBox, heroTf, heroBox)) {
+                        // Mark enemy as swinging for visuals even if damage is blocked.
+                        Engine::Vec2 dir{heroTf.position.x - enemyTf.position.x, heroTf.position.y - enemyTf.position.y};
+                        float swingDur = 0.35f;
+                        if (const auto* anim = registry.get<Engine::ECS::SpriteAnimation>(enemyEnt)) {
+                            float fd = anim->frameDuration > 0.0f ? anim->frameDuration : 0.01f;
+                            swingDur = static_cast<float>(anim->frameCount) * fd;
+                        }
+                        if (auto* swing = registry.get<Game::EnemyAttackSwing>(enemyEnt)) {
+                            swing->timer = swingDur;
+                            swing->targetDir = dir;
+                        } else {
+                            registry.emplace<Game::EnemyAttackSwing>(enemyEnt, Game::EnemyAttackSwing{swingDur, dir});
+                        }
+
+                        if (auto* inv = registry.get<Game::Invulnerable>(heroEnt)) {
+                            if (inv->timer > 0.0f) return;
+                        }
                         const float preHealth = heroHp.currentHealth;
                         const float preShields = heroHp.currentShields;
                         Engine::Gameplay::DamageEvent contact{};
@@ -182,15 +199,29 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
         });
 
     // Enemy contact damages mini units and turrets.
-    registry.view<Engine::ECS::Transform, Engine::ECS::EnemyTag, Engine::ECS::AABB>(
-        [&](Engine::ECS::Entity enemyEnt, Engine::ECS::Transform& enemyTf, Engine::ECS::EnemyTag& /*tag*/,
-            Engine::ECS::AABB& enemyBox) {
+    registry.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::EnemyTag, Engine::ECS::AABB>(
+        [&](Engine::ECS::Entity enemyEnt, Engine::ECS::Transform& enemyTf, Engine::ECS::Health& enemyHp,
+            Engine::ECS::EnemyTag& /*tag*/, Engine::ECS::AABB& enemyBox) {
+            if (!enemyHp.alive()) return;
             // Mini units.
             registry.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::AABB, Game::MiniUnit>(
                 [&](Engine::ECS::Entity miniEnt, Engine::ECS::Transform& miniTf, Engine::ECS::Health& miniHp,
                     Engine::ECS::AABB& miniBox, Game::MiniUnit&) {
                     if (!miniHp.alive()) return;
                     if (aabbOverlap(enemyTf, enemyBox, miniTf, miniBox)) {
+                        Engine::Vec2 dir{miniTf.position.x - enemyTf.position.x, miniTf.position.y - enemyTf.position.y};
+                        float swingDur = 0.35f;
+                        if (const auto* anim = registry.get<Engine::ECS::SpriteAnimation>(enemyEnt)) {
+                            float fd = anim->frameDuration > 0.0f ? anim->frameDuration : 0.01f;
+                            swingDur = static_cast<float>(anim->frameCount) * fd;
+                        }
+                        if (auto* swing = registry.get<Game::EnemyAttackSwing>(enemyEnt)) {
+                            swing->timer = swingDur;
+                            swing->targetDir = dir;
+                        } else {
+                            registry.emplace<Game::EnemyAttackSwing>(enemyEnt, Game::EnemyAttackSwing{swingDur, dir});
+                        }
+
                         Engine::Gameplay::DamageEvent contact{};
                         contact.baseDamage = contactDamage_;
                         contact.type = Engine::Gameplay::DamageType::Normal;
@@ -213,6 +244,19 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                     if (b.type != Game::BuildingType::Turret) return;
                     if (!bHp.alive()) return;
                     if (aabbOverlap(enemyTf, enemyBox, bTf, bBox)) {
+                        Engine::Vec2 dir{bTf.position.x - enemyTf.position.x, bTf.position.y - enemyTf.position.y};
+                        float swingDur = 0.35f;
+                        if (const auto* anim = registry.get<Engine::ECS::SpriteAnimation>(enemyEnt)) {
+                            float fd = anim->frameDuration > 0.0f ? anim->frameDuration : 0.01f;
+                            swingDur = static_cast<float>(anim->frameCount) * fd;
+                        }
+                        if (auto* swing = registry.get<Game::EnemyAttackSwing>(enemyEnt)) {
+                            swing->timer = swingDur;
+                            swing->targetDir = dir;
+                        } else {
+                            registry.emplace<Game::EnemyAttackSwing>(enemyEnt, Game::EnemyAttackSwing{swingDur, dir});
+                        }
+
                         Engine::Gameplay::DamageEvent contact{};
                         contact.baseDamage = contactDamage_;
                         contact.type = Engine::Gameplay::DamageType::Normal;

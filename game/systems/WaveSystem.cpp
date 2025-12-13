@@ -16,6 +16,7 @@
 #include "../components/PickupBob.h"
 #include "../components/BountyTag.h"
 #include "../components/Facing.h"
+#include "../components/LookDirection.h"
 
 namespace Game {
 
@@ -72,6 +73,7 @@ bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
         registry.emplace<Engine::ECS::Transform>(e, pos);
         registry.emplace<Engine::ECS::Velocity>(e, Engine::Vec2{0.0f, 0.0f});
         registry.emplace<Game::Facing>(e, Game::Facing{1});
+        registry.emplace<Game::LookDirection>(e, Game::LookDirection{});
         const EnemyDefinition* def = pickEnemyDef();
         float hpVal = settings_.enemyHp;
         float speedVal = settings_.enemySpeed;
@@ -129,6 +131,7 @@ bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
         registry.emplace<Engine::ECS::Transform>(e, pos);
         registry.emplace<Engine::ECS::Velocity>(e, Engine::Vec2{0.0f, 0.0f});
         registry.emplace<Game::Facing>(e, Game::Facing{1});
+        registry.emplace<Game::LookDirection>(e, Game::LookDirection{});
         const EnemyDefinition* def = pickEnemyDef();
         float sizeMul = def ? def->sizeMultiplier : 1.2f;
         float size = 24.0f * sizeMul;
@@ -180,6 +183,7 @@ bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
             registry.emplace<Engine::ECS::Transform>(e, pos);
             registry.emplace<Engine::ECS::Velocity>(e, Engine::Vec2{0.0f, 0.0f});
             registry.emplace<Game::Facing>(e, Game::Facing{1});
+            registry.emplace<Game::LookDirection>(e, Game::LookDirection{});
             const EnemyDefinition* def = pickEnemyDef();
             float sizeMul = def ? def->sizeMultiplier * 1.6f : 2.0f;
             float size = 34.0f * sizeMul;

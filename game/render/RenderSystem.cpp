@@ -34,6 +34,9 @@ uint32_t hashCoords(int x, int y) {
     h *= 0x01000193u;
     return h;
 }
+
+constexpr float kEnemyVisualScale = 2.0f;
+constexpr float kHeroVisualScale = 2.0f;
 }  // namespace
 
 void RenderSystem::draw(const Engine::ECS::Registry& registry, const Engine::Camera2D& camera, int viewportW,
@@ -51,9 +54,12 @@ void RenderSystem::draw(const Engine::ECS::Registry& registry, const Engine::Cam
                           const Engine::ECS::Renderable& rend) {
             Engine::Vec2 screenPos =
                 Engine::worldToScreen(tf.position, camera, static_cast<float>(viewportW), static_cast<float>(viewportH));
-            screenPos.x -= rend.size.x * 0.5f * camera.zoom;
-            screenPos.y -= rend.size.y * 0.5f * camera.zoom;
-            Engine::Vec2 scaledSize{rend.size.x * camera.zoom, rend.size.y * camera.zoom};
+            const bool isEnemy = registry.has<Engine::ECS::EnemyTag>(e) || registry.has<Engine::ECS::BossTag>(e);
+            const bool isHero = registry.has<Engine::ECS::HeroTag>(e);
+            const float visualScale = isEnemy ? kEnemyVisualScale : (isHero ? kHeroVisualScale : 1.0f);
+            screenPos.x -= rend.size.x * 0.5f * camera.zoom * visualScale;
+            screenPos.y -= rend.size.y * 0.5f * camera.zoom * visualScale;
+            Engine::Vec2 scaledSize{rend.size.x * camera.zoom * visualScale, rend.size.y * camera.zoom * visualScale};
             const float cullMargin = 64.0f;
             if (screenPos.x > center.x * 2.0f + cullMargin || screenPos.y > center.y * 2.0f + cullMargin ||
                 screenPos.x + scaledSize.x < -cullMargin || screenPos.y + scaledSize.y < -cullMargin) {
@@ -105,9 +111,11 @@ void RenderSystem::draw(const Engine::ECS::Registry& registry, const Engine::Cam
             if (rend.texture) {
                 if (const auto* anim = registry.get<Engine::ECS::SpriteAnimation>(e);
                     anim && anim->frameCount > 1) {
-                    Engine::IntRect src{anim->frameWidth * anim->currentFrame, 0, anim->frameWidth,
+                    Engine::IntRect src{anim->frameWidth * anim->currentFrame,
+                                        anim->frameHeight * anim->row,
+                                        anim->frameWidth,
                                         anim->frameHeight};
-                    device_.drawTextureRegion(*rend.texture, screenPos, scaledSize, src, flipX);
+                    device_.drawTextureRegion(*rend.texture, screenPos, scaledSize, src, flipX && anim->allowFlipX);
                 } else {
                     Engine::IntRect src{0, 0, rend.texture->width(), rend.texture->height()};
                     device_.drawTextureRegion(*rend.texture, screenPos, scaledSize, src, flipX);

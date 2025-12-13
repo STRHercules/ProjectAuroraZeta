@@ -10,6 +10,8 @@ struct SpriteAnimation {
     float frameDuration{0.16f};
     float accumulator{0.0f};
     int currentFrame{0};
+    int row{0};           // 0-based row index in the spritesheet
+    bool allowFlipX{true};  // if false, renderer ignores Facing-based mirroring
 };
 
 }  // namespace Engine::ECS

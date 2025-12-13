@@ -59,9 +59,13 @@ void EnemyAISystem::update(Engine::ECS::Registry& registry, Engine::ECS::Entity 
         outTf = heroTf;
     };
 
-    registry.view<Engine::ECS::Transform, Engine::ECS::Velocity, Game::EnemyAttributes>(
+    registry.view<Engine::ECS::Transform, Engine::ECS::Velocity, Engine::ECS::Health, Game::EnemyAttributes>(
         [&registry, heroTf, &step, &pickNearestTarget](Engine::ECS::Entity e, Engine::ECS::Transform& tf, Engine::ECS::Velocity& vel,
-                            const Game::EnemyAttributes& attr) {
+                            Engine::ECS::Health& hp, const Game::EnemyAttributes& attr) {
+            if (!hp.alive()) {
+                vel.value = {0.0f, 0.0f};
+                return;
+            }
             // If taunted, chase the taunting mini-unit instead of the hero/other targets.
             const Engine::ECS::Transform* targetTf = nullptr;
             if (auto* taunt = registry.get<Game::TauntTarget>(e)) {

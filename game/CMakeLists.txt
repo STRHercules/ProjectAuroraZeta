@@ -8,6 +8,8 @@ set(GAME_SOURCES
     systems/CollisionSystem.cpp
     systems/EnemyAISystem.cpp
     systems/WaveSystem.cpp
+    systems/EnemySpriteStateSystem.cpp
+    systems/HeroSpriteStateSystem.cpp
     systems/AnimationSystem.cpp
     systems/HitFlashSystem.cpp
     systems/DamageNumberSystem.cpp

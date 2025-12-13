@@ -16,8 +16,27 @@
 #include "../../engine/math/Vec2.h"
 #include "../components/EnemyAttributes.h"
 #include "../components/BountyTag.h"
+#include "../components/Facing.h"
+#include "../components/LookDirection.h"
+#include "../../engine/ecs/components/SpriteAnimation.h"
+#include "../EnemyDefinition.h"
 
 namespace Game {
+
+namespace {
+const EnemyDefinition* pickEventEnemyDef(const std::vector<EnemyDefinition>* defs) {
+    if (!defs || defs->empty()) return nullptr;
+    std::vector<const EnemyDefinition*> textured;
+    textured.reserve(defs->size());
+    for (const auto& d : *defs) {
+        if (d.texture) textured.push_back(&d);
+    }
+    if (textured.empty()) return &(*defs)[0];
+    static thread_local std::mt19937 rng{std::random_device{}()};
+    std::uniform_int_distribution<std::size_t> pick(0, textured.size() - 1);
+    return textured[pick(rng)];
+}
+}  // namespace
 
 void EventSystem::spawnSalvage(Engine::ECS::Registry& registry, const Engine::Vec2& heroPos) {
     // Spawn toward a random edge from hero to encourage movement.
@@ -48,14 +67,24 @@ void EventSystem::spawnBounty(Engine::ECS::Registry& registry, const Engine::Vec
         auto e = registry.create();
         registry.emplace<Engine::ECS::Transform>(e, pos);
         registry.emplace<Engine::ECS::Velocity>(e, Engine::Vec2{0.0f, 0.0f});
+        registry.emplace<Game::Facing>(e, Game::Facing{1});
+        registry.emplace<Game::LookDirection>(e, Game::LookDirection{});
+        const EnemyDefinition* def = pickEventEnemyDef(enemyDefs_);
+        Engine::TexturePtr tex = def ? def->texture : Engine::TexturePtr{};
         registry.emplace<Engine::ECS::Renderable>(e,
-            Engine::ECS::Renderable{Engine::Vec2{22.0f, 22.0f}, Engine::Color{255, 160, 110, 255}});
+            Engine::ECS::Renderable{Engine::Vec2{22.0f, 22.0f}, Engine::Color{255, 160, 110, 255}, tex});
         registry.emplace<Engine::ECS::AABB>(e, Engine::ECS::AABB{Engine::Vec2{11.0f, 11.0f}});
         registry.emplace<Engine::ECS::Health>(e, Engine::ECS::Health{160.0f, 160.0f});
         registry.emplace<Engine::ECS::EnemyTag>(e, Engine::ECS::EnemyTag{});
         registry.emplace<Game::EnemyAttributes>(e, Game::EnemyAttributes{110.0f});
         registry.emplace<Game::BountyTag>(e, Game::BountyTag{});
         registry.emplace<Game::EventMarker>(e, Game::EventMarker{eventId});
+        if (tex) {
+            const int fw = def ? def->frameWidth : 16;
+            const int fh = def ? def->frameHeight : 16;
+            const float fd = def ? def->frameDuration : 0.14f;
+            registry.emplace<Engine::ECS::SpriteAnimation>(e, Engine::ECS::SpriteAnimation{fw, fh, 4, fd});
+        }
     }
     // Controller entity tracks timer and kill requirement.
     auto controller = registry.create();
@@ -215,13 +244,23 @@ void EventSystem::tickSpawners(Engine::ECS::Registry& registry, const Engine::Ti
             auto m = registry.create();
             registry.emplace<Engine::ECS::Transform>(m, pos);
             registry.emplace<Engine::ECS::Velocity>(m, Engine::Vec2{0.0f, 0.0f});
+            registry.emplace<Game::Facing>(m, Game::Facing{1});
+            registry.emplace<Game::LookDirection>(m, Game::LookDirection{});
+            const EnemyDefinition* def = pickEventEnemyDef(enemyDefs_);
+            Engine::TexturePtr tex = def ? def->texture : Engine::TexturePtr{};
             registry.emplace<Engine::ECS::Renderable>(m,
-                Engine::ECS::Renderable{Engine::Vec2{16.0f, 16.0f}, Engine::Color{255, 150, 180, 255}});
+                Engine::ECS::Renderable{Engine::Vec2{16.0f, 16.0f}, Engine::Color{255, 150, 180, 255}, tex});
             registry.emplace<Engine::ECS::AABB>(m, Engine::ECS::AABB{Engine::Vec2{8.0f, 8.0f}});
             registry.emplace<Engine::ECS::Health>(m, Engine::ECS::Health{70.0f, 70.0f});
             registry.emplace<Engine::ECS::EnemyTag>(m, Engine::ECS::EnemyTag{});
             registry.emplace<Game::EnemyAttributes>(m, Game::EnemyAttributes{140.0f});
             registry.emplace<Game::EventMarker>(m, Game::EventMarker{sp.eventId});
+            if (tex) {
+                const int fw = def ? def->frameWidth : 16;
+                const int fh = def ? def->frameHeight : 16;
+                const float fd = def ? def->frameDuration : 0.14f;
+                registry.emplace<Engine::ECS::SpriteAnimation>(m, Engine::ECS::SpriteAnimation{fw, fh, 4, fd});
+            }
         }
     });
 }
