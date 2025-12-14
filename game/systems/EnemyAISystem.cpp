@@ -11,6 +11,8 @@
 #include "../components/MiniUnit.h"
 #include "../components/Building.h"
 #include "../components/BountyTag.h"
+#include "../components/EscortTarget.h"
+#include "../components/EscortPreMove.h"
 #include "../../engine/ecs/components/Health.h"
 
 namespace Game {
@@ -18,6 +20,23 @@ namespace Game {
 void EnemyAISystem::update(Engine::ECS::Registry& registry, Engine::ECS::Entity hero, const Engine::TimeStep& step) {
     const auto* heroTf = registry.get<Engine::ECS::Transform>(hero);
     if (!heroTf) return;
+    auto pickNearestEscort = [&](const Engine::Vec2& from, const Engine::ECS::Transform*& outTf) {
+        outTf = nullptr;
+        float bestD2 = std::numeric_limits<float>::max();
+        registry.view<Engine::ECS::Transform, Engine::ECS::Health, Game::EscortTarget>(
+            [&](Engine::ECS::Entity escortEnt, const Engine::ECS::Transform& tfE, const Engine::ECS::Health& hpE, const Game::EscortTarget&) {
+                if (!hpE.alive()) return;
+                if (registry.has<Game::EscortPreMove>(escortEnt)) return;  // ignore until countdown done
+                float dx = tfE.position.x - from.x;
+                float dy = tfE.position.y - from.y;
+                float d2 = dx * dx + dy * dy;
+                if (d2 < bestD2) {
+                    bestD2 = d2;
+                    outTf = &tfE;
+                }
+            });
+    };
+
     auto pickNearestTarget = [&](const Engine::Vec2& from, const Engine::ECS::Transform*& outTf) {
         outTf = nullptr;
         float bestD2 = std::numeric_limits<float>::max();
@@ -61,7 +80,7 @@ void EnemyAISystem::update(Engine::ECS::Registry& registry, Engine::ECS::Entity 
     };
 
     registry.view<Engine::ECS::Transform, Engine::ECS::Velocity, Engine::ECS::Health, Game::EnemyAttributes>(
-        [&registry, heroTf, &step, &pickNearestTarget](Engine::ECS::Entity e, Engine::ECS::Transform& tf, Engine::ECS::Velocity& vel,
+        [&registry, heroTf, &step, &pickNearestTarget, &pickNearestEscort](Engine::ECS::Entity e, Engine::ECS::Transform& tf, Engine::ECS::Velocity& vel,
                             Engine::ECS::Health& hp, const Game::EnemyAttributes& attr) {
             if (!hp.alive()) {
                 vel.value = {0.0f, 0.0f};
@@ -85,6 +104,10 @@ void EnemyAISystem::update(Engine::ECS::Registry& registry, Engine::ECS::Entity 
                         }
                     }
                 }
+            }
+            if (!targetTf) {
+                // Bosses and bounty elites should always pressure the hero; regular enemies prefer turrets/minis first.
+                pickNearestEscort(tf.position, targetTf);
             }
             if (!targetTf) {
                 // Bosses and bounty elites should always pressure the hero; regular enemies prefer turrets/minis first.

@@ -267,6 +267,9 @@ private:
     Engine::TexturePtr pickupImmortalTex_{};
     Engine::TexturePtr pickupFreezeTex_{};
     Engine::TexturePtr pickupTurretTex_{};
+    Engine::TexturePtr pickupChronoTex_{};
+    Engine::TexturePtr pickupPhaseLeechTex_{};
+    Engine::TexturePtr pickupStormCoreTex_{};
     std::vector<Engine::TexturePtr> projectileTextures_;
     Engine::TexturePtr projectileTexRed_;
     Engine::TexturePtr projectileTexTurret_;
@@ -302,7 +305,7 @@ private:
     float pickupPowerupShare_{0.35f};
     int copperPickupMin_{4};
     int copperPickupMax_{10};
-    int salvageReward_{20};
+    int salvageReward_{60};
     // Hotzones
     float hotzoneMapRadius_{900.0f};
     float hotzoneRadiusMin_{140.0f};
@@ -338,6 +341,15 @@ private:
     bool shopRightPrev_{false};
     bool shopMiddlePrev_{false};
     bool shopUIClickPrev_{false};
+    // Traveling shop purchase caps.
+    int shopDamagePctPurchases_{0};
+    int shopAttackSpeedPctPurchases_{0};
+    int shopVitalsPctPurchases_{0};
+    int shopCooldownPurchases_{0};
+    int shopRangeVisionPurchases_{0};
+    int shopChargePurchases_{0};
+    int shopSpeedBootsPurchases_{0};
+    int shopVitalAusterityPurchases_{0};
     double fireInterval_{0.2};
     double fireIntervalBase_{0.2};
     float autoFireRangeBonus_{0.0f};
@@ -552,9 +564,18 @@ private:
     double bossBannerTimer_{0.0};
     double eventBannerTimer_{0.0};
     std::string eventBannerText_;
+    double eventCountdownSeconds_{0.0};
+    std::string eventCountdownLabel_;
     double freezeTimer_{0.0};
     float attackSpeedMul_{1.0f};
     float lifestealPercent_{0.0f};
+    float lifestealBuff_{0.0f};
+    double lifestealTimer_{0.0};
+    float attackSpeedBuffMul_{1.0f};
+    double chronoTimer_{0.0};
+    int chainBonusTemp_{0};
+    double stormTimer_{0.0};
+    int chainBase_{0};
     int chainBounces_{0};
     // Energy
     float energy_{0.0f};

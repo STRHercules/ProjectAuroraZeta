@@ -132,7 +132,7 @@
 
 | Event                   | Mechanics                                           | Reward                          |
 | ----------------------- | --------------------------------------------------- | ------------------------------- |
-| **“Salvage Run”**       | Collect 10 cargo crates before timer.               | Lump-sum gold + rare shop item. |
+| **“Escort Duty”**       | Protect a non-combat escort walking 500–1200u; foes prioritize it. | Hefty gold payout on arrival. |
 | **“Power Core Escort”** | Slow-moving core, enemies target it.                | XP + global damage buff 2 min.  |
 | **“Bounty Hunt”**       | Elite hunter squad invades; names displayed on HUD. | Phase shard (for Evolves).      |
 

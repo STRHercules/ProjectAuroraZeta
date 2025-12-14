@@ -91,7 +91,7 @@
     "visionMax": 5
   },
   "events": {
-    "salvageReward": 30
+    "salvageReward": 60
   },
   "drops": {
     "pickupChance": 0.25,

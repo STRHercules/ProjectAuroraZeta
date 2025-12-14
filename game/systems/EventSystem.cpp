@@ -1,23 +1,30 @@
 #include "EventSystem.h"
 
 #include <algorithm>
+#include <cmath>
+#include <cstdlib>
+#include <filesystem>
 #include <random>
 #include <vector>
 
 #include "../components/EventActive.h"
 #include "../components/EventMarker.h"
 #include "../components/Spawner.h"
+#include "../components/EscortObjective.h"
+#include "../components/EscortTarget.h"
 #include "../../engine/ecs/components/Transform.h"
 #include "../../engine/ecs/components/Velocity.h"
 #include "../../engine/ecs/components/Renderable.h"
 #include "../../engine/ecs/components/AABB.h"
 #include "../../engine/ecs/components/Tags.h"
 #include "../../engine/ecs/components/Health.h"
+#include "../../engine/core/Logger.h"
 #include "../../engine/math/Vec2.h"
 #include "../components/EnemyAttributes.h"
 #include "../components/BountyTag.h"
 #include "../components/Facing.h"
 #include "../components/LookDirection.h"
+#include "../components/EscortPreMove.h"
 #include "../../engine/ecs/components/SpriteAnimation.h"
 #include "../EnemyDefinition.h"
 
@@ -36,29 +43,144 @@ const EnemyDefinition* pickEventEnemyDef(const std::vector<EnemyDefinition>* def
     std::uniform_int_distribution<std::size_t> pick(0, textured.size() - 1);
     return textured[pick(rng)];
 }
+
+constexpr float kMoveEps = 0.01f;
+
+LookDir4 dirFromVec(const Engine::Vec2& v, LookDir4 fallback) {
+    const float ax = std::abs(v.x);
+    const float ay = std::abs(v.y);
+    if (ax < 0.0001f && ay < 0.0001f) return fallback;
+    if (ax >= ay) {
+        return v.x >= 0.0f ? LookDir4::Right : LookDir4::Left;
+    }
+    return v.y >= 0.0f ? LookDir4::Front : LookDir4::Back;
+}
+
+int rowIdle(LookDir4 d) {
+    switch (d) {
+        case LookDir4::Left: return 0;
+        case LookDir4::Right: return 1;
+        case LookDir4::Front: return 2;
+        case LookDir4::Back: return 3;
+    }
+    return 2;
+}
+
+int rowWalk(LookDir4 d) {
+    switch (d) {
+        case LookDir4::Left: return 4;
+        case LookDir4::Right: return 5;
+        case LookDir4::Front: return 6;
+        case LookDir4::Back: return 7;
+    }
+    return 6;
+}
 }  // namespace
 
-void EventSystem::spawnSalvage(Engine::ECS::Registry& registry, const Engine::Vec2& heroPos) {
-    // Spawn toward a random edge from hero to encourage movement.
+Engine::TexturePtr EventSystem::loadEscortTexture() {
+    if (escortTexture_) return escortTexture_;
+    if (!textureManager_) return {};
+    namespace fs = std::filesystem;
+    std::vector<fs::path> candidates;
+    if (const char* home = std::getenv("HOME")) {
+        candidates.emplace_back(fs::path(home) / "assets" / "Sprites" / "Characters" / "Escort.png");
+    }
+    candidates.emplace_back(fs::path("assets") / "Sprites" / "Characters" / "Escort.png");
+    for (const auto& p : candidates) {
+        if (fs::exists(p)) {
+            auto tex = textureManager_->getOrLoadBMP(p.string());
+            if (tex) {
+                escortTexture_ = *tex;
+                return escortTexture_;
+            }
+        }
+    }
+    Engine::logWarn("EventSystem: escort texture not found; using fallback color block.");
+    return {};
+}
+
+Engine::TexturePtr EventSystem::loadSpireTexture() {
+    if (spireTexture_) return spireTexture_;
+    if (!textureManager_) return {};
+    namespace fs = std::filesystem;
+    std::vector<fs::path> candidates;
+    if (const char* home = std::getenv("HOME")) {
+        candidates.emplace_back(fs::path(home) / "assets" / "Sprites" / "Buildings" / "spawner.png");
+    }
+    candidates.emplace_back(fs::path("assets") / "Sprites" / "Buildings" / "spawner.png");
+    for (const auto& p : candidates) {
+        if (fs::exists(p)) {
+            auto tex = textureManager_->getOrLoadBMP(p.string());
+            if (tex) {
+                spireTexture_ = *tex;
+                return spireTexture_;
+            }
+        }
+    }
+    Engine::logWarn("EventSystem: spawner texture not found; using fallback color block.");
+    return {};
+}
+
+void EventSystem::spawnEscort(Engine::ECS::Registry& registry, const Engine::Vec2& heroPos) {
+    // Spawn near hero and task the NPC to travel 500–1200 units.
     static thread_local std::mt19937 rng{std::random_device{}()};
-    std::uniform_real_distribution<float> angleDist(0.0f, 6.28318f);
-    float ang = angleDist(rng);
-    float dist = 420.0f;
-    Engine::Vec2 pos{heroPos.x + std::cos(ang) * dist, heroPos.y + std::sin(ang) * dist};
-    auto e = registry.create();
-    registry.emplace<Engine::ECS::Transform>(e, pos);
-    registry.emplace<Engine::ECS::Renderable>(e,
-        Engine::ECS::Renderable{Engine::Vec2{28.0f, 28.0f}, Engine::Color{120, 200, 255, 255}});
-    registry.emplace<Engine::ECS::AABB>(e, Engine::ECS::AABB{Engine::Vec2{14.0f, 14.0f}});
-    registry.emplace<Game::EventActive>(e, Game::EventActive{nextEventId_, Game::EventType::Salvage, 30.0f, 30.0f,
-                                                             false, false, false, true, 0});
-    registry.emplace<Engine::ECS::PickupTag>(e, Engine::ECS::PickupTag{});
+    std::uniform_real_distribution<float> spawnAng(0.0f, 6.28318f);
+    std::uniform_real_distribution<float> spawnRad(90.0f, 160.0f);
+    std::uniform_real_distribution<float> travelDist(500.0f, 1200.0f);
+    std::uniform_real_distribution<float> travelAng(0.0f, 6.28318f);
+
+    float angSpawn = spawnAng(rng);
+    float radSpawn = spawnRad(rng);
+    Engine::Vec2 spawnPos{heroPos.x + std::cos(angSpawn) * radSpawn, heroPos.y + std::sin(angSpawn) * radSpawn};
+
+    float distTarget = travelDist(rng);
+    float angTravel = travelAng(rng);
+    Engine::Vec2 dest{spawnPos.x + std::cos(angTravel) * distTarget, spawnPos.y + std::sin(angTravel) * distTarget};
+
+    Engine::TexturePtr tex = loadEscortTexture();
+    float size = 26.0f;
+    auto escortEnt = registry.create();
+    registry.emplace<Engine::ECS::Transform>(escortEnt, spawnPos);
+    registry.emplace<Engine::ECS::Velocity>(escortEnt, Engine::Vec2{0.0f, 0.0f});
+    registry.emplace<Game::Facing>(escortEnt, Game::Facing{1});
+    registry.emplace<Game::LookDirection>(escortEnt, Game::LookDirection{Game::LookDir4::Front});
+    registry.emplace<Engine::ECS::Renderable>(escortEnt,
+        Engine::ECS::Renderable{Engine::Vec2{size, size}, Engine::Color{180, 230, 255, 255}, tex});
+    registry.emplace<Engine::ECS::AABB>(escortEnt, Engine::ECS::AABB{Engine::Vec2{size * 0.5f, size * 0.5f}});
+    registry.emplace<Engine::ECS::Health>(escortEnt, Engine::ECS::Health{1200.0f, 1200.0f});
+    if (auto* hp = registry.get<Engine::ECS::Health>(escortEnt)) {
+        hp->maxShields = 600.0f;
+        hp->currentShields = 600.0f;
+        hp->healthArmor = 3.5f;
+        hp->shieldArmor = 2.5f;
+        hp->regenDelay = 1.6f;
+        hp->shieldRegenRate = 10.0f;
+    }
+    registry.emplace<Game::EscortTarget>(escortEnt, Game::EscortTarget{nextEventId_, dest, spawnPos, 65.0f});
+    // Escort is protected and non-aggro until countdown ends.
+    registry.emplace<Game::EscortPreMove>(escortEnt, Game::EscortPreMove{});
+    if (tex) {
+        const int frameW = 16;
+        const int frameH = 16;
+        const int frames = std::max(1, tex->width() / frameW);
+        registry.emplace<Engine::ECS::SpriteAnimation>(escortEnt, Engine::ECS::SpriteAnimation{frameW, frameH, frames, 0.12f});
+    }
+
+    // Controller keeps timer/progress and shares a transform for HUD arrows.
+    auto controller = registry.create();
+    registry.emplace<Engine::ECS::Transform>(controller, spawnPos);
+    Game::EventActive ev{nextEventId_, Game::EventType::Escort, 55.0f, 55.0f, false, false, false, true, 0};
+    ev.countdown = 4.0f;
+    registry.emplace<Game::EventActive>(controller, ev);
+    registry.emplace<Game::EscortObjective>(controller,
+        Game::EscortObjective{escortEnt, dest, spawnPos, distTarget, 16.0f});
+    eventTypes_[ev.id] = ev.type;
 }
 
 void EventSystem::spawnBounty(Engine::ECS::Registry& registry, const Engine::Vec2& heroPos, int eventId) {
     static thread_local std::mt19937 rng{std::random_device{}()};
-    std::uniform_real_distribution<float> angleDist(0.0f, 6.28318f);
-    std::uniform_real_distribution<float> radiusDist(260.0f, 320.0f);
+            std::uniform_real_distribution<float> angleDist(0.0f, 6.28318f);
+            std::uniform_real_distribution<float> radiusDist(260.0f, 320.0f);
     const int count = 3;
     for (int i = 0; i < count; ++i) {
         float ang = angleDist(rng);
@@ -74,7 +196,13 @@ void EventSystem::spawnBounty(Engine::ECS::Registry& registry, const Engine::Vec
         registry.emplace<Engine::ECS::Renderable>(e,
             Engine::ECS::Renderable{Engine::Vec2{22.0f, 22.0f}, Engine::Color{255, 160, 110, 255}, tex});
         registry.emplace<Engine::ECS::AABB>(e, Engine::ECS::AABB{Engine::Vec2{11.0f, 11.0f}});
-        registry.emplace<Engine::ECS::Health>(e, Engine::ECS::Health{160.0f, 160.0f});
+        registry.emplace<Engine::ECS::Health>(e, Engine::ECS::Health{360.0f, 360.0f, 140.0f, 140.0f});
+        if (auto* hp = registry.get<Engine::ECS::Health>(e)) {
+            hp->healthArmor = 2.0f;
+            hp->shieldArmor = 1.5f;
+            hp->regenDelay = 1.5f;
+            hp->shieldRegenRate = 8.0f;
+        }
         registry.emplace<Engine::ECS::EnemyTag>(e, Engine::ECS::EnemyTag{});
         registry.emplace<Game::EnemyAttributes>(e, Game::EnemyAttributes{110.0f});
         registry.emplace<Game::BountyTag>(e, Game::BountyTag{});
@@ -88,8 +216,15 @@ void EventSystem::spawnBounty(Engine::ECS::Registry& registry, const Engine::Vec
     }
     // Controller entity tracks timer and kill requirement.
     auto controller = registry.create();
-    registry.emplace<Game::EventActive>(controller,
-        Game::EventActive{eventId, Game::EventType::Bounty, 35.0f, 35.0f, false, false, false, false, count});
+    Game::EventActive ev{};
+    ev.id = eventId;
+    ev.type = Game::EventType::Bounty;
+    ev.timer = ev.maxTimer = 35.0f;
+    ev.requiredKills = count;
+    ev.countdown = countdownDefault_;
+    ev.countdown = countdownDefault_;
+    registry.emplace<Game::EventActive>(controller, ev);
+    eventTypes_[ev.id] = ev.type;
 }
 
 void EventSystem::spawnSpireHunt(Engine::ECS::Registry& registry, const Engine::Vec2& heroPos, int eventId) {
@@ -97,6 +232,8 @@ void EventSystem::spawnSpireHunt(Engine::ECS::Registry& registry, const Engine::
     std::uniform_real_distribution<float> angleDist(0.0f, 6.28318f);
     std::uniform_real_distribution<float> radiusDist(340.0f, 480.0f);
     const int count = 3;
+    Engine::TexturePtr texSpire = loadSpireTexture();
+    std::uniform_real_distribution<float> lifetimeDist(120.0f, 240.0f);
     for (int i = 0; i < count; ++i) {
         float ang = angleDist(rng);
         float rad = radiusDist(rng);
@@ -104,15 +241,26 @@ void EventSystem::spawnSpireHunt(Engine::ECS::Registry& registry, const Engine::
         auto e = registry.create();
         registry.emplace<Engine::ECS::Transform>(e, pos);
         registry.emplace<Engine::ECS::Renderable>(e,
-            Engine::ECS::Renderable{Engine::Vec2{26.0f, 26.0f}, Engine::Color{255, 110, 170, 255}});
+            Engine::ECS::Renderable{Engine::Vec2{26.0f, 26.0f}, Engine::Color{255, 110, 170, 255}, texSpire});
         registry.emplace<Engine::ECS::AABB>(e, Engine::ECS::AABB{Engine::Vec2{13.0f, 13.0f}});
         registry.emplace<Engine::ECS::Health>(e, Engine::ECS::Health{240.0f, 240.0f});
         registry.emplace<Game::EventMarker>(e, Game::EventMarker{eventId});
-        registry.emplace<Game::Spawner>(e, Game::Spawner{1.0f, 3.0f, eventId});
+        Game::Spawner sp{};
+        sp.spawnTimer = 1.0f;
+        sp.interval = 3.0f;
+        sp.eventId = eventId;
+        sp.lifetime = lifetimeDist(rng);
+        registry.emplace<Game::Spawner>(e, sp);
     }
     auto controller = registry.create();
-    registry.emplace<Game::EventActive>(controller,
-        Game::EventActive{eventId, Game::EventType::SpawnerHunt, 45.0f, 45.0f, false, false, false, false, count});
+    Game::EventActive ev{};
+    ev.id = eventId;
+    ev.type = Game::EventType::SpawnerHunt;
+    ev.timer = ev.maxTimer = 45.0f;
+    ev.requiredKills = count;
+    ev.countdown = countdownDefault_;
+    registry.emplace<Game::EventActive>(controller, ev);
+    eventTypes_[ev.id] = ev.type;
 }
 
 void EventSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep& step, int wave, int& gold,
@@ -126,8 +274,8 @@ void EventSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep
         lastEventWave_ = wave;
         int choice = eventCycle_ % 3;
         if (choice == 0) {
-            spawnSalvage(registry, heroPos);
-            lastEventLabel_ = "Salvage Run";
+            spawnEscort(registry, heroPos);
+            lastEventLabel_ = "Escort Duty";
         } else if (choice == 1) {
             spawnBounty(registry, heroPos, eventId);
             lastEventLabel_ = "Bounty Hunt";
@@ -143,38 +291,102 @@ void EventSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep
 
     // Tick active events.
     std::vector<Engine::ECS::Entity> toDestroy;
+    pendingCountdown_ = 0.0f;
+    pendingCountdownLabel_.clear();
     registry.view<Game::EventActive>([&](Engine::ECS::Entity e, Game::EventActive& ev) {
-        ev.timer -= static_cast<float>(step.deltaSeconds);
-        if (ev.type == Game::EventType::Salvage) {
-            if (auto* rend = registry.get<Engine::ECS::Renderable>(e)) {
-                if (ev.timer <= 0.0f && !ev.failed) {
-                    ev.success = true;  // timer elapsed (intermission) counts as success
+        if (ev.countdown > 0.0f) {
+            ev.countdown -= static_cast<float>(step.deltaSeconds);
+            // Track earliest countdown to display.
+            if (pendingCountdown_ <= 0.0f || ev.countdown < pendingCountdown_) {
+                pendingCountdown_ = ev.countdown;
+                switch (ev.type) {
+                    case Game::EventType::Escort: pendingCountdownLabel_ = "Escort Duty"; break;
+                    case Game::EventType::Bounty: pendingCountdownLabel_ = "Bounty Hunt"; break;
+                    case Game::EventType::SpawnerHunt: pendingCountdownLabel_ = "Assassinate Spawners"; break;
                 }
+            }
+            return;
+        }
+        ev.timer -= static_cast<float>(step.deltaSeconds);
+        if (ev.type == Game::EventType::Escort) {
+            auto* escortObj = registry.get<Game::EscortObjective>(e);
+            Engine::ECS::Entity escortEnt = escortObj ? escortObj->escort : Engine::ECS::kInvalidEntity;
+            auto* escortHp = (escortEnt != Engine::ECS::kInvalidEntity) ? registry.get<Engine::ECS::Health>(escortEnt) : nullptr;
+            auto* escortTf = (escortEnt != Engine::ECS::kInvalidEntity) ? registry.get<Engine::ECS::Transform>(escortEnt) : nullptr;
+            auto* escortVel = (escortEnt != Engine::ECS::kInvalidEntity) ? registry.get<Engine::ECS::Velocity>(escortEnt) : nullptr;
+            auto* escortTag = (escortEnt != Engine::ECS::kInvalidEntity) ? registry.get<Game::EscortTarget>(escortEnt) : nullptr;
+
+            if (auto* ctrlTf = registry.get<Engine::ECS::Transform>(e)) {
+                if (escortTf) ctrlTf->position = escortTf->position;
+            }
+
+            bool escortDead = !escortObj || escortEnt == Engine::ECS::kInvalidEntity || !escortHp || !escortHp->alive() || !escortTf;
+            if (escortDead) {
+                ev.failed = true;
+                toDestroy.push_back(e);
+                if (escortEnt != Engine::ECS::kInvalidEntity) {
+                    toDestroy.push_back(escortEnt);
+                }
+                lastFail_ = true;
+                completedEventIds.push_back(ev.id);
+            } else {
+                Engine::Vec2 delta{escortObj->destination.x - escortTf->position.x, escortObj->destination.y - escortTf->position.y};
+                float dist2 = delta.x * delta.x + delta.y * delta.y;
+                if (dist2 <= escortObj->arrivalRadius * escortObj->arrivalRadius) {
+                    ev.success = true;
+                } else if (escortVel && ev.countdown <= 0.0f) {
+                    float invLen = 1.0f / std::sqrt(std::max(dist2, 0.0001f));
+                    float speed = escortTag ? escortTag->speed : 95.0f;
+                    escortVel->value = {delta.x * invLen * speed, delta.y * invLen * speed};
+                } else if (escortVel && ev.countdown > 0.0f) {
+                    escortVel->value = {0.0f, 0.0f};
+                }
+
+                // Drive escort animation row (idle vs walk) to match movement.
+                if (escortVel) {
+                    Engine::Vec2 v = escortVel->value;
+                    auto* anim = registry.get<Engine::ECS::SpriteAnimation>(escortEnt);
+                    auto* look = registry.get<Game::LookDirection>(escortEnt);
+                    LookDir4 dir = look ? look->dir : LookDir4::Front;
+                    if (std::abs(v.x) > kMoveEps || std::abs(v.y) > kMoveEps) {
+                        dir = dirFromVec(v, dir);
+                        if (look) look->dir = dir;
+                        if (anim && anim->row != rowWalk(dir)) {
+                            anim->row = rowWalk(dir);
+                            anim->currentFrame = 0;
+                            anim->accumulator = 0.0f;
+                        }
+                    } else {
+                        if (anim && anim->row != rowIdle(dir)) {
+                            anim->row = rowIdle(dir);
+                            anim->currentFrame = 0;
+                            anim->accumulator = 0.0f;
+                        }
+                    }
+                }
+
                 if (ev.success) {
-                    rend->color = Engine::Color{120, 255, 160, 255};
+                    if (escortVel) escortVel->value = {0.0f, 0.0f};
                     if (!ev.rewardGranted) {
                         gold += salvageReward;
                         ev.rewardGranted = true;
                     }
                     toDestroy.push_back(e);
+                    toDestroy.push_back(escortEnt);
                     lastSuccess_ = true;
                     completedEventIds.push_back(ev.id);
                 } else if (ev.timer <= 0.0f && inCombat) {
                     ev.failed = true;
-                    rend->color = Engine::Color{255, 80, 80, 255};
+                    if (escortVel) escortVel->value = {0.0f, 0.0f};
                     toDestroy.push_back(e);
+                    toDestroy.push_back(escortEnt);
                     lastFail_ = true;
                     completedEventIds.push_back(ev.id);
-                } else {
-                    // Pulse color to draw attention.
-                    float t = std::clamp(ev.timer / ev.maxTimer, 0.0f, 1.0f);
-                    rend->color = Engine::Color{static_cast<uint8_t>(120 + 80 * (1 - t)), 200, 255, 255};
                 }
-            } else {
-                // If salvage object was picked up/destroyed early, treat as success.
-                ev.success = true;
-                toDestroy.push_back(e);
-                lastSuccess_ = true;
+                // Once countdown ends, allow damage/aggro.
+                if (ev.countdown <= 0.0f && registry.has<Game::EscortPreMove>(escortEnt)) {
+                    registry.remove<Game::EscortPreMove>(escortEnt);
+                }
             }
         } else if (ev.type == Game::EventType::Bounty) {
             if (ev.requiredKills <= 0) {
@@ -234,12 +446,34 @@ void EventSystem::notifyTargetKilled(Engine::ECS::Registry& registry, int eventI
     });
 }
 
+bool EventSystem::isSpawnerEvent(int eventId) const {
+    auto it = eventTypes_.find(eventId);
+    return it != eventTypes_.end() && it->second == Game::EventType::SpawnerHunt;
+}
+
+bool EventSystem::getCountdownText(std::string& labelOut, float& secondsOut) const {
+    if (pendingCountdown_ > 0.0f && !pendingCountdownLabel_.empty()) {
+        labelOut = pendingCountdownLabel_;
+        secondsOut = pendingCountdown_;
+        return true;
+    }
+    return false;
+}
+
 void EventSystem::tickSpawners(Engine::ECS::Registry& registry, const Engine::TimeStep& step) {
     static thread_local std::mt19937 rng{std::random_device{}()};
     std::uniform_real_distribution<float> ang(0.0f, 6.28318f);
     std::uniform_real_distribution<float> rad(90.0f, 140.0f);
-    registry.view<Game::Spawner, Engine::ECS::Transform>([&](Engine::ECS::Entity, Game::Spawner& sp, Engine::ECS::Transform& tf) {
+    std::vector<Engine::ECS::Entity> expired;
+    registry.view<Game::Spawner, Engine::ECS::Transform>([&](Engine::ECS::Entity e, Game::Spawner& sp, Engine::ECS::Transform& tf) {
         sp.spawnTimer -= static_cast<float>(step.deltaSeconds);
+        if (sp.lifetime > 0.0f) {
+            sp.lifetime -= static_cast<float>(step.deltaSeconds);
+            if (sp.lifetime <= 0.0f) {
+                expired.push_back(e);
+                return;
+            }
+        }
         if (sp.spawnTimer <= 0.0f) {
             sp.spawnTimer = sp.interval;
             float a = ang(rng);
@@ -267,6 +501,14 @@ void EventSystem::tickSpawners(Engine::ECS::Registry& registry, const Engine::Ti
             }
         }
     });
+    if (!expired.empty()) {
+        for (auto e : expired) {
+            if (auto* sp = registry.get<Game::Spawner>(e)) {
+                notifyTargetKilled(registry, sp->eventId);
+            }
+            registry.destroy(e);
+        }
+    }
 }
 
 }  // namespace Game

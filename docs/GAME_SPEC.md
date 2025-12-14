@@ -85,9 +85,8 @@ Loop per run:
 
 4. **Mini-Events (every 5 waves)**
    - Optional mission-like objectives:
-     - Escort a mech.
+     - Escort a civilian courier (500–1200u travel; enemies prioritize them).
      - Defend a “data siphon.”
-     - Salvage cargo.
      - Bounty hunts (elite squads).
    - Rewards: bonus currency, XP, rare items, “phase shards” for hero evolution. :contentReference[oaicite:7]{index=7}  
 
@@ -291,11 +290,13 @@ Initial set (per Gameplay Loop refinement): :contentReference[oaicite:15]{index=
 
 ### 7.3 Events & Side Objectives
 
-Examples: :contentReference[oaicite:16]{index=16}  
+ Examples: :contentReference[oaicite:16]{index=16}  
 
-- **Salvage Run**
-  - Collect N cargo crates before timer expires.
-  - Rewards: large gold bonus + rare shop item.
+- **Escort Duty (replaces Salvage Run)**
+  - A non-combatant NPC spawns near the player and walks 500–1200 units toward a random destination.
+  - Enemies prioritize attacking the escort during the event.
+  - Success (escort survives to destination): hefty gold payout (configurable `events.salvageReward`) + standard event XP/gold.
+  - Failure: escort dies or timer expires while in combat.
 - **Power Core Escort**
   - Slow-moving core targeted by enemies.
   - Rewards: XP + global damage buff for limited duration.
@@ -519,7 +520,7 @@ Codex should implement the game in a sequence of small, verifiable milestones.
 
 - Implement:
   - Basic boss entity with multiple phases.
-  - Mini-events (e.g., Salvage Run).
+  - Mini-events (e.g., Escort Duty).
 - Integrate rewards: buff, phase shards, extra currency.
 
 ### Milestone 7 – Full Progression + Talent Tree

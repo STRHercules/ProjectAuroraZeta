@@ -17,6 +17,8 @@
 #include "../components/DamageNumber.h"
 #include "../components/Pickup.h"
 #include "../components/PickupBob.h"
+#include "../components/EscortTarget.h"
+#include "../components/BountyTag.h"
 #include "../../engine/render/BitmapTextRenderer.h"
 #include "../../engine/ecs/components/Tags.h"
 #include "../systems/BuffSystem.h"
@@ -79,19 +81,27 @@ void RenderSystem::draw(const Engine::ECS::Registry& registry, const Engine::Cam
             }
 
             Engine::Color color = rend.color;
-            // Pulse color for pickups.
+            // Pulse color for pickups (except static Field Medkit item).
             if (registry.has<Game::Pickup>(e)) {
-                if (const auto* bob = registry.get<Game::PickupBob>(e)) {
-                    float t = 0.5f + 0.5f * std::sin(bob->pulsePhase * 3.14159f * 2.0f);
-                    auto add = static_cast<uint8_t>(30 + 80 * t);
-                    color = {static_cast<uint8_t>(std::min(255, color.r + add)),
-                             static_cast<uint8_t>(std::min(255, color.g + add)),
-                             color.b, color.a};
+                const auto* pick = registry.get<Game::Pickup>(e);
+                const bool isStaticMedkit = pick && pick->kind == Game::Pickup::Kind::Item &&
+                                            pick->item.effect == Game::ItemEffect::Heal;
+                if (!isStaticMedkit) {
+                    if (const auto* bob = registry.get<Game::PickupBob>(e)) {
+                        float t = 0.5f + 0.5f * std::sin(bob->pulsePhase * 3.14159f * 2.0f);
+                        auto add = static_cast<uint8_t>(30 + 80 * t);
+                        color = {static_cast<uint8_t>(std::min(255, color.r + add)),
+                                 static_cast<uint8_t>(std::min(255, color.g + add)),
+                                 color.b, color.a};
+                    }
                 }
             }
             // Tint bosses differently.
             if (registry.has<Engine::ECS::BossTag>(e)) {
                 color = Engine::Color{color.r, static_cast<uint8_t>(std::min(255, color.g / 2)), color.b, color.a};
+            }
+            if (registry.has<Game::BountyTag>(e)) {
+                color = Engine::Color{255, static_cast<uint8_t>(std::min(255, color.g + 40)), 120, color.a};
             }
             if (const auto* flash = registry.get<Game::HitFlash>(e)) {
                 if (flash->timer > 0.0f) {
@@ -124,8 +134,9 @@ void RenderSystem::draw(const Engine::ECS::Registry& registry, const Engine::Cam
                 device_.drawFilledRect(screenPos, scaledSize, color);
             }
 
-            // Floating health/shield bars for enemies and mini units.
-            if (registry.has<Engine::ECS::EnemyTag>(e) || registry.has<Engine::ECS::BossTag>(e) || registry.has<Game::MiniUnit>(e)) {
+            // Floating health/shield bars for enemies, mini units, and escort target.
+            if (registry.has<Engine::ECS::EnemyTag>(e) || registry.has<Engine::ECS::BossTag>(e) ||
+                registry.has<Game::MiniUnit>(e) || registry.has<Game::EscortTarget>(e)) {
                 if (const auto* hp = registry.get<Engine::ECS::Health>(e)) {
                     const float barW = std::clamp(rend.size.x * camera.zoom, 18.0f, 60.0f);
                     const float barH = 3.0f;
@@ -172,6 +183,12 @@ void RenderSystem::draw(const Engine::ECS::Registry& registry, const Engine::Cam
                                                    Engine::Color{50, 40, 30, 220});
                         }
                     }
+                }
+
+                // Marker over bounty targets.
+                if (registry.has<Game::BountyTag>(e)) {
+                    Engine::Vec2 markPos{screenPos.x + scaledSize.x * 0.5f - 3.0f, screenPos.y - 12.0f};
+                    device_.drawFilledRect(markPos, Engine::Vec2{6.0f, 6.0f}, Engine::Color{255, 180, 80, 240});
                 }
             }
         });

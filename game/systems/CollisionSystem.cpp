@@ -20,6 +20,8 @@
 #include "../components/EnemyAttackSwing.h"
 #include "../components/MiniUnit.h"
 #include "../components/Building.h"
+#include "../components/EscortTarget.h"
+#include "../components/EscortPreMove.h"
 
 namespace {
 bool aabbOverlap(const Engine::ECS::Transform& ta, const Engine::ECS::AABB& aa, const Engine::ECS::Transform& tb,
@@ -193,6 +195,47 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                                     }
                                 }
                             }
+                        }
+                    }
+                });
+    });
+
+    // Enemy contact damages escort NPCs.
+    registry.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::EnemyTag, Engine::ECS::AABB>(
+        [&](Engine::ECS::Entity enemyEnt, Engine::ECS::Transform& enemyTf, Engine::ECS::Health& enemyHp,
+            Engine::ECS::EnemyTag& /*tag*/, Engine::ECS::AABB& enemyBox) {
+            if (!enemyHp.alive()) return;
+            registry.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::AABB, Game::EscortTarget>(
+                [&](Engine::ECS::Entity escortEnt, Engine::ECS::Transform& escortTf, Engine::ECS::Health& escortHp,
+                    Engine::ECS::AABB& escortBox, Game::EscortTarget&) {
+                    if (!escortHp.alive()) return;
+                    if (registry.has<Game::EscortPreMove>(escortEnt)) return;
+                    if (aabbOverlap(enemyTf, enemyBox, escortTf, escortBox)) {
+                        Engine::Vec2 dir{escortTf.position.x - enemyTf.position.x, escortTf.position.y - enemyTf.position.y};
+                        float swingDur = 0.35f;
+                        if (const auto* anim = registry.get<Engine::ECS::SpriteAnimation>(enemyEnt)) {
+                            float fd = anim->frameDuration > 0.0f ? anim->frameDuration : 0.01f;
+                            swingDur = static_cast<float>(anim->frameCount) * fd;
+                        }
+                        if (auto* swing = registry.get<Game::EnemyAttackSwing>(enemyEnt)) {
+                            swing->timer = swingDur;
+                            swing->targetDir = dir;
+                        } else {
+                            registry.emplace<Game::EnemyAttackSwing>(enemyEnt, Game::EnemyAttackSwing{swingDur, dir});
+                        }
+
+                        Engine::Gameplay::DamageEvent contact{};
+                        contact.baseDamage = contactDamage_;
+                        contact.type = Engine::Gameplay::DamageType::Normal;
+                        Engine::Gameplay::BuffState buff{};
+                        if (auto* armorBuff = registry.get<Game::ArmorBuff>(escortEnt)) {
+                            buff = armorBuff->state;
+                        }
+                        Engine::Gameplay::applyDamage(escortHp, contact, buff);
+                        if (auto* flash = registry.get<Game::HitFlash>(escortEnt)) {
+                            flash->timer = 0.12f;
+                        } else {
+                            registry.emplace<Game::HitFlash>(escortEnt, Game::HitFlash{0.12f});
                         }
                     }
                 });

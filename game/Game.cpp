@@ -50,6 +50,7 @@
 #include "components/EnemyAttributes.h"
 #include "components/EventActive.h"
 #include "components/EventMarker.h"
+#include "components/EscortObjective.h"
 #include "components/Spawner.h"
 #include "components/Invulnerable.h"
 #include "components/Shopkeeper.h"
@@ -104,6 +105,18 @@ constexpr std::size_t offensiveTypeIndex(Game::OffensiveType type) {
 }
 
 }  // namespace
+
+// Forward decl for traveling shop dynamic pricing.
+static int effectiveShopCost(ItemEffect eff,
+                             int base,
+                             int dmgPct,
+                             int atkPct,
+                             int vitals,
+                             int cdr,
+                             int rangeVision,
+                             int charges,
+                             int speedBoots,
+                             int vitalAust);
 
 bool GameRoot::onInitialize(Engine::Application& app) {
     Engine::logInfo("GameRoot initialized. Spawning placeholder hero entity.");
@@ -166,6 +179,7 @@ bool GameRoot::onInitialize(Engine::Application& app) {
                                                      hotzoneMinSeparation_, hotzoneSpawnClearance_, rng_());
     // Wave settings loaded later from gameplay config.
     textureManager_ = std::make_unique<Engine::TextureManager>(*render_);
+    if (eventSystem_) eventSystem_->setTextureManager(textureManager_.get());
     loadProgress();
     netSession_ = std::make_unique<Game::Net::NetSession>();
     netSession_->setSnapshotProvider([this]() { return this->collectNetSnapshot(); });
@@ -1101,6 +1115,8 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     float y = startY + (i / 3) * (cardH + 12.0f);
                     if (mx >= x && mx <= x + cardW && my >= y && my <= y + cardH) {
                         hoveredCard = i;
+                        // Refresh inventory after a capped item purchase so prices/caps update.
+                        refreshShopInventory();
                         break;
                     }
                 }
@@ -1136,11 +1152,17 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     float x = startX + static_cast<float>(i) * (cardW + gap);
                     if (mx >= x && mx <= x + cardW && my >= y && my <= y + cardH) {
                         const ItemDefinition& item = shopInventory_[i];
-                        if (gold_ < item.cost) {
+                        int dynCost = effectiveShopCost(item.effect, item.cost, shopDamagePctPurchases_, shopAttackSpeedPctPurchases_,
+                                                        shopVitalsPctPurchases_, shopCooldownPurchases_, shopRangeVisionPurchases_,
+                                                        shopChargePurchases_, shopSpeedBootsPurchases_, shopVitalAusterityPurchases_);
+                        if (dynCost < 0) {
+                            continue;  // capped; ignore click
+                        }
+                        if (gold_ < dynCost) {
                             shopNoFundsTimer_ = 0.6;
                             break;
                         }
-                        gold_ -= item.cost;
+                        gold_ -= dynCost;
                         switch (item.effect) {
                             case ItemEffect::Damage:
                                 projectileDamage_ += item.value;
@@ -1164,18 +1186,22 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                                 break;
                             case ItemEffect::DamagePercent:
                                 projectileDamage_ *= (1.0f + item.value);
+                                shopDamagePctPurchases_ += 1;
                                 break;
                             case ItemEffect::RangeVision:
                                 autoFireRangeBonus_ += item.value * abilityRangePerLevel_;
                                 projectileLifetime_ += (item.value * abilityRangePerLevel_) / std::max(1.0f, projectileSpeed_);
                                 heroVisionRadiusTiles_ += item.value;
+                                shopRangeVisionPurchases_ += 1;
                                 break;
                             case ItemEffect::AttackSpeedPercent:
                                 attackSpeedMul_ *= (1.0f + item.value);
                                 fireInterval_ = fireIntervalBase_ / std::max(0.1f, attackSpeedMul_);
+                                shopAttackSpeedPctPurchases_ += 1;
                                 break;
                             case ItemEffect::MoveSpeedFlat:
                                 heroMoveSpeed_ += item.value;
+                                shopSpeedBootsPurchases_ += 1;
                                 break;
                             case ItemEffect::BonusVitalsPercent: {
                                 float mul = 1.0f + item.value;
@@ -1189,19 +1215,23 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                                     hp->currentShields = heroShield_;
                                 }
                                 energy_ = energyMax_;
+                                shopVitalsPctPurchases_ += 1;
                                 break;
                             }
                             case ItemEffect::CooldownFaster:
                                 abilityCooldownMul_ = std::max(0.1f, abilityCooldownMul_ * (1.0f - item.value));
+                                shopCooldownPurchases_ += 1;
                                 break;
                             case ItemEffect::AbilityCharges:
                                 abilityChargesBonus_ += static_cast<int>(item.value);
+                                shopChargePurchases_ += 1;
                                 break;
                             case ItemEffect::VitalCostReduction:
                                 abilityVitalCostMul_ = std::max(0.1f, abilityVitalCostMul_ * (1.0f - item.value));
                                 for (auto& slot : abilities_) {
                                     slot.energyCost *= abilityVitalCostMul_;
                                 }
+                                shopVitalAusterityPurchases_ += 1;
                                 break;
                             default:
                                 break;
@@ -1254,14 +1284,19 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             if (abilityUltEdge) executeAbility(4);
             if (useItemEdge) {
                 clampInventorySelection();
-                // Prefer the selected support item; otherwise pick the first support available.
+                auto isConsumable = [](const ItemDefinition& d) {
+                    return d.effect == ItemEffect::Heal || d.effect == ItemEffect::FreezeTime ||
+                           d.effect == ItemEffect::Turret || d.effect == ItemEffect::Lifesteal ||
+                           d.effect == ItemEffect::AttackSpeed || d.effect == ItemEffect::Chain;
+                };
+                // Prefer the selected consumable (support or lifesteal); otherwise pick the first available.
                 int targetIdx = -1;
                 if (inventorySelected_ >= 0 && inventorySelected_ < static_cast<int>(inventory_.size()) &&
-                    inventory_[inventorySelected_].def.kind == ItemKind::Support) {
+                    isConsumable(inventory_[inventorySelected_].def)) {
                     targetIdx = inventorySelected_;
                 } else {
                     for (std::size_t i = 0; i < inventory_.size(); ++i) {
-                        if (inventory_[i].def.kind == ItemKind::Support) { targetIdx = static_cast<int>(i); break; }
+                        if (isConsumable(inventory_[i].def)) { targetIdx = static_cast<int>(i); break; }
                     }
                 }
                 if (targetIdx != -1) {
@@ -1288,6 +1323,24 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                             registry_.emplace<Engine::ECS::Renderable>(t.visEntity,
                                 Engine::ECS::Renderable{size, Engine::Color{255, 255, 255, 255}, tex});
                             turrets_.push_back(t);
+                            break;
+                        }
+                        case ItemEffect::Lifesteal: {
+                            lifestealBuff_ = inst.def.value;
+                            lifestealPercent_ = lifestealBuff_;
+                            lifestealTimer_ = std::max(lifestealTimer_, 60.0);
+                            break;
+                        }
+                        case ItemEffect::AttackSpeed: {
+                            attackSpeedBuffMul_ = std::max(attackSpeedBuffMul_, 1.0f + inst.def.value);
+                            chronoTimer_ = std::max(chronoTimer_, 60.0);
+                            fireInterval_ = fireIntervalBase_ / std::max(0.1f, attackSpeedMul_ * attackSpeedBuffMul_);
+                            break;
+                        }
+                        case ItemEffect::Chain: {
+                            chainBonusTemp_ = std::max(chainBonusTemp_, static_cast<int>(std::round(inst.def.value)));
+                            stormTimer_ = std::max(stormTimer_, 60.0);
+                            chainBounces_ = chainBase_ + chainBonusTemp_;
                             break;
                         }
                         default:
@@ -1663,8 +1716,16 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             enemiesAlive_ = 0;
             registry_.view<Engine::ECS::Health, Engine::ECS::EnemyTag, Engine::ECS::Transform>(
                 [&](Engine::ECS::Entity e, Engine::ECS::Health& hp, Engine::ECS::EnemyTag&, Engine::ECS::Transform& tf) {
+                    bool isSpawnerEventEnemy = false;
+                    if (auto* mark = registry_.get<Game::EventMarker>(e)) {
+                        if (eventSystem_ && eventSystem_->isSpawnerEvent(mark->eventId)) {
+                            isSpawnerEventEnemy = true;
+                        }
+                    }
                     if (hp.alive()) {
-                        enemiesAlive_++;
+                        if (!isSpawnerEventEnemy) {
+                            enemiesAlive_++;
+                        }
                     } else {
                         if (auto* dying = registry_.get<Game::Dying>(e)) {
                             dying->timer -= static_cast<float>(step.deltaSeconds);
@@ -1718,7 +1779,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                         switch (payload.powerup) {
                             case Pickup::Powerup::Heal: tex = pickupHealPowerupTex_; break;
                             case Pickup::Powerup::Kaboom: tex = pickupKaboomTex_; break;
-                            case Pickup::Powerup::Recharge: tex = pickupRechargeTex_; break;
+                            case Pickup::Powerup::Recharge: tex = pickupRechargeTex_; scale *= 1.8f; break;  // make recharge orb much more visible
                             case Pickup::Powerup::Frenzy: tex = pickupFrenzyTex_; break;
                             case Pickup::Powerup::Immortal: tex = pickupImmortalTex_; animated = true; break;
                             case Pickup::Powerup::Freeze: tex = pickupFreezeTex_; break;
@@ -1729,7 +1790,10 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                         switch (payload.item.effect) {
                             case ItemEffect::Turret: tex = pickupTurretTex_; break;
                             case ItemEffect::Heal: tex = pickupHealTex_; break;
-                            case ItemEffect::FreezeTime: tex = pickupFreezeTex_; break;
+                            case ItemEffect::FreezeTime: tex = pickupFreezeTex_; scale *= 1.8f; break;  // boss Cryo Capsule pickup bigger
+                            case ItemEffect::AttackSpeed: tex = pickupChronoTex_; animated = true; break;
+                            case ItemEffect::Lifesteal: tex = pickupPhaseLeechTex_; animated = true; break;
+                            case ItemEffect::Chain: tex = pickupStormCoreTex_; animated = true; break;
                             default: break;
                         }
                     }
@@ -1818,7 +1882,8 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                             // Powerup drop
                             Pickup p{};
                             p.kind = Pickup::Kind::Powerup;
-                            std::uniform_int_distribution<int> pick(0, 5);
+                            // Exclude Freeze powerup to avoid confusing it with the Cryo Capsule item.
+                            std::uniform_int_distribution<int> pick(0, 4);
                             int choice = pick(rng_);
                             switch (choice) {
                                 case 0: p.powerup = Pickup::Powerup::Heal; break;
@@ -1826,7 +1891,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                                 case 2: p.powerup = Pickup::Powerup::Recharge; break;
                                 case 3: p.powerup = Pickup::Powerup::Frenzy; break;
                                 case 4: p.powerup = Pickup::Powerup::Immortal; break;
-                                default: p.powerup = Pickup::Powerup::Freeze; break;
+                                default: p.powerup = Pickup::Powerup::Heal; break;
                             }
                             spawnPickupEntity(p, scatterPos(death.pos), Engine::Color{150, 220, 255, 255}, 11.0f, 4.0f, 3.2f);
                         } else {
@@ -1859,9 +1924,27 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 }
                 registry_.emplace<Game::Dying>(death.e, Game::Dying{std::max(0.05f, despawnAfter)});
             }
-            for (const auto& death : toDestroy) {
-                registry_.destroy(death.e);
+        for (const auto& death : toDestroy) {
+            registry_.destroy(death.e);
+        }
+
+        // Handle event spawners (assassin spire) deaths/lifetime completions so events can finish and they don't block flow.
+        {
+            std::vector<Engine::ECS::Entity> deadSpawners;
+            registry_.view<Engine::ECS::Health, Game::Spawner>(
+                [&](Engine::ECS::Entity e, Engine::ECS::Health& hp, Game::Spawner& sp) {
+                    if (!hp.alive()) {
+                        deadSpawners.push_back(e);
+                        if (eventSystem_) {
+                            eventSystem_->notifyTargetKilled(registry_, sp.eventId);
+                        }
+                    }
+                });
+            for (auto e : deadSpawners) {
+                registry_.destroy(e);
             }
+        }
+
         // If no enemies remain and a wave was active, grant wave clear bonus once.
         const bool anyEnemies = enemiesAlive_ > 0;
         if (!anyEnemies && !waveClearedPending_ && wave_ > 0) {
@@ -1919,9 +2002,42 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 }
             }
         }
-        // Fast-forward combat timer when field is empty.
-        if (inCombat_ && enemiesAlive_ == 0 && combatTimer_ > 1.0) {
+        // Fast-forward combat timer when field is empty and a wave actually spawned.
+        if (inCombat_ && waveSpawned_ && enemiesAlive_ == 0 && combatTimer_ > 1.0) {
             combatTimer_ = 1.0;
+        }
+        // Safety: if combat timer expires with no enemies (e.g., boss dead) force-progress.
+        if (inCombat_ && waveSpawned_ && enemiesAlive_ == 0 && combatTimer_ <= 0.0) {
+            if (!waveClearedPending_ && wave_ > 0) {
+                copper_ += waveClearBonus_;
+                waveClearedPending_ = true;
+                clearBannerTimer_ = 1.5;
+                wavesClearedThisRound_ += 1;
+                waveSpawned_ = false;
+                if (waveSystem_) waveSystem_->resetTimer();
+            }
+            inCombat_ = false;
+            intermissionTimer_ = intermissionDuration_;
+            xp_ += xpPerWave_;
+            waveSpawned_ = false;
+            itemShopOpen_ = false;
+            abilityShopOpen_ = false;
+            paused_ = userPaused_;
+            refreshShopInventory();
+            if (multiplayerEnabled_ && reviveNextRound_) {
+                reviveLocalPlayer();
+            }
+            Engine::Vec2 heroPos{0.0f, 0.0f};
+            if (const auto* tf = registry_.get<Engine::ECS::Transform>(hero_)) heroPos = tf->position;
+            if (travelShopUnlocked_ && gold_ > 0) {
+                spawnShopkeeper(heroPos);
+            }
+            if (waveSystem_) waveSystem_->setTimer(0.0);
+            waveWarmup_ = intermissionTimer_;
+            round_ += 1;
+            wavesClearedThisRound_ = 0;
+            wavesTargetThisRound_ = wavesPerRoundBase_ + (round_ - 1) / wavesPerRoundGrowthInterval_;
+            if (waveSystem_) waveSystem_->setRound(round_);
         }
     }
 
@@ -2070,6 +2186,30 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             if (buffSystem_) {
                 buffSystem_->update(registry_, step);
             }
+            if (lifestealTimer_ > 0.0) {
+                lifestealTimer_ -= step.deltaSeconds;
+                if (lifestealTimer_ <= 0.0) {
+                    lifestealTimer_ = 0.0;
+                    lifestealPercent_ = 0.0f;
+                    lifestealBuff_ = 0.0f;
+                }
+            }
+            if (chronoTimer_ > 0.0) {
+                chronoTimer_ -= step.deltaSeconds;
+                if (chronoTimer_ <= 0.0) {
+                    chronoTimer_ = 0.0;
+                    attackSpeedBuffMul_ = 1.0f;
+                    fireInterval_ = fireIntervalBase_ / std::max(0.1f, attackSpeedMul_ * attackSpeedBuffMul_);
+                }
+            }
+            if (stormTimer_ > 0.0) {
+                stormTimer_ -= step.deltaSeconds;
+                if (stormTimer_ <= 0.0) {
+                    stormTimer_ = 0.0;
+                    chainBonusTemp_ = 0;
+                    chainBounces_ = chainBase_;
+                }
+            }
             // Energy regeneration (faster during intermission).
             float regen = inCombat_ ? energyRegen_ : energyRegenIntermission_;
             energy_ = std::min(energyMax_, energy_ + regen * static_cast<float>(step.deltaSeconds));
@@ -2085,11 +2225,19 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             heroPos = tf->position;
         }
         eventSystem_->update(registry_, step, wave_, gold_, inCombat_, heroPos, salvageReward_);
+        eventCountdownSeconds_ = 0.0;
+        eventCountdownLabel_.clear();
+        std::string lbl;
+        float seconds = 0.0f;
+        if (eventSystem_->getCountdownText(lbl, seconds) && seconds > 0.0f) {
+            eventCountdownLabel_ = lbl;
+            eventCountdownSeconds_ = seconds;
+        }
         std::string evLabel = eventSystem_->lastEventLabel().empty() ? "Event" : eventSystem_->lastEventLabel();
         if (eventSystem_->lastSuccess()) {
             std::ostringstream eb;
             eb << evLabel << " Success";
-            if (evLabel == "Salvage Run") {
+            if (evLabel == "Escort Duty") {
                 eb << " +" << salvageReward_ << "g";
             }
             eventBannerText_ = eb.str();
@@ -2423,6 +2571,15 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                                  static_cast<float>(viewportHeight_) * 0.20f};
                 drawTextTTF(bb.str(), pos, scale, Engine::Color{255, 120, 200, 240});
             }
+            if (eventCountdownSeconds_ > 0.0) {
+                std::ostringstream eb;
+                eb << eventCountdownLabel_ << " starts in " << std::fixed << std::setprecision(1)
+                   << eventCountdownSeconds_ << "s";
+                float scale = 1.1f;
+                Engine::Vec2 pos{static_cast<float>(viewportWidth_) * 0.5f - 150.0f,
+                                 static_cast<float>(viewportHeight_) * 0.24f};
+                drawTextTTF(eb.str(), pos, scale, Engine::Color{200, 240, 255, 235});
+            }
             if (eventBannerTimer_ > 0.0 && !eventBannerText_.empty()) {
                 eventBannerTimer_ -= step.deltaSeconds;
                 Engine::Vec2 pos{10.0f, 190.0f};
@@ -2543,11 +2700,20 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                                                           : Engine::Color{180, 210, 240, 210});
             }
             // Active event HUD.
-            registry_.view<Game::EventActive>([&](Engine::ECS::Entity, const Game::EventActive& ev) {
+            registry_.view<Game::EventActive>([&](Engine::ECS::Entity evEnt, const Game::EventActive& ev) {
                 float t = std::max(0.0f, ev.timer);
                 std::ostringstream evMsg;
-                if (ev.type == Game::EventType::Salvage) {
-                    evMsg << "Event: Salvage Run - " << std::fixed << std::setprecision(1) << t << "s";
+                if (ev.type == Game::EventType::Escort) {
+                    float distLeft = 0.0f;
+                    if (auto* escortObj = registry_.get<Game::EscortObjective>(evEnt)) {
+                        if (auto* escortTf = registry_.get<Engine::ECS::Transform>(escortObj->escort)) {
+                            Engine::Vec2 delta{escortObj->destination.x - escortTf->position.x,
+                                               escortObj->destination.y - escortTf->position.y};
+                            distLeft = std::sqrt(std::max(0.0f, delta.x * delta.x + delta.y * delta.y));
+                        }
+                    }
+                    evMsg << "Event: Escort - " << std::fixed << std::setprecision(0) << distLeft << "u | "
+                          << std::setprecision(1) << t << "s";
                 } else if (ev.type == Game::EventType::Bounty) {
                     evMsg << "Event: Bounty Hunt - " << ev.requiredKills << " hunters left | "
                           << std::fixed << std::setprecision(1) << t << "s";
@@ -2593,9 +2759,26 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 }
             }
             // Event status (fallback if multiple).
-            registry_.view<Game::EventActive>([&](Engine::ECS::Entity, const Game::EventActive& ev) {
+            registry_.view<Game::EventActive>([&](Engine::ECS::Entity e, const Game::EventActive& ev) {
                 std::ostringstream msg;
-                msg << "Event: Salvage | " << std::fixed << std::setprecision(1) << ev.timer << "s left";
+                if (ev.type == Game::EventType::Escort) {
+                    float distLeft = 0.0f;
+                    if (auto* escortObj = registry_.get<Game::EscortObjective>(e)) {
+                        if (auto* escortTf = registry_.get<Engine::ECS::Transform>(escortObj->escort)) {
+                            Engine::Vec2 delta{escortObj->destination.x - escortTf->position.x,
+                                               escortObj->destination.y - escortTf->position.y};
+                            distLeft = std::sqrt(std::max(0.0f, delta.x * delta.x + delta.y * delta.y));
+                        }
+                    }
+                    msg << "Event: Escort | " << std::fixed << std::setprecision(0) << distLeft << "u | "
+                        << std::setprecision(1) << ev.timer << "s left";
+                } else if (ev.type == Game::EventType::Bounty) {
+                    msg << "Event: Bounty | " << ev.requiredKills << " targets | "
+                        << std::fixed << std::setprecision(1) << ev.timer << "s left";
+                } else {
+                    msg << "Event: Spire Hunt | " << ev.requiredKills << " spires | "
+                        << std::fixed << std::setprecision(1) << ev.timer << "s left";
+                }
                 drawTextUnified(msg.str(), Engine::Vec2{10.0f, 172.0f}, 0.9f,
                                 Engine::Color{200, 240, 255, 200});
             });
@@ -3625,10 +3808,13 @@ void GameRoot::loadPickupTextures() {
     // Visuals: explosive = kaboompickup, freeze grenade = cryonade.
     pickupKaboomTex_ = loadTextureOptional("assets/Sprites/Misc/kaboompickup.png");
     pickupFreezeTex_ = loadTextureOptional("assets/Sprites/Misc/cryonade.png");
-    pickupRechargeTex_ = loadTextureOptional("assets/Sprites/Misc/rechargepickup2.png");
+    pickupRechargeTex_ = loadTextureOptional("assets/Sprites/Misc/rechargepickup.png");
     pickupFrenzyTex_ = loadTextureOptional("assets/Sprites/Misc/frenzypickup.png");
     pickupImmortalTex_ = loadTextureOptional("assets/Sprites/Misc/immortalpickup.png");
     pickupTurretTex_ = loadTextureOptional("assets/Sprites/Misc/turretdeployable.png");
+    pickupChronoTex_ = loadTextureOptional("assets/Sprites/Misc/chronoprism.png");
+    pickupPhaseLeechTex_ = loadTextureOptional("assets/Sprites/Misc/phaseleech.png");
+    pickupStormCoreTex_ = loadTextureOptional("assets/Sprites/Misc/stormcore.png");
 }
 
 void GameRoot::loadProjectileTextures() {
@@ -5015,6 +5201,18 @@ void GameRoot::buildAbilities() {
     freezeTimer_ = 0.0;
     attackSpeedMul_ = 1.0f;
     lifestealPercent_ = 0.0f;
+    lifestealBuff_ = 0.0f;
+    lifestealTimer_ = 0.0;
+    attackSpeedBuffMul_ = 1.0f;
+    chronoTimer_ = 0.0;
+    chainBonusTemp_ = 0;
+    stormTimer_ = 0.0;
+    chainBase_ = 0;
+    attackSpeedBuffMul_ = 1.0f;
+    chronoTimer_ = 0.0;
+    chainBonusTemp_ = 0;
+    stormTimer_ = 0.0;
+    chainBase_ = 0;
     turrets_.clear();
 
     // Load from data file
@@ -5214,11 +5412,61 @@ static std::string shopLabelForEffect(ItemEffect eff) {
     return "Item";
 }
 
+static int effectiveShopCost(ItemEffect eff,
+                             int base,
+                             int dmgPct,
+                             int atkPct,
+                             int vitals,
+                             int cdr,
+                             int rangeVision,
+                             int charges,
+                             int speedBoots,
+                             int vitalAust) {
+    switch (eff) {
+        case ItemEffect::DamagePercent:
+            if (dmgPct >= 2) return -1;
+            return (dmgPct == 0) ? 1000 : 2500;
+        case ItemEffect::AttackSpeedPercent:
+            if (atkPct >= 1) return -1;
+            return 1500;
+        case ItemEffect::BonusVitalsPercent:
+            if (vitals >= 1) return -1;
+            return 1500;
+        case ItemEffect::CooldownFaster:
+            if (cdr >= 2) return -1;
+            return (cdr == 0) ? 500 : 1000;
+        case ItemEffect::RangeVision:
+            if (rangeVision >= 5) return -1;
+            return 500 * (rangeVision + 1);
+        case ItemEffect::AbilityCharges:
+            if (charges >= 3) return -1;
+            return 500;
+        case ItemEffect::MoveSpeedFlat:
+            if (speedBoots >= 10) return -1;
+            return 200;
+        case ItemEffect::VitalCostReduction:
+            if (vitalAust >= 3) return -1;
+            return 500;
+        default:
+            return base;
+    }
+}
+
 void GameRoot::refreshShopInventory() {
     shopPool_ = travelShopUnlocked_ ? goldCatalog_ : itemCatalog_;
     // Shuffle and take first 4.
     std::shuffle(shopPool_.begin(), shopPool_.end(), rng_);
-    shopInventory_.assign(shopPool_.begin(), shopPool_.begin() + std::min<std::size_t>(4, shopPool_.size()));
+    shopInventory_.clear();
+    for (const auto& def : shopPool_) {
+        int cost = effectiveShopCost(def.effect, def.cost, shopDamagePctPurchases_, shopAttackSpeedPctPurchases_,
+                                     shopVitalsPctPurchases_, shopCooldownPurchases_, shopRangeVisionPurchases_,
+                                     shopChargePurchases_, shopSpeedBootsPurchases_, shopVitalAusterityPurchases_);
+        if (cost < 0) continue;  // capped out; don't offer
+        ItemDefinition priced = def;
+        priced.cost = cost;
+        shopInventory_.push_back(priced);
+        if (shopInventory_.size() >= 4) break;
+    }
     if (shopSystem_) {
         shopSystem_->setInventory(shopInventory_);
     }
@@ -5270,8 +5518,11 @@ void GameRoot::drawItemShopOverlay() {
         drawTextUnified(title, Engine::Vec2{x + 12.0f, y + 10.0f}, 1.0f, Engine::Color{220, 240, 255, 240});
         drawTextUnified(desc.str(), Engine::Vec2{x + 12.0f, y + 34.0f}, 0.95f, Engine::Color{200, 220, 240, 230});
         std::ostringstream cost;
-        cost << item.cost << "g";
-        bool affordable = gold_ >= item.cost;
+        int dynCost = effectiveShopCost(item.effect, item.cost, shopDamagePctPurchases_, shopAttackSpeedPctPurchases_,
+                                        shopVitalsPctPurchases_, shopCooldownPurchases_, shopRangeVisionPurchases_,
+                                        shopChargePurchases_, shopSpeedBootsPurchases_, shopVitalAusterityPurchases_);
+        cost << (dynCost < 0 ? 0 : dynCost) << "g";
+        bool affordable = dynCost >= 0 && gold_ >= dynCost;
         Engine::Color costCol = affordable ? Engine::Color{180, 255, 200, 240}
                                            : Engine::Color{220, 160, 160, 220};
         drawTextUnified(cost.str(), Engine::Vec2{x + 12.0f, y + 62.0f}, 0.9f, costCol);
@@ -5789,6 +6040,7 @@ void GameRoot::resetRun() {
     for (auto& st : abilityStates_) {
         st.cooldown = 0.0f;
     }
+    fireInterval_ = fireIntervalBase_ / std::max(0.1f, attackSpeedMul_ * attackSpeedBuffMul_);
 }
 
 bool GameRoot::addItemToInventory(const ItemDefinition& def) {
@@ -5798,14 +6050,14 @@ bool GameRoot::addItemToInventory(const ItemDefinition& def) {
     // Apply passive bonuses for Unique items.
     switch (def.effect) {
         case ItemEffect::AttackSpeed:
-            attackSpeedMul_ *= (1.0f + def.value);
-            fireInterval_ = fireIntervalBase_ / std::max(0.1f, attackSpeedMul_);
+            // Chrono Prism is consumable; effect applied on use.
             break;
         case ItemEffect::Lifesteal:
-            lifestealPercent_ = std::max(lifestealPercent_, def.value);
+            // Phase Leech is consumable; effect applied on use.
+            lifestealBuff_ = std::max(lifestealBuff_, 0.0f);
             break;
         case ItemEffect::Chain:
-            chainBounces_ = std::max(chainBounces_, static_cast<int>(def.value));
+            // Storm Core is consumable; effect applied on use.
             break;
         default:
             break;
