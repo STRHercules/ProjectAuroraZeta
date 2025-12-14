@@ -5,14 +5,19 @@
 #include <vector>
 #include <cstdint>
 
+#include "GlobalUpgrades.h"
+
 namespace Game {
 
 struct SaveData {
-    int version{2};
+    int version{3};
     int totalRuns{0};
     int bestWave{0};
     int totalKills{0};
     int movementMode{0};  // 0 = Modern, 1 = RTS
+    int64_t vaultGold{0};
+    std::string lastDepositedMatchId{};
+    Meta::UpgradeLevels upgrades{};
 };
 
 class SaveManager {

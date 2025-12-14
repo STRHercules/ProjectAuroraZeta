@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <vector>
 #include <random>
+#include <chrono>
 #include <filesystem>
 #include <functional>
 #include <optional>
@@ -58,6 +59,7 @@
 #include "components/HitFlash.h"
 #include "systems/BuffSystem.h"
 #include "meta/SaveManager.h"
+#include "meta/GlobalUpgrades.h"
 #include "meta/ItemDefs.h"
 #include "systems/HotzoneSystem.h"
 #include "../engine/gameplay/FogOfWar.h"
@@ -495,10 +497,14 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     heroShieldBase_ = heroShields;
     heroShieldPreset_ = heroShields;
     heroBaseStats_ = Engine::Gameplay::BaseStats{heroHealthArmor, heroShieldArmor};
+    heroBaseStatsScaled_ = heroBaseStats_;
     heroHealthArmor_ = heroHealthArmor;
     heroShieldArmor_ = heroShieldArmor;
     heroShieldRegen_ = heroShieldRegen;
     heroHealthRegen_ = heroHealthRegen;
+    heroShieldRegenBase_ = heroShieldRegen;
+    heroHealthRegenBase_ = heroHealthRegen;
+    heroRegenDelayBase_ = heroRegenDelay;
     heroRegenDelay_ = heroRegenDelay;
     projectileDamagePreset_ = projectileDamage_;
     heroSize_ = heroSize;
@@ -1079,7 +1085,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                             hp->maxHealth = heroMaxHp_;
                             hp->currentHealth = std::min(hp->maxHealth, hp->currentHealth + abilityHealthPerLevel_);
                             heroUpgrades_.groundArmorLevel += 1;
-                            Engine::Gameplay::applyUpgradesToUnit(*hp, heroBaseStats_, heroUpgrades_, false);
+                            Engine::Gameplay::applyUpgradesToUnit(*hp, heroBaseStatsScaled_, heroUpgrades_, false);
                         }
                         return true;
                     }};
@@ -1091,7 +1097,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                         heroHealthArmor_ += abilityArmorPerLevel_;
                         if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
                             hp->healthArmor = heroHealthArmor_;
-                            Engine::Gameplay::applyUpgradesToUnit(*hp, heroBaseStats_, heroUpgrades_, false);
+                            Engine::Gameplay::applyUpgradesToUnit(*hp, heroBaseStatsScaled_, heroUpgrades_, false);
                         }
                         return true;
                     }};
@@ -1173,7 +1179,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                                     hp->maxHealth = heroMaxHp_;
                                     hp->currentHealth = std::min(hp->currentHealth + item.value, hp->maxHealth);
                                     heroUpgrades_.groundArmorLevel += 1;
-                                    Engine::Gameplay::applyUpgradesToUnit(*hp, heroBaseStats_, heroUpgrades_, false);
+                                    Engine::Gameplay::applyUpgradesToUnit(*hp, heroBaseStatsScaled_, heroUpgrades_, false);
                                 }
                                 break;
                             case ItemEffect::Speed:
@@ -2190,7 +2196,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 lifestealTimer_ -= step.deltaSeconds;
                 if (lifestealTimer_ <= 0.0) {
                     lifestealTimer_ = 0.0;
-                    lifestealPercent_ = 0.0f;
+                    lifestealPercent_ = globalModifiers_.playerLifestealAdd;
                     lifestealBuff_ = 0.0f;
                 }
             }
@@ -3188,12 +3194,12 @@ void GameRoot::reviveLocalPlayer() {
     xp_ = 0;
     xpToNext_ = xpBaseToLevel_;
     heroUpgrades_ = {};
-    projectileDamage_ = projectileDamageBase_;
-    heroMoveSpeed_ = heroMoveSpeedBase_;
-    heroMaxHp_ = heroMaxHpBase_;
-    heroShield_ = heroShieldBase_;
-    heroHealthArmor_ = heroBaseStats_.baseHealthArmor;
-    heroShieldArmor_ = heroBaseStats_.baseShieldArmor;
+    projectileDamage_ = projectileDamagePreset_;
+    heroMoveSpeed_ = heroMoveSpeedPreset_;
+    heroMaxHp_ = heroMaxHpPreset_;
+    heroShield_ = heroShieldPreset_;
+    heroHealthArmor_ = heroBaseStatsScaled_.baseHealthArmor;
+    heroShieldArmor_ = heroBaseStatsScaled_.baseShieldArmor;
     if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
         hp->maxHealth = heroMaxHp_;
         hp->currentHealth = heroMaxHp_;
@@ -3302,6 +3308,7 @@ void GameRoot::handleHeroDeath(const Engine::TimeStep& step) {
             totalKillsAccum_ += kills_;
             int naturalWave = std::max(0, wave_ - std::max(0, startWaveBase_ - 1));
             bestWave_ = std::max(bestWave_, naturalWave);
+            depositRunGoldOnce("match_end_defeat");
             runStarted_ = false;
             saveProgress();
         }
@@ -3457,27 +3464,100 @@ void GameRoot::loadProgress() {
     SaveData data{};
     if (mgr.load(data)) {
         saveData_ = data;
-        saveData_.version = 2;
+        saveData_.version = 3;
         totalRuns_ = data.totalRuns;
         bestWave_ = data.bestWave;
         totalKillsAccum_ = data.totalKills;
         movementMode_ = (data.movementMode == 1) ? MovementMode::RTS : MovementMode::Modern;
+        vaultGold_ = data.vaultGold;
+        lastDepositedMatchId_ = data.lastDepositedMatchId;
+        upgradeLevels_ = data.upgrades;
         Engine::logInfo("Save loaded.");
     } else {
         Engine::logWarn("No valid save found; starting fresh profile.");
     }
+    recomputeGlobalModifiers();
 }
 
 void GameRoot::saveProgress() {
-    saveData_.version = 2;
+    saveData_.version = 3;
     saveData_.totalRuns = totalRuns_;
     saveData_.bestWave = bestWave_;
     saveData_.totalKills = totalKillsAccum_;
     saveData_.movementMode = (movementMode_ == MovementMode::RTS) ? 1 : 0;
+    saveData_.vaultGold = vaultGold_;
+    saveData_.lastDepositedMatchId = lastDepositedMatchId_;
+    saveData_.upgrades = upgradeLevels_;
     SaveManager mgr(savePath_);
     if (!mgr.save(saveData_)) {
         Engine::logWarn("Failed to write save file.");
     }
+}
+
+void GameRoot::recomputeGlobalModifiers() {
+    globalModifiers_ = Meta::computeModifiers(upgradeLevels_);
+    applyGlobalModifiersToPresets();
+}
+
+void GameRoot::applyGlobalModifiersToPresets() {
+    // Armor bases need scaling before being passed into unit upgrade helpers.
+    heroBaseStatsScaled_ = heroBaseStats_;
+    heroBaseStatsScaled_.baseHealthArmor = heroBaseStats_.baseHealthArmor * globalModifiers_.playerArmorMult;
+    heroBaseStatsScaled_.baseShieldArmor = heroBaseStats_.baseShieldArmor * globalModifiers_.playerArmorMult;
+    attackSpeedBaseMul_ = globalModifiers_.playerAttackSpeedMult;
+    applyArchetypePreset();
+    rebuildWaveSettings();
+}
+
+std::string GameRoot::generateMatchId() const {
+    auto now = std::chrono::steady_clock::now().time_since_epoch().count();
+    uint64_t randBits = (static_cast<uint64_t>(std::random_device{}()) << 32) ^ static_cast<uint64_t>(std::random_device{}());
+    std::ostringstream ss;
+    ss << now << "-" << randBits;
+    return ss.str();
+}
+
+void GameRoot::depositRunGoldOnce(const std::string& reason) {
+    auto res = Meta::applyDepositGuard(vaultGold_, gold_, currentMatchId_, lastDepositedMatchId_);
+    if (!res.performed) return;
+    vaultGold_ = res.newVault;
+    lastDepositedMatchId_ = res.newLastId;
+    gold_ = 0;
+    saveProgress();
+    std::ostringstream ss;
+    ss << "Deposited " << res.deposited << " gold to vault (" << reason << ").";
+    Engine::logInfo(ss.str());
+}
+
+void GameRoot::resetUpgradeError() {
+    upgradeError_.clear();
+    upgradeErrorTimer_ = 0.0;
+}
+
+bool GameRoot::tryPurchaseUpgrade(int index) {
+    const auto& defs = Meta::upgradeDefinitions();
+    if (index < 0 || index >= static_cast<int>(defs.size())) return false;
+    const auto& def = defs[static_cast<std::size_t>(index)];
+    int* levelPtr = Meta::levelPtrByKey(upgradeLevels_, def.key);
+    if (!levelPtr) return false;
+    int currentLevel = *levelPtr;
+    if (def.maxLevel >= 0 && currentLevel >= def.maxLevel) {
+        upgradeError_ = "MAX level reached";
+        upgradeErrorTimer_ = 1.6;
+        return false;
+    }
+    int64_t cost = Meta::costForNext(def, currentLevel);
+    if (vaultGold_ < cost) {
+        upgradeError_ = "Not enough gold";
+        upgradeErrorTimer_ = 1.6;
+        return false;
+    }
+    vaultGold_ -= cost;
+    *levelPtr = Meta::clampLevel(def, currentLevel + 1);
+    resetUpgradeError();
+    recomputeGlobalModifiers();
+    saveProgress();
+    return true;
 }
 
 Engine::TexturePtr GameRoot::loadTextureOptional(const std::string& path) {
@@ -3992,12 +4072,20 @@ void GameRoot::startNewGame() {
     paused_ = false;
     itemShopOpen_ = false;
     abilityShopOpen_ = false;
+    currentMatchId_ = generateMatchId();
     runStarted_ = true;
     resetRun();
 }
 
 void GameRoot::updateMenuInput(const Engine::ActionState& actions, const Engine::InputState& input, double dt) {
     menuPulse_ += dt;
+    if (upgradeErrorTimer_ > 0.0) {
+        upgradeErrorTimer_ -= dt;
+        if (upgradeErrorTimer_ < 0.0) {
+            upgradeErrorTimer_ = 0.0;
+            upgradeError_.clear();
+        }
+    }
     bool up = actions.moveY < -0.5f;
     bool down = actions.moveY > 0.5f;
     bool upEdge = up && !menuUpPrev_;
@@ -4061,7 +4149,7 @@ void GameRoot::updateMenuInput(const Engine::ActionState& actions, const Engine:
 
     if (inMenu_) {
         if (menuPage_ == MenuPage::Main) {
-            const int itemCount = 6;
+            const int itemCount = 7;
             for (int i = 0; i < itemCount; ++i) {
                 float y = topY + 80.0f + i * 38.0f;
                 float x = centerX - 120.0f;
@@ -4075,9 +4163,10 @@ void GameRoot::updateMenuInput(const Engine::ActionState& actions, const Engine:
                     case 0: menuPage_ = MenuPage::CharacterSelect; menuSelection_ = 0; return;  // Solo
                     case 1: menuPage_ = MenuPage::HostConfig; menuSelection_ = 0; return;
                     case 2: menuPage_ = MenuPage::JoinSelect; menuSelection_ = 0; return;
-                    case 3: menuPage_ = MenuPage::Stats; menuSelection_ = 0; return;
-                    case 4: menuPage_ = MenuPage::Options; menuSelection_ = 0; return;
-                    case 5: if (app_) app_->requestQuit("Exit from main menu"); return;
+                    case 3: menuPage_ = MenuPage::Upgrades; upgradesSelection_ = 0; upgradeConfirmOpen_ = false; return;
+                    case 4: menuPage_ = MenuPage::Stats; menuSelection_ = 0; return;
+                    case 5: menuPage_ = MenuPage::Options; menuSelection_ = 0; return;
+                    case 6: if (app_) app_->requestQuit("Exit from main menu"); return;
                 }
             }
             if (pauseEdge && app_) {
@@ -4095,6 +4184,77 @@ void GameRoot::updateMenuInput(const Engine::ActionState& actions, const Engine:
             if (clickEdge) {
                 menuPage_ = MenuPage::Main;
                 menuSelection_ = 0;
+            }
+        } else if (menuPage_ == MenuPage::Upgrades) {
+            const auto& defs = Meta::upgradeDefinitions();
+            int itemCount = static_cast<int>(defs.size());
+            if (itemCount > 0) {
+                upgradesSelection_ = std::clamp(upgradesSelection_, 0, itemCount - 1);
+            }
+            const float panelW = 760.0f;
+            const float panelX = centerX - panelW * 0.5f;
+            const float panelY = topY + 90.0f;
+            const float rowH = 44.0f;
+            if (!upgradeConfirmOpen_) {
+                advanceSelection(std::max(1, itemCount));
+            }
+            // Hover rows to move selection; click purchase button to open confirm.
+            for (int i = 0; i < itemCount; ++i) {
+                float y = panelY + 50.0f + static_cast<float>(i) * (rowH + 8.0f);
+                const auto& def = defs[static_cast<std::size_t>(i)];
+                const int* lvlPtr = Meta::levelPtrByKey(upgradeLevels_, def.key);
+                int lvl = lvlPtr ? *lvlPtr : 0;
+                bool maxed = (def.maxLevel >= 0 && lvl >= def.maxLevel);
+                if (inside(mx, my, panelX + 8.0f, y, panelW - 16.0f, rowH)) {
+                    upgradesSelection_ = i;
+                }
+                float btnW = 110.0f;
+                float btnH = 28.0f;
+                float btnX = panelX + panelW - btnW - 18.0f;
+                float btnY = y + 8.0f;
+                if (clickEdge && inside(mx, my, btnX, btnY, btnW, btnH) && !upgradeConfirmOpen_) {
+                    if (maxed) {
+                        upgradeError_ = "MAX level reached";
+                        upgradeErrorTimer_ = 1.2;
+                    } else {
+                        upgradeConfirmOpen_ = true;
+                        upgradeConfirmIndex_ = i;
+                    }
+                }
+            }
+            if (confirmEdge && !upgradeConfirmOpen_ && itemCount > 0) {
+                const auto& def = defs[static_cast<std::size_t>(upgradesSelection_)];
+                const int* lvlPtr = Meta::levelPtrByKey(upgradeLevels_, def.key);
+                int lvl = lvlPtr ? *lvlPtr : 0;
+                bool maxed = (def.maxLevel >= 0 && lvl >= def.maxLevel);
+                if (maxed) {
+                    upgradeError_ = "MAX level reached";
+                    upgradeErrorTimer_ = 1.2;
+                } else {
+                    upgradeConfirmOpen_ = true;
+                    upgradeConfirmIndex_ = upgradesSelection_;
+                }
+            }
+            if (upgradeConfirmOpen_) {
+                float pw = 420.0f;
+                float ph = 150.0f;
+                float px = centerX - pw * 0.5f;
+                float py = topY + 130.0f;
+                float cancelX = px + pw - 190.0f;
+                float confirmX = px + pw - 90.0f;
+                float btnY = py + ph - 44.0f;
+                bool clickConfirm = clickEdge && inside(mx, my, confirmX, btnY, 80.0f, 32.0f);
+                bool clickCancel = clickEdge && inside(mx, my, cancelX, btnY, 80.0f, 32.0f);
+                if (confirmEdge || clickConfirm) {
+                    tryPurchaseUpgrade(upgradeConfirmIndex_);
+                    upgradeConfirmOpen_ = false;
+                } else if (pauseEdge || menuBackEdge || clickCancel) {
+                    upgradeConfirmOpen_ = false;
+                }
+            }
+            if ((pauseEdge || menuBackEdge) && !upgradeConfirmOpen_) {
+                menuPage_ = MenuPage::Main;
+                menuSelection_ = 3;  // Upgrades slot
             }
         } else if (menuPage_ == MenuPage::Options) {
             const int itemCount = 3;  // toggles + movement mode, back via Esc
@@ -4502,12 +4662,15 @@ void GameRoot::renderMenu() {
         drawButton("New Game (Solo)", 0);
         drawButton("Host", 1);
         drawButton("Join", 2);
-        drawButton("Stats", 3);
-        drawButton("Options", 4);
-        drawButton("Exit", 5);
+        drawButton("Upgrades", 3);
+        drawButton("Stats", 4);
+        drawButton("Options", 5);
+        drawButton("Exit", 6);
         float pulse = 0.6f + 0.4f * std::sin(static_cast<float>(menuPulse_) * 2.0f);
         Engine::Color hint{static_cast<uint8_t>(180 + 40 * pulse), 220, 255, 220};
-        drawTextUnified("          A Major Bonghit Production", Engine::Vec2{centerX - 160.0f, topY + 300.0f},
+        // Position the credit text well beneath the Exit button row.
+        float creditsY = topY + 80.0f + 6 * 38.0f + 48.0f;
+        drawTextUnified("          A Major Bonghit Production", Engine::Vec2{centerX - 185.0f, creditsY},
                         0.9f, hint);
     } else if (menuPage_ == MenuPage::Stats) {
         Engine::Color c{200, 230, 255, 240};
@@ -4523,6 +4686,101 @@ void GameRoot::renderMenu() {
         drawTextUnified(ss.str(), Engine::Vec2{centerX - 120.0f, topY + 156.0f}, 1.0f, c);
         drawTextUnified("Esc / Mouse1 to return", Engine::Vec2{centerX - 120.0f, topY + 204.0f}, 0.9f,
                         Engine::Color{180, 210, 240, 220});
+    } else if (menuPage_ == MenuPage::Upgrades) {
+        const auto& defs = Meta::upgradeDefinitions();
+        Engine::Color c{200, 230, 255, 240};
+        drawTextUnified("Global Upgrades", Engine::Vec2{centerX - 110.0f, topY + 52.0f}, 1.2f, c);
+        const float panelW = 760.0f;
+        const float rowH = 44.0f;
+        const float panelH = std::max(420.0f, 80.0f + static_cast<float>(defs.size()) * (rowH + 8.0f));
+        const float panelX = centerX - panelW * 0.5f;
+        const float panelY = topY + 80.0f;
+        render_->drawFilledRect(Engine::Vec2{panelX, panelY}, Engine::Vec2{panelW, panelH},
+                                Engine::Color{22, 30, 44, 220});
+        drawTextUnified("Name", Engine::Vec2{panelX + 16.0f, panelY + 12.0f}, 1.05f, c);
+        drawTextUnified("Level", Engine::Vec2{panelX + 200.0f, panelY + 12.0f}, 1.05f, c);
+        drawTextUnified("Current", Engine::Vec2{panelX + 280.0f, panelY + 12.0f}, 1.05f, c);
+        drawTextUnified("Next", Engine::Vec2{panelX + 470.0f, panelY + 12.0f}, 1.05f, c);
+        std::ostringstream vault;
+        vault << "Vault Gold: " << vaultGold_;
+        drawTextUnified(vault.str(), Engine::Vec2{panelX + panelW - 160.0f, panelY + 12.0f}, 1.0f,
+                        Engine::Color{240, 210, 120, 240});
+        float rowY = panelY + 50.0f;
+        for (std::size_t i = 0; i < defs.size(); ++i) {
+            const auto& def = defs[i];
+            const int* lvlPtr = Meta::levelPtrByKey(upgradeLevels_, def.key);
+            int lvl = lvlPtr ? *lvlPtr : 0;
+            bool selected = static_cast<int>(i) == upgradesSelection_;
+            bool maxed = (def.maxLevel >= 0 && lvl >= def.maxLevel);
+            int64_t cost = Meta::costForNext(def, lvl);
+            bool affordable = !maxed && vaultGold_ >= cost && cost < std::numeric_limits<int64_t>::max();
+            Engine::Color bg = selected ? Engine::Color{46, 68, 96, 235} : Engine::Color{30, 40, 56, 215};
+            render_->drawFilledRect(Engine::Vec2{panelX + 8.0f, rowY}, Engine::Vec2{panelW - 16.0f, rowH}, bg);
+            drawTextUnified(def.displayName, Engine::Vec2{panelX + 16.0f, rowY + 6.0f}, 1.0f,
+                            Engine::Color{220, 240, 255, 240});
+            std::ostringstream lvlTxt;
+            lvlTxt << "Lv " << lvl;
+            if (def.maxLevel >= 0) lvlTxt << "/" << def.maxLevel;
+            drawTextUnified(lvlTxt.str(), Engine::Vec2{panelX + 200.0f, rowY + 6.0f}, 0.98f,
+                            Engine::Color{200, 220, 235, 230});
+            auto curStr = Meta::currentEffectString(def, upgradeLevels_);
+            auto nextStr = Meta::nextEffectString(def, upgradeLevels_);
+            drawTextUnified(curStr, Engine::Vec2{panelX + 280.0f, rowY + 6.0f}, 0.98f,
+                            Engine::Color{200, 230, 255, 230});
+            drawTextUnified(nextStr, Engine::Vec2{panelX + 470.0f, rowY + 6.0f}, 0.98f,
+                            Engine::Color{180, 210, 240, 220});
+            float btnW = 110.0f;
+            float btnH = 28.0f;
+            float btnX = panelX + panelW - btnW - 18.0f;
+            float btnY = rowY + 8.0f;
+            Engine::Color btnCol =
+                maxed ? Engine::Color{90, 90, 90, 200}
+                      : (affordable ? Engine::Color{80, 140, 100, 235} : Engine::Color{140, 80, 80, 220});
+            render_->drawFilledRect(Engine::Vec2{btnX, btnY}, Engine::Vec2{btnW, btnH}, btnCol);
+            std::ostringstream btnLabel;
+            if (maxed || cost >= std::numeric_limits<int64_t>::max()) {
+                btnLabel << "MAX";
+            } else {
+                btnLabel << cost;
+            }
+            float textX = btnX + (btnW * 0.5f) - 16.0f;
+            drawTextUnified(btnLabel.str(), Engine::Vec2{textX, btnY + 6.0f}, 0.9f,
+                            Engine::Color{220, 240, 255, 240});
+            rowY += rowH + 8.0f;
+        }
+        if (!upgradeError_.empty()) {
+            drawTextUnified(upgradeError_, Engine::Vec2{panelX + 12.0f, panelY + panelH - 28.0f}, 0.9f,
+                            Engine::Color{255, 160, 160, 230});
+        }
+        if (upgradeConfirmOpen_ && upgradeConfirmIndex_ >= 0 &&
+            upgradeConfirmIndex_ < static_cast<int>(defs.size())) {
+            const auto& def = defs[static_cast<std::size_t>(upgradeConfirmIndex_)];
+            const int* lvlPtr = Meta::levelPtrByKey(upgradeLevels_, def.key);
+            int lvl = lvlPtr ? *lvlPtr : 0;
+            int64_t cost = Meta::costForNext(def, lvl);
+            float pw = 420.0f;
+            float ph = 150.0f;
+            float px = centerX - pw * 0.5f;
+            float py = topY + 130.0f;
+            render_->drawFilledRect(Engine::Vec2{px, py}, Engine::Vec2{pw, ph}, Engine::Color{24, 34, 48, 235});
+            std::ostringstream prompt;
+            prompt << "Buy " << def.displayName << " Lv." << (lvl + 1) << " for " << cost << " Gold?";
+            drawTextUnified(prompt.str(), Engine::Vec2{px + 14.0f, py + 20.0f}, 0.95f,
+                            Engine::Color{220, 240, 255, 240});
+            drawTextUnified("Enter / Click confirm | Esc / Cancel", Engine::Vec2{px + 14.0f, py + 52.0f}, 0.9f,
+                            Engine::Color{190, 210, 235, 220});
+            float cancelX = px + pw - 190.0f;
+            float confirmX = px + pw - 90.0f;
+            float btnY = py + ph - 44.0f;
+            render_->drawFilledRect(Engine::Vec2{cancelX, btnY}, Engine::Vec2{80.0f, 32.0f},
+                                    Engine::Color{80, 90, 110, 230});
+            render_->drawFilledRect(Engine::Vec2{confirmX, btnY}, Engine::Vec2{80.0f, 32.0f},
+                                    Engine::Color{90, 140, 110, 235});
+            drawTextUnified("Cancel", Engine::Vec2{cancelX + 12.0f, btnY + 7.0f}, 0.9f,
+                            Engine::Color{220, 230, 240, 240});
+            drawTextUnified("Confirm", Engine::Vec2{confirmX + 8.0f, btnY + 7.0f}, 0.9f,
+                            Engine::Color{220, 240, 255, 240});
+        }
     } else if (menuPage_ == MenuPage::Options) {
         Engine::Color c{200, 240, 200, 240};
         drawTextUnified("Options", Engine::Vec2{centerX - 50.0f, topY + 70.0f}, 1.2f, c);
@@ -5142,11 +5400,18 @@ void GameRoot::rebuildWaveSettings() {
     float hpMul = activeDifficulty_.enemyHpMul;
     float hpGrowth = std::pow(1.08f, static_cast<float>(startWaveBase_ - 1));
     float speedGrowth = std::pow(1.01f, static_cast<float>(startWaveBase_ - 1));
-    waveSettingsBase_.enemyHp *= hpMul * hpGrowth;
-    waveSettingsBase_.enemyShields *= hpMul * hpGrowth;
+    float enemyPower = globalModifiers_.enemyPowerMult;
+    waveSettingsBase_.enemyHp *= hpMul * hpGrowth * enemyPower;
+    waveSettingsBase_.enemyShields *= hpMul * hpGrowth * enemyPower;
     waveSettingsBase_.enemySpeed *= speedGrowth;
+    waveSettingsBase_.enemyHealthArmor *= enemyPower;
+    waveSettingsBase_.enemyShieldArmor *= enemyPower;
+    waveSettingsBase_.contactDamage *= enemyPower;
     int batchIncrease = (startWaveBase_ - 1) / 2;
-    waveSettingsBase_.batchSize = std::min(12, waveSettingsBase_.batchSize + batchIncrease);
+    int baseBatch = std::min(12, waveSettingsBase_.batchSize + batchIncrease);
+    int scaledBatch =
+        std::max(1, static_cast<int>(std::floor(static_cast<float>(baseBatch) * globalModifiers_.enemyCountMult)));
+    waveSettingsBase_.batchSize = std::min(16, scaledBatch);
     waveBatchBase_ = waveSettingsBase_.batchSize;
     contactDamage_ = waveSettingsBase_.contactDamage;
     if (collisionSystem_) collisionSystem_->setContactDamage(contactDamage_);
@@ -5164,10 +5429,10 @@ void GameRoot::applyArchetypePreset() {
     if (archetypes_.empty()) return;
     selectedArchetype_ = std::clamp(selectedArchetype_, 0, static_cast<int>(archetypes_.size() - 1));
     activeArchetype_ = archetypes_[selectedArchetype_];
-    heroMaxHpPreset_ = heroMaxHpBase_ * activeArchetype_.hpMul;
-    heroShieldPreset_ = heroShieldBase_ * activeArchetype_.hpMul;
-    heroMoveSpeedPreset_ = heroMoveSpeedBase_ * activeArchetype_.speedMul;
-    projectileDamagePreset_ = projectileDamageBase_ * activeArchetype_.damageMul;
+    heroMaxHpPreset_ = heroMaxHpBase_ * activeArchetype_.hpMul * globalModifiers_.playerHealthMult;
+    heroShieldPreset_ = heroShieldBase_ * activeArchetype_.hpMul * globalModifiers_.playerShieldsMult;
+    heroMoveSpeedPreset_ = heroMoveSpeedBase_ * activeArchetype_.speedMul * globalModifiers_.playerSpeedMult;
+    projectileDamagePreset_ = projectileDamageBase_ * activeArchetype_.damageMul * globalModifiers_.playerAttackPowerMult;
     heroColorPreset_ = activeArchetype_.color;
     heroTexturePath_ = resolveArchetypeTexture(activeArchetype_);
     buildAbilities();
@@ -5199,8 +5464,8 @@ void GameRoot::buildAbilities() {
     abilityVitalCostMul_ = 1.0f;
     abilityChargesBonus_ = 0;
     freezeTimer_ = 0.0;
-    attackSpeedMul_ = 1.0f;
-    lifestealPercent_ = 0.0f;
+    attackSpeedMul_ = attackSpeedBaseMul_;
+    lifestealPercent_ = globalModifiers_.playerLifestealAdd;
     lifestealBuff_ = 0.0f;
     lifestealTimer_ = 0.0;
     attackSpeedBuffMul_ = 1.0f;
@@ -5329,7 +5594,7 @@ void GameRoot::applyLevelChoice(int index) {
                 hp->maxHealth = heroMaxHp_;
                 hp->currentHealth = std::min(hp->maxHealth, hp->currentHealth + choice.amount * 0.5f);
                 heroUpgrades_.groundArmorLevel += 1;
-                Engine::Gameplay::applyUpgradesToUnit(*hp, heroBaseStats_, heroUpgrades_, false);
+                Engine::Gameplay::applyUpgradesToUnit(*hp, heroBaseStatsScaled_, heroUpgrades_, false);
             }
             break;
         case LevelChoiceType::Speed:
@@ -5697,7 +5962,7 @@ void GameRoot::drawAbilityShopOverlay() {
             hp->maxHealth = heroMaxHp_;
             hp->currentHealth = std::min(hp->maxHealth, hp->currentHealth + abilityHealthPerLevel_);
             heroUpgrades_.groundArmorLevel += 1;
-            Engine::Gameplay::applyUpgradesToUnit(*hp, heroBaseStats_, heroUpgrades_, false);
+            Engine::Gameplay::applyUpgradesToUnit(*hp, heroBaseStatsScaled_, heroUpgrades_, false);
         }
         return true;
     }};
@@ -5709,7 +5974,7 @@ void GameRoot::drawAbilityShopOverlay() {
         heroHealthArmor_ += abilityArmorPerLevel_;
         if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
             hp->healthArmor = heroHealthArmor_;
-            Engine::Gameplay::applyUpgradesToUnit(*hp, heroBaseStats_, heroUpgrades_, false);
+            Engine::Gameplay::applyUpgradesToUnit(*hp, heroBaseStatsScaled_, heroUpgrades_, false);
         }
         return true;
     }};
@@ -5850,7 +6115,7 @@ void GameRoot::spawnHero() {
         hp->shieldArmor += mod.shieldArmorBonus;
         hp->healthRegenRate += mod.healthRegenBonus;
         hp->shieldRegenRate += mod.shieldRegenBonus;
-        Engine::Gameplay::applyUpgradesToUnit(*hp, heroBaseStats_, heroUpgrades_, false);
+        Engine::Gameplay::applyUpgradesToUnit(*hp, heroBaseStatsScaled_, heroUpgrades_, false);
     }
     registry_.emplace<Engine::ECS::HeroTag>(hero_, Engine::ECS::HeroTag{});
     registry_.emplace<Game::OffensiveTypeTag>(hero_, Game::OffensiveTypeTag{activeArchetype_.offensiveType});
@@ -5937,13 +6202,19 @@ void GameRoot::resetRun() {
     heroMaxHp_ = heroMaxHpPreset_;
     heroUpgrades_ = {};
     heroShield_ = heroShieldPreset_;
-    heroHealthArmor_ = heroBaseStats_.baseHealthArmor;
-    heroShieldArmor_ = heroBaseStats_.baseShieldArmor;
+    heroHealthArmor_ = heroBaseStatsScaled_.baseHealthArmor;
+    heroShieldArmor_ = heroBaseStatsScaled_.baseShieldArmor;
     heroMoveSpeed_ = heroMoveSpeedPreset_;
     heroVisionRadiusTiles_ = heroVisionRadiusBaseTiles_;
     projectileDamage_ = projectileDamagePreset_;
     abilityDamageLevel_ = abilityAttackSpeedLevel_ = abilityRangeLevel_ = abilityVisionLevel_ = abilityHealthLevel_ = abilityArmorLevel_ = 0;
-    attackSpeedMul_ = 1.0f;
+    attackSpeedMul_ = attackSpeedBaseMul_;
+    heroHealthRegen_ = heroHealthRegenBase_ + globalModifiers_.playerRegenAdd;
+    heroShieldRegen_ = heroShieldRegenBase_;
+    heroRegenDelay_ = heroRegenDelayBase_;
+    lifestealPercent_ = globalModifiers_.playerLifestealAdd;
+    lifestealBuff_ = 0.0f;
+    reviveCharges_ = globalModifiers_.playerLivesAdd;
     autoFireRangeBonus_ = 0.0f;
     wave_ = std::max(0, startWaveBase_ - 1);
     defeated_ = false;
@@ -6004,6 +6275,7 @@ void GameRoot::resetRun() {
         waveSystem_ = std::make_unique<WaveSystem>(rng_, waveSettingsBase_);
         waveSystem_->setBossConfig(bossWave_, bossHpMultiplier_, bossSpeedMultiplier_);
         waveSystem_->setEnemyDefinitions(&enemyDefs_);
+        waveSystem_->setBaseArmor(Engine::Gameplay::BaseStats{waveSettingsBase_.enemyHealthArmor, waveSettingsBase_.enemyShieldArmor});
         if (eventSystem_) eventSystem_->setEnemyDefinitions(&enemyDefs_);
         waveSystem_->setSpawnBatchInterval(spawnBatchRoundInterval_);
         waveSystem_->setRound(round_);

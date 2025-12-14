@@ -20,6 +20,7 @@ set(GAME_SOURCES
     systems/MiniUnitSystem.cpp
     GameSelectedBuilding.cpp
     meta/ItemDefs.cpp
+    meta/GlobalUpgrades.cpp
     meta/SaveManager.cpp
     net/NetSession.cpp
 )

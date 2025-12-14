@@ -48,6 +48,7 @@
 #include "systems/BuffSystem.h"
 #include "systems/MiniUnitSystem.h"
 #include "meta/SaveManager.h"
+#include "meta/GlobalUpgrades.h"
 #include "EnemyDefinition.h"
 #include "components/OffensiveType.h"
 #include "components/Building.h"
@@ -118,6 +119,12 @@ private:
     void applyArchetypePreset();
     void loadProgress();
     void saveProgress();
+    void recomputeGlobalModifiers();
+    void applyGlobalModifiersToPresets();
+    std::string generateMatchId() const;
+    void depositRunGoldOnce(const std::string& reason);
+    bool tryPurchaseUpgrade(int index);
+    void resetUpgradeError();
     void rebuildWaveSettings();
     void buildAbilities();
     void drawAbilityPanel();
@@ -143,7 +150,7 @@ private:
                                Game::OffensiveType offenseType);
     bool performMeleeAttack(const Engine::TimeStep& step, const Engine::ActionState& actions);
 
-    enum class MenuPage { Main, Stats, Options, CharacterSelect, HostConfig, JoinSelect, Lobby, ServerBrowser };
+    enum class MenuPage { Main, Stats, Options, CharacterSelect, HostConfig, JoinSelect, Lobby, ServerBrowser, Upgrades };
     enum class MovementMode { Modern, RTS };
     enum class LevelChoiceType { Damage, Health, Speed };
     struct LevelChoice {
@@ -456,6 +463,11 @@ private:
     bool inMenu_{true};
     MenuPage menuPage_{MenuPage::Main};
     int menuSelection_{0};
+    int upgradesSelection_{0};
+    bool upgradeConfirmOpen_{false};
+    int upgradeConfirmIndex_{-1};
+    std::string upgradeError_;
+    double upgradeErrorTimer_{0.0};
     bool menuUpPrev_{false};
     bool menuDownPrev_{false};
     bool menuLeftPrev_{false};
@@ -510,6 +522,16 @@ private:
     // Persistence
     std::string savePath_{"saves/profile.dat"};
     Game::SaveData saveData_{};
+    std::string currentMatchId_{};
+    int64_t vaultGold_{0};
+    std::string lastDepositedMatchId_{};
+    Game::Meta::UpgradeLevels upgradeLevels_{};
+    Game::Meta::GlobalModifiers globalModifiers_{};
+    float attackSpeedBaseMul_{1.0f};
+    Engine::Gameplay::BaseStats heroBaseStatsScaled_{};
+    float heroHealthRegenBase_{0.0f};
+    float heroShieldRegenBase_{0.0f};
+    float heroRegenDelayBase_{0.0f};
     bool runStarted_{false};
     bool reviveNextRound_{false};
     // Level-up choice overlay

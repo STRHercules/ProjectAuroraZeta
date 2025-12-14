@@ -70,6 +70,23 @@ std::vector<uint8_t> SaveManager::serialize(const SaveData& data) const {
     j["bestWave"] = data.bestWave;
     j["totalKills"] = data.totalKills;
     j["movementMode"] = data.movementMode;
+    nlohmann::json vault;
+    vault["gold"] = data.vaultGold;
+    vault["lastMatchId"] = data.lastDepositedMatchId;
+    j["vault"] = vault;
+    nlohmann::json upgrades;
+    upgrades["attack_power"] = data.upgrades.attackPower;
+    upgrades["attack_speed"] = data.upgrades.attackSpeed;
+    upgrades["health"] = data.upgrades.health;
+    upgrades["speed"] = data.upgrades.speed;
+    upgrades["armor"] = data.upgrades.armor;
+    upgrades["shields"] = data.upgrades.shields;
+    upgrades["lifesteal"] = data.upgrades.lifesteal;
+    upgrades["regeneration"] = data.upgrades.regeneration;
+    upgrades["lives"] = data.upgrades.lives;
+    upgrades["difficulty"] = data.upgrades.difficulty;
+    upgrades["mastery"] = data.upgrades.mastery;
+    j["global_upgrades"] = upgrades;
     auto str = j.dump();
     return std::vector<uint8_t>(str.begin(), str.end());
 }
@@ -83,6 +100,33 @@ bool SaveManager::deserialize(const std::vector<uint8_t>& bytes, SaveData& outDa
         outData.bestWave = j.value("bestWave", 0);
         outData.totalKills = j.value("totalKills", 0);
         outData.movementMode = j.value("movementMode", 0);
+        if (j.contains("vault")) {
+            auto v = j["vault"];
+            outData.vaultGold = v.value("gold", static_cast<int64_t>(0));
+            outData.lastDepositedMatchId = v.value("lastMatchId", std::string{});
+        } else {
+            outData.vaultGold = j.value("vaultGold", static_cast<int64_t>(0));
+            outData.lastDepositedMatchId = j.value("lastDepositedMatchId", std::string{});
+        }
+        if (j.contains("global_upgrades")) {
+            auto g = j["global_upgrades"];
+            outData.upgrades.attackPower = g.value("attack_power", 0);
+            outData.upgrades.attackSpeed = g.value("attack_speed", 0);
+            outData.upgrades.health = g.value("health", 0);
+            outData.upgrades.speed = g.value("speed", 0);
+            outData.upgrades.armor = g.value("armor", 0);
+            outData.upgrades.shields = g.value("shields", 0);
+            outData.upgrades.lifesteal = g.value("lifesteal", 0);
+            outData.upgrades.regeneration = g.value("regeneration", 0);
+            outData.upgrades.lives = g.value("lives", 0);
+            outData.upgrades.difficulty = g.value("difficulty", 0);
+            outData.upgrades.mastery = g.value("mastery", 0);
+        }
+        for (const auto& def : Meta::upgradeDefinitions()) {
+            if (int* ptr = Meta::levelPtrByKey(outData.upgrades, def.key)) {
+                *ptr = Meta::clampLevel(def, *ptr);
+            }
+        }
         return true;
     } catch (...) {
         return false;
