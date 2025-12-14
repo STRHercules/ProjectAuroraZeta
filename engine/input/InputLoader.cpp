@@ -52,6 +52,9 @@ std::optional<InputBindings> InputLoader::loadFromFile(const std::string& path) 
     if (j.contains("toggleShop")) {
         bindings.toggleShop = readStrings(j["toggleShop"]);
     }
+    if (j.contains("characterScreen")) {
+        bindings.characterScreen = readStrings(j["characterScreen"]);
+    }
     if (j.contains("pause")) {
         bindings.pause = readStrings(j["pause"]);
     }

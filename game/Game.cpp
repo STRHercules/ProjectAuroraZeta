@@ -106,6 +106,29 @@ constexpr std::size_t offensiveTypeIndex(Game::OffensiveType type) {
     return static_cast<std::size_t>(type);
 }
 
+inline int iconIndexFromName(const std::string& name) {
+    std::hash<std::string> h;
+    return static_cast<int>((h(name) % 66u) + 1u);
+}
+
+struct HUDRect {
+    float x{0.0f};
+    float y{0.0f};
+    float w{0.0f};
+    float h{0.0f};
+};
+
+inline HUDRect abilityHudRect(int abilityCount, int viewportW, int viewportH) {
+    const float margin = 16.0f;
+    const float iconBox = 52.0f;  // background box around a scaled 16x16 icon
+    const float gap = 10.0f;
+    float w = abilityCount > 0 ? abilityCount * iconBox + std::max(0, abilityCount - 1) * gap : 0.0f;
+    float h = 64.0f;
+    float x = static_cast<float>(viewportW) - w - margin;
+    float y = static_cast<float>(viewportH) - h - margin;
+    return HUDRect{x, y, w, h};
+}
+
 }  // namespace
 
 // Forward decl for traveling shop dynamic pricing.
@@ -181,6 +204,31 @@ bool GameRoot::onInitialize(Engine::Application& app) {
                                                      hotzoneMinSeparation_, hotzoneSpawnClearance_, rng_());
     // Wave settings loaded later from gameplay config.
     textureManager_ = std::make_unique<Engine::TextureManager>(*render_);
+    {
+        std::filesystem::path iconPath = "assets/Sprites/GUI/abilities.png";
+        if (const char* home = std::getenv("HOME")) {
+            std::filesystem::path p = std::filesystem::path(home) / "assets" / "Sprites" / "GUI" / "abilities.png";
+            if (std::filesystem::exists(p)) {
+                iconPath = p;
+            }
+        }
+        abilityIconTex_ = loadTextureOptional(iconPath.string());
+        if (!abilityIconTex_) {
+            Engine::logWarn("Failed to load ability icons at " + iconPath.string());
+        }
+    }
+    auto loadGuiTex = [&](const std::string& rel) -> Engine::TexturePtr {
+        std::filesystem::path path = rel;
+        if (const char* home = std::getenv("HOME")) {
+            std::filesystem::path p = std::filesystem::path(home) / rel;
+            if (std::filesystem::exists(p)) path = p;
+        }
+        return loadTextureOptional(path.string());
+    };
+    hpBarTex_ = loadGuiTex("assets/Sprites/GUI/healthbar.png");
+    shieldBarTex_ = loadGuiTex("assets/Sprites/GUI/armorbar.png");
+    energyBarTex_ = loadGuiTex("assets/Sprites/GUI/energybar.png");
+    dashBarTex_ = loadGuiTex("assets/Sprites/GUI/dashbar.png");
     if (eventSystem_) eventSystem_->setTextureManager(textureManager_.get());
     loadProgress();
     netSession_ = std::make_unique<Game::Net::NetSession>();
@@ -207,6 +255,7 @@ bool GameRoot::onInitialize(Engine::Application& app) {
         bindings_.useItem = {"key:q"};
         bindings_.restart = {"backspace"};
         bindings_.dash = {"space"};
+        bindings_.characterScreen = {"i"};
         bindings_.ability1 = {"key:1"};
         bindings_.ability2 = {"key:2"};
         bindings_.ability3 = {"key:3"};
@@ -603,6 +652,11 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
 
     // Sample high-level actions.
     Engine::ActionState actions = actionMapper_.sample(input);
+    if (characterScreenOpen_) {
+        actions.scroll = 0;
+        actions.moveX = actions.moveY = 0.0f;
+        actions.camX = actions.camY = 0.0f;
+    }
     updateNetwork(step.deltaSeconds);
     if (multiplayerEnabled_) {
         bool remoteAlive = false;
@@ -632,6 +686,8 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
     }
     const bool pausePressed = actions.pause && !pauseTogglePrev_;
     pauseTogglePrev_ = actions.pause;
+    bool characterEdge = actions.characterScreen && !characterScreenPrev_;
+    characterScreenPrev_ = actions.characterScreen;
     bool menuBackEdge = actions.menuBack && !menuBackPrev_;
     menuBackPrev_ = actions.menuBack;
     const bool buildMenuEdge = actions.buildMenu && !buildMenuPrev_;
@@ -663,21 +719,17 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         pauseMenuBlink_ = 0.0;
         pauseClickPrev_ = false;
     }
-    paused_ = userPaused_ || itemShopOpen_ || abilityShopOpen_ || levelChoiceOpen_;
+    if (characterEdge && !inMenu_) {
+        characterScreenOpen_ = !characterScreenOpen_;
+    }
+    paused_ = userPaused_ || itemShopOpen_ || abilityShopOpen_ || levelChoiceOpen_ ||
+              (characterScreenOpen_ && !multiplayerEnabled_);
     if (actions.toggleFollow && (itemShopOpen_ || abilityShopOpen_)) {
         // ignore camera toggle while paused/shop
     }
 
-    // Ability focus/upgrade input
-    if (actions.scroll != 0) {
-        abilityFocus_ = std::clamp(abilityFocus_ + (actions.scroll > 0 ? -1 : 1), 0,
-                                   static_cast<int>(abilities_.size() > 0 ? abilities_.size() - 1 : 0));
-    }
-    bool upgradeEdge = actions.reload && !abilityUpgradePrev_;
+    // Ability focus/upgrade input (scroll disabled per UI overhaul; upgrades via HUD click).
     abilityUpgradePrev_ = actions.reload;
-    if (upgradeEdge) {
-        upgradeFocusedAbility();
-    }
 
     // Level-up choice input (mouse click on cards).
     if (levelChoiceOpen_) {
@@ -760,7 +812,8 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             };
             if (inside(resumeX, resumeY)) {
                 userPaused_ = false;
-                paused_ = itemShopOpen_ || abilityShopOpen_ || levelChoiceOpen_;
+                paused_ = itemShopOpen_ || abilityShopOpen_ || levelChoiceOpen_ ||
+                          (characterScreenOpen_ && !multiplayerEnabled_);
                 pauseMenuBlink_ = 0.0;
             } else if (inside(resumeX, quitY)) {
                 bool hostQuit = netSession_ && netSession_->isHost();
@@ -786,7 +839,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
     }
 
     // Mini-unit selection and orders (RTS-style). Available in both movement modes.
-    if (!inMenu_ && !paused_) {
+    if (!inMenu_ && !paused_ && !characterScreenOpen_) {
         const bool leftDown = input.isMouseButtonDown(0);
         const bool rightDown = input.isMouseButtonDown(2);
         Engine::Vec2 worldMouse = Engine::Gameplay::mouseWorldPosition(input, camera_, viewportWidth_, viewportHeight_);
@@ -815,6 +868,15 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             const float ry = static_cast<float>(viewportHeight_) - panelH - 20.0f;
             mouseOverUI |= pointInRect(lastMouseX_, lastMouseY_, rx, ry, panelW, panelH);
         }
+        HUDRect abilityRect = abilityHudRect(static_cast<int>(abilities_.size()), viewportWidth_, viewportHeight_);
+        mouseOverUI |= pointInRect(lastMouseX_, lastMouseY_, abilityRect.x - 6.0f, abilityRect.y - 6.0f,
+                                   abilityRect.w + 12.0f, abilityRect.h + 12.0f);
+        const float badgeW = 280.0f;
+        const float badgeH = 50.0f;
+        const float margin = 16.0f;
+        float invX = margin;
+        float invY = static_cast<float>(viewportHeight_) - badgeH - margin;
+        mouseOverUI |= pointInRect(lastMouseX_, lastMouseY_, invX, invY, badgeW, badgeH);
         if (!selectedMiniUnits_.empty()) {
             const float hudW = 300.0f;
             const float hudH = 70.0f;
@@ -940,7 +1002,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         const bool midClick = input.isMouseButtonDown(1);
 
         if (auto* vel = registry_.get<Engine::ECS::Velocity>(hero_)) {
-            if (paused_ || defeatDelayActive_) {
+            if (paused_ || defeatDelayActive_ || characterScreenOpen_) {
                 vel->value = {0.0f, 0.0f};
             } else if (movementMode_ == MovementMode::Modern) {
                 vel->value = {actions.moveX * heroMoveSpeed_, actions.moveY * heroMoveSpeed_};
@@ -973,7 +1035,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         // Dash trigger.
         const bool dashEdge = actions.dash && !dashPrev_;
         dashPrev_ = actions.dash;
-        if (!paused_ && !defeatDelayActive_ && dashEdge && dashCooldownTimer_ <= 0.0f) {
+        if (!paused_ && !defeatDelayActive_ && !characterScreenOpen_ && dashEdge && dashCooldownTimer_ <= 0.0f) {
             Engine::Vec2 dir{actions.moveX, actions.moveY};
             if (movementMode_ == MovementMode::RTS) {
                 if (moveTargetActive_) {
@@ -1274,16 +1336,18 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 if (dist2 < 80.0f * 80.0f) {
                     if (itemShopOpen_) {
                         itemShopOpen_ = false;
-                        paused_ = userPaused_ || abilityShopOpen_;
+                        paused_ = userPaused_ || abilityShopOpen_ ||
+                                  (characterScreenOpen_ && !multiplayerEnabled_);
                     } else {
                         itemShopOpen_ = true;
-                        paused_ = userPaused_ || itemShopOpen_ || abilityShopOpen_;
+                        paused_ = userPaused_ || itemShopOpen_ || abilityShopOpen_ ||
+                                  (characterScreenOpen_ && !multiplayerEnabled_);
                     }
                 }
             }
         }
 
-        if (!paused_) {
+        if (!paused_ && !characterScreenOpen_) {
             if (ability1Edge) executeAbility(1);
             if (ability2Edge) executeAbility(2);
             if (ability3Edge) executeAbility(3);
@@ -2028,7 +2092,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             waveSpawned_ = false;
             itemShopOpen_ = false;
             abilityShopOpen_ = false;
-            paused_ = userPaused_;
+            paused_ = userPaused_ || (characterScreenOpen_ && !multiplayerEnabled_);
             refreshShopInventory();
             if (multiplayerEnabled_ && reviveNextRound_) {
                 reviveLocalPlayer();
@@ -2082,7 +2146,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 waveSpawned_ = false;
                 itemShopOpen_ = false;
                 abilityShopOpen_ = false;
-                paused_ = userPaused_;
+                paused_ = userPaused_ || (characterScreenOpen_ && !multiplayerEnabled_);
                 refreshShopInventory();
                 if (multiplayerEnabled_ && reviveNextRound_) {
                     reviveLocalPlayer();
@@ -2114,7 +2178,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 waveSpawned_ = false;
                 itemShopOpen_ = false;
                 abilityShopOpen_ = false;
-                paused_ = userPaused_;
+                paused_ = userPaused_ || (characterScreenOpen_ && !multiplayerEnabled_);
                 despawnShopkeeper();
                 refreshShopInventory();
                 if (waveSystem_) {
@@ -2613,17 +2677,16 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 note << "Wave clear bonus +" << waveClearBonus_;
                 drawTextUnified(note.str(), Engine::Vec2{10.0f, 82.0f}, 0.9f, Engine::Color{180, 240, 180, 200});
             }
-            // HP and XP bars (bottom-left).
+            drawResourceCluster();
+            // Inventory badge anchored bottom-left.
             {
-                const float barW = 300.0f;
-                const float hpH = 18.0f;
-                const float xpH = 16.0f;
-                Engine::Vec2 origin{10.0f, static_cast<float>(viewportHeight_) - 82.0f};
-                // Held item display just above the bars.
-                Engine::Vec2 invPos{origin.x, origin.y - 50.0f};
-                float invW = barW;
-                float invH = 32.0f;
-                render_->drawFilledRect(invPos, Engine::Vec2{invW, invH}, Engine::Color{18, 24, 34, 210});
+                const float badgeW = 280.0f;
+                const float badgeH = 50.0f;
+                const float margin = 16.0f;
+                float x = margin;
+                float y = static_cast<float>(viewportHeight_) - badgeH - margin;
+                render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{badgeW, badgeH},
+                                        Engine::Color{18, 24, 34, 215});
                 auto rarityCol = [](ItemRarity r) {
                     switch (r) {
                         case ItemRarity::Common: return Engine::Color{200, 220, 240, 240};
@@ -2634,76 +2697,25 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 };
                 if (inventory_.empty()) {
                     inventorySelected_ = -1;
-                    drawTextUnified("Inventory empty (Tab to cycle)", Engine::Vec2{invPos.x + 10.0f, invPos.y + 6.0f},
-                                    0.9f, Engine::Color{200, 220, 240, 220});
+                    drawTextUnified("Inventory empty (Tab to cycle)", Engine::Vec2{x + 10.0f, y + 4.0f}, 0.9f,
+                                    Engine::Color{200, 220, 240, 220});
                 } else {
                     clampInventorySelection();
                     const auto& held = inventory_[inventorySelected_];
                     bool usable = held.def.kind == ItemKind::Support;
                     std::ostringstream heldText;
                     heldText << "Holding: " << held.def.name;
-                    drawTextUnified(heldText.str(), Engine::Vec2{invPos.x + 10.0f, invPos.y + 2.0f}, 1.0f,
-                                    rarityCol(held.def.rarity));
+                    drawTextUnified(heldText.str(), Engine::Vec2{x + 10.0f, y + 2.0f}, 1.0f, rarityCol(held.def.rarity));
                     std::ostringstream hint;
                     hint << "Tab to cycle   Q to " << (usable ? "use" : "use support item");
-                    drawTextUnified(hint.str(), Engine::Vec2{invPos.x + 10.0f, invPos.y + 12.0f},
-                                    0.85f, Engine::Color{180, 200, 220, 210});
+                    drawTextUnified(hint.str(), Engine::Vec2{x + 10.0f, y + 18.0f}, 0.85f,
+                                    Engine::Color{180, 200, 220, 210});
                 }
-
-                // Wallet
+                // Wallet badge next to inventory.
                 std::ostringstream wallet;
                 wallet << "Copper " << copper_ << " | Gold " << gold_;
-                drawTextUnified(wallet.str(), Engine::Vec2{origin.x, origin.y - 16.0f}, 0.85f,
+                drawTextUnified(wallet.str(), Engine::Vec2{x + 10.0f, y + badgeH - 20.0f}, 0.85f,
                                 Engine::Color{200, 230, 255, 210});
-
-                // HP bar
-                float hpRatio = 0.0f;
-                float shieldRatio = 0.0f;
-                if (const auto* heroHealth = registry_.get<Engine::ECS::Health>(hero_)) {
-                    float maxPool = heroHealth->maxHealth + heroHealth->maxShields;
-                    if (maxPool > 0.0f) {
-                        hpRatio = std::clamp(heroHealth->currentHealth / maxPool, 0.0f, 1.0f);
-                        shieldRatio = std::clamp(heroHealth->currentShields / maxPool, 0.0f, 1.0f);
-                    }
-                }
-                render_->drawFilledRect(origin, Engine::Vec2{barW, hpH}, Engine::Color{50, 30, 30, 200});
-                if (shieldRatio > 0.0f) {
-                    render_->drawFilledRect(origin, Engine::Vec2{barW * shieldRatio, hpH}, Engine::Color{90, 140, 240, 230});
-                }
-                if (hpRatio > 0.0f) {
-                    render_->drawFilledRect(origin, Engine::Vec2{barW * hpRatio, hpH}, Engine::Color{200, 80, 80, 230});
-                }
-                std::ostringstream hpTxt;
-                float totalRatio = std::clamp(hpRatio + shieldRatio, 0.0f, 1.0f);
-                hpTxt << "HP " << static_cast<int>(std::round(totalRatio * 100)) << "%";
-                drawTextUnified(hpTxt.str(), Engine::Vec2{origin.x + 8.0f, origin.y + 2.0f}, 0.9f,
-                                Engine::Color{255, 230, 230, 240});
-
-                // XP bar directly under HP
-                float xpRatio = xpToNext_ > 0 ? static_cast<float>(xp_) / static_cast<float>(xpToNext_) : 0.0f;
-                xpRatio = std::clamp(xpRatio, 0.0f, 1.0f);
-                Engine::Vec2 xpPos{origin.x, origin.y + hpH + 6.0f};
-                render_->drawFilledRect(xpPos, Engine::Vec2{barW, xpH}, Engine::Color{30, 40, 60, 200});
-                render_->drawFilledRect(xpPos, Engine::Vec2{barW * xpRatio, xpH}, Engine::Color{90, 180, 255, 230});
-                std::ostringstream lvl;
-                lvl << "Lv " << level_ << "  " << xp_ << "/" << xpToNext_;
-                drawTextUnified(lvl.str(), Engine::Vec2{xpPos.x + 8.0f, xpPos.y + 1.0f}, 0.9f,
-                                Engine::Color{220, 235, 255, 240});
-
-                // Dash cooldown bar beneath XP
-                float dashRatio = dashCooldown_ > 0.0f ? 1.0f - std::clamp(dashCooldownTimer_ / dashCooldown_, 0.0f, 1.0f) : 1.0f;
-                Engine::Vec2 dpos{xpPos.x, xpPos.y + xpH + 6.0f};
-                render_->drawFilledRect(dpos, Engine::Vec2{barW, 8.0f}, Engine::Color{40, 40, 50, 200});
-                render_->drawFilledRect(dpos, Engine::Vec2{barW * dashRatio, 8.0f}, Engine::Color{180, 240, 200, 220});
-                drawTextUnified("Dash", Engine::Vec2{dpos.x + 8.0f, dpos.y + 0.5f}, 0.8f, Engine::Color{180, 220, 200, 210});
-                // Energy bar beneath dash
-                float energyRatio = energyMax_ > 0.0f ? std::clamp(energy_ / energyMax_, 0.0f, 1.0f) : 0.0f;
-                Engine::Vec2 epos{dpos.x, dpos.y + 12.0f};
-                render_->drawFilledRect(epos, Engine::Vec2{barW, 8.0f}, Engine::Color{28, 30, 46, 200});
-                render_->drawFilledRect(epos, Engine::Vec2{barW * energyRatio, 8.0f}, Engine::Color{120, 200, 255, 230});
-                drawTextUnified("Energy", Engine::Vec2{epos.x + 8.0f, epos.y + 0.5f}, 0.8f,
-                                energyWarningTimer_ > 0.0 ? Engine::Color{255, 200, 160, 220}
-                                                          : Engine::Color{180, 210, 240, 210});
             }
             // Active event HUD.
             registry_.view<Game::EventActive>([&](Engine::ECS::Entity evEnt, const Game::EventActive& ev) {
@@ -2806,7 +2818,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         // HUD fallback (rectangles) if debug font missing.
         // Fallback bars only when TTF is unavailable and we rely on bitmap font.
         if (!hasTTF() && !debugText_) {
-            const float barW = 200.0f;
+            const float barW = 150.0f;
             const float barH = 12.0f;
             float hpRatio = 0.0f;
             float shieldRatio = 0.0f;
@@ -2817,7 +2829,9 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     shieldRatio = std::clamp(heroHealth->currentShields / maxPool, 0.0f, 1.0f);
                 }
             }
-            Engine::Vec2 pos{10.0f, static_cast<float>(viewportHeight_) - 24.0f};
+            float totalW = barW * 4.0f + 18.0f * 3.0f;
+            float startX = static_cast<float>(viewportWidth_) * 0.5f - totalW * 0.5f;
+            Engine::Vec2 pos{startX, static_cast<float>(viewportHeight_) - 24.0f};
             render_->drawFilledRect(pos, Engine::Vec2{barW, barH}, Engine::Color{50, 50, 60, 220});
             if (shieldRatio > 0.0f) {
                 render_->drawFilledRect(pos, Engine::Vec2{barW * shieldRatio, barH}, Engine::Color{80, 140, 240, 220});
@@ -2825,6 +2839,13 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             if (hpRatio > 0.0f) {
                 render_->drawFilledRect(pos, Engine::Vec2{barW * hpRatio, barH}, Engine::Color{120, 220, 120, 240});
             }
+            // Draw simple placeholders for other bars to maintain spacing.
+            render_->drawFilledRect(Engine::Vec2{pos.x + barW + 18.0f, pos.y}, Engine::Vec2{barW, barH},
+                                    Engine::Color{60, 70, 90, 180});
+            render_->drawFilledRect(Engine::Vec2{pos.x + (barW + 18.0f) * 2.0f, pos.y}, Engine::Vec2{barW, barH},
+                                    Engine::Color{60, 70, 90, 180});
+            render_->drawFilledRect(Engine::Vec2{pos.x + (barW + 18.0f) * 3.0f, pos.y}, Engine::Vec2{barW, barH},
+                                    Engine::Color{60, 90, 70, 180});
             // Wave-clear cue (fallback bar).
             if (clearBannerTimer_ > 0.0) {
                 render_->drawFilledRect(Engine::Vec2{10.0f, 28.0f}, Engine::Vec2{140.0f, 12.0f},
@@ -2876,7 +2897,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         }
 
         bool worldLeftEdge = input.isMouseButtonDown(0) && !buildPreviewActive_ && !buildingSelectPrev_;
-        if (worldLeftEdge && !mouseOverBottomLeftUI && !inMenu_ && !paused_) {
+        if (worldLeftEdge && !mouseOverBottomLeftUI && !inMenu_ && !paused_ && !characterScreenOpen_) {
             selectBuildingAt(mouseWorld_);
             buildingJustSelected_ = true;
         }
@@ -2888,10 +2909,13 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         drawPauseOverlay();
     }
         if (!inMenu_) {
-            drawAbilityPanel();
+            drawAbilityHud(input);
         }
         if (levelChoiceOpen_) {
             drawLevelChoiceOverlay();
+        }
+        if (characterScreenOpen_) {
+            drawCharacterScreen(input);
         }
         showDefeatOverlay();
     }
@@ -2905,7 +2929,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         }
         bool previewLeftEdge = input.isMouseButtonDown(0) && !buildPreviewClickPrev_;
         bool previewRightEdge = input.isMouseButtonDown(2) && !buildPreviewRightPrev_;
-        if (!paused_ && previewLeftEdge) {
+        if (!paused_ && !characterScreenOpen_ && previewLeftEdge) {
             placeBuilding(mouseWorld_);
         } else if (previewRightEdge) {
             clearBuildPreview();
@@ -5458,6 +5482,7 @@ std::string GameRoot::resolveArchetypeTexture(const GameRoot::ArchetypeDef& def)
 void GameRoot::buildAbilities() {
     abilities_.clear();
     abilityStates_.clear();
+    abilityIconIndices_.clear();
     abilityFocus_ = 0;
     rageTimer_ = 0.0f;
     rageDamageBuff_ = 1.0f;
@@ -5512,6 +5537,7 @@ void GameRoot::buildAbilities() {
         slot.type = def.type;
         slot.powerScale = 1.0f;
         slot.energyCost = static_cast<float>(def.baseCost);
+        slot.iconIndex = def.iconIndex > 0 ? def.iconIndex : iconIndexFromName(def.name);
         abilities_.push_back(slot);
 
         AbilityState st{};
@@ -5520,6 +5546,7 @@ void GameRoot::buildAbilities() {
         st.maxLevel = 5;
         st.cooldown = 0.0f;
         abilityStates_.push_back(st);
+        abilityIconIndices_.push_back(slot.iconIndex);
     };
 
     bool loaded = false;
@@ -5534,6 +5561,7 @@ void GameRoot::buildAbilities() {
                 def.baseCooldown = a.value("cooldown", 8.0f);
                 def.baseCost = a.value("cost", 25);
                 def.type = a.value("type", "generic");
+                def.iconIndex = a.value("icon", 0);
                 if (!def.name.empty()) {
                     pushAbility(def);
                 }
@@ -5604,7 +5632,7 @@ void GameRoot::applyLevelChoice(int index) {
             break;
     }
     levelChoiceOpen_ = false;
-    paused_ = userPaused_ || itemShopOpen_ || abilityShopOpen_;
+    paused_ = userPaused_ || itemShopOpen_ || abilityShopOpen_ || (characterScreenOpen_ && !multiplayerEnabled_);
 }
 
 void GameRoot::drawLevelChoiceOverlay() {
@@ -6045,51 +6073,364 @@ void GameRoot::drawPauseOverlay() {
     drawBtn("Main Menu", resumeX, quitY, hoverQuit);
 }
 
-void GameRoot::drawAbilityPanel() {
+void GameRoot::drawResourceCluster() {
+    if (!render_) return;
+    float hpFillTarget = 0.0f;
+    float shieldFillTarget = 0.0f;
+    float curHp = 0.0f;
+    float maxHp = 0.0f;
+    float curShield = 0.0f;
+    float maxShield = 0.0f;
+    if (const auto* heroHealth = registry_.get<Engine::ECS::Health>(hero_)) {
+        maxHp = heroHealth->maxHealth;
+        curHp = heroHealth->currentHealth;
+        maxShield = heroHealth->maxShields;
+        curShield = heroHealth->currentShields;
+        if (maxHp > 0.0f) hpFillTarget = std::clamp(curHp / maxHp, 0.0f, 1.0f);
+        if (maxShield > 0.0f) shieldFillTarget = std::clamp(curShield / maxShield, 0.0f, 1.0f);
+    }
+    float energyRatio = energyMax_ > 0.0f ? std::clamp(energy_ / energyMax_, 0.0f, 1.0f) : 0.0f;
+    float dashRatio = dashCooldown_ > 0.0f ? 1.0f - std::clamp(dashCooldownTimer_ / dashCooldown_, 0.0f, 1.0f) : 1.0f;
+
+    auto smooth = [](float current, float target) {
+        const float k = 0.18f;
+        return current + (target - current) * k;
+    };
+    uiHpFill_ = smooth(uiHpFill_, hpFillTarget);
+    uiShieldFill_ = smooth(uiShieldFill_, shieldFillTarget);
+    uiEnergyFill_ = smooth(uiEnergyFill_, energyRatio);
+    uiDashFill_ = smooth(uiDashFill_, dashRatio);
+
+    float baseBarW = 180.0f;
+    float baseBarH = 22.0f;
+    const float barScale = 3.0f;
+    auto texW = [&](const Engine::TexturePtr& t, float fallback) { return t ? static_cast<float>(t->width()) : fallback; };
+    auto texH = [&](const Engine::TexturePtr& t, float fallback) { return t ? static_cast<float>(t->height()) : fallback; };
+    baseBarW = std::max({texW(hpBarTex_, baseBarW), texW(shieldBarTex_, baseBarW), texW(energyBarTex_, baseBarW), texW(dashBarTex_, baseBarW)});
+    baseBarH = std::max({texH(hpBarTex_, baseBarH), texH(shieldBarTex_, baseBarH), texH(energyBarTex_, baseBarH), texH(dashBarTex_, baseBarH)});
+    const float barW = baseBarW * barScale;
+    const float barH = baseBarH * barScale;
+    const float gap = 18.0f * barScale;
+    const int barCount = 4;
+    const float totalW = barCount * barW + (barCount - 1) * gap;
+    const float startX = static_cast<float>(viewportWidth_) * 0.5f - totalW * 0.5f;
+    const float y = static_cast<float>(viewportHeight_) - (barH + 20.0f);
+
+    auto centeredTextPosY = [&](float baseY) { return baseY + (barH - 12.0f) * 0.5f; };
+
+    auto drawBar = [&](int index, float fill, const Engine::Color& fallbackCol, const std::string& label,
+                       const std::string& value, const Engine::TexturePtr& tex) {
+        float x = startX + static_cast<float>(index) * (barW + gap);
+        // No background; filled portion grows left -> right from the bar start.
+        if (tex && fill > 0.0f) {
+            int srcW = static_cast<int>(std::round(static_cast<float>(tex->width()) * fill));
+            if (srcW > 0) {
+                Engine::IntRect src{0, 0, srcW, tex->height()};
+                float texWidthScaled = static_cast<float>(srcW) * barScale;
+                float texHeightScaled = static_cast<float>(tex->height()) * barScale;
+                float texX = x;
+                float texY = y + (barH - texHeightScaled) * 0.5f;
+                render_->drawTextureRegion(*tex, Engine::Vec2{texX, texY},
+                                           Engine::Vec2{texWidthScaled, texHeightScaled},
+                                           src);
+            }
+        } else {
+            float w = barW * fill;
+            render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{w, barH}, fallbackCol);
+        }
+        float ty = centeredTextPosY(y) - 4.0f;  // raise text a bit within the bar
+        // Center text inside bar.
+        std::string combined = label + " " + value;
+        // rough center by measuring approximate width via character count (bitmap font lacks metrics); this is acceptable for UI text here.
+        float textX = x + barW * 0.5f - static_cast<float>(combined.size()) * 4.5f;
+        drawTextUnified(combined, Engine::Vec2{textX, ty}, 0.95f, Engine::Color{235, 245, 255, 235});
+    };
+
+    std::ostringstream hpText;
+    hpText << static_cast<int>(curHp) << "/" << static_cast<int>(maxHp);
+    std::ostringstream shieldText;
+    shieldText << static_cast<int>(curShield) << "/" << static_cast<int>(maxShield);
+    std::ostringstream energyText;
+    energyText << static_cast<int>(std::round(energy_)) << "/" << static_cast<int>(std::round(energyMax_));
+    std::ostringstream dashText;
+    if (dashCooldownTimer_ <= 0.0f) {
+        dashText << "Ready";
+    } else {
+        dashText << std::fixed << std::setprecision(1) << dashCooldownTimer_ << "s";
+    }
+
+    drawBar(0, uiHpFill_, Engine::Color{204, 92, 92, 235}, "Health", hpText.str(), hpBarTex_);
+    drawBar(1, uiShieldFill_, Engine::Color{108, 166, 255, 235}, "Shield", shieldText.str(), shieldBarTex_);
+    drawBar(2, uiEnergyFill_, Engine::Color{120, 200, 255, 235}, "Energy", energyText.str(), energyBarTex_);
+    drawBar(3, uiDashFill_, Engine::Color{110, 160, 120, 230}, "Dash", dashText.str(), dashBarTex_);
+}
+
+void GameRoot::drawAbilityHud(const Engine::InputState& input) {
     if (!render_ || abilities_.empty()) return;
-    const float scale = 1.15f;
-    const float panelW = 320.0f * scale;
-    const float panelH = 240.0f * scale;
-    const float margin = 16.0f;
-    float x = static_cast<float>(viewportWidth_) - panelW - margin;
-    float y = static_cast<float>(viewportHeight_) - panelH - margin;
-    render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{panelW, panelH}, Engine::Color{16, 24, 34, 210});
-    const float headerH = 26.0f * scale;
-    drawTextUnified("Abilities", Engine::Vec2{x + 12.0f, y + 10.0f}, 1.0f * scale, Engine::Color{200, 230, 255, 235});
-    const float lineH = 30.0f * scale;
-    const float hintH = 36.0f * scale;
-    float listHeight = static_cast<float>(abilities_.size()) * lineH;
-    float available = panelH - headerH - hintH - 24.0f;  // padding
-    float listStartY = y + headerH + std::max(12.0f, (available - listHeight) * 0.5f);
+    HUDRect rect = abilityHudRect(static_cast<int>(abilities_.size()), viewportWidth_, viewportHeight_);
+    if (rect.w <= 0.0f) return;
+    const float iconBox = 52.0f;
+    const float gap = 10.0f;
+    const float iconSize = 40.0f;  // scaled from 16x16
+    const float inset = (iconBox - iconSize) * 0.5f;
+
+    bool leftClick = input.isMouseButtonDown(0);
+    bool leftEdge = leftClick && !abilityHudClickPrev_;
+    abilityHudClickPrev_ = leftClick;
+
+    int hovered = -1;
+    int mx = input.mouseX();
+    int my = input.mouseY();
+
+    render_->drawFilledRect(Engine::Vec2{rect.x - 6.0f, rect.y - 6.0f},
+                            Engine::Vec2{rect.w + 12.0f, rect.h + 12.0f}, Engine::Color{14, 18, 26, 200});
+
+    auto upgradeCost = [](const AbilitySlot& slot) {
+        return slot.upgradeCost + (slot.level - 1) * (slot.upgradeCost / 2);
+    };
+
+    auto attemptUpgrade = [&](int idx) {
+        if (idx < 0 || idx >= static_cast<int>(abilities_.size())) return;
+        auto& slot = abilities_[idx];
+        auto& st = abilityStates_[idx];
+        if (slot.level >= slot.maxLevel) return;
+        int cost = upgradeCost(slot);
+        if (copper_ < cost) {
+            shopNoFundsTimer_ = 0.6;
+            return;
+        }
+        copper_ -= cost;
+        slot.level += 1;
+        st.level = slot.level;
+        if (slot.type == "scatter" || slot.type == "nova" || slot.type == "ultimate") {
+            slot.powerScale *= 1.2f;
+        } else if (slot.type == "rage") {
+            slot.powerScale *= 1.1f;
+            slot.cooldownMax = std::max(4.0f, slot.cooldownMax * 0.92f);
+        }
+    };
+
     for (std::size_t i = 0; i < abilities_.size(); ++i) {
-        const auto& ab = abilities_[i];
-        float ly = listStartY + static_cast<float>(i) * lineH;
-        bool focused = static_cast<int>(i) == abilityFocus_;
-        Engine::Color keyCol{180, 210, 240, 230};
-        Engine::Color nameCol{210, 235, 255, static_cast<uint8_t>(focused ? 255 : 235)};
-        Engine::Color lvlCol{180, 220, 190, 230};
-        Engine::Color bg{static_cast<uint8_t>(focused ? 32u : 24u), static_cast<uint8_t>(focused ? 44u : 36u),
-                         56u, 220};
-        render_->drawFilledRect(Engine::Vec2{x + 6.0f, ly - 2.0f}, Engine::Vec2{panelW - 12.0f, lineH - 2.0f}, bg);
-        drawTextUnified(ab.keyHint, Engine::Vec2{x + 10.0f, ly}, 0.95f * scale, keyCol);
-        drawTextUnified(ab.name, Engine::Vec2{x + 54.0f, ly}, 1.0f * scale, nameCol);
-        std::ostringstream lv;
-        lv << "Lv " << ab.level << "/" << ab.maxLevel;
-        drawTextUnified(lv.str(), Engine::Vec2{x + panelW - 90.0f, ly}, 0.9f * scale, lvlCol);
-        if (ab.cooldown > 0.0f && ab.cooldownMax > 0.0f) {
-            float cdRatio = std::clamp(ab.cooldown / ab.cooldownMax, 0.0f, 1.0f);
-            render_->drawFilledRect(Engine::Vec2{x + 8.0f, ly + 18.0f}, Engine::Vec2{(panelW - 16.0f) * cdRatio, 4.0f},
-                                    Engine::Color{80, 140, 200, 220});
+        float x = rect.x + static_cast<float>(i) * (iconBox + gap);
+        float y = rect.y + (rect.h - iconBox) * 0.5f;
+        bool inside = mx >= x && mx <= x + iconBox && my >= y && my <= y + iconBox;
+        if (inside) hovered = static_cast<int>(i);
+
+        Engine::Color bg{26, 34, 48, static_cast<uint8_t>(inside ? 230 : 200)};
+        render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{iconBox, iconBox}, bg);
+
+        const auto& slot = abilities_[i];
+        int iconIndex = (i < abilityIconIndices_.size() ? abilityIconIndices_[i] : iconIndexFromName(slot.name));
+        if (abilityIconTex_ && iconIndex >= 1 && iconIndex <= 66) {
+            int zeroIndex = iconIndex - 1;
+            int col = zeroIndex % 11;
+            int row = zeroIndex / 11;
+            Engine::IntRect src{col * 16, row * 16, 16, 16};
+            render_->drawTextureRegion(*abilityIconTex_, Engine::Vec2{x + inset, y + inset},
+                                       Engine::Vec2{iconSize, iconSize}, src);
+        } else {
+            render_->drawFilledRect(Engine::Vec2{x + inset, y + inset}, Engine::Vec2{iconSize, iconSize},
+                                    Engine::Color{80, 120, 180, 230});
+        }
+
+        // Cooldown fill overlay from bottom (darker the more remaining).
+        float cdRatio = (slot.cooldownMax > 0.0f) ? std::clamp(slot.cooldown / slot.cooldownMax, 0.0f, 1.0f) : 0.0f;
+        if (cdRatio > 0.0f) {
+            float h = iconBox * cdRatio;
+            float oy = y + iconBox - h;
+            Engine::Color cdCol{10, 14, 24, 180};
+            render_->drawFilledRect(Engine::Vec2{x, oy}, Engine::Vec2{iconBox, h}, cdCol);
+            // subtle accent near bottom to hint progression
+            Engine::Color accent{80, 160, 255, 80};
+            render_->drawFilledRect(Engine::Vec2{x, y + iconBox - 6.0f}, Engine::Vec2{iconBox, 6.0f}, accent);
+        }
+
+        bool maxed = slot.level >= slot.maxLevel;
+        int cost = upgradeCost(slot);
+        bool affordable = copper_ >= cost;
+        if (maxed) {
+            render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{iconBox, iconBox},
+                                    Engine::Color{0, 0, 0, 80});
+        } else if (!affordable) {
+            render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{iconBox, iconBox},
+                                    Engine::Color{80, 40, 40, 80});
+        }
+
+        // Level badge
+        std::ostringstream lvl;
+        lvl << slot.level;
+        Engine::Color badgeBg{18, 24, 34, 220};
+        Engine::Color badgeTxt{220, 240, 255, 240};
+        float badgeW = 16.0f;
+        float badgeH = 14.0f;
+        render_->drawFilledRect(Engine::Vec2{x + iconBox - badgeW - 4.0f, y + iconBox - badgeH - 4.0f},
+                                Engine::Vec2{badgeW, badgeH}, badgeBg);
+        drawTextUnified(lvl.str(), Engine::Vec2{x + iconBox - badgeW - 0.5f, y + iconBox - badgeH - 6.0f}, 0.8f,
+                        badgeTxt);
+
+        if (inside && leftEdge && !maxed) {
+            attemptUpgrade(static_cast<int>(i));
         }
     }
-    // Separate hint block beneath ability rows
-    float hintY = y + panelH - hintH + 6.0f;
-    render_->drawFilledRect(Engine::Vec2{x + 6.0f, hintY - 10.0f}, Engine::Vec2{panelW - 12.0f, hintH},
-                            Engine::Color{20, 30, 44, 220});
-    std::ostringstream hint;
-            hint << "Scroll swaps | F upgrades (Cost " << abilities_[abilityFocus_].upgradeCost << "c)";
-    drawTextUnified(hint.str(), Engine::Vec2{x + 12.0f, hintY}, 0.95f * scale,
-                    Engine::Color{170, 200, 230, 220});
+
+    if (hovered >= 0 && hovered < static_cast<int>(abilities_.size())) {
+        abilityFocus_ = hovered;
+        const auto& slot = abilities_[hovered];
+        int cost = slot.level >= slot.maxLevel ? -1 : (slot.upgradeCost + (slot.level - 1) * (slot.upgradeCost / 2));
+        // Tooltip anchored to cursor.
+        float tipW = 260.0f;
+        float tipH = 78.0f;
+        float tx = static_cast<float>(mx) + 18.0f;
+        float ty = static_cast<float>(my) + 18.0f;
+        if (tx + tipW > viewportWidth_) tx = static_cast<float>(viewportWidth_) - tipW - 12.0f;
+        if (ty + tipH > viewportHeight_) ty = static_cast<float>(viewportHeight_) - tipH - 12.0f;
+        render_->drawFilledRect(Engine::Vec2{tx, ty}, Engine::Vec2{tipW, tipH}, Engine::Color{12, 16, 24, 225});
+        drawTextUnified(slot.name, Engine::Vec2{tx + 10.0f, ty + 8.0f}, 1.0f, Engine::Color{210, 235, 255, 240});
+        drawTextUnified(slot.description, Engine::Vec2{tx + 10.0f, ty + 26.0f}, 0.9f,
+                        Engine::Color{190, 210, 235, 230});
+        std::ostringstream costTxt;
+        costTxt << (cost < 0 ? "MAX" : ("Upgrade " + std::to_string(cost) + "c"));
+        drawTextUnified(costTxt.str(), Engine::Vec2{tx + 10.0f, ty + 48.0f}, 0.9f,
+                        cost < 0 ? Engine::Color{160, 200, 180, 230}
+                                 : Engine::Color{220, 240, 200, 230});
+    }
+}
+
+void GameRoot::drawCharacterScreen(const Engine::InputState& input) {
+    if (!render_ || !characterScreenOpen_) return;
+    const float uiScale = 1.2f;  // 20% larger text
+    Engine::Color scrim{10, 12, 20, 180};
+    render_->drawFilledRect(Engine::Vec2{0.0f, 0.0f},
+                            Engine::Vec2{static_cast<float>(viewportWidth_), static_cast<float>(viewportHeight_)},
+                            scrim);
+    const float margin = 32.0f;
+    float panelW = std::min(1100.0f, static_cast<float>(viewportWidth_) - margin * 2.0f);
+    float panelH = std::min(720.0f, static_cast<float>(viewportHeight_) - margin * 2.0f);
+    float px = static_cast<float>(viewportWidth_) * 0.5f - panelW * 0.5f;
+    float py = static_cast<float>(viewportHeight_) * 0.5f - panelH * 0.5f;
+    render_->drawFilledRect(Engine::Vec2{px, py}, Engine::Vec2{panelW, panelH}, Engine::Color{16, 22, 32, 235});
+    drawTextUnified("Character", Engine::Vec2{px + 18.0f, py + 14.0f}, 1.2f * uiScale, Engine::Color{210, 235, 255, 240});
+    drawTextUnified(multiplayerEnabled_ ? "Multiplayer (no pause)" : "Single-player (paused)",
+                    Engine::Vec2{px + 20.0f, py + 36.0f}, 0.9f * uiScale,
+                    multiplayerEnabled_ ? Engine::Color{180, 220, 255, 220} : Engine::Color{200, 240, 200, 220});
+
+    float colGap = 14.0f;
+    float sectionW = (panelW - 40.0f - colGap) * 0.5f;
+    float leftX = px + 16.0f;
+    float rightX = leftX + sectionW + colGap;
+    float topY = py + 60.0f;
+
+    auto drawSectionBox = [&](float x, float y, float w, float h) {
+        render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{w, h}, Engine::Color{12, 16, 24, 220});
+    };
+
+    // Abilities (read-only)
+    const float abilitiesH = panelH * 0.35f;
+    drawSectionBox(leftX, topY, sectionW, abilitiesH);
+    drawTextUnified("Abilities", Engine::Vec2{leftX + 10.0f, topY + 8.0f}, 1.0f * uiScale, Engine::Color{200, 230, 255, 235});
+    float rowY = topY + 30.0f;
+    const float rowH = 26.0f * uiScale;
+    for (std::size_t i = 0; i < abilities_.size(); ++i) {
+        const auto& slot = abilities_[i];
+        int cost = slot.level >= slot.maxLevel ? -1 : (slot.upgradeCost + (slot.level - 1) * (slot.upgradeCost / 2));
+        drawTextUnified(slot.name, Engine::Vec2{leftX + 12.0f, rowY}, 0.95f * uiScale, Engine::Color{210, 230, 250, 230});
+        std::ostringstream lv;
+        lv << "Lv " << slot.level << "/" << slot.maxLevel;
+        drawTextUnified(lv.str(), Engine::Vec2{leftX + sectionW - 110.0f, rowY}, 0.9f * uiScale,
+                        Engine::Color{180, 220, 190, 220});
+        std::ostringstream costTxt;
+        costTxt << (cost < 0 ? "MAX" : std::to_string(cost) + "c");
+        drawTextUnified(costTxt.str(), Engine::Vec2{leftX + sectionW - 48.0f, rowY}, 0.9f * uiScale,
+                        cost < 0 ? Engine::Color{160, 200, 180, 220}
+                                 : Engine::Color{200, 230, 200, 220});
+        rowY += rowH;
+        if (rowY > topY + abilitiesH - rowH) break;
+    }
+
+    // Attributes + modifiers
+    float attrY = topY + abilitiesH + 14.0f;
+    float attrH = panelH - (attrY - py) - 16.0f;
+    drawSectionBox(leftX, attrY, sectionW, attrH);
+    drawTextUnified("Attributes", Engine::Vec2{leftX + 10.0f, attrY + 8.0f}, 1.0f * uiScale,
+                    Engine::Color{200, 230, 255, 235});
+    auto writeAttr = [&](const std::string& label, const std::string& value, float y) {
+        drawTextUnified(label, Engine::Vec2{leftX + 12.0f, y}, 0.92f * uiScale, Engine::Color{190, 210, 230, 230});
+        drawTextUnified(value, Engine::Vec2{leftX + sectionW - 120.0f, y}, 0.92f * uiScale,
+                        Engine::Color{220, 240, 255, 230});
+    };
+    float attrRow = attrY + 30.0f;
+    const auto* hp = registry_.get<Engine::ECS::Health>(hero_);
+    float maxHp = hp ? hp->maxHealth : 0.0f;
+    float maxShield = hp ? hp->maxShields : 0.0f;
+    writeAttr("Health", std::to_string(static_cast<int>(maxHp)), attrRow); attrRow += 22.0f * uiScale;
+    writeAttr("Shields", std::to_string(static_cast<int>(maxShield)), attrRow); attrRow += 22.0f * uiScale;
+    writeAttr("Energy", std::to_string(static_cast<int>(energyMax_)), attrRow); attrRow += 22.0f * uiScale;
+    std::ostringstream atk;
+    atk << std::fixed << std::setprecision(2) << attackSpeedMul_;
+    writeAttr("Attack Speed x", atk.str(), attrRow); attrRow += 22.0f * uiScale;
+    std::ostringstream dmg;
+    dmg << static_cast<int>(std::round(projectileDamage_));
+    writeAttr("Damage", dmg.str(), attrRow); attrRow += 22.0f * uiScale;
+    writeAttr("Move Speed", std::to_string(static_cast<int>(heroMoveSpeed_)), attrRow); attrRow += 26.0f * uiScale;
+
+    // Active modifiers (BuffState)
+    if (registry_.has<Game::ArmorBuff>(hero_)) {
+        if (auto* buff = registry_.get<Game::ArmorBuff>(hero_)) {
+            auto addBuffLine = [&](const std::string& label, float value) {
+                std::ostringstream v; v << std::showpos << std::fixed << std::setprecision(2) << value;
+                writeAttr(label, v.str(), attrRow);
+                attrRow += 22.0f * uiScale;
+            };
+            if (buff->state.healthArmorBonus != 0.0f) addBuffLine("Health Armor", buff->state.healthArmorBonus);
+            if (buff->state.shieldArmorBonus != 0.0f) addBuffLine("Shield Armor", buff->state.shieldArmorBonus);
+            if (buff->state.damageTakenMultiplier != 1.0f) addBuffLine("Damage Taken x", buff->state.damageTakenMultiplier);
+        }
+    }
+
+    // Stats + currencies
+    drawSectionBox(rightX, topY, sectionW, panelH * 0.35f);
+    drawTextUnified("Run Stats", Engine::Vec2{rightX + 10.0f, topY + 8.0f}, 1.0f * uiScale,
+                    Engine::Color{200, 230, 255, 235});
+    float statsY = topY + 32.0f;
+    auto statLine = [&](const std::string& label, const std::string& value) {
+        drawTextUnified(label, Engine::Vec2{rightX + 12.0f, statsY}, 0.92f * uiScale, Engine::Color{190, 210, 230, 230});
+        drawTextUnified(value, Engine::Vec2{rightX + sectionW - 140.0f, statsY}, 0.92f * uiScale,
+                        Engine::Color{220, 240, 255, 230});
+        statsY += 22.0f * uiScale;
+    };
+    statLine("Kills", std::to_string(kills_));
+    statLine("Copper", std::to_string(copper_));
+    statLine("Gold", std::to_string(gold_));
+    statLine("Level", std::to_string(level_));
+    statLine("XP", std::to_string(xp_) + "/" + std::to_string(xpToNext_));
+    statLine("Wave", std::to_string(wave_ + 1));
+
+    // Inventory table
+    float invY = topY + panelH * 0.35f + 14.0f;
+    float invH = panelH - (invY - py) - 16.0f;
+    drawSectionBox(rightX, invY, sectionW, invH);
+    drawTextUnified("Inventory", Engine::Vec2{rightX + 10.0f, invY + 8.0f}, 1.0f * uiScale,
+                    Engine::Color{200, 230, 255, 235});
+    float rowInvY = invY + 30.0f;
+    const float invRowH = 22.0f * uiScale;
+    for (std::size_t i = 0; i < inventory_.size(); ++i) {
+        const auto& item = inventory_[i];
+        int sell = std::max(1, item.def.cost / 2) * std::max(1, item.quantity);
+        drawTextUnified(item.def.name, Engine::Vec2{rightX + 12.0f, rowInvY}, 0.9f * uiScale,
+                        Engine::Color{210, 235, 255, 230});
+        drawTextUnified(std::to_string(sell) + "c", Engine::Vec2{rightX + sectionW - 90.0f, rowInvY}, 0.9f * uiScale,
+                        Engine::Color{200, 230, 200, 230});
+        drawTextUnified(item.def.desc, Engine::Vec2{rightX + 12.0f, rowInvY + 12.0f}, 0.8f * uiScale,
+                        Engine::Color{180, 205, 225, 220});
+        rowInvY += invRowH + 6.0f * uiScale;
+        if (rowInvY > invY + invH - invRowH) break;
+    }
+}
+
+
+
+void GameRoot::drawAbilityPanel() {
+    // Legacy wrapper kept for compatibility; new icon HUD is invoked directly from onUpdate.
 }
 
 void GameRoot::spawnHero() {
@@ -6304,6 +6645,9 @@ void GameRoot::resetRun() {
     abilityShopOpen_ = false;
     shopLeftPrev_ = shopRightPrev_ = shopMiddlePrev_ = false;
     shopNoFundsTimer_ = 0.0;
+    characterScreenOpen_ = false;
+    characterScreenPrev_ = false;
+    abilityHudClickPrev_ = false;
     userPaused_ = false;
     paused_ = false;
     levelChoiceOpen_ = false;
@@ -6315,6 +6659,7 @@ void GameRoot::resetRun() {
         st.cooldown = 0.0f;
     }
     fireInterval_ = fireIntervalBase_ / std::max(0.1f, attackSpeedMul_ * attackSpeedBuffMul_);
+    uiHpFill_ = uiShieldFill_ = uiEnergyFill_ = uiDashFill_ = 1.0f;
 }
 
 bool GameRoot::addItemToInventory(const ItemDefinition& def) {

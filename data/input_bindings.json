@@ -14,6 +14,7 @@
   "toggleFollow": ["c"],
   "restart": ["backspace"],
   "toggleShop": ["b"],
+  "characterScreen": ["i"],
   "pause": ["escape"],
   "dash": ["space"],
   "interact": ["key:e"],

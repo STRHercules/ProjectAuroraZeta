@@ -37,6 +37,7 @@ InputKey toInputKey(const std::string& key) {
     if (lower == "tab" || lower == "inventory" || lower == "inventory_cycle") return InputKey::InventoryCycle;
     if (lower == "r" || lower == "restart") return InputKey::Restart;
     if (lower == "b" || lower == "toggle_shop" || lower == "shop") return InputKey::ToggleShop;
+    if (lower == "i" || lower == "character" || lower == "character_screen") return InputKey::CharacterScreen;
     if (lower == "v" || lower == "build" || lower == "build_menu") return InputKey::BuildMenu;
     if (lower == "escape" || lower == "pause" || lower == "esc") return InputKey::Pause;
     if (lower == "space" || lower == "dash" || lower == "shift") return InputKey::Dash;
@@ -99,6 +100,14 @@ ActionState ActionMapper::sample(const InputState& input) const {
         InputKey mapped = toInputKey(key);
         if (mapped != InputKey::Count && input.isDown(mapped)) {
             act.toggleShop = true;
+            break;
+        }
+    }
+    act.characterScreen = input.isDown(InputKey::CharacterScreen);
+    for (const auto& key : bindings_.characterScreen) {
+        InputKey mapped = toInputKey(key);
+        if (mapped != InputKey::Count && input.isDown(mapped)) {
+            act.characterScreen = true;
             break;
         }
     }

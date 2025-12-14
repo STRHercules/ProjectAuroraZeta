@@ -2,13 +2,32 @@
 * Expose as much as possible to make it as easy as possible to mod
     * Develop mod tools?
 
+# Increase Copper output at higher waves
+
+# Increase Escort health/armor at higher waves
+
+# Escort facing opposite direction they are running.
+
+# Only the Builder class should have the ability to Drag-Select
+
 # Chat
 * Ability for players to chat in Multiplayer Lobby/Match
+
+# Traveling Shop sometimes attaching to wrong asset?
+* I saw the Traveling shop attach itself to one of the assassin spawner assets around they time also spawned
+* I also saw the traveling shop attach itself to player projectiles. I can see 'Press E to shop' hovering over projectiles I am firing.
 
 # Add training time to Mini-Units
 * RTS Style queue?
 
-# Need to ensure All players in a multiplayer match are fighting the same exact monsters, not monstres in their own respective clients.
+# Need to ensure All players in a multiplayer match are fighting the same exact monsters, not monsters in their own respective clients.
+* We also need to ensure that no menu *pauses* the match for any player, if any player opens any menus.
+    * Pausing will be reserved in multiplayer to a dedicated 'Pause' option in the Esc menu, which will pause for all players.
+        * While in the 'paused' state, players and enemies cannot move.
+        * While in the 'paused' state, all mechanics will also pause. (Regeneration, timers, Summons, Mini Units, etc)
+        * While in the 'paused' state, the 'Pause' button in the Esc menu will be replaced with; 'Resume'.
+            * Any player can 'Resume' the game if 'Paused'.
+            * Resuming takes places after a 5 second countdown after clicking 'Resume' to avoid immediate resume-related deaths. 
 
 # Summoner Class
 * Uses abilities to summon various creatures
@@ -60,60 +79,14 @@
         * Paths
         * Cliffs?
 
-# Hotkey to open Character screen to see attributes/stats/inventory
-* Pauses Game
-* Shows abilities, description of what ability does, current level, cost to next level.
-* Shows current attributes
-    * Attributes
-        * Health
-        * Current modifiers
-            * +Dmg
-            * +Health
-            * etc
-    * Relevant Stats
-        * Kills
-        * Copper / Gold
-        * etc
-* Shows current inventory with item names, sell price, and short description.
-
-# Change main on-screen Ability GUI
-* Change to Icon based
-    * `~/assets/Sprites/GUI/abilities.png`
-        * This asset contains 16x16 assets
-        * `176x96`
-        * There are 11 Columns and 6 Rows.
-            * Internally number these from top left to bottom right like so;
-                * 1 2 3 4 5 6 7 8 9 10 11
-                * 12 13 14 15 16 17 18 19 20 21
-            * Internally numbering them will make it easy for me to dictate ability icon 4, etc.
-            * For now, assign random indexes to abilities for now, so they all populate. I can dictate later.
-    * Display Icon with current level overlayed in the bottom right of the icon.
-    * F no longer purchases ability upgrades.
-        * Scroll wheel no longer cycles abilities.
-        * Hovering the abilities will produce a mouse coursor anchored tooltip with the name of the ability, a short description and the price to upgrade.
-        * Clicking the ability icon will upgrade the ability, if the player can afford it.
-    * The new Ability GUI will live at the bottom left where it already does, but it will be smaller, with room for their ability icons
-
-# Player Health/Shields/Energy/Dash display
-* Move the Health, Shields, and Energy Bars to be centered at the bottom of the screen. 
-    * keep them evenly spaced apart.
-* The Health, Shield, Energy and Dash bars will look and behave modernly, with a nice calming aesthetic.
-* With These bars moved, we can reserve the left-hand side for other things, such as the currently active inventory item, which will just move to the bottom left of the screen.
-
 # Gameplay Pt. 2
 * Monster spawns should be further spread out from the player
 * A giant Boss spawns on Wave 20, they should spawn every 20 Waves.
+    * We need to make sure we cap the scale of these bosses, not making them too large.
 
 # Zones have no assets
 * Currently no idea how to identify these zones in-game
 * Potentially going to convert the zones to static areas on the map (coordinates/quadrants) 
-
-# Android Port
-* According to Google, Android supports Raw C++ using SDL.
-
-# Discord Rich Presence
-* Integrate Discord SDK to achieve Rich Discord Presence when playing Zeta
-    * Rich Presence should display Character, Round, Total Kills, Time Elapsed
 
 # Lives
 * When playing by yourself, the player will have 2 lives by default.
@@ -137,8 +110,6 @@ In Zeta, Characters, Bosses and monsters alike can sometimes perform attacks or 
     * Unstoppable: Allow the host to be immune to stuns, slows and most speed impeding effects
 
 # GUI/HUD
-* Move Health/Energy/Dash Bars
-
 * Mini-Map
     * Mini-Map will be in the top right, will display the players location at the center, and will display small blips wherever enemies are in real-time.
 * Round/Wave Information
@@ -148,6 +119,13 @@ In Zeta, Characters, Bosses and monsters alike can sometimes perform attacks or 
         * Player - Kills - Alive? - Deaths
 * Boss/Mini Boss Health Bars
     * Persistent on-screen Health bar of currently spawned Boss and/or Mini-Boss.
+
+# Android Port
+* According to Google, Android supports Raw C++ using SDL.
+
+# Discord Rich Presence
+* Integrate Discord SDK to achieve Rich Discord Presence when playing Zeta
+    * Rich Presence should display Character, Round, Total Kills, Time Elapsed
 
 # Achievements
 * Achievements unlocked when completing certain milestones
@@ -161,7 +139,7 @@ In Zeta, Characters, Bosses and monsters alike can sometimes perform attacks or 
     * 100 Escorts safely transported
     * 1,000 Assassins thwarted
 
-# Thorough expansion of Stat screen ^^^^
+# Thorough ^^^^ expansion of Stat Screen
 * X Enemies Killed
 * X Bosses Killed
 * X Pickups picked up

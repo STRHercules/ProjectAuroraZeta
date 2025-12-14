@@ -98,6 +98,9 @@ private:
     void drawAbilityShopOverlay();
     void drawInventoryOverlay();
     void drawPauseOverlay();
+    void drawCharacterScreen(const Engine::InputState& input);
+    void drawAbilityHud(const Engine::InputState& input);
+    void drawResourceCluster();
     void refreshShopInventory();
     bool addItemToInventory(const ItemDefinition& def);
     bool sellItemFromInventory(std::size_t idx, int& copperOut);
@@ -232,6 +235,7 @@ private:
         float powerScale{1.0f};
         std::string type;  // semantic type used for behavior
         float energyCost{0.0f};
+        int iconIndex{1};
     };
     struct AbilityDef {
         std::string name;
@@ -240,6 +244,7 @@ private:
         float baseCooldown{8.0f};
         int baseCost{25};
         std::string type;
+        int iconIndex{0};  // optional override (1..66)
     };
     struct AbilityState {
         AbilityDef def;
@@ -561,6 +566,11 @@ private:
     std::unique_ptr<Game::EventSystem> eventSystem_;
     std::unique_ptr<Game::HotzoneSystem> hotzoneSystem_;
     std::unique_ptr<Engine::TextureManager> textureManager_;
+    Engine::TexturePtr abilityIconTex_{};
+    Engine::TexturePtr hpBarTex_{};
+    Engine::TexturePtr shieldBarTex_{};
+    Engine::TexturePtr energyBarTex_{};
+    Engine::TexturePtr dashBarTex_{};
     TTF_Font* uiFont_{nullptr};
     SDL_Renderer* sdlRenderer_{nullptr};
     bool restartPrev_{false};
@@ -577,6 +587,8 @@ private:
     bool paused_{false};
     bool userPaused_{false};
     bool pauseTogglePrev_{false};
+    bool characterScreenPrev_{false};
+    bool characterScreenOpen_{false};
     bool shopTogglePrev_{false};
     double pauseMenuBlink_{0.0};
     bool inCombat_{true};
@@ -611,6 +623,10 @@ private:
     double roundBannerTimer_{0.0};
     int roundBanner_{1};
     double clearBannerTimer_{0.0};
+    float uiHpFill_{0.0f};
+    float uiShieldFill_{0.0f};
+    float uiEnergyFill_{0.0f};
+    float uiDashFill_{0.0f};
     // Mouse cache
     int lastMouseX_{0};
     int lastMouseY_{0};
@@ -632,12 +648,14 @@ private:
     // Abilities
     std::vector<AbilitySlot> abilities_;
     std::vector<AbilityState> abilityStates_;
+    std::vector<int> abilityIconIndices_;
     int abilityFocus_{0};
     bool ability1Prev_{false};
     bool ability2Prev_{false};
     bool ability3Prev_{false};
     bool abilityUltPrev_{false};
     bool abilityUpgradePrev_{false};
+    bool abilityHudClickPrev_{false};
     float rageTimer_{0.0f};
     float rageDamageBuff_{1.0f};
     float rageRateBuff_{1.0f};

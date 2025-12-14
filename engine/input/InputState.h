@@ -19,6 +19,7 @@ enum class InputKey {
     ToggleFollow,
     ToggleShop,
     InventoryCycle,
+    CharacterScreen,
     Pause,
     Dash,
     Interact,

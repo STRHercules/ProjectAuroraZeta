@@ -13,6 +13,7 @@ struct ActionState {
     bool primaryFire{false};
     bool restart{false};
     bool toggleShop{false};
+    bool characterScreen{false};
     bool pause{false};
     bool interact{false};
     bool useItem{false};

@@ -131,6 +131,9 @@ void SDLWindow::pollEvents(Application& app, InputState& input) {
                     case SDLK_b:
                         input.setKeyDown(InputKey::ToggleShop, true);
                         break;
+                    case SDLK_i:
+                        input.setKeyDown(InputKey::CharacterScreen, true);
+                        break;
                     case SDLK_v:
                         input.setKeyDown(InputKey::BuildMenu, true);
                         break;
@@ -153,6 +156,9 @@ void SDLWindow::pollEvents(Application& app, InputState& input) {
                         break;
                     case SDLK_b:
                         input.setKeyDown(InputKey::ToggleShop, false);
+                        break;
+                    case SDLK_i:
+                        input.setKeyDown(InputKey::CharacterScreen, false);
                         break;
                     case SDLK_v:
                         input.setKeyDown(InputKey::BuildMenu, false);
