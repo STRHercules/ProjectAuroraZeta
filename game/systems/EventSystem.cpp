@@ -208,14 +208,18 @@ void EventSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep
     }
     // Clean up spawners related to completed/failed events to avoid endless spawns.
     if (!completedEventIds.empty()) {
+        std::vector<Engine::ECS::Entity> spawnersToDestroy;
         registry.view<Game::Spawner>([&](Engine::ECS::Entity e, Game::Spawner& sp) {
             for (int id : completedEventIds) {
                 if (sp.eventId == id) {
-                    registry.destroy(e);
+                    spawnersToDestroy.push_back(e);
                     break;
                 }
             }
         });
+        for (auto e : spawnersToDestroy) {
+            registry.destroy(e);
+        }
     }
     // Update active flag (true if any EventActive remain).
     eventActive_ = false;

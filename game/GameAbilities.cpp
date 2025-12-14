@@ -66,6 +66,10 @@ void GameRoot::applyPowerupPickup(Pickup::Powerup type) {
             energy_ = energyMax_;
             break;
         }
+        case Pickup::Powerup::Freeze: {
+            freezeTimer_ = std::max(freezeTimer_, 5.0);  // brief crowd-control window
+            break;
+        }
         case Pickup::Powerup::Frenzy: {
             frenzyTimer_ = 30.0f;
             frenzyRateBuff_ = 1.25f;

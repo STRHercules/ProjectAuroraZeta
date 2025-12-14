@@ -3,29 +3,22 @@
     * Develop mod tools?
 
 # Add train time to Mini Units
+* RTS Style queue?
 
 # Summoner Class
 * Uses abilities to summon various creatures
 
-# Increase Sprite Size
-* Global Sprite scale increase
-    * Increase ALL sprites globally by 20-40%
-
-# Procedurally Generated Maps
-* Obstacles
-    * Trees
-    * Rocks
-    * Cliffs
-    * Lakes
-    * Holes
-    * Buildings
-
 # Static Maps
 * Maps designed with Tiled?
     * Curent map is 512x512 - would have to make a massive map.
-        * Tiled has an infinite mode..?
 
-# Field Medkit has no asset
+# Events have no assets
+* Escort (Salvage Run)
+* Bounty Hunt
+* Assassinate Spawners
+    * Spawners have no assets
+
+# Zones have no assets
 
 # Android Port
 * According to Google, Android supports Raw C++ using SDL.

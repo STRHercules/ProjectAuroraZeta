@@ -1713,19 +1713,25 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     bool animated = false;
                     float scale = 1.0f;
                     if (payload.kind == Pickup::Kind::Copper) { tex = pickupCopperTex_; animated = true; scale = 1.75f; }
-                    if (payload.kind == Pickup::Kind::Gold)   { tex = pickupGoldTex_;   animated = true; scale = 1.75f; }
+                    if (payload.kind == Pickup::Kind::Gold)   { tex = pickupGoldTex_;   animated = false; scale = 1.3f; }
                     if (payload.kind == Pickup::Kind::Powerup) {
                         switch (payload.powerup) {
-                            case Pickup::Powerup::Heal: tex = pickupHealTex_; break;
+                            case Pickup::Powerup::Heal: tex = pickupHealPowerupTex_; break;
                             case Pickup::Powerup::Kaboom: tex = pickupKaboomTex_; break;
                             case Pickup::Powerup::Recharge: tex = pickupRechargeTex_; break;
                             case Pickup::Powerup::Frenzy: tex = pickupFrenzyTex_; break;
                             case Pickup::Powerup::Immortal: tex = pickupImmortalTex_; animated = true; break;
+                            case Pickup::Powerup::Freeze: tex = pickupFreezeTex_; break;
                             default: break;
                         }
                     }
-                    if (payload.kind == Pickup::Kind::Item && payload.item.effect == ItemEffect::Turret) {
-                        tex = pickupTurretTex_;
+                    if (payload.kind == Pickup::Kind::Item) {
+                        switch (payload.item.effect) {
+                            case ItemEffect::Turret: tex = pickupTurretTex_; break;
+                            case ItemEffect::Heal: tex = pickupHealTex_; break;
+                            case ItemEffect::FreezeTime: tex = pickupFreezeTex_; break;
+                            default: break;
+                        }
                     }
                     Engine::Vec2 rendSize{size, size};
                     float aabbHalf = size * 0.5f;
@@ -1812,14 +1818,15 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                             // Powerup drop
                             Pickup p{};
                             p.kind = Pickup::Kind::Powerup;
-                            std::uniform_int_distribution<int> pick(0, 4);
+                            std::uniform_int_distribution<int> pick(0, 5);
                             int choice = pick(rng_);
                             switch (choice) {
                                 case 0: p.powerup = Pickup::Powerup::Heal; break;
                                 case 1: p.powerup = Pickup::Powerup::Kaboom; break;
                                 case 2: p.powerup = Pickup::Powerup::Recharge; break;
                                 case 3: p.powerup = Pickup::Powerup::Frenzy; break;
-                                default: p.powerup = Pickup::Powerup::Immortal; break;
+                                case 4: p.powerup = Pickup::Powerup::Immortal; break;
+                                default: p.powerup = Pickup::Powerup::Freeze; break;
                             }
                             spawnPickupEntity(p, scatterPos(death.pos), Engine::Color{150, 220, 255, 255}, 11.0f, 4.0f, 3.2f);
                         } else {
@@ -1863,6 +1870,10 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             clearBannerTimer_ = 1.5;
             wavesClearedThisRound_ += 1;
             waveSpawned_ = false;
+            // Ensure the next wave timer restarts immediately after a full clear (prevents stalls post-boss).
+            if (waveSystem_) {
+                waveSystem_->resetTimer();
+            }
         }
 
         // Cleanup dead mini units and free supply.
@@ -3608,9 +3619,12 @@ void GameRoot::loadUnitDefinitions() {
 
 void GameRoot::loadPickupTextures() {
     pickupCopperTex_ = loadTextureOptional("assets/Sprites/Misc/copperpickup.png");
-    pickupGoldTex_ = loadTextureOptional("assets/Sprites/Misc/goldpickup.png");
-    pickupHealTex_ = loadTextureOptional("assets/Sprites/Misc/healthpickup.png");
+    pickupGoldTex_ = loadTextureOptional("assets/Sprites/Misc/moneybag.png");
+    pickupHealTex_ = loadTextureOptional("assets/Sprites/Misc/fieldmedickit.png");
+    pickupHealPowerupTex_ = loadTextureOptional("assets/Sprites/Misc/healthpickup.png");
+    // Visuals: explosive = kaboompickup, freeze grenade = cryonade.
     pickupKaboomTex_ = loadTextureOptional("assets/Sprites/Misc/kaboompickup.png");
+    pickupFreezeTex_ = loadTextureOptional("assets/Sprites/Misc/cryonade.png");
     pickupRechargeTex_ = loadTextureOptional("assets/Sprites/Misc/rechargepickup2.png");
     pickupFrenzyTex_ = loadTextureOptional("assets/Sprites/Misc/frenzypickup.png");
     pickupImmortalTex_ = loadTextureOptional("assets/Sprites/Misc/immortalpickup.png");
@@ -3622,33 +3636,19 @@ void GameRoot::loadProjectileTextures() {
     projectileTexRed_ = {};
     projectileTexTurret_ = {};
     if (!sdlRenderer_) return;
-    SDL_Surface* sheet = IMG_Load("assets/Sprites/Misc/projectiles.png");
+    SDL_Surface* sheet = IMG_Load("assets/Sprites/Misc/playerprojectile.png");
     if (!sheet) {
-        Engine::logWarn(std::string("Failed to load projectile sheet: ") + IMG_GetError());
+        Engine::logWarn(std::string("Failed to load projectile texture: ") + IMG_GetError());
         return;
     }
-    const int frameW = 16;
-    const int frameH = 16;
-    const int frames = 4;
-    for (int i = 0; i < frames; ++i) {
-        SDL_Rect src{0, i * frameH, frameW, frameH};
-        SDL_Surface* sub = SDL_CreateRGBSurfaceWithFormat(0, frameW, frameH, 32, sheet->format->format);
-        if (!sub) continue;
-        SDL_BlitSurface(sheet, &src, sub, nullptr);
-        SDL_Texture* tex = SDL_CreateTextureFromSurface(sdlRenderer_, sub);
-        SDL_FreeSurface(sub);
-        if (tex) {
-            projectileTextures_.push_back(std::make_shared<Engine::SDLTexture>(tex));
-        }
+    SDL_Texture* tex = SDL_CreateTextureFromSurface(sdlRenderer_, sheet);
+    if (tex) {
+        auto wrapped = std::make_shared<Engine::SDLTexture>(tex);
+        projectileTextures_.push_back(wrapped);
+        projectileTexRed_ = wrapped;
+        projectileTexTurret_ = wrapped;
     }
     SDL_FreeSurface(sheet);
-    if (projectileTextures_.size() >= 4) {
-        projectileTexRed_ = projectileTextures_[3];  // bottom (red)
-        projectileTexTurret_ = projectileTextures_[1]; // second sprite for turrets
-    } else if (!projectileTextures_.empty()) {
-        projectileTexRed_ = projectileTextures_.back();
-        projectileTexTurret_ = projectileTextures_.front();
-    }
 }
 
 void GameRoot::beginBuildPreview(Game::BuildingType type) {

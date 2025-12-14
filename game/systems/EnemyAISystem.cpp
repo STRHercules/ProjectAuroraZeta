@@ -10,6 +10,7 @@
 #include "../../engine/ecs/components/Tags.h"
 #include "../components/MiniUnit.h"
 #include "../components/Building.h"
+#include "../components/BountyTag.h"
 #include "../../engine/ecs/components/Health.h"
 
 namespace Game {
@@ -86,7 +87,14 @@ void EnemyAISystem::update(Engine::ECS::Registry& registry, Engine::ECS::Entity 
                 }
             }
             if (!targetTf) {
-                pickNearestTarget(tf.position, targetTf);
+                // Bosses and bounty elites should always pressure the hero; regular enemies prefer turrets/minis first.
+                const bool isBoss = registry.has<Engine::ECS::BossTag>(e);
+                const bool isBounty = registry.has<Game::BountyTag>(e);
+                if (isBoss || isBounty) {
+                    targetTf = heroTf;
+                } else {
+                    pickNearestTarget(tf.position, targetTf);
+                }
             }
             if (!targetTf) return;
             Engine::Vec2 dir{targetTf->position.x - tf.position.x, targetTf->position.y - tf.position.y};

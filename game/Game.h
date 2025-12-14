@@ -259,11 +259,13 @@ private:
     // Pickup textures
     Engine::TexturePtr pickupCopperTex_{};
     Engine::TexturePtr pickupGoldTex_{};
-    Engine::TexturePtr pickupHealTex_{};
+    Engine::TexturePtr pickupHealTex_{};         // Field med kit (item)
+    Engine::TexturePtr pickupHealPowerupTex_{};  // Instant heal powerup orb
     Engine::TexturePtr pickupKaboomTex_{};
     Engine::TexturePtr pickupRechargeTex_{};
     Engine::TexturePtr pickupFrenzyTex_{};
     Engine::TexturePtr pickupImmortalTex_{};
+    Engine::TexturePtr pickupFreezeTex_{};
     Engine::TexturePtr pickupTurretTex_{};
     std::vector<Engine::TexturePtr> projectileTextures_;
     Engine::TexturePtr projectileTexRed_;

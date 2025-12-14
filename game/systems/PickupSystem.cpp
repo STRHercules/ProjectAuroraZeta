@@ -25,8 +25,8 @@ void PickupSystem::update(Engine::ECS::Registry& registry, Engine::ECS::Entity h
 
     // Animate idle bob.
     const float dt = 1.0f / 60.0f;  // approximate; not timing critical
-    registry.view<Engine::ECS::Transform, Game::PickupBob>(
-        [dt](Engine::ECS::Entity /*e*/, Engine::ECS::Transform& tf, Game::PickupBob& bob) {
+    registry.view<Engine::ECS::Transform, Game::PickupBob, Engine::ECS::PickupTag>(
+        [dt](Engine::ECS::Entity /*e*/, Engine::ECS::Transform& tf, Game::PickupBob& bob, Engine::ECS::PickupTag&) {
             bob.phase += bob.speed * dt;
             bob.pulsePhase += 2.5f * dt;
             float offset = std::sin(bob.phase) * bob.amplitude;
