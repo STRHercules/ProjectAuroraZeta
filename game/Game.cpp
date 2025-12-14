@@ -2948,7 +2948,8 @@ bool GameRoot::performRangedAutoFire(const Engine::TimeStep& step, const Engine:
     float visionRange = heroVisionRadiusTiles_ * static_cast<float>(fogTileSize_ > 0 ? fogTileSize_ : 32);
     float allowedRange = std::min(visionRange, autoFireBaseRange_ + autoFireRangeBonus_);
     float allowedRange2 = allowedRange * allowedRange;
-    if (actions.primaryFire) {
+    const bool allowManualTargeting = movementMode_ != MovementMode::RTS;  // StarCraft-style: no left-click attack in RTS mode.
+    if (allowManualTargeting && actions.primaryFire) {
         dir = {mouseWorld_.x - heroTf->position.x, mouseWorld_.y - heroTf->position.y};
         float len2 = dir.x * dir.x + dir.y * dir.y;
         if (len2 <= allowedRange2 && len2 > 0.0001f) {
@@ -3055,7 +3056,8 @@ bool GameRoot::performMeleeAttack(const Engine::TimeStep& step, const Engine::Ac
     float visionRange = heroVisionRadiusTiles_ * static_cast<float>(fogTileSize_ > 0 ? fogTileSize_ : 32);
     float meleeRange = std::min(visionRange, meleeConfig_.range);
     float meleeRange2 = meleeRange * meleeRange;
-    if (actions.primaryFire) {
+    const bool allowManualTargeting = movementMode_ != MovementMode::RTS;  // StarCraft-style: no left-click attack in RTS mode.
+    if (allowManualTargeting && actions.primaryFire) {
         Engine::Vec2 raw{mouseWorld_.x - heroTf->position.x, mouseWorld_.y - heroTf->position.y};
         float len2 = raw.x * raw.x + raw.y * raw.y;
         if (len2 > 0.0001f) {

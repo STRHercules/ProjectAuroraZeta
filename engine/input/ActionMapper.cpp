@@ -85,7 +85,7 @@ ActionState ActionMapper::sample(const InputState& input) const {
         }
     }
 
-    act.primaryFire = input.isMouseButtonDown(0);
+    act.primaryFire = false;  // Disable left-click manual firing (StarCraft-style auto/command-only attacks).
     act.restart = input.isDown(InputKey::Restart);
     for (const auto& key : bindings_.restart) {
         InputKey mapped = toInputKey(key);

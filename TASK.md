@@ -1,366 +1,236 @@
-## Personal Vault + Persistent Global Upgrades (Codex Spec)
+# TASK: UI/UX Overhaul — Character Screen, Ability HUD, and Resource Bars
 
-### High-level goal
-Add a **Personal Vault** that persists across sessions and match runs. At the end of every match, the player's earned **Gold** is deposited into the Vault. From the **Main Menu**, players can open an **Upgrades** screen and spend Vault Gold on **permanent, global upgrades** that affect *all characters equally*.
+## Objective
+Implement three coordinated UI changes:
 
-This system is intended to be a long-term progression sink:
-- Upgrades are **very expensive**
-- Upgrades are **persistent**
-- Upgrades apply **globally to every character**
-- Purchases are **irreversible** (no refunds) unless a dev/debug flag is enabled
+1. **Character Screen**: Add a toggleable “Character” screen that exposes player progression and inventory details.
+2. **Ability HUD**: Replace the existing on-screen ability UI with a compact, icon-based upgrade interface driven by an existing sprite sheet.
+3. **Resource Bars**: Relocate and restyle Health/Shield/Energy/Dash bars to a modern, centered bottom layout, freeing the left side for other HUD elements.
 
----
+These changes must preserve existing gameplay systems (abilities, upgrades, currencies, inventory) while altering **presentation** and **input bindings** as specified below.
 
-## Definitions
-- **Run/Match Gold:** Gold earned during a single match/run (temporary).
-- **Vault Gold:** Persistent currency stored on the player's save.
-- **Global Upgrade Level:** Integer purchase count per upgrade type.
-- **Global Stat Multiplier:** Derived from upgrade levels and applied to base stats for all characters.
+**Critical multiplayer constraint:** Opening the Character Screen must **NOT pause** the game in multiplayer/networked sessions. The pause behavior is allowed only in single-player/offline.
 
 ---
 
-## Core Requirements
-
-### 1) Vault persistence
-**Vault Gold must persist** in the player's save file and remain available between launches.
-
-**Rules**
-- Vault Gold can only increase from:
-  - match-end deposit of run gold
-  - (optional) dev/debug grant
-- Vault Gold can decrease only from:
-  - upgrades purchases
-- Vault Gold is never negative.
-- Vault Gold is saved immediately after any deposit or purchase.
-
-**Match-end deposit**
-- When a match ends (win, loss, quit, disconnect), the system computes:
-  - `deposit = max(0, RunGoldEarnedThisMatch)`
-  - `VaultGold += deposit`
-- RunGold is then reset to 0 for the next run.
-- Deposit occurs once per match end event (guard against double-firing).
-
-**Anti-double-deposit guard**
-- Each match has a unique `match_id`.
-- Save `last_deposited_match_id`.
-- Only deposit if `match_id != last_deposited_match_id`.
-- After deposit, set `last_deposited_match_id = match_id` and persist.
+## Deliverables
+- A new **Character Screen** UI (panel/window) accessible via a configurable hotkey (default: **I**).
+- A refactored **Ability HUD** located in the bottom-left, icon-based, clickable for upgrades, with hover tooltips.
+- A redesigned **Resource Bar** cluster centered at the bottom of the screen: Health, Shield, Energy, Dash (evenly spaced, modern aesthetic).
+- Updated input mappings (remove/disable certain bindings) without breaking core gameplay.
+- Multiplayer-safe behavior: Character Screen is **UI-only** (no global pause/time freeze) when a multiplayer session is active.
 
 ---
 
-## 2) Global Upgrades menu entry
-On the **Main Menu**, add a new option **Upgrades** between **Join** and **Stats**.
+## 1) Character Screen (Hotkey + Pause + Data Views)
 
-Menu order example:
-1. Play / Host (existing)
-2. Join (existing)
-3. **Upgrades (new)**
-4. Stats (existing)
-5. Settings / Exit (existing)
+### 1.1 Input + Simulation Behavior
+- Add a **configurable input binding**: `ToggleCharacterScreen` (default key: **I**).
+- Pressing the hotkey must **toggle** the Character Screen:
+  - **Open**: Character Screen visible; input routed to UI.
+  - **Close**: Character Screen hidden; input routed back to gameplay.
 
----
+#### 1.1.1 Single-Player / Offline Behavior (Pause Allowed)
+When Character Screen is open in single-player/offline:
+- Freeze/suspend gameplay simulation (e.g., movement, AI, combat, timers, physics updates) using the project’s existing pause mechanism.
+- Disable in-world player controls while leaving UI navigation enabled.
+- Ensure pause state is idempotent and stacked safely (i.e., if other systems can pause the game, closing Character Screen must not incorrectly unpause them).
 
-## 3) Upgrades screen UI requirements
-**Top-right:** Display current `Vault Gold` always visible.
+#### 1.1.2 Multiplayer / Networked Behavior (Pause Prohibited)
+When Character Screen is open during multiplayer/networked play:
+- **Do NOT pause the game**:
+  - Do not set global time scale to 0 (or equivalent).
+  - Do not trigger any “global pause” token/state that affects other players or the server simulation.
+  - Do not interrupt replication/network tick or authoritative simulation.
+- Treat Character Screen as a **local UI overlay**:
+  - Disable *local* in-world controls (movement/attacks/abilities) for the local player while the screen is open, unless the project already supports simultaneous control + UI.
+  - Keep UI navigation enabled (mouse/keyboard/controller).
+  - Ensure other players and the world continue updating normally.
+- Multiplayer detection must be robust:
+  - Use an existing authoritative signal/flag for “multiplayer active” (e.g., current GameMode, NetworkManager state, session type, or similar).
+  - Host and client should behave consistently: neither should globally pause the match via Character Screen.
 
-**Upgrade list layout**
-- Each upgrade row shows:
-  - Upgrade Name
-  - Current Level
-  - Current Effect (human readable)
-  - Next Level Effect (human readable)
-  - Cost to purchase next level
-  - Purchase button (disabled if insufficient gold or at max level)
+### 1.2 Character Screen Layout Requirements
+The Character Screen must present the following sections (scrollable if needed):
 
-**Confirm purchase**
-- Clicking Purchase prompts:
-  - “Buy {UpgradeName} Lv.{Level+1} for {Cost} Gold?”
-  - Confirm / Cancel
-- Confirm executes atomic transaction:
-  1. Validate enough Vault Gold and not maxed
-  2. Subtract cost
-  3. Increment upgrade level
-  4. Persist save
-  5. Refresh UI
+#### A) Abilities (Read-Only details + Upgrade Cost Preview)
+For each player ability, display:
+- Ability name
+- Short description (what the ability does)
+- Current level
+- Upgrade cost to next level (or “MAX” if capped)
 
-**Error states**
-- If insufficient gold: show tooltip “Not enough gold.”
-- If maxed: disable + show “MAX”.
+Notes:
+- This screen is informational; it does **not** need to support upgrades unless already trivial with existing UI components. (Upgrades are primarily handled via the new Ability HUD below.)
+- Abilities must be populated from the same data source used by gameplay and upgrades to avoid divergence.
 
----
+#### B) Attributes (Current Values + Modifiers)
+Show:
+- **Core attributes** (minimum):
+  - Health (current and/or max, as available in existing data)
+- **Current modifiers** (dynamic list):
+  - +Damage
+  - +Health
+  - +Attack Speed
+  - etc.
 
-## Upgrade Types (Persistent)
+Implementation note:
+- Render modifiers as a data-driven list derived from the player’s modifier/buff system (do not hardcode the set).
+- If a modifier has no active value, omit it (or render as 0 in a muted state—pick one approach consistently).
 
-### Shared behavior
-- All upgrades are persistent, global, and apply to every character.
-- Levels are integers (0..maxLevel where applicable).
-- Effects stack multiplicatively where appropriate.
+#### C) Relevant Stats (Progress / Session / Run Stats)
+Show at minimum:
+- Kills
+- Copper / Gold (or whichever currency objects exist; display all tracked currencies)
+- Any other existing “run stats” currently tracked by the game (optional: time survived, damage dealt, etc.)
 
-> Recommended numeric handling:
-> Use fixed-point (e.g., store multipliers as integer basis points) to avoid float drift:
-> - 1% = 100 basis points (bp)
-> - 0.5% = 50 bp
+#### D) Inventory (Name + Sell Price + Short Description)
+Show current inventory contents as a list (table-style preferred):
+- Item name
+- Sell price (per item, or total if the inventory item stacks—use existing economic rules)
+- Short description
 
----
+Optional (if available at low cost):
+- Item icon
+- Quantity / stack count
 
-### A) Stat % upgrades (1% per purchase)
-Each purchase increases the stat by **+1%** globally.
-
-- Attack Power: +1% per level
-- Attack Speed: +1% per level
-- Health: +1% per level
-- Speed: +1% per level
-- Armor: +1% per level
-- Shields: +1% per level
-
-**Effect formula**
-Let `L` be level.  
-Multiplier = `1.0 + 0.01 * L`
-
-Example:
-- L=0 → 1.00x
-- L=10 → 1.10x
-- L=50 → 1.50x
-
----
-
-### B) Lifesteal % upgrade (0.5% per purchase)
-- Lifesteal: +0.5% per level
-
-Interpretation:
-- If lifesteal is a percent of damage dealt returned as HP, then:
-  - `lifesteal_percent = base_lifesteal_percent + 0.5 * L`
-
-If you currently have no lifesteal system:
-- Treat it as “heal X% of damage dealt” and clamp to a sane max (e.g., 50%).
+### 1.3 Character Screen UX Requirements
+- UI must be navigable with mouse and keyboard/controller if supported by the project.
+- Support screen-safe layout (avoid clipping on different aspect ratios; respect safe areas if applicable).
+- Closing the Character Screen must restore the previous HUD state without visual glitches.
+- In multiplayer, opening/closing Character Screen must not cause hitching or desync (no pausing-related net side effects).
 
 ---
 
-### C) Regeneration upgrade (0.5 HP per purchase)
-- Regeneration: +0.5 HP per level
+## 2) Ability HUD (Icon-Based, Click-to-Upgrade, Tooltip on Hover)
 
-Interpretation:
-- Add flat regen to the player's regen stat:
-  - `regen_hp_per_second = base_regen + 0.5 * L`
+### 2.1 Replace Existing Ability HUD Presentation
+Refactor the on-screen ability upgrade display to be **icon-based** and more compact.
 
-If your regen ticks instead of per-second:
-- Convert to per-tick based on tick rate, but store the stat in consistent units.
+**Location**
+- Bottom-left of the screen (same general area as current ability UI), but **smaller** and designed to accommodate multiple icons cleanly.
 
----
+### 2.2 Sprite Sheet: `~/assets/Sprites/GUI/abilities.png`
+Use the provided sprite sheet:
+- Tile size: **16×16**
+- Sheet size: **176×96**
+- Grid: **11 columns × 6 rows** (66 tiles total)
 
-### D) Lives upgrade (1 per purchase, maximum 3)
-- Lives: +1 life per purchase, **max 3 purchases**
+#### 2.2.1 Internal Icon Indexing
+Implement a stable index mapping for tiles to support later assignment by index.
 
-Interpretation:
-- Lives levels `0..3`
-- Total lives = `base_lives + L`
-- If base_lives already exists, this stacks additively.
-- Max only applies to the upgrade, not necessarily the final life count (unless you want it to).
+- Index tiles from **top-left to bottom-right**, 1-based:
+  - Index formula:
+    - `index = (row * 11) + col + 1`
+    - where `row ∈ [0..5]` top-to-bottom, `col ∈ [0..10]` left-to-right
 
----
+This index is used as the canonical “icon id” for an ability.
 
-### E) Difficulty upgrade (1% per purchase)
-- Difficulty: increases **Power** and **Count** of Enemies by **+1% per level**.
+#### 2.2.2 Temporary Icon Assignment
+- For now, assign **random (but deterministic)** icon indices to each ability so all abilities display an icon immediately.
+  - Deterministic suggestion: hash ability id/name → icon index (1..66), with collision handling (optional).
+- Store icon index in an easily editable location (e.g., AbilityDefinition/ScriptableObject/config entry) so the mapping can be overridden later without code changes.
 
-Interpretation:
-- Enemy Power multiplier = `1.0 + 0.01 * DifficultyLevel`
-- Enemy Count multiplier = `1.0 + 0.01 * DifficultyLevel`
+### 2.3 HUD Icon Rendering Requirements
+For each ability shown on the HUD:
+- Render its **icon** (16×16 source tile; scaled to an appropriate HUD size).
+- Overlay the **current ability level** in the **bottom-right** corner of the icon.
+  - The overlay must remain readable at typical HUD scales (use outline/shadow if available).
+- If an ability is not upgradable (locked/maxed), display a distinct “disabled” state (e.g., reduced opacity, muted tint, or overlay).
 
-**Enemy Power can include:**
-- enemy max health
-- enemy damage
-- enemy armor/shields (if applicable)
-- optionally enemy speed (only if desired; default off)
+### 2.4 Upgrade Interaction Changes (Input + Mouse)
+Modify upgrade interactions as follows:
 
-**Enemy Count scaling**
-- When spawning enemies:
-  - `spawn_count = floor(base_spawn_count * (1.0 + 0.01 * DifficultyLevel))`
-- Ensure you still spawn at least 1 enemy when base_spawn_count > 0.
+#### 2.4.1 Remove Existing Bindings
+- **F no longer purchases ability upgrades.**
+- **Mouse scroll wheel no longer cycles abilities.**
 
----
+If the project currently requires ability selection:
+- Preserve selection through other existing mechanisms (e.g., number keys) **without** relying on scroll wheel.
+- If scroll wheel is used elsewhere, ensure this change does not break other unrelated bindings.
 
-### F) Mastery (global +10% to all stats, including Difficulty)
-- Mastery: **+10% global increase of all stats (including Difficulty)**  
-- Extremely expensive.
+#### 2.4.2 Hover Tooltip (Cursor-Anchored)
+When the cursor hovers an ability icon:
+- Show a tooltip anchored to the mouse cursor position.
+- Tooltip content:
+  - Ability name
+  - Short description
+  - Upgrade price (cost to next level) or “MAX” if capped
+- Tooltip must follow the cursor and be clamped to screen bounds (never off-screen).
 
-Interpretation:
-- Mastery levels can be:
-  - **Option 1 (recommended):** 0..1 (single purchase)
-  - Option 2: 0..N (each level adds another +10%) — risk of runaway scaling
+#### 2.4.3 Click to Upgrade
+- Left-clicking an ability icon attempts to upgrade that ability:
+  - Check affordability (player currency).
+  - If affordable:
+    - Deduct currency.
+    - Apply upgrade (increment level, apply effects via existing upgrade logic).
+    - Refresh HUD + tooltips immediately.
+  - If not affordable:
+    - Do not upgrade.
+    - Provide clear feedback (e.g., brief shake, error sound, red flash, or toast—use an existing feedback system if present).
 
-**Mastery multiplier**
-- `mastery_multiplier = 1.0 + 0.10 * MasteryLevel`
-
-**“Including Difficulty”**
-- Mastery must also scale the **DifficultyLevel effect**.
-- Implementation approach:
-  - Apply mastery as a multiplier to *all* resulting multipliers, including enemy multipliers.
-
-Example order of operations:
-1. Compute player stat multipliers from upgrade levels
-2. Multiply by mastery_multiplier
-3. Compute enemy multipliers from difficulty level
-4. Multiply enemy multipliers by mastery_multiplier (because mastery includes difficulty)
-
----
-
-## Economy & Pricing (Very Expensive)
-
-### Cost goals
-- Early upgrades should be technically purchasable, but slow.
-- Costs should ramp fast enough to remain a long-term sink.
-- Different upgrades can have different base costs.
-
-### Suggested pricing formula (per upgrade)
-For each upgrade type:
-- `base_cost` (unique per upgrade)
-- `growth` (unique per upgrade)
-
-Cost for next level (level = current_level, buying level+1):
-- `cost = floor(base_cost * (growth ** current_level))`
-
-Recommended starting points (tune in playtests):
-- 1% upgrades (Power/Speed/etc):
-  - base_cost: 250
-  - growth: 1.15
-- Lifesteal / Regen:
-  - base_cost: 400
-  - growth: 1.18
-- Lives (max 3):
-  - base_cost: 2000
-  - growth: 2.0
-- Difficulty:
-  - base_cost: 800
-  - growth: 1.20
-- Mastery:
-  - base_cost: 250000
-  - growth: 5.0 (if multi-level) or just fixed cost for 1 level
-
-### Cost sanity protections
-- Hard cap: if cost exceeds a max int, clamp to max.
-- Use 64-bit integers for gold and cost.
-- Costs should never be 0.
+### 2.5 Ability HUD Acceptance Criteria
+- All currently available abilities show icons.
+- Level overlay matches the current ability level at all times.
+- Tooltips show correct name/description/price and stay within screen bounds.
+- Clicking upgrades the correct ability and correctly charges currency.
+- F key and scroll wheel no longer perform their previous ability HUD actions.
 
 ---
 
-## Data Model (Save Schema)
+## 3) Health / Shield / Energy / Dash Display (Centered Bottom, Modern Aesthetic)
 
-### Suggested JSON-like structure
-(Adapt to your save format. The important part is that it’s persistent and versioned.)
+### 3.1 Layout Changes
+Relocate the following HUD bars to be **centered at the bottom** of the screen:
+- Health
+- Shield
+- Energy
+- Dash (meter or cooldown bar, depending on current dash implementation)
 
-```json
-{
-  "save_version": 1,
-  "vault": {
-    "gold": 0,
-    "last_deposited_match_id": ""
-  },
-  "global_upgrades": {
-    "attack_power": 0,
-    "attack_speed": 0,
-    "health": 0,
-    "speed": 0,
-    "armor": 0,
-    "shields": 0,
-    "lifesteal": 0,
-    "regeneration": 0,
-    "lives": 0,
-    "difficulty": 0,
-    "mastery": 0
-  }
-}
-```
+Layout requirements:
+- Bars must be arranged in a single horizontal cluster centered along the bottom.
+- Keep bars **evenly spaced** (consistent gaps).
+- Bars must be responsive across resolutions/aspect ratios (anchor + scale properly).
 
-### Versioning
-- Include `save_version`.
-- On load, if older, migrate:
-  - missing fields default to 0
-  - unknown fields ignored but preserved if possible
+### 3.2 Visual Style Requirements
+Restyle these bars to look and feel “modern” with a calm aesthetic:
+- Rounded corners (if supported by the UI framework)
+- Subtle backgrounds and clear foreground fill
+- Smooth fill transitions (e.g., lerp to new value instead of instant snapping), without compromising responsiveness
+- Optional: small, minimal labels or icons if already present; do not add clutter
+
+### 3.3 Behavior Requirements
+- Health/Shield/Energy fills must track underlying values precisely (no desync).
+- Dash bar must reflect current dash availability (e.g., cooldown progress or charges).
+- Bars must remain readable and unobtrusive during combat (avoid excessive animations).
+
+### 3.4 HUD Space Reallocation
+With the resource bars moved to bottom-center:
+- Reserve the left-hand HUD space for other elements.
+- Move the “currently active inventory item” display to the **bottom-left** of the screen (aligned with the new Ability HUD, without overlapping).
 
 ---
 
-## Applying Upgrades In-Game
-
-### Where to apply
-When a character is created/selected for a match:
-1. Load base stats for selected character.
-2. Fetch global upgrade levels + mastery.
-3. Apply player multipliers to character stats.
-4. Configure enemy scaling based on difficulty + mastery.
-
-### Recommended application method
-Compute a **GlobalModifiers** object once at match start:
-- `player_attack_power_mult`
-- `player_attack_speed_mult`
-- `player_health_mult`
-- `player_speed_mult`
-- `player_armor_mult`
-- `player_shields_mult`
-- `player_lifesteal_add` (percent)
-- `player_regen_add` (hp/sec)
-- `player_lives_add` (int)
-- `enemy_power_mult`
-- `enemy_count_mult`
-
-Then all gameplay systems reference this object.
-
-### Stacking / rounding rules
-- Multipliers are applied multiplicatively.
-- Flat stats add after multipliers if they represent separate systems (regen, lives).
-- Rounding:
-  - Use consistent rounding (floor or round) and document it.
-  - HP and shields should be at least 1 after scaling if base > 0.
+## Non-Functional Requirements
+- **No regressions** to underlying gameplay systems (abilities, upgrades, currencies, inventory, stats).
+- UI should be built with reusable components (icon button + tooltip + list row prefabs/components).
+- Avoid hardcoding ability names/descriptions/costs: bind to existing data models.
+- Ensure performance is stable (no per-frame allocations in tooltip/layout logic if avoidable).
+- Multiplayer safety:
+  - Character Screen must not introduce any global pause or simulation freeze.
+  - No server-authoritative state changes should occur solely because a client opened the Character Screen.
 
 ---
 
-## Multiplayer / Host Authority (if applicable)
-If your game has online co-op:
-- Vault + upgrades are **per-player** (not shared), tied to their profile/save.
-- Purchasing/upgrading happens in menus (client-side).
-- During a match:
-  - Each player’s modifiers apply to their character.
-  - Enemy difficulty scaling should be **host-authoritative**:
-    - Option A: Host uses their own difficulty+mastery to scale enemies.
-    - Option B (recommended co-op fairness): Use the **max** difficulty among players, or average, or a selected “Lobby Difficulty Owner”.
-  - Deposit should happen per player at match end based on their personal run gold.
-
-Pick one policy and implement it consistently.
-
----
-
-## UX polish ideas (optional but recommended)
-- Show “Next purchase adds: +1%” or “+0.5%” on the row.
-- Add a “Preview Effects” panel showing final multipliers.
-- Add subtle “you got poorer” purchase animation (tiny gold count pop).
-- Add sorting:
-  - Offensive, Defensive, Utility, Meta (Difficulty/Mastery)
-
----
-
-## Edge Cases / Must-handle
-- Quitting mid-run:
-  - Deposit earned gold so far (unless you explicitly want quit penalty).
-- Crashes:
-  - Save run gold periodically or on checkpoints to avoid losing all progress.
-- Double deposit:
-  - Prevent via `match_id` guard.
-- Corrupt save:
-  - Reset vault/upgrades to safe defaults and warn.
-
----
-
-## Implementation Checklist (Codex)
-- [ ] Add persistent storage fields: VaultGold + upgrade levels + save_version
-- [ ] Add match_end event handler: deposit run gold into vault once
-- [ ] Add menu entry “Upgrades” between Join and Stats
-- [ ] Build Upgrades screen UI with gold display (top-right)
-- [ ] Implement upgrade rows, costs, max levels (Lives, Mastery)
-- [ ] Implement purchase confirm modal + atomic transaction
-- [ ] Apply global modifiers at character spawn / match start
-- [ ] Apply difficulty scaling to enemy power + enemy count
-- [ ] Add tests for:
-  - deposit once
-  - purchase reduces gold
-  - upgrades persist after restart
-  - max levels enforced
-  - mastery affects both player and enemy scaling
+## Test Checklist (Definition of Done)
+- [ ] Character Screen toggles with default key **I** and can be rebound.
+- [ ] **Single-player:** Opening Character Screen pauses gameplay; closing resumes without breaking other pause sources.
+- [ ] **Multiplayer:** Opening Character Screen does **not** pause the match (no global pause/time scale changes); other players continue unaffected.
+- [ ] In multiplayer, local input is safely disabled while the Character Screen is open (UI navigation remains enabled).
+- [ ] Character Screen shows: abilities (name/desc/level/next cost), attributes/modifiers, relevant stats, inventory (name/sell price/desc).
+- [ ] Ability HUD uses `abilities.png` and renders icon + level overlay for each ability.
+- [ ] Hover tooltip follows cursor, clamps to screen, and shows correct info and upgrade cost.
+- [ ] Clicking ability icon upgrades if affordable; otherwise gives clear “cannot afford” feedback.
+- [ ] F key no longer upgrades abilities; scroll wheel no longer cycles abilities.
+- [ ] Health/Shield/Energy/Dash bars are centered at bottom, evenly spaced, modern-styled, and update correctly.
+- [ ] Active inventory item display is moved to bottom-left and does not overlap new HUD elements.

@@ -8,6 +8,8 @@
 # Add training time to Mini-Units
 * RTS Style queue?
 
+# Need to ensure All players in a multiplayer match are fighting the same exact monsters, not monstres in their own respective clients.
+
 # Summoner Class
 * Uses abilities to summon various creatures
     * Beatles
@@ -58,8 +60,45 @@
         * Paths
         * Cliffs?
 
-# Remove ability to attack via left click
-* Starcraft style attack logic.
+# Hotkey to open Character screen to see attributes/stats/inventory
+* Pauses Game
+* Shows abilities, description of what ability does, current level, cost to next level.
+* Shows current attributes
+    * Attributes
+        * Health
+        * Current modifiers
+            * +Dmg
+            * +Health
+            * etc
+    * Relevant Stats
+        * Kills
+        * Copper / Gold
+        * etc
+* Shows current inventory with item names, sell price, and short description.
+
+# Change main on-screen Ability GUI
+* Change to Icon based
+    * `~/assets/Sprites/GUI/abilities.png`
+        * This asset contains 16x16 assets
+        * `176x96`
+        * There are 11 Columns and 6 Rows.
+            * Internally number these from top left to bottom right like so;
+                * 1 2 3 4 5 6 7 8 9 10 11
+                * 12 13 14 15 16 17 18 19 20 21
+            * Internally numbering them will make it easy for me to dictate ability icon 4, etc.
+            * For now, assign random indexes to abilities for now, so they all populate. I can dictate later.
+    * Display Icon with current level overlayed in the bottom right of the icon.
+    * F no longer purchases ability upgrades.
+        * Scroll wheel no longer cycles abilities.
+        * Hovering the abilities will produce a mouse coursor anchored tooltip with the name of the ability, a short description and the price to upgrade.
+        * Clicking the ability icon will upgrade the ability, if the player can afford it.
+    * The new Ability GUI will live at the bottom left where it already does, but it will be smaller, with room for their ability icons
+
+# Player Health/Shields/Energy/Dash display
+* Move the Health, Shields, and Energy Bars to be centered at the bottom of the screen. 
+    * keep them evenly spaced apart.
+* The Health, Shield, Energy and Dash bars will look and behave modernly, with a nice calming aesthetic.
+* With These bars moved, we can reserve the left-hand side for other things, such as the currently active inventory item, which will just move to the bottom left of the screen.
 
 # Gameplay Pt. 2
 * Monster spawns should be further spread out from the player
@@ -99,8 +138,7 @@ In Zeta, Characters, Bosses and monsters alike can sometimes perform attacks or 
 
 # GUI/HUD
 * Move Health/Energy/Dash Bars
-* Hotkey to open Character screen to see attributes/stats/inventory
-    * Pauses Game
+
 * Mini-Map
     * Mini-Map will be in the top right, will display the players location at the center, and will display small blips wherever enemies are in real-time.
 * Round/Wave Information
