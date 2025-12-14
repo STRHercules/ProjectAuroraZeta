@@ -10,7 +10,42 @@
 
 # Summoner Class
 * Uses abilities to summon various creatures
-    * Similar to builder to produce units, weaker units that only last so long on timer.
+    * Beatles
+        * `~/assets/Sprites/Units/Beatle/Beatle.png`
+        * `~/assets/Sprites/Units/Beatle/Beatle_Attack.png`
+        * `~/assets/Sprites/Units/Beatle/Beatle_Slime_Shot.png`
+    * Snakes
+        * `~/assets/Sprites/Units/Snake/Snake.png`
+        * `~/assets/Sprites/Units/Snake/Snake_Attack.png`
+    * These Assets used for the Summoner Summons are stitched together using the same atlas type the player characters are using;
+        * Movement + Combat Spritesheets.
+    * Summoned Units act autonomosly, attacking enemies nearest the Summoner.
+    * Summoned Units will never stray too far from the Summoner, they will have a "leash".
+
+# Druid Class
+* Ability to transform into various animals.
+    * Bear
+        * `~/assets/Sprites/Units/Bear/Bear.png`
+        * `~/assets/Sprites/Units/Bear/Bear_Attack.png`
+        * Tank Role
+        * High Health / Armor
+        * Low Damage
+        * Slower Movement
+    * Wolf
+        * `~/assets/Sprites/Units/Wolf/Wolf.png`
+        * `~/assets/Sprites/Units/Wolf/Wolf_Attack.png`
+        * DPS Role
+        * Medium Health / Small Armor
+        * High Damage
+        * Higher Movement
+    * Both Forms will perform Melee Combat - so they will need to be able to survive close quarters combat - the bear having much more survivability than the wolf.
+    * The Druid will have the ability to pick between Wolf or Bear at level 2.
+        * Picking either Wolf or Bear will assign that as their ultimate ability.
+            * Their ultimate ability no longer has a cooldown, and rather becomes a toggle. 
+                * Toggled ON = Bear/Wolf Mode activated; Form changed, stats changed, etc
+                * Toggled OFF = Revert back to 'human' sprite and standard ranged attacks.
+    * These Assets used for the Druid Animal transformations are stitched together using the same atlas type the player characters are using;
+        * Movement + Combat Spritesheets.
 
 # Map Design
 * Fabricated assets to place in-world
@@ -25,31 +60,6 @@
 
 # Remove ability to attack via left click
 * Starcraft style attack logic.
-
-# Personal Vault | Persistent Upgrades
-* Any Gold the player has when the match ends should go into a personal vault.
-    * The Personal Vault 
-        * The Personal Vault will persist on their save, so it can live inside and outside the matches.
-        * The Personal Vault will store the players gold that they can then spend on global upgrades.
-    * Global Upgrades
-        * On the Main Menu, there will be a new option between Join and Stats; 'Upgrades'
-        * On the 'Upgrades' menu, it will display the player's Gold amount in the Vault in the top right.
-        * The Upgrades Menu will show some permanent and persistent upgrades to their characters.
-            * These persistent upgrades will apply to each character the same.
-            * These persistent upgrades will be -very- expensive.
-            * The persistent upgrades:
-                * Attack Power: 1% Increase per purchase
-                * Attack Speed: 1% Increase per purchase
-                * Health: 1% Increase per purchase
-                * Speed: 1% Increase per purchase
-                * Armor: 1% Increase per purchase
-                * Shields: 1% Increase per purchase
-                * Lifesteal: 0.5% Increase per purchase
-                * Regeneration: 0.5HP Increase per purchase
-                * Lives: 1 Per Purchase (Maximum 3)
-                * Difficulty: Increases Power and Count of Enemies by 1% per purchase
-                * Mastery: Global 10% increase of all stats (Including Difficulty)(Extremely Expensive)
-
 
 # Gameplay Pt. 2
 * Monster spawns should be further spread out from the player
