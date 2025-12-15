@@ -1,5 +1,4 @@
 # Units
-* https://electriclemon.itch.io/citizens-guards-warriors
 * https://electriclemon.itch.io/creatures-extended
 * https://electriclemon.itch.io/creatures-high-dragon
 * https://electriclemon.itch.io/fantasy-rpg-monster-boss-vampire-lord-and-minions
