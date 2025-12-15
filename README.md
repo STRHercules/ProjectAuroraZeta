@@ -131,3 +131,6 @@ unzip SDL2_image-devel-2.8.2-mingw.zip
 ```
 
 The distributable zip is written to `dist/windows/zeta-win64.zip` and contains `Project Aurora Zeta.exe`, required SDL DLLs, data, and a `start.bat` launcher.
+
+## Building for Android (APK)
+An Android build pipeline is not yet checked into the repo, but `docs/AndroidBuild.md` describes how to wire the existing CMake projects into the SDL2 Android template and package an APK with Gradle.
