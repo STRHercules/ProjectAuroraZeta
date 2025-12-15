@@ -61,6 +61,7 @@
 #include "components/HeroSpriteSheets.h"
 #include "components/HeroAttackAnim.h"
 #include "components/HeroPickupAnim.h"
+#include "components/SecondaryWeapon.h"
 #include "../engine/gameplay/FogOfWar.h"
 #include "../engine/render/FogOfWarRenderer.h"
 #include "net/NetSession.h"
@@ -160,6 +161,20 @@ private:
         LevelChoiceType type{LevelChoiceType::Damage};
         float amount{0.0f};
     };
+    enum class DruidForm {
+        Human,
+        Wolf,
+        Bear
+    };
+    enum class WizardElement {
+        Fire,
+        Ice,
+        Dark,
+        Earth,
+        Lightning,
+        Wind,
+        Count
+    };
     struct ItemInstance {
         ItemDefinition def;
         int quantity{1};
@@ -198,6 +213,8 @@ private:
         float tauntRadius{0.0f};
         float healRange{0.0f};
         float frameDuration{0.0f};
+        int frameWidth{16};
+        int frameHeight{16};
         Game::OffensiveType offensiveType{Game::OffensiveType::Ranged};
         int costCopper{0};
         std::string texturePath{};
@@ -252,8 +269,29 @@ private:
         int maxLevel{5};
         float cooldown{0.0f};
     };
+    struct SpriteSheetDesc {
+        Engine::TexturePtr texture{};
+        int frameWidth{0};
+        int frameHeight{0};
+        int frameCount{1};
+        float frameDuration{0.08f};
+    };
+    struct HeroSpriteFiles {
+        std::string folder;
+        std::string movementFile;
+        std::string combatFile;
+    };
     void placeBuilding(const Engine::Vec2& pos);
-    bool spawnMiniUnit(const MiniUnitDef& def, const Engine::Vec2& pos);
+    Engine::ECS::Entity spawnMiniUnit(const MiniUnitDef& def, const Engine::Vec2& pos);
+    void applyProjectileVisual(Engine::ECS::Entity e,
+                               float sizeMul,
+                               Engine::Color color,
+                               bool turret = false,
+                               const SpriteSheetDesc* overrideVis = nullptr);
+    HeroSpriteFiles heroSpriteFilesFor(const ArchetypeDef& def) const;
+    bool archetypeSupportsSecondaryWeapon(const ArchetypeDef& def) const;
+    void toggleHeroWeaponMode();
+    void refreshHeroOffenseTag();
 
     Engine::ECS::Registry registry_{};
     Engine::ECS::Entity hero_{Engine::ECS::kInvalidEntity};
@@ -283,6 +321,9 @@ private:
     Engine::TexturePtr pickupPhaseLeechTex_{};
     Engine::TexturePtr pickupStormCoreTex_{};
     std::vector<Engine::TexturePtr> projectileTextures_;
+    SpriteSheetDesc projectileVisualPlayer_{};
+    SpriteSheetDesc projectileVisualTurret_{};
+    SpriteSheetDesc projectileVisualArrow_{};
     Engine::TexturePtr projectileTexRed_;
     Engine::TexturePtr projectileTexTurret_;
     SDL_Cursor* customCursor_{nullptr};
@@ -292,12 +333,26 @@ private:
     Engine::InputBindings bindings_{};
     Engine::ActionMapper actionMapper_{};
     Engine::AssetManifest manifest_{};
+    Game::OffensiveType heroBaseOffense_{Game::OffensiveType::Melee};
+    bool usingSecondaryWeapon_{false};
+    bool swapWeaponHeld_{false};
     float projectileSpeed_{400.0f};
     float projectileDamage_{15.0f};
     float projectileDamageBase_{15.0f};
     float projectileSize_{8.0f};
     float projectileHitboxSize_{8.0f};
     float projectileLifetime_{1.5f};
+    // Wizard elemental visuals
+    Engine::TexturePtr wizardElementTex_{};
+    int wizardElementColumns_{0};
+    float wizardElementFrameDuration_{0.06f};
+    DruidForm druidForm_{DruidForm::Human};
+    DruidForm druidChosen_{DruidForm::Human};
+    bool druidChoiceMade_{false};
+    WizardElement wizardElement_{WizardElement::Fire};
+    float lightningDomeTimer_{0.0f};
+    struct FlameWallInstance { Engine::Vec2 pos; float timer; Engine::ECS::Entity visEntity{Engine::ECS::kInvalidEntity}; };
+    std::vector<FlameWallInstance> flameWalls_{};
     double waveInterval_{2.5};
     double graceDuration_{1.0};
     int copperPerKill_{5};
@@ -468,6 +523,8 @@ private:
     bool inMenu_{true};
     MenuPage menuPage_{MenuPage::Main};
     int menuSelection_{0};
+    float archetypeScroll_{0.0f};
+    float difficultyScroll_{0.0f};
     int upgradesSelection_{0};
     bool upgradeConfirmOpen_{false};
     int upgradeConfirmIndex_{-1};
@@ -483,6 +540,7 @@ private:
     bool menuClickPrev_{false};
     bool pauseClickPrev_{false};
     double menuPulse_{0.0};
+    int scrollDeltaFrame_{0};
     MovementMode movementMode_{MovementMode::Modern};
     bool moveCommandPrev_{false};
     bool moveTargetActive_{false};

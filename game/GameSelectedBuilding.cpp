@@ -73,8 +73,8 @@ void GameRoot::drawSelectedBuildingPanel(int mouseX, int mouseY, bool leftClickE
                     spawnPos.x += 20.0f * (i - 1);
                     spawnPos.y += 24.0f;
                 }
-                bool ok = spawnMiniUnit(it->second, spawnPos);
-                (void)ok;
+                auto ent = spawnMiniUnit(it->second, spawnPos);
+                (void)ent;
             }
         }
     }

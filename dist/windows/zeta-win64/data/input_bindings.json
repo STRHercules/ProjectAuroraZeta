@@ -23,5 +23,6 @@
   "ability3": ["key:3"],
   "ultimate": ["key:4"],
   "reload": ["key:f", "key:f1"],
-  "menuBack": ["key:m"]
+  "menuBack": ["key:m"],
+  "swapWeapon": ["lalt"]
 }

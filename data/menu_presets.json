@@ -2,7 +2,7 @@
   "archetypes": [
     {
       "id": "tank",
-      "name": "Tank",
+      "name": "Knight",
       "description": "High survivability frontliner with slower stride.",
       "hpMul": 1.35,
       "speedMul": 0.9,
@@ -22,7 +22,7 @@
     },
     {
       "id": "damage",
-      "name": "Damage Dealer",
+      "name": "Militia",
       "description": "Glass-cannon firepower, slightly faster pacing.",
       "hpMul": 0.95,
       "speedMul": 1.05,
@@ -52,7 +52,7 @@
     },
     {
       "id": "support",
-      "name": "Support",
+      "name": "Dragoon",
       "description": "All-rounder tuned for team buffs.",
       "hpMul": 1.0,
       "speedMul": 1.0,
@@ -62,12 +62,42 @@
     },
     {
       "id": "special",
-      "name": "Special",
+      "name": "Crusader",
       "description": "Experimental kit with slight boosts across the board.",
       "hpMul": 1.1,
       "speedMul": 1.05,
       "damageMul": 1.05,
       "color": [200, 160, 240, 255],
+      "offensiveType": "Ranged"
+    },
+    {
+      "id": "summoner",
+      "name": "Summoner",
+      "description": "Calls beetles and snakes; fragile but protected by summons.",
+      "hpMul": 0.95,
+      "speedMul": 1.0,
+      "damageMul": 0.9,
+      "color": [170, 140, 230, 255],
+      "offensiveType": "Ranged"
+    },
+    {
+      "id": "druid",
+      "name": "Druid",
+      "description": "Shifts between human ranged and melee beast forms.",
+      "hpMul": 1.1,
+      "speedMul": 1.0,
+      "damageMul": 1.0,
+      "color": [140, 200, 120, 255],
+      "offensiveType": "Ranged"
+    },
+    {
+      "id": "wizard",
+      "name": "Wizard",
+      "description": "Elementalist with cycling primary and high-energy spell kit.",
+      "hpMul": 0.85,
+      "speedMul": 1.05,
+      "damageMul": 1.1,
+      "color": [120, 190, 255, 255],
       "offensiveType": "Ranged"
     }
   ],

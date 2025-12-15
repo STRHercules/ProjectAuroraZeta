@@ -14,12 +14,14 @@
 #include "../components/EscortTarget.h"
 #include "../components/EscortPreMove.h"
 #include "../../engine/ecs/components/Health.h"
+#include "../components/StatusEffects.h"
 
 namespace Game {
 
 void EnemyAISystem::update(Engine::ECS::Registry& registry, Engine::ECS::Entity hero, const Engine::TimeStep& step) {
     const auto* heroTf = registry.get<Engine::ECS::Transform>(hero);
     if (!heroTf) return;
+    const float dt = static_cast<float>(step.deltaSeconds);
     auto pickNearestEscort = [&](const Engine::Vec2& from, const Engine::ECS::Transform*& outTf) {
         outTf = nullptr;
         float bestD2 = std::numeric_limits<float>::max();
@@ -80,19 +82,69 @@ void EnemyAISystem::update(Engine::ECS::Registry& registry, Engine::ECS::Entity 
     };
 
     registry.view<Engine::ECS::Transform, Engine::ECS::Velocity, Engine::ECS::Health, Game::EnemyAttributes>(
-        [&registry, heroTf, &step, &pickNearestTarget, &pickNearestEscort](Engine::ECS::Entity e, Engine::ECS::Transform& tf, Engine::ECS::Velocity& vel,
+        [&registry, heroTf, dt, &pickNearestTarget, &pickNearestEscort](Engine::ECS::Entity e, Engine::ECS::Transform& tf, Engine::ECS::Velocity& vel,
                             Engine::ECS::Health& hp, const Game::EnemyAttributes& attr) {
             if (!hp.alive()) {
                 vel.value = {0.0f, 0.0f};
                 return;
             }
+            float speedMul = 1.0f;
+            bool stunned = false;
+            Engine::Vec2 blindDir{0.0f, 0.0f};
+            bool blinded = false;
+            if (auto* se = registry.get<Game::StatusEffects>(e)) {
+                if (se->burnTimer > 0.0f && se->burnDps > 0.0f) {
+                    Engine::Gameplay::DamageEvent burn{};
+                    burn.type = Engine::Gameplay::DamageType::Spell;
+                    burn.baseDamage = se->burnDps * dt;
+                    Engine::Gameplay::applyDamage(hp, burn, {});
+                    se->burnTimer -= dt;
+                    if (se->burnTimer <= 0.0f) se->burnDps = 0.0f;
+                }
+                if (se->earthTimer > 0.0f && se->earthDps > 0.0f) {
+                    Engine::Gameplay::DamageEvent thorn{};
+                    thorn.type = Engine::Gameplay::DamageType::Spell;
+                    thorn.baseDamage = se->earthDps * dt;
+                    Engine::Gameplay::applyDamage(hp, thorn, {});
+                    se->earthTimer -= dt;
+                    if (se->earthTimer <= 0.0f) se->earthDps = 0.0f;
+                }
+                if (se->slowTimer > 0.0f) {
+                    se->slowTimer -= dt;
+                    speedMul = std::min(speedMul, se->slowMultiplier);
+                    if (se->slowTimer <= 0.0f) {
+                        se->slowMultiplier = 1.0f;
+                        se->slowTimer = 0.0f;
+                    }
+                }
+                if (se->stunTimer > 0.0f) {
+                    se->stunTimer -= dt;
+                    stunned = true;
+                }
+                if (se->blindTimer > 0.0f) {
+                    se->blindTimer -= dt;
+                    se->blindRetarget -= dt;
+                    if (se->blindRetarget <= 0.0f) {
+                        float seed = tf.position.x + tf.position.y;
+                        float angle = std::fmod(seed * 0.23f + se->blindTimer * 1.3f, 6.28318f);
+                        se->blindDir = {std::cos(angle), std::sin(angle)};
+                        se->blindRetarget = 0.6f;
+                    }
+                    blindDir = se->blindDir;
+                    blinded = true;
+                }
+            }
+            if (stunned) {
+                vel.value = {0.0f, 0.0f};
+                return;
+            }
             // If taunted, chase the taunting mini-unit instead of the hero/other targets.
             const Engine::ECS::Transform* targetTf = nullptr;
-            if (auto* taunt = registry.get<Game::TauntTarget>(e)) {
-                if (taunt->timer > 0.0f) {
-                    taunt->timer -= static_cast<float>(step.deltaSeconds);
-                    if (taunt->timer < 0.0f) taunt->timer = 0.0f;
-                }
+                if (auto* taunt = registry.get<Game::TauntTarget>(e)) {
+                    if (taunt->timer > 0.0f) {
+                        taunt->timer -= dt;
+                        if (taunt->timer < 0.0f) taunt->timer = 0.0f;
+                    }
                 if (taunt->timer > 0.0f) {
                     if (taunt->target != Engine::ECS::kInvalidEntity) {
                         if (auto* miniTf = registry.get<Engine::ECS::Transform>(taunt->target)) {
@@ -120,17 +172,20 @@ void EnemyAISystem::update(Engine::ECS::Registry& registry, Engine::ECS::Entity 
                 }
             }
             if (!targetTf) return;
-            Engine::Vec2 dir{targetTf->position.x - tf.position.x, targetTf->position.y - tf.position.y};
-            // Normalize dir
-            float len2 = dir.x * dir.x + dir.y * dir.y;
-            if (len2 > 0.0001f) {
-                float inv = 1.0f / std::sqrt(len2);
-                dir.x *= inv;
-                dir.y *= inv;
-                vel.value = {dir.x * attr.moveSpeed, dir.y * attr.moveSpeed};
+            Engine::Vec2 dir{};
+            if (blinded) {
+                dir = blindDir;
             } else {
-                vel.value = {0.0f, 0.0f};
+                dir = {targetTf->position.x - tf.position.x, targetTf->position.y - tf.position.y};
+                float len2 = dir.x * dir.x + dir.y * dir.y;
+                if (len2 > 0.0001f) {
+                    float inv = 1.0f / std::sqrt(len2);
+                    dir.x *= inv;
+                    dir.y *= inv;
+                }
             }
+            float speed = attr.moveSpeed * speedMul;
+            vel.value = {dir.x * speed, dir.y * speed};
         });
 }
 

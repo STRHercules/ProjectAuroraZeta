@@ -39,6 +39,7 @@ InputKey toInputKey(const std::string& key) {
     if (lower == "b" || lower == "toggle_shop" || lower == "shop") return InputKey::ToggleShop;
     if (lower == "i" || lower == "character" || lower == "character_screen") return InputKey::CharacterScreen;
     if (lower == "v" || lower == "build" || lower == "build_menu") return InputKey::BuildMenu;
+    if (lower == "swap_weapon" || lower == "weapon_swap" || lower == "lalt" || lower == "leftalt" || lower == "alt") return InputKey::SwapWeapon;
     if (lower == "escape" || lower == "pause" || lower == "esc") return InputKey::Pause;
     if (lower == "space" || lower == "dash" || lower == "shift") return InputKey::Dash;
     if (lower == "e" || lower == "interact") return InputKey::Interact;
@@ -132,6 +133,14 @@ ActionState ActionMapper::sample(const InputState& input) const {
         InputKey mapped = toInputKey(key);
         if (mapped != InputKey::Count && input.isDown(mapped)) {
             act.pause = true;
+            break;
+        }
+    }
+    act.swapWeapon = input.isDown(InputKey::SwapWeapon);
+    for (const auto& key : bindings_.swapWeapon) {
+        InputKey mapped = toInputKey(key);
+        if (mapped != InputKey::Count && input.isDown(mapped)) {
+            act.swapWeapon = true;
             break;
         }
     }

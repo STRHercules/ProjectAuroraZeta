@@ -22,6 +22,7 @@ enum class InputKey {
     CharacterScreen,
     Pause,
     Dash,
+    SwapWeapon,
     Interact,
     UseItem,
     Ability1,

@@ -1,5 +1,5 @@
 {
-  "heroTexture": "assets/Sprites/Characters/DamageDealer.png",
+  "heroTexture": "assets/Sprites/Characters/Damage Dealer/Dps.png",
   "gridTextures": [
     "assets/Tilesheets/Sprite-0001.png",
     "assets/Tilesheets/Sprite-0002.png",

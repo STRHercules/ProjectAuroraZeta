@@ -23,6 +23,7 @@ struct InputBindings {
     std::vector<std::string> characterScreen;
     std::vector<std::string> pause;
     std::vector<std::string> dash;
+    std::vector<std::string> swapWeapon;
     std::vector<std::string> interact;
     std::vector<std::string> useItem;
     std::vector<std::string> ability1;

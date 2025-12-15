@@ -7,7 +7,9 @@
       "damage": 8.0,
       "offensiveType": "Ranged",
       "costCopper": 6,
-      "texture": "assets/Sprites/Units/LightUnit.png"
+      "texture": "assets/Sprites/Units/LightUnit.png",
+      "frameWidth": 16,
+      "frameHeight": 16
     },
     "heavy": {
       "hp": 220.0,
@@ -18,7 +20,9 @@
       "shieldArmor": 1.0,
       "offensiveType": "Ranged",
       "costCopper": 10,
-      "texture": "assets/Sprites/Units/HeavyUnit.png"
+      "texture": "assets/Sprites/Units/HeavyUnit.png",
+      "frameWidth": 16,
+      "frameHeight": 16
     },
     "medic": {
       "hp": 60.0,
@@ -28,7 +32,43 @@
       "healPerSecond": 10.0,
       "offensiveType": "Ranged",
       "costCopper": 8,
-      "texture": "assets/Sprites/Units/MedicUnit.png"
+      "texture": "assets/Sprites/Units/MedicUnit.png",
+      "frameWidth": 16,
+      "frameHeight": 16
+    },
+    "beatle": {
+      "class": "light",
+      "hp": 60.0,
+      "shields": 0.0,
+      "moveSpeed": 170.0,
+      "damage": 9.0,
+      "attackRange": 140.0,
+      "attackRate": 0.9,
+      "preferredDistance": 120.0,
+      "offensiveType": "Ranged",
+      "costCopper": 0,
+      "texture": "assets/Sprites/Units/Beatle/Beatle.png",
+      "frameWidth": 16,
+      "frameHeight": 16,
+      "frameDuration": 0.12
+    },
+    "snake": {
+      "class": "heavy",
+      "hp": 110.0,
+      "shields": 10.0,
+      "moveSpeed": 150.0,
+      "damage": 13.0,
+      "attackRange": 75.0,
+      "attackRate": 1.05,
+      "tauntRadius": 0.0,
+      "offensiveType": "Ranged",
+      "costCopper": 0,
+      "armor": 0.5,
+      "shieldArmor": 0.5,
+      "texture": "assets/Sprites/Units/Snake/Snake.png",
+      "frameWidth": 16,
+      "frameHeight": 16,
+      "frameDuration": 0.12
     }
   },
   "buildings": {

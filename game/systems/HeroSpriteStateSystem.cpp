@@ -11,19 +11,12 @@
 #include "../components/HeroPickupAnim.h"
 #include "../components/HeroSpriteSheets.h"
 #include "../components/LookDirection.h"
+#include "../components/SecondaryWeapon.h"
 
 namespace Game {
 
 namespace {
 constexpr float kMoveEpsilon = 0.01f;
-
-LookDir4 swapLeftRight(LookDir4 d) {
-    switch (d) {
-        case LookDir4::Left: return LookDir4::Right;
-        case LookDir4::Right: return LookDir4::Left;
-        default: return d;
-    }
-}
 
 LookDir4 dirFromVec(const Engine::Vec2& v, LookDir4 fallback) {
     const float ax = std::abs(v.x);
@@ -36,61 +29,35 @@ LookDir4 dirFromVec(const Engine::Vec2& v, LookDir4 fallback) {
     return v.y >= 0.0f ? LookDir4::Front : LookDir4::Back;
 }
 
-int rowIdle(LookDir4 d) {
-    d = swapLeftRight(d);
-    // Movement sheet rows are 1-based in the asset reference.
-    switch (d) {
-        case LookDir4::Left: return 0;   // 1: idle left
-        case LookDir4::Right: return 1;  // 2: idle right
-        case LookDir4::Front: return 2;  // 3: idle down
-        case LookDir4::Back: return 3;   // 4: idle up
-    }
-    return 2;
-}
-
-int rowWalk(LookDir4 d) {
-    d = swapLeftRight(d);
-    switch (d) {
-        case LookDir4::Left: return 4;   // 5: walk left
-        case LookDir4::Right: return 5;  // 6: walk right
-        case LookDir4::Front: return 6;  // 7: walk down
-        case LookDir4::Back: return 7;   // 8: walk up
-    }
-    return 6;
-}
-
-int rowPickup(LookDir4 d) {
-    d = swapLeftRight(d);
-    switch (d) {
-        case LookDir4::Left: return 16;   // 17: pickup left
-        case LookDir4::Right: return 17;  // 18: pickup right
-        case LookDir4::Front: return 18;  // 19: pickup down
-        case LookDir4::Back: return 19;   // 20: pickup up
-    }
-    return 18;
-}
-
-int rowKnockdown(LookDir4 d) {
-    d = swapLeftRight(d);
-    switch (d) {
-        case LookDir4::Left: return 24;   // 25: knockdown left
-        case LookDir4::Right: return 25;  // 26: knockdown right
-        case LookDir4::Front: return 26;  // 27: knockdown down
-        case LookDir4::Back: return 27;   // 28: knockdown up
-    }
-    return 26;
-}
-
 int rowMeleeAttack(LookDir4 d, int variant) {
-    d = swapLeftRight(d);
     const int v = (variant % 2 == 0) ? 0 : 1;
     switch (d) {
-        case LookDir4::Left: return 0 + v;   // left 1/2
-        case LookDir4::Right: return 2 + v;  // right 1/2
-        case LookDir4::Front: return 4 + v;  // down 1/2
-        case LookDir4::Back: return 6 + v;   // up 1/2
+        case LookDir4::Right: return 0 + v;  // attack right / backhand
+        case LookDir4::Left: return 2 + v;   // attack left / backhand
+        case LookDir4::Front: return 4 + v;  // attack front / backhand
+        case LookDir4::Back: return 6 + v;   // attack back / backhand
     }
     return 4 + v;
+}
+
+int rowSecondaryAttack(LookDir4 d) {
+    switch (d) {
+        case LookDir4::Right: return 12;  // row 13
+        case LookDir4::Left: return 13;   // row 14
+        case LookDir4::Front: return 14;  // row 15
+        case LookDir4::Back: return 15;   // row 16
+    }
+    return 14;
+}
+
+int rowSecondaryIdle(LookDir4 d) {
+    switch (d) {
+        case LookDir4::Right: return 16;  // row 17
+        case LookDir4::Left: return 17;   // row 18
+        case LookDir4::Front: return 18;  // row 19
+        case LookDir4::Back: return 19;   // row 20
+    }
+    return 18;
 }
 
 int framesInSheet(const Engine::TexturePtr& tex, int frameWidth) {
@@ -99,10 +66,39 @@ int framesInSheet(const Engine::TexturePtr& tex, int frameWidth) {
     return std::max(1, frames);
 }
 
-void resetAnimIfChanged(Engine::ECS::SpriteAnimation& anim, int row, int frameCount, float frameDuration) {
+int rowsInSheet(const Engine::TexturePtr& tex, int frameHeight) {
+    if (!tex || frameHeight <= 0) return 1;
+    int rows = tex->height() / frameHeight;
+    return std::max(1, rows);
+}
+
+int clampRowToSheet(const Engine::TexturePtr& tex, int frameHeight, int row) {
+    int rows = rowsInSheet(tex, frameHeight);
+    return std::clamp(row, 0, std::max(0, rows - 1));
+}
+
+void applyRenderSize(Game::HeroSpriteSheets* sheets, Engine::ECS::Renderable* rend, bool combat) {
+    if (!sheets || !rend) return;
+    float base = sheets->baseRenderSize > 0.0f ? sheets->baseRenderSize : rend->size.x;
+    float refW = std::max(1, sheets->movementFrameWidth);
+    float srcW = combat ? std::max(1, sheets->combatFrameWidth) : std::max(1, sheets->movementFrameWidth);
+    float srcH = combat ? std::max(1, sheets->combatFrameHeight) : std::max(1, sheets->movementFrameHeight);
+    float scale = base / static_cast<float>(refW);
+    rend->size = {static_cast<float>(srcW) * scale, static_cast<float>(srcH) * scale};
+}
+
+void resetAnimIfChanged(Engine::ECS::SpriteAnimation& anim,
+                        int row,
+                        int frameCount,
+                        float frameDuration,
+                        int frameWidth,
+                        int frameHeight) {
     const bool changed = anim.row != row || anim.frameCount != frameCount ||
+                         anim.frameWidth != frameWidth || anim.frameHeight != frameHeight ||
                          std::abs(anim.frameDuration - frameDuration) > 0.0001f;
     if (!changed) return;
+    anim.frameWidth = frameWidth;
+    anim.frameHeight = frameHeight;
     anim.row = row;
     anim.frameCount = frameCount;
     anim.frameDuration = frameDuration;
@@ -117,6 +113,8 @@ void HeroSpriteStateSystem::update(Engine::ECS::Registry& registry, const Engine
     auto* anim = registry.get<Engine::ECS::SpriteAnimation>(hero);
     auto* sheets = registry.get<Game::HeroSpriteSheets>(hero);
     auto* hp = registry.get<Engine::ECS::Health>(hero);
+    const bool secondaryEquipped = registry.has<Game::SecondaryWeapon>(hero) &&
+                                    registry.get<Game::SecondaryWeapon>(hero)->active;
     if (!rend || !anim || !sheets || !hp) return;
 
     auto* look = registry.get<Game::LookDirection>(hero);
@@ -148,22 +146,42 @@ void HeroSpriteStateSystem::update(Engine::ECS::Registry& registry, const Engine
     }
 
     LookDir4 dir = dirFromVec(dirVec, lastDir);
+    if (sheets->swapVertical) {
+        if (dir == LookDir4::Front) dir = LookDir4::Back;
+        else if (dir == LookDir4::Back) dir = LookDir4::Front;
+    }
     if (look) look->dir = dir;
 
     // Priorities: Knockdown (dead) > Attack > Pickup > Walk > Idle.
     if (!hp->alive()) {
         rend->texture = sheets->movement;
+        applyRenderSize(sheets, rend, false);
         anim->allowFlipX = false;
-        const int frames = framesInSheet(sheets->movement, sheets->frameWidth);
-        resetAnimIfChanged(*anim, rowKnockdown(dir), frames, sheets->movementFrameDuration);
+        const int frames = framesInSheet(sheets->movement, sheets->movementFrameWidth);
+        auto rowKnockdown = [&](LookDir4 d) {
+            switch (d) {
+                case LookDir4::Right: return sheets->rowKnockdownRight;
+                case LookDir4::Left: return sheets->rowKnockdownLeft;
+                case LookDir4::Front: return sheets->rowKnockdownRight;  // fallback to right/left rows
+                case LookDir4::Back: return sheets->rowKnockdownLeft;
+            }
+            return sheets->rowKnockdownRight;
+        };
+        int row = clampRowToSheet(sheets->movement, sheets->movementFrameHeight, rowKnockdown(dir));
+        resetAnimIfChanged(*anim, row, frames, sheets->movementFrameDuration,
+                           sheets->movementFrameWidth, sheets->movementFrameHeight);
         return;
     }
 
     if (attacking && sheets->combat) {
         rend->texture = sheets->combat;
+        applyRenderSize(sheets, rend, true);
         anim->allowFlipX = false;
-        const int frames = framesInSheet(sheets->combat, sheets->frameWidth);
-        resetAnimIfChanged(*anim, rowMeleeAttack(dir, attackVariant), frames, sheets->combatFrameDuration);
+        const int frames = framesInSheet(sheets->combat, sheets->combatFrameWidth);
+        int row = secondaryEquipped ? rowSecondaryAttack(dir) : rowMeleeAttack(dir, attackVariant);
+        row = clampRowToSheet(sheets->combat, sheets->combatFrameHeight, row);
+        resetAnimIfChanged(*anim, row, frames, sheets->combatFrameDuration,
+                           sheets->combatFrameWidth, sheets->combatFrameHeight);
         return;
     }
 
@@ -171,21 +189,70 @@ void HeroSpriteStateSystem::update(Engine::ECS::Registry& registry, const Engine
     if (const auto* pick = registry.get<Game::HeroPickupAnim>(hero)) {
         pickingUp = pick->timer > 0.0f;
     }
-    if (pickingUp && sheets->movement) {
+    if (pickingUp && sheets->movement && sheets->hasPickupRows) {
         rend->texture = sheets->movement;
+        applyRenderSize(sheets, rend, false);
         anim->allowFlipX = false;
-        const int frames = framesInSheet(sheets->movement, sheets->frameWidth);
-        resetAnimIfChanged(*anim, rowPickup(dir), frames, sheets->movementFrameDuration);
+        const int frames = framesInSheet(sheets->movement, sheets->movementFrameWidth);
+        auto rowPickup = [&](LookDir4 d) {
+            switch (d) {
+                case LookDir4::Right: return sheets->rowPickupRight;
+                case LookDir4::Left: return sheets->rowPickupLeft;
+                case LookDir4::Front: return sheets->rowPickupFront;
+                case LookDir4::Back: return sheets->rowPickupBack;
+            }
+            return sheets->rowPickupFront;
+        };
+        int row = clampRowToSheet(sheets->movement, sheets->movementFrameHeight, rowPickup(dir));
+        resetAnimIfChanged(*anim, row, frames, sheets->movementFrameDuration,
+                           sheets->movementFrameWidth, sheets->movementFrameHeight);
         return;
     }
 
     rend->texture = sheets->movement;
+    applyRenderSize(sheets, rend, false);
     anim->allowFlipX = false;
-    const int frames = framesInSheet(sheets->movement, sheets->frameWidth);
+    const int frames = framesInSheet(sheets->movement, sheets->movementFrameWidth);
     if (moving) {
-        resetAnimIfChanged(*anim, rowWalk(dir), frames, sheets->movementFrameDuration);
+        auto rowWalk = [&](LookDir4 d) {
+            switch (d) {
+                case LookDir4::Right: return sheets->rowWalkRight;
+                case LookDir4::Left: return sheets->rowWalkLeft;
+                case LookDir4::Front: return sheets->rowWalkFront;
+                case LookDir4::Back: return sheets->rowWalkBack;
+            }
+            return sheets->rowWalkFront;
+        };
+        int row = clampRowToSheet(sheets->movement, sheets->movementFrameHeight, rowWalk(dir));
+        resetAnimIfChanged(*anim, row, frames, sheets->movementFrameDuration,
+                           sheets->movementFrameWidth, sheets->movementFrameHeight);
+    } else if (secondaryEquipped && sheets->combat) {
+        rend->texture = sheets->combat;
+        applyRenderSize(sheets, rend, true);
+        int row = clampRowToSheet(sheets->combat, sheets->combatFrameHeight, rowSecondaryIdle(dir));
+        int framesCombat = framesInSheet(sheets->combat, sheets->combatFrameWidth);
+        resetAnimIfChanged(*anim, row, framesCombat, sheets->combatFrameDuration,
+                           sheets->combatFrameWidth, sheets->combatFrameHeight);
     } else {
-        resetAnimIfChanged(*anim, rowIdle(dir), frames, sheets->movementFrameDuration);
+        auto rowIdle = [&](LookDir4 d) {
+            switch (d) {
+                case LookDir4::Right: return sheets->rowIdleRight;
+                case LookDir4::Left: return sheets->rowIdleLeft;
+                case LookDir4::Front: return sheets->rowIdleFront;
+                case LookDir4::Back: return sheets->rowIdleBack;
+            }
+            return sheets->rowIdleFront;
+        };
+        int baseRow = rowIdle(dir);
+        if (sheets->lockFrontBackIdle) {
+            // Force front/back rows only.
+            if (dir == LookDir4::Left || dir == LookDir4::Right) {
+                baseRow = rowIdle(LookDir4::Front);
+            }
+        }
+        int row = clampRowToSheet(sheets->movement, sheets->movementFrameHeight, baseRow);
+        resetAnimIfChanged(*anim, row, frames, sheets->movementFrameDuration,
+                           sheets->movementFrameWidth, sheets->movementFrameHeight);
     }
 }
 

@@ -33,5 +33,26 @@
     {"name": "Slow Wave", "description": "Snare enemies.", "key": "2", "cooldown": 12.0, "cost": 40, "type": "generic"},
     {"name": "Shield Burst", "description": "Temporary shields.", "key": "3", "cooldown": 15.0, "cost": 45, "type": "generic"},
     {"name": "Inspire", "description": "Ultimate team-wide buff.", "key": "4", "cooldown": 38.0, "cost": 60, "type": "ultimate"}
+  ],
+  "summoner": [
+    {"name": "Arcane Bolt", "description": "Light ranged attack.", "key": "M1", "cooldown": 0.0, "cost": 0, "type": "primary"},
+    {"name": "Summon Beatle", "description": "Call a beetle companion.", "key": "1", "cooldown": 6.0, "cost": 25, "type": "summon_beatle"},
+    {"name": "Summon Snake", "description": "Call a snake bruiser.", "key": "2", "cooldown": 9.0, "cost": 30, "type": "summon_snake"},
+    {"name": "Rally", "description": "Pull summons back and refresh their leash.", "key": "3", "cooldown": 8.0, "cost": 20, "type": "summon_rally"},
+    {"name": "Swarm Burst", "description": "Rapidly summon a mixed wave.", "key": "4", "cooldown": 24.0, "cost": 50, "type": "summon_horde"}
+  ],
+  "druid": [
+    {"name": "Spirit Arrow", "description": "Ranged attack while human.", "key": "M1", "cooldown": 0.0, "cost": 0, "type": "primary"},
+    {"name": "Choose Bear", "description": "Mark Bear as your form (unlock at Lv2).", "key": "1", "cooldown": 0.0, "cost": 0, "type": "druid_select_bear"},
+    {"name": "Choose Wolf", "description": "Mark Wolf as your form (unlock at Lv2).", "key": "2", "cooldown": 0.0, "cost": 0, "type": "druid_select_wolf"},
+    {"name": "Regrowth", "description": "Brief self-heal and regen boost.", "key": "3", "cooldown": 12.0, "cost": 30, "type": "druid_regrowth"},
+    {"name": "Shapeshift", "description": "Toggle chosen form; no cooldown.", "key": "4", "cooldown": 0.5, "cost": 0, "type": "druid_toggle"}
+  ],
+  "wizard": [
+    {"name": "Elemental Bolt", "description": "Primary that cycles elements (Alt).", "key": "M1", "cooldown": 0.0, "cost": 0, "type": "primary"},
+    {"name": "Fireball", "description": "Stage 3 Fire projectile that explodes.", "key": "1", "cooldown": 6.0, "cost": 30, "type": "wizard_fireball"},
+    {"name": "Flame Wall", "description": "Persistent fire line between you and target.", "key": "2", "cooldown": 12.0, "cost": 45, "type": "wizard_flamewall"},
+    {"name": "Lightning Bolt", "description": "Lateral lightning strike that stuns.", "key": "3", "cooldown": 9.0, "cost": 40, "type": "wizard_lbolt"},
+    {"name": "Lightning Dome", "description": "Protective electric field around caster.", "key": "4", "cooldown": 24.0, "cost": 60, "type": "wizard_ldome"}
   ]
 }

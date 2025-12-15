@@ -18,6 +18,9 @@
 #include "../components/Invulnerable.h"
 #include "../components/OffensiveType.h"
 #include "../components/EnemyAttackSwing.h"
+#include "../components/StatusEffects.h"
+#include "../components/SpellEffect.h"
+#include "../components/AreaDamage.h"
 #include "../components/MiniUnit.h"
 #include "../components/Building.h"
 #include "../components/EscortTarget.h"
@@ -53,6 +56,86 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                             buff = armorBuff->state;
                         }
                         Engine::Gameplay::applyDamage(health, proj.damage, buff);
+
+                        // Elemental spell effects (Wizard)
+                        if (registry.has<Game::SpellEffect>(projEnt)) {
+                            const auto* eff = registry.get<Game::SpellEffect>(projEnt);
+                            auto* status = registry.get<Game::StatusEffects>(targetEnt);
+                            if (!status) {
+                                registry.emplace<Game::StatusEffects>(targetEnt, Game::StatusEffects{});
+                                status = registry.get<Game::StatusEffects>(targetEnt);
+                            }
+                            const int stage = std::max(1, eff->stage);
+                            switch (eff->element) {
+                                case Game::ElementType::Ice: {
+                                    status->slowMultiplier = std::min(status->slowMultiplier, 1.0f - 0.12f * stage);
+                                    status->slowTimer = std::max(status->slowTimer, 1.2f + 0.4f * stage);
+                                    break;
+                                }
+                                case Game::ElementType::Fire: {
+                                    status->burnTimer = std::max(status->burnTimer, 2.0f + stage * 0.8f);
+                                    status->burnDps = std::max(status->burnDps, proj.damage.baseDamage * (0.18f + 0.04f * stage));
+                                    break;
+                                }
+                                case Game::ElementType::Dark: {
+                                    status->blindTimer = std::max(status->blindTimer, 1.0f + 0.5f * stage);
+                                    status->blindRetarget = 0.0f;
+                                    status->blindDir = {0.0f, 0.0f};
+                                    break;
+                                }
+                                case Game::ElementType::Earth: {
+                                    status->earthTimer = std::max(status->earthTimer, 2.2f + 0.4f * stage);
+                                    status->earthDps = std::max(status->earthDps, proj.damage.baseDamage * (0.12f + 0.05f * stage));
+                                    // Minor AoE thorn splash.
+                                    float radius2 = 90.0f * 90.0f;
+                                    registry.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::EnemyTag>(
+                                        [&](Engine::ECS::Entity e2, Engine::ECS::Transform& tf2, Engine::ECS::Health& hp2, Engine::ECS::EnemyTag&) {
+                                            if (e2 == targetEnt || !hp2.alive()) return;
+                                            float dx = tf2.position.x - tgtTf.position.x;
+                                            float dy = tf2.position.y - tgtTf.position.y;
+                                            float d2 = dx * dx + dy * dy;
+                                            if (d2 <= radius2) {
+                                                Engine::Gameplay::DamageEvent thorn{};
+                                                thorn.type = Engine::Gameplay::DamageType::Spell;
+                                                thorn.baseDamage = proj.damage.baseDamage * 0.35f;
+                                                Engine::Gameplay::applyDamage(hp2, thorn, {});
+                                            }
+                                        });
+                                    break;
+                                }
+                                case Game::ElementType::Lightning: {
+                                    status->stunTimer = std::max(status->stunTimer, 0.5f + 0.15f * stage);
+                                    break;
+                                }
+                                case Game::ElementType::Wind: {
+                                    if (auto* vel = registry.get<Engine::ECS::Velocity>(targetEnt)) {
+                                        Engine::Vec2 push{tgtTf.position.x - projTf.position.x, tgtTf.position.y - projTf.position.y};
+                                        float len2 = push.x * push.x + push.y * push.y;
+                                        float invLen = len2 > 0.0001f ? 1.0f / std::sqrt(len2) : 0.0f;
+                                        push = {push.x * invLen * (180.0f + 30.0f * stage), push.y * invLen * (180.0f + 30.0f * stage)};
+                                        vel->value = {vel->value.x + push.x, vel->value.y + push.y};
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                        // AoE damage on impact
+                        if (registry.has<Game::AreaDamage>(projEnt)) {
+                            const auto* aoe = registry.get<Game::AreaDamage>(projEnt);
+                            float radius2 = aoe->radius * aoe->radius;
+                            registry.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::EnemyTag>(
+                                [&](Engine::ECS::Entity e2, Engine::ECS::Transform& tf2, Engine::ECS::Health& hp2, Engine::ECS::EnemyTag&) {
+                                    if (e2 == targetEnt || !hp2.alive()) return;
+                                    float dx = tf2.position.x - tgtTf.position.x;
+                                    float dy = tf2.position.y - tgtTf.position.y;
+                                    float d2 = dx * dx + dy * dy;
+                                    if (d2 <= radius2) {
+                                        Engine::Gameplay::DamageEvent splash = proj.damage;
+                                        splash.baseDamage *= aoe->damageMultiplier;
+                                        Engine::Gameplay::applyDamage(hp2, splash, {});
+                                    }
+                                });
+                        }
 
                         const float postHealth = health.currentHealth;
                         const float postShields = health.currentShields;

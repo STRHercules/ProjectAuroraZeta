@@ -137,6 +137,10 @@ void SDLWindow::pollEvents(Application& app, InputState& input) {
                     case SDLK_v:
                         input.setKeyDown(InputKey::BuildMenu, true);
                         break;
+                    case SDLK_LALT:
+                    case SDLK_RALT:
+                        input.setKeyDown(InputKey::SwapWeapon, true);
+                        break;
                     case SDLK_SPACE:
                     case SDLK_LSHIFT:
                     case SDLK_RSHIFT:
@@ -162,6 +166,10 @@ void SDLWindow::pollEvents(Application& app, InputState& input) {
                         break;
                     case SDLK_v:
                         input.setKeyDown(InputKey::BuildMenu, false);
+                        break;
+                    case SDLK_LALT:
+                    case SDLK_RALT:
+                        input.setKeyDown(InputKey::SwapWeapon, false);
                         break;
                     case SDLK_SPACE:
                     case SDLK_LSHIFT:

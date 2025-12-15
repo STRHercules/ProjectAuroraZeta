@@ -13,6 +13,7 @@
 #include "../components/MiniUnitCommand.h"
 #include "../components/MiniUnitStats.h"
 #include "../components/TauntTarget.h"
+#include "../components/SummonedUnit.h"
 
 namespace Game {
 
@@ -62,6 +63,33 @@ void MiniUnitSystem::update(Engine::ECS::Registry& registry, const Engine::TimeS
     registry.view<Game::MiniUnit, Game::MiniUnitStats, Engine::ECS::Transform, Engine::ECS::Velocity, Game::MiniUnitCommand>(
         [&](Engine::ECS::Entity e, Game::MiniUnit& mu, Game::MiniUnitStats& stats, Engine::ECS::Transform& tf,
             Engine::ECS::Velocity& vel, Game::MiniUnitCommand& cmd) {
+            // Summoned units stay leashed to their owner.
+            if (auto* leash = registry.get<Game::SummonedUnit>(e)) {
+                Engine::Vec2 ownerPos{};
+                bool hasOwner = false;
+                if (leash->owner != Engine::ECS::kInvalidEntity) {
+                    if (auto* otf = registry.get<Engine::ECS::Transform>(leash->owner)) {
+                        ownerPos = otf->position;
+                        hasOwner = true;
+                    }
+                }
+                if (hasOwner) {
+                    Engine::Vec2 delta{ownerPos.x - tf.position.x, ownerPos.y - tf.position.y};
+                    float dist2 = delta.x * delta.x + delta.y * delta.y;
+                    float leashR2 = leash->leashRadius * leash->leashRadius;
+                    if (dist2 > leashR2) {
+                        float invLen = 1.0f / std::sqrt(std::max(dist2, 0.0001f));
+                        Engine::Vec2 desired{delta.x * invLen * stats.moveSpeed, delta.y * invLen * stats.moveSpeed};
+                        float accel = 12.0f;
+                        float t = std::clamp(accel * dt, 0.0f, 1.0f);
+                        vel.value = {vel.value.x + (desired.x - vel.value.x) * t,
+                                     vel.value.y + (desired.y - vel.value.y) * t};
+                        // While returning, suppress combat AI for a moment.
+                        mu.attackCooldown = std::max(0.0f, mu.attackCooldown - dt);
+                        return;
+                    }
+                }
+            }
             // 1) Explicit move orders take priority.
             if (cmd.hasOrder) {
                 Engine::Vec2 delta{cmd.target.x - tf.position.x, cmd.target.y - tf.position.y};

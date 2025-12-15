@@ -25,5 +25,6 @@
   "ultimate": ["key:4"],
   "reload": ["key:f", "key:f1"],
   "menuBack": ["key:m"],
-  "buildMenu": ["v"]
+  "buildMenu": ["v"],
+  "swapWeapon": ["lalt"]
 }

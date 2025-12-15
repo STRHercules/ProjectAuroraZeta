@@ -57,6 +57,8 @@
 #include "components/Shopkeeper.h"
 #include "components/OffensiveType.h"
 #include "components/HitFlash.h"
+#include "components/StatusEffects.h"
+#include "components/SpellEffect.h"
 #include "systems/BuffSystem.h"
 #include "meta/SaveManager.h"
 #include "meta/GlobalUpgrades.h"
@@ -262,6 +264,7 @@ bool GameRoot::onInitialize(Engine::Application& app) {
         bindings_.ultimate = {"key:4"};
         bindings_.reload = {"key:f1"};
         bindings_.buildMenu = {"v"};
+        bindings_.swapWeapon = {"lalt"};
     }
     actionMapper_ = Engine::ActionMapper(bindings_);
 
@@ -274,7 +277,7 @@ bool GameRoot::onInitialize(Engine::Application& app) {
         Engine::logWarn("Failed to load asset manifest; using defaults.");
     }
     if (manifest_.heroTexture.empty()) {
-        manifest_.heroTexture = "assets/Sprites/Characters/DamageDealer.png";
+        manifest_.heroTexture = "assets/Sprites/Characters/Damage Dealer/Dps.png";
     }
     if (manifest_.gridTexture.empty() && manifest_.gridTextures.empty()) {
         manifest_.gridTextures = {"assets/Tilesheets/floor1.png", "assets/Tilesheets/floor2.png"};
@@ -649,6 +652,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
     ++tickCount_;
     lastMouseX_ = input.mouseX();
     lastMouseY_ = input.mouseY();
+    scrollDeltaFrame_ = input.scrollDelta();
 
     // Sample high-level actions.
     Engine::ActionState actions = actionMapper_.sample(input);
@@ -656,6 +660,16 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         actions.scroll = 0;
         actions.moveX = actions.moveY = 0.0f;
         actions.camX = actions.camY = 0.0f;
+    }
+    const bool swapEdge = actions.swapWeapon && !swapWeaponHeld_;
+    swapWeaponHeld_ = actions.swapWeapon;
+    if (swapEdge && !inMenu_) {
+        if (activeArchetype_.id == "wizard") {
+            int next = (static_cast<int>(wizardElement_) + 1) % static_cast<int>(WizardElement::Count);
+            wizardElement_ = static_cast<WizardElement>(next);
+        } else {
+            toggleHeroWeaponMode();
+        }
     }
     updateNetwork(step.deltaSeconds);
     if (multiplayerEnabled_) {
@@ -1494,7 +1508,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     if (b.spawnTimer <= 0.0f) {
                         auto miniIt = miniUnitDefs_.find("light");
                         if (miniIt != miniUnitDefs_.end()) {
-                            if (spawnMiniUnit(miniIt->second, tf.position)) {
+                            if (spawnMiniUnit(miniIt->second, tf.position) != Engine::ECS::kInvalidEntity) {
                                 b.spawnTimer = def.spawnInterval;
                             } else {
                                 b.spawnTimer = std::min(def.spawnInterval, 1.0f);  // retry soon if blocked by supply/copper
@@ -1591,6 +1605,79 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         if (immortalTimer_ < 0.0f) immortalTimer_ = 0.0f;
     }
 
+    // Lightning dome tick damage.
+    if (lightningDomeTimer_ > 0.0f) {
+        lightningDomeTimer_ -= static_cast<float>(step.deltaSeconds);
+        int stage = std::clamp((!abilityStates_.empty() ? (abilityStates_[0].level + 1) / 2 : 1), 1, 3);
+        float radius = 140.0f;
+        float dmg = projectileDamage_ * (0.35f + 0.1f * stage) * (hotzoneSystem_ ? hotzoneSystem_->damageMultiplier() : 1.0f);
+        Engine::Gameplay::DamageEvent dome{};
+        dome.type = Engine::Gameplay::DamageType::Spell;
+        dome.baseDamage = dmg * static_cast<float>(step.deltaSeconds);
+        Engine::Vec2 heroPos{0.0f, 0.0f};
+        if (const auto* tf = registry_.get<Engine::ECS::Transform>(hero_)) heroPos = tf->position;
+        float r2 = radius * radius;
+        registry_.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::EnemyTag>(
+            [&](Engine::ECS::Entity e, Engine::ECS::Transform& tf, Engine::ECS::Health& hp, Engine::ECS::EnemyTag&) {
+                if (!hp.alive()) return;
+                float dx = tf.position.x - heroPos.x;
+                float dy = tf.position.y - heroPos.y;
+                float d2 = dx * dx + dy * dy;
+                if (d2 <= r2) {
+                    Engine::Gameplay::applyDamage(hp, dome, {});
+                    if (auto* se = registry_.get<Game::StatusEffects>(e)) {
+                        se->stunTimer = std::max(se->stunTimer, 0.2f);
+                    } else {
+                        registry_.emplace<Game::StatusEffects>(e, Game::StatusEffects{});
+                        if (auto* se2 = registry_.get<Game::StatusEffects>(e)) se2->stunTimer = 0.2f;
+                    }
+                }
+            });
+        if (lightningDomeTimer_ < 0.0f) lightningDomeTimer_ = 0.0f;
+    }
+    // Flame walls tick and cleanup.
+    if (!flameWalls_.empty()) {
+        for (auto it = flameWalls_.begin(); it != flameWalls_.end();) {
+            it->timer -= static_cast<float>(step.deltaSeconds);
+            float radius = 20.0f;
+            float r2 = radius * radius;
+            Engine::Gameplay::DamageEvent dmg{};
+            dmg.type = Engine::Gameplay::DamageType::Spell;
+            dmg.baseDamage = projectileDamage_ * 0.25f * static_cast<float>(step.deltaSeconds);
+            registry_.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::EnemyTag>(
+                [&](Engine::ECS::Entity e, Engine::ECS::Transform& tf, Engine::ECS::Health& hp, Engine::ECS::EnemyTag&) {
+                    if (!hp.alive()) return;
+                    float dx = tf.position.x - it->pos.x;
+                    float dy = tf.position.y - it->pos.y;
+                    float d2 = dx * dx + dy * dy;
+                    if (d2 <= r2) {
+                        Engine::Gameplay::applyDamage(hp, dmg, {});
+                        // apply brief burn
+                        if (auto* se = registry_.get<Game::StatusEffects>(e)) {
+                            se->burnTimer = std::max(se->burnTimer, 1.5f);
+                            se->burnDps = std::max(se->burnDps, projectileDamage_ * 0.15f);
+                        } else {
+                            registry_.emplace<Game::StatusEffects>(e, Game::StatusEffects{});
+                            if (auto* se2 = registry_.get<Game::StatusEffects>(e)) {
+                                se2->burnTimer = 1.5f;
+                                se2->burnDps = projectileDamage_ * 0.15f;
+                            }
+                        }
+                    }
+                });
+            bool expired = it->timer <= 0.0f;
+            if (expired) {
+                if (it->visEntity != Engine::ECS::kInvalidEntity &&
+                    registry_.has<Engine::ECS::Transform>(it->visEntity)) {
+                    registry_.destroy(it->visEntity);
+                }
+                it = flameWalls_.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+
     // Keep invulnerable marker in sync with dash/immortal timers.
     if (hero_ != Engine::ECS::kInvalidEntity) {
         float invRemaining = std::max(dashInvulnTimer_, immortalTimer_);
@@ -1657,16 +1744,10 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 }
                 auto proj = registry_.create();
                 registry_.emplace<Engine::ECS::Transform>(proj, t.pos);
-                registry_.emplace<Engine::ECS::Velocity>(proj, Engine::Vec2{0.0f, 0.0f});
+                registry_.emplace<Engine::ECS::Velocity>(proj, Engine::Vec2{dir.x * projectileSpeed_, dir.y * projectileSpeed_});
                 const float halfSize = projectileHitboxSize_ * 0.5f;
                 registry_.emplace<Engine::ECS::AABB>(proj, Engine::ECS::AABB{Engine::Vec2{halfSize, halfSize}});
-                Engine::TexturePtr turretTex = projectileTexTurret_ ? projectileTexTurret_ : projectileTexRed_;
-                float sz = projectileSize_;
-                if (turretTex) sz = static_cast<float>(turretTex->width());
-                registry_.emplace<Engine::ECS::Renderable>(proj,
-                                                           Engine::ECS::Renderable{Engine::Vec2{sz, sz},
-                                                                                   Engine::Color{120, 220, 255, 230},
-                                                                                   turretTex});
+                applyProjectileVisual(proj, 1.0f, Engine::Color{120, 220, 255, 230}, true);
                 Engine::Gameplay::DamageEvent dmgEvent{};
                 dmgEvent.baseDamage = projectileDamage_ * 0.8f;
                 dmgEvent.type = Engine::Gameplay::DamageType::Normal;
@@ -1690,6 +1771,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
     if (!paused_) {
         registry_.view<Game::Building, Engine::ECS::Transform, Engine::ECS::Health>(
             [&](Engine::ECS::Entity be, Game::Building& b, Engine::ECS::Transform& tf, Engine::ECS::Health& hp) {
+                (void)be;
                 if (b.type != Game::BuildingType::Turret) return;
                 if (!hp.alive()) return;
                 auto defIt = buildingDefs_.find(buildingKey(b.type));
@@ -1725,16 +1807,10 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
 
                 auto proj = registry_.create();
                 registry_.emplace<Engine::ECS::Transform>(proj, tf.position);
-                registry_.emplace<Engine::ECS::Velocity>(proj, Engine::Vec2{0.0f, 0.0f});
+                registry_.emplace<Engine::ECS::Velocity>(proj, Engine::Vec2{dir.x * projectileSpeed_, dir.y * projectileSpeed_});
                 const float halfSize = projectileHitboxSize_ * 0.5f;
                 registry_.emplace<Engine::ECS::AABB>(proj, Engine::ECS::AABB{Engine::Vec2{halfSize, halfSize}});
-                Engine::TexturePtr turretTex = projectileTexTurret_ ? projectileTexTurret_ : projectileTexRed_;
-                float sz = projectileSize_;
-                if (turretTex) sz = static_cast<float>(turretTex->width());
-                registry_.emplace<Engine::ECS::Renderable>(proj,
-                                                           Engine::ECS::Renderable{Engine::Vec2{sz, sz},
-                                                                                   Engine::Color{120, 220, 255, 230},
-                                                                                   turretTex});
+                applyProjectileVisual(proj, 1.0f, Engine::Color{120, 220, 255, 230}, true);
                 Engine::Gameplay::DamageEvent dmgEvent{};
                 dmgEvent.baseDamage = def.damage;
                 dmgEvent.type = Engine::Gameplay::DamageType::Normal;
@@ -2213,7 +2289,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     (p.kind == Pickup::Kind::Copper || p.kind == Pickup::Kind::Gold || p.kind == Pickup::Kind::Powerup)) {
                     float dur = 0.35f;
                     if (const auto* sheets = registry_.get<Game::HeroSpriteSheets>(hero_); sheets && sheets->movement) {
-                        int frames = std::max(1, sheets->movement->width() / std::max(1, sheets->frameWidth));
+                        int frames = std::max(1, sheets->movement->width() / std::max(1, sheets->movementFrameWidth));
                         dur = std::max(0.05f, static_cast<float>(frames) * sheets->movementFrameDuration);
                     }
                     if (auto* pick = registry_.get<Game::HeroPickupAnim>(hero_)) {
@@ -2966,6 +3042,7 @@ bool GameRoot::performRangedAutoFire(const Engine::TimeStep& step, const Engine:
     (void)step;
     const auto* heroTf = registry_.get<Engine::ECS::Transform>(hero_);
     if (!heroTf) return false;
+    const bool isWizard = activeArchetype_.id == "wizard";
 
     Engine::Vec2 dir{};
     bool haveTarget = false;
@@ -3019,7 +3096,7 @@ bool GameRoot::performRangedAutoFire(const Engine::TimeStep& step, const Engine:
         }
         float dur = 0.28f;
         if (const auto* sheets = registry_.get<Game::HeroSpriteSheets>(hero_); sheets && sheets->combat) {
-            int frames = std::max(1, sheets->combat->width() / std::max(1, sheets->frameWidth));
+            int frames = std::max(1, sheets->combat->width() / std::max(1, sheets->combatFrameWidth));
             dur = std::max(0.05f, static_cast<float>(frames) * sheets->combatFrameDuration);
         }
         if (auto* atk = registry_.get<Game::HeroAttackAnim>(hero_)) {
@@ -3029,26 +3106,43 @@ bool GameRoot::performRangedAutoFire(const Engine::TimeStep& step, const Engine:
         }
     }
 
+    float speedLocal = projectileSpeed_;
+    float sizeMul = 1.0f;
+    if (isWizard) {
+        speedLocal *= 0.35f;  // much slower travel
+        sizeMul = 2.8f;       // larger visuals
+    }
+
     auto proj = registry_.create();
     registry_.emplace<Engine::ECS::Transform>(proj, heroTf->position);
-    registry_.emplace<Engine::ECS::Velocity>(proj, Engine::Vec2{0.0f, 0.0f});
-    const float halfSize = projectileHitboxSize_ * 0.5f;
+    registry_.emplace<Engine::ECS::Velocity>(proj, Engine::Vec2{dir.x * speedLocal, dir.y * speedLocal});
+    const float halfSize = projectileHitboxSize_ * 0.5f * sizeMul;
     registry_.emplace<Engine::ECS::AABB>(proj, Engine::ECS::AABB{Engine::Vec2{halfSize, halfSize}});
-    float sz = projectileSize_;
-    if (projectileTexRed_) {
-        // Use native tex size to avoid squish; scale by size_ factor.
-        sz = static_cast<float>(projectileTexRed_->width());
+    if (archetypeSupportsSecondaryWeapon(activeArchetype_) && !usingSecondaryWeapon_) {
+        // Melee mode: no visual projectile.
+    } else {
+        const SpriteSheetDesc* vis = (usingSecondaryWeapon_ && archetypeSupportsSecondaryWeapon(activeArchetype_))
+                                         ? &projectileVisualArrow_
+                                         : nullptr;
+        applyProjectileVisual(proj, sizeMul, Engine::Color{255, 230, 90, 255}, false, vis);
     }
-    registry_.emplace<Engine::ECS::Renderable>(proj,
-                                               Engine::ECS::Renderable{Engine::Vec2{sz, sz},
-                                                                       Engine::Color{255, 230, 90, 255},
-                                                                       projectileTexRed_});
     float zoneDmgMul = hotzoneSystem_ ? hotzoneSystem_->damageMultiplier() : 1.0f;
     float dmgMul = rageDamageBuff_ * zoneDmgMul;
     Engine::Gameplay::DamageEvent dmgEvent{};
     dmgEvent.type = Engine::Gameplay::DamageType::Normal;
     dmgEvent.bonusVsTag[Engine::Gameplay::Tag::Biological] = 1.0f;
     float baseDamage = projectileDamage_ * dmgMul;
+    if (activeArchetype_.id == "wizard") {
+        switch (wizardElement_) {
+            case WizardElement::Fire: baseDamage *= 1.1f; break;
+            case WizardElement::Ice: baseDamage *= 0.95f; break;
+            case WizardElement::Dark: baseDamage *= 1.0f; break;
+            case WizardElement::Earth: baseDamage *= 1.05f; break;
+            case WizardElement::Lightning: baseDamage *= 1.0f; break;
+            case WizardElement::Wind: baseDamage *= 0.9f; break;
+            default: break;
+        }
+    }
     if (offenseType == Game::OffensiveType::Plasma) {
         float healthScaled = baseDamage * plasmaConfig_.healthDamageMultiplier;
         float shieldBonus = baseDamage * (plasmaConfig_.shieldDamageMultiplier - plasmaConfig_.healthDamageMultiplier);
@@ -3060,14 +3154,92 @@ bool GameRoot::performRangedAutoFire(const Engine::TimeStep& step, const Engine:
         dmgEvent.baseDamage = baseDamage;
     }
     registry_.emplace<Engine::ECS::Projectile>(proj,
-                                               Engine::ECS::Projectile{Engine::Vec2{dir.x * projectileSpeed_,
-                                                                                     dir.y * projectileSpeed_},
+                                               Engine::ECS::Projectile{Engine::Vec2{dir.x * speedLocal,
+                                                                                     dir.y * speedLocal},
                                                                        dmgEvent, projectileLifetime_, lifestealPercent_,
                                                                        chainBounces_});
     registry_.emplace<Engine::ECS::ProjectileTag>(proj, Engine::ECS::ProjectileTag{});
+    if (activeArchetype_.id == "wizard") {
+        int stage = 1;
+        if (!abilityStates_.empty()) {
+            stage = std::clamp((abilityStates_[0].level + 1) / 2, 1, 3);
+        }
+        Game::ElementType el = Game::ElementType::Fire;
+        switch (wizardElement_) {
+            case WizardElement::Fire: el = Game::ElementType::Fire; break;
+            case WizardElement::Ice: el = Game::ElementType::Ice; break;
+            case WizardElement::Dark: el = Game::ElementType::Dark; break;
+            case WizardElement::Earth: el = Game::ElementType::Earth; break;
+            case WizardElement::Lightning: el = Game::ElementType::Lightning; break;
+            case WizardElement::Wind: el = Game::ElementType::Wind; break;
+            default: break;
+        }
+        if (registry_.has<Game::SpellEffect>(proj)) {
+            registry_.remove<Game::SpellEffect>(proj);
+        }
+        registry_.emplace<Game::SpellEffect>(proj, Game::SpellEffect{el, stage});
+
+        // Override visual to elemental sheet if available.
+        if (wizardElementTex_) {
+            int rowBase = 0;
+            switch (wizardElement_) {
+                case WizardElement::Lightning: rowBase = 0; break;          // rows 1-3
+                case WizardElement::Dark: rowBase = 3; break;               // rows 4-6
+                case WizardElement::Fire: rowBase = 6; break;               // rows 7-9
+                case WizardElement::Ice: rowBase = 9; break;                // rows 10-12 (13 reserved)
+                case WizardElement::Wind: rowBase = 13; break;              // rows 14-16
+                case WizardElement::Earth: rowBase = 17; break;             // rows 18-20
+                default: rowBase = 0; break;
+            }
+            int row = rowBase + (stage - 1);
+            // Cap row to available rows.
+            int maxRows = std::max(1, wizardElementTex_->height() / 8);
+            row = std::clamp(row, 0, maxRows - 1);
+            Engine::Color col{255, 255, 255, 255};
+            float visSize = 8.0f * sizeMul;
+            if (registry_.has<Engine::ECS::Renderable>(proj)) registry_.remove<Engine::ECS::Renderable>(proj);
+            registry_.emplace<Engine::ECS::Renderable>(proj,
+                Engine::ECS::Renderable{Engine::Vec2{visSize, visSize}, col, wizardElementTex_});
+            auto anim = Engine::ECS::SpriteAnimation{8, 8, std::max(1, wizardElementColumns_), wizardElementFrameDuration_};
+            anim.row = row;
+            if (registry_.has<Engine::ECS::SpriteAnimation>(proj)) registry_.remove<Engine::ECS::SpriteAnimation>(proj);
+            registry_.emplace<Engine::ECS::SpriteAnimation>(proj, anim);
+        }
+    }
     float rateMul = rageRateBuff_ * frenzyRateBuff_ * (hotzoneSystem_ ? hotzoneSystem_->rateMultiplier() : 1.0f);
     fireCooldown_ = fireInterval_ / std::max(0.1f, rateMul);
+    if (isWizard) {
+        fireCooldown_ *= 2.4f;  // even slower wizard firing cadence
+    }
     return true;
+}
+
+bool GameRoot::archetypeSupportsSecondaryWeapon(const GameRoot::ArchetypeDef& def) const {
+    return def.id == "damage" || def.name == "Damage Dealer";
+}
+
+void GameRoot::refreshHeroOffenseTag() {
+    Game::OffensiveType type = heroBaseOffense_;
+    if (usingSecondaryWeapon_ && archetypeSupportsSecondaryWeapon(activeArchetype_)) {
+        type = Game::OffensiveType::Ranged;
+    }
+    if (registry_.has<Game::OffensiveTypeTag>(hero_)) {
+        registry_.get<Game::OffensiveTypeTag>(hero_)->type = type;
+    } else if (hero_ != Engine::ECS::kInvalidEntity) {
+        registry_.emplace<Game::OffensiveTypeTag>(hero_, Game::OffensiveTypeTag{type});
+    }
+    activeArchetype_.offensiveType = type;
+    if (registry_.has<Game::SecondaryWeapon>(hero_)) {
+        registry_.get<Game::SecondaryWeapon>(hero_)->active = usingSecondaryWeapon_;
+    } else if (hero_ != Engine::ECS::kInvalidEntity) {
+        registry_.emplace<Game::SecondaryWeapon>(hero_, Game::SecondaryWeapon{usingSecondaryWeapon_});
+    }
+}
+
+void GameRoot::toggleHeroWeaponMode() {
+    if (!archetypeSupportsSecondaryWeapon(activeArchetype_)) return;
+    usingSecondaryWeapon_ = !usingSecondaryWeapon_;
+    refreshHeroOffenseTag();
 }
 
 bool GameRoot::performMeleeAttack(const Engine::TimeStep& step, const Engine::ActionState& actions) {
@@ -3125,7 +3297,7 @@ bool GameRoot::performMeleeAttack(const Engine::TimeStep& step, const Engine::Ac
         }
         float dur = 0.28f;
         if (const auto* sheets = registry_.get<Game::HeroSpriteSheets>(hero_); sheets && sheets->combat) {
-            int frames = std::max(1, sheets->combat->width() / std::max(1, sheets->frameWidth));
+            int frames = std::max(1, sheets->combat->width() / std::max(1, sheets->combatFrameWidth));
             dur = std::max(0.05f, static_cast<float>(frames) * sheets->combatFrameDuration);
         }
         if (auto* atk = registry_.get<Game::HeroAttackAnim>(hero_)) {
@@ -3374,7 +3546,7 @@ void GameRoot::handleHeroDeath(const Engine::TimeStep& step) {
     float delay = 0.6f;
     if (const auto* sheets = registry_.get<Game::HeroSpriteSheets>(hero_)) {
         if (sheets->movement) {
-            int frames = std::max(1, sheets->movement->width() / std::max(1, sheets->frameWidth));
+            int frames = std::max(1, sheets->movement->width() / std::max(1, sheets->movementFrameWidth));
             delay = std::max(0.1f, static_cast<float>(frames) * sheets->movementFrameDuration);
         }
     }
@@ -3871,6 +4043,8 @@ void GameRoot::loadUnitDefinitions() {
             def.tauntRadius = v.value("tauntRadius", 0.0f);
             def.healRange = v.value("healRange", 0.0f);
             def.frameDuration = v.value("frameDuration", 0.0f);
+            def.frameWidth = v.value("frameWidth", 16);
+            def.frameHeight = v.value("frameHeight", 16);
             def.offensiveType = offensiveTypeFromString(v.value("offensiveType", std::string("Ranged")));
             def.costCopper = v.value("costCopper", 0);
             def.texturePath = v.value("texture", std::string{});
@@ -3925,22 +4099,131 @@ void GameRoot::loadPickupTextures() {
 
 void GameRoot::loadProjectileTextures() {
     projectileTextures_.clear();
-    projectileTexRed_ = {};
-    projectileTexTurret_ = {};
-    if (!sdlRenderer_) return;
-    SDL_Surface* sheet = IMG_Load("assets/Sprites/Misc/playerprojectile.png");
-    if (!sheet) {
-        Engine::logWarn(std::string("Failed to load projectile texture: ") + IMG_GetError());
-        return;
+    projectileVisualPlayer_ = {};
+    projectileVisualTurret_ = {};
+    projectileVisualArrow_ = {};
+    projectileTexRed_.reset();
+    projectileTexTurret_.reset();
+
+    auto loadSheet = [&](const std::string& rel, int columns, float frameDuration) -> SpriteSheetDesc {
+        SpriteSheetDesc desc{};
+        std::filesystem::path path = rel;
+        if (const char* home = std::getenv("HOME")) {
+            std::filesystem::path homePath = std::filesystem::path(home) / rel;
+            if (std::filesystem::exists(homePath)) path = homePath;
+        }
+        auto tex = loadTextureOptional(path.string());
+        if (!tex) return desc;
+        desc.texture = tex;
+        desc.frameWidth = std::max(1, tex->width() / std::max(1, columns));
+        desc.frameHeight = tex->height();  // single-row sheets
+        desc.frameCount = std::max(1, columns);
+        desc.frameDuration = frameDuration;
+        return desc;
+    };
+
+    projectileVisualPlayer_ = loadSheet("assets/Sprites/Misc/Simple_Sling_Bullet.png", 4, 0.06f);
+    if (!projectileVisualPlayer_.texture) {
+        projectileVisualPlayer_ = loadSheet("assets/Sprites/Misc/playerprojectile.png", 1, 0.10f);
     }
-    SDL_Texture* tex = SDL_CreateTextureFromSurface(sdlRenderer_, sheet);
-    if (tex) {
-        auto wrapped = std::make_shared<Engine::SDLTexture>(tex);
-        projectileTextures_.push_back(wrapped);
-        projectileTexRed_ = wrapped;
-        projectileTexTurret_ = wrapped;
+    projectileVisualTurret_ = loadSheet("assets/Sprites/Misc/Sling_Bullets.png", 4, 0.08f);
+    if (!projectileVisualTurret_.texture) {
+        projectileVisualTurret_ = projectileVisualPlayer_;
     }
-    SDL_FreeSurface(sheet);
+    projectileVisualArrow_ = loadSheet("assets/Sprites/Misc/Arrows.png", 4, 0.08f);
+    if (!projectileVisualArrow_.texture) {
+        projectileVisualArrow_ = projectileVisualPlayer_;
+    }
+
+    projectileTexRed_ = projectileVisualPlayer_.texture;
+    projectileTexTurret_ = projectileVisualTurret_.texture;
+    if (projectileVisualPlayer_.texture) projectileTextures_.push_back(projectileVisualPlayer_.texture);
+    if (projectileVisualTurret_.texture && projectileVisualTurret_.texture != projectileVisualPlayer_.texture) {
+        projectileTextures_.push_back(projectileVisualTurret_.texture);
+    }
+    if (projectileVisualArrow_.texture && projectileVisualArrow_.texture != projectileVisualPlayer_.texture &&
+        projectileVisualArrow_.texture != projectileVisualTurret_.texture) {
+        projectileTextures_.push_back(projectileVisualArrow_.texture);
+    }
+
+    // Wizard elemental projectile sheet
+    wizardElementTex_ = loadTextureOptional("assets/Sprites/Spells/Elemental_Spellcasting_Effects_v1_Anti_Alias_glow_8x8.png");
+    if (wizardElementTex_) {
+        wizardElementColumns_ = std::max(1, wizardElementTex_->width() / 8);
+    }
+}
+
+GameRoot::HeroSpriteFiles GameRoot::heroSpriteFilesFor(const GameRoot::ArchetypeDef& def) const {
+    GameRoot::HeroSpriteFiles files{};
+    auto set = [&](std::string folder, std::string base) {
+        files.folder = std::move(folder);
+        files.movementFile = base + ".png";
+        files.combatFile = base + "_Combat.png";
+    };
+    if (def.id == "assassin") set("Assassin", "Assassin");
+    else if (def.id == "healer") set("Healer", "Healer");
+    else if (def.id == "damage" || def.name == "Damage Dealer") set("Damage Dealer", "Dps");
+    else if (def.id == "tank") set("Tank", "Tank");
+    else if (def.id == "builder") set("Builder", "Builder");
+    else if (def.id == "support") set("Support", "Support");
+    else if (def.id == "special") set("Special", "Special");
+    else if (def.id == "summoner") set("Summoner", "Summoner");
+    else if (def.id == "druid") set("Druid", "Druid");
+    else if (def.id == "wizard") set("Wizard", "Wizard");
+    else {
+        std::string folder = def.name.empty() ? def.id : def.name;
+        if (folder.empty()) folder = "Damage Dealer";
+        files.folder = folder;
+        std::string base = folder;
+        base.erase(std::remove(base.begin(), base.end(), ' '), base.end());
+        files.movementFile = base + ".png";
+        files.combatFile = base + "_Combat.png";
+    }
+    return files;
+}
+
+bool isMeleeOnlyArchetype(const std::string& idOrName) {
+    static const std::unordered_set<std::string> meleeIds = {
+        "tank", "assassin", "support", "special"};
+    std::string key = idOrName;
+    std::transform(key.begin(), key.end(), key.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+    // normalize spaces
+    for (auto& c : key) {
+        if (c == '_') c = ' ';
+    }
+    return meleeIds.count(key) > 0;
+}
+
+void GameRoot::applyProjectileVisual(Engine::ECS::Entity e,
+                                     float sizeMul,
+                                     Engine::Color color,
+                                     bool turret,
+                                     const SpriteSheetDesc* overrideVis) {
+    const SpriteSheetDesc& vis = overrideVis ? *overrideVis : (turret ? projectileVisualTurret_ : projectileVisualPlayer_);
+    Engine::TexturePtr tex = vis.texture ? vis.texture : (turret ? projectileTexTurret_ : projectileTexRed_);
+    int frameW = 0;
+    int frameH = 0;
+    int frameCount = 1;
+    float frameDuration = 0.08f;
+    if (vis.texture) {
+        frameW = vis.frameWidth > 0 ? vis.frameWidth : vis.texture->width();
+        frameH = vis.frameHeight > 0 ? vis.frameHeight : vis.texture->height();
+        frameCount = std::max(1, vis.frameCount);
+        frameDuration = vis.frameDuration;
+    } else if (tex) {
+        frameW = tex->width();
+        frameH = tex->height();
+    } else {
+        frameW = frameH = static_cast<int>(projectileSize_ * sizeMul);
+    }
+
+    float w = static_cast<float>(frameW) * sizeMul;
+    float h = static_cast<float>(frameH) * sizeMul;
+    registry_.emplace<Engine::ECS::Renderable>(e, Engine::ECS::Renderable{Engine::Vec2{w, h}, color, tex});
+    if (tex && frameCount > 1) {
+        registry_.emplace<Engine::ECS::SpriteAnimation>(
+            e, Engine::ECS::SpriteAnimation{frameW, frameH, frameCount, frameDuration});
+    }
 }
 
 void GameRoot::beginBuildPreview(Game::BuildingType type) {
@@ -3983,31 +4266,34 @@ void GameRoot::clearBuildPreview() {
     selectedBuilding_ = Engine::ECS::kInvalidEntity;
 }
 
-bool GameRoot::spawnMiniUnit(const MiniUnitDef& def, const Engine::Vec2& pos) {
+Engine::ECS::Entity GameRoot::spawnMiniUnit(const MiniUnitDef& def, const Engine::Vec2& pos) {
     if (miniUnitSupplyUsed_ >= miniUnitSupplyMax_) {
         Engine::logWarn("Mini-unit spawn blocked: supply cap reached.");
-        return false;
+        return Engine::ECS::kInvalidEntity;
     }
     if (copper_ < def.costCopper) {
         Engine::logWarn("Mini-unit spawn blocked: not enough copper.");
-        return false;
+        return Engine::ECS::kInvalidEntity;
     }
     miniUnitSupplyUsed_++;
     copper_ -= def.costCopper;
     auto e = registry_.create();
     registry_.emplace<Engine::ECS::Transform>(e, pos);
     registry_.emplace<Engine::ECS::Velocity>(e, Engine::Vec2{0.0f, 0.0f});
-    const float size = 16.0f;
+    float size = 16.0f;
     registry_.emplace<Engine::ECS::AABB>(e, Engine::ECS::AABB{Engine::Vec2{size * 0.5f, size * 0.5f}});
     Engine::TexturePtr tex{};
     if (textureManager_ && !def.texturePath.empty()) {
         tex = loadTextureOptional(def.texturePath);
     }
+    if (tex) {
+        size = static_cast<float>(std::max(def.frameWidth, 16));
+    }
     registry_.emplace<Engine::ECS::Renderable>(e,
         Engine::ECS::Renderable{Engine::Vec2{size, size}, Engine::Color{160, 240, 200, 255}, tex});
     if (tex) {
-        int frameW = 16;
-        int frameH = 16;
+        int frameW = def.frameWidth > 0 ? def.frameWidth : 16;
+        int frameH = def.frameHeight > 0 ? def.frameHeight : frameW;
         int frames = std::max(1, tex->width() / frameW);
         float frameDur = def.frameDuration > 0.0f ? def.frameDuration : 0.14f;
         registry_.emplace<Engine::ECS::SpriteAnimation>(e, Engine::ECS::SpriteAnimation{frameW, frameH, frames, frameDur});
@@ -4047,7 +4333,7 @@ bool GameRoot::spawnMiniUnit(const MiniUnitDef& def, const Engine::Vec2& pos) {
     }
     registry_.emplace<Game::MiniUnitStats>(e, stats);
     registry_.emplace<Game::OffensiveTypeTag>(e, Game::OffensiveTypeTag{def.offensiveType});
-    return true;
+    return e;
 }
 
 void GameRoot::placeBuilding(const Engine::Vec2& pos) {
@@ -4337,33 +4623,46 @@ void GameRoot::updateMenuInput(const Engine::ActionState& actions, const Engine:
             }
             // Mouse click to select entries (hover should not auto-select)
             const float panelW = 260.0f;
+            const float panelH = 220.0f;
             const float gap = 30.0f;
             const float listStartY = topY + 80.0f;
             float leftX = centerX - panelW - gap * 0.5f;
             float rightX = centerX + gap * 0.5f;
             const float entryH = 26.0f;
-            for (std::size_t i = 0; i < archetypes_.size(); ++i) {
-                float y = listStartY + 32.0f + static_cast<float>(i) * entryH;
-                bool hovered = inside(mx, my, leftX + 8.0f, y, panelW - 16.0f, entryH - 4.0f);
-                if (hovered) {
-                    menuSelection_ = 0;  // move focus but wait for click to lock choice
-                    if (clickEdge) {
-                        selectedArchetype_ = static_cast<int>(i);
-                        localLobbyHeroId_ = archetypes_[selectedArchetype_].id;
-                        applyArchetypePreset();
+            auto handleListClick = [&, panelH, entryH, listStartY, panelW](auto& list, float x, float& scrollVal, int& selected, int selIndex) {
+                int maxVisible = std::max(1, static_cast<int>((panelH - 44.0f) / entryH));
+                float maxScroll = std::max(0.0f, static_cast<float>(list.size() - maxVisible));
+                scrollVal = std::clamp(scrollVal, 0.0f, maxScroll);
+                int start = std::clamp(static_cast<int>(std::round(scrollVal)), 0,
+                                       static_cast<int>(list.size() > 0 ? list.size() - 1 : 0));
+                if (static_cast<int>(list.size()) > maxVisible) {
+                    start = std::clamp(start, 0, static_cast<int>(list.size()) - maxVisible);
+                } else {
+                    start = 0;
+                }
+                int end = std::min(static_cast<int>(list.size()), start + maxVisible);
+                for (int i = start; i < end; ++i) {
+                    float y = listStartY + 32.0f + static_cast<float>(i - start) * entryH;
+                    bool hovered = inside(mx, my, x + 8.0f, y, panelW - 16.0f, entryH - 4.0f);
+                    if (hovered) {
+                        menuSelection_ = selIndex;
+                        if (clickEdge) {
+                            selected = i;
+                            if (selIndex == 0) {
+                                localLobbyHeroId_ = list[selected].id;
+                                applyArchetypePreset();
+                            } else if (selIndex == 1) {
+                                applyDifficultyPreset();
+                            }
+                        }
                     }
                 }
+            };
+            if (!archetypes_.empty()) {
+                handleListClick(archetypes_, leftX, archetypeScroll_, selectedArchetype_, 0);
             }
-            for (std::size_t i = 0; i < difficulties_.size(); ++i) {
-                float y = listStartY + 32.0f + static_cast<float>(i) * entryH;
-                bool hovered = inside(mx, my, rightX + 8.0f, y, panelW - 16.0f, entryH - 4.0f);
-                if (hovered) {
-                    menuSelection_ = 1;
-                    if (clickEdge) {
-                        selectedDifficulty_ = static_cast<int>(i);
-                        applyDifficultyPreset();
-                    }
-                }
+            if (!difficulties_.empty()) {
+                handleListClick(difficulties_, rightX, difficultyScroll_, selectedDifficulty_, 1);
             }
             float summaryY = listStartY + 220.0f + 18.0f;
             float actionY = summaryY + 98.0f;
@@ -4850,14 +5149,44 @@ void GameRoot::renderMenu() {
         const float panelH = 220.0f;
         const float gap = 30.0f;
         const float listStartY = topY + 80.0f;
-        auto drawList = [&](auto& list, int selected, bool focused, float x, const std::string& title) {
+        int mx = lastMouseX_;
+        int my = lastMouseY_;
+        int scrollDelta = scrollDeltaFrame_;
+        bool mouseDown = SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(SDL_BUTTON_LEFT);
+        auto drawList = [&](auto& list, int selected, bool focused, float x, const std::string& title, float& scrollVal) {
             Engine::Color panel{28, 42, 60, 220};
             render_->drawFilledRect(Engine::Vec2{x, listStartY}, Engine::Vec2{panelW, panelH}, panel);
             drawTextUnified(title, Engine::Vec2{x + 12.0f, listStartY + 8.0f}, 1.05f,
                             Engine::Color{200, 230, 255, 240});
             const float entryH = 26.0f;
-            for (std::size_t i = 0; i < list.size(); ++i) {
-                float y = listStartY + 32.0f + static_cast<float>(i) * entryH;
+            // compute sliding window so list stays within panel
+            int maxVisible = static_cast<int>((panelH - 44.0f) / entryH);
+            maxVisible = std::max(1, maxVisible);
+            int start = 0;
+            float maxScroll = std::max(0.0f, static_cast<float>(list.size() - maxVisible));
+            bool hover = mx >= x && mx <= x + panelW && my >= listStartY && my <= listStartY + panelH;
+            if (hover && scrollDelta != 0) {
+                scrollVal = std::clamp(scrollVal - static_cast<float>(scrollDelta) * 0.5f, 0.0f, maxScroll);
+            }
+            // scrollbar drag/click
+            float barWidth = 10.0f;
+            float trackX = x + panelW - barWidth - 6.0f;
+            float trackTop = listStartY + 30.0f;
+            float trackH = panelH - 42.0f;
+            if (hover && mouseDown && list.size() > static_cast<std::size_t>(maxVisible)) {
+                if (mx >= trackX && mx <= trackX + barWidth) {
+                    float t = (static_cast<float>(my) - trackTop) / std::max(1.0f, trackH);
+                    t = std::clamp(t, 0.0f, 1.0f);
+                    scrollVal = t * maxScroll;
+                }
+            }
+            if (static_cast<int>(list.size()) > maxVisible) {
+                start = std::clamp(static_cast<int>(std::round(scrollVal)), 0,
+                                   static_cast<int>(list.size()) - maxVisible);
+            }
+            int end = std::min(static_cast<int>(list.size()), start + maxVisible);
+            for (int i = start; i < end; ++i) {
+                float y = listStartY + 32.0f + static_cast<float>(i - start) * entryH;
                 Engine::Color bg{40, 60, 80, static_cast<uint8_t>(focused && static_cast<int>(i) == selected ? 230 : 160)};
                 if (static_cast<int>(i) == selected) {
                     bg = Engine::Color{static_cast<uint8_t>(bg.r + 20), static_cast<uint8_t>(bg.g + 40),
@@ -4869,19 +5198,58 @@ void GameRoot::renderMenu() {
                                         : Engine::Color{200, 220, 240, 230};
                 drawTextUnified(list[i].name, Engine::Vec2{x + 14.0f, y + 4.0f}, 0.95f, txt);
             }
+            // scrollbar visuals
+            if (list.size() > static_cast<std::size_t>(maxVisible)) {
+                float thumbH = std::max(18.0f, trackH * (static_cast<float>(maxVisible) / static_cast<float>(list.size())));
+                float ratio = (maxScroll > 0.0f) ? (scrollVal / maxScroll) : 0.0f;
+                float thumbY = trackTop + (trackH - thumbH) * ratio;
+                render_->drawFilledRect(Engine::Vec2{trackX, trackTop}, Engine::Vec2{barWidth, trackH},
+                                        Engine::Color{18, 28, 40, 180});
+                render_->drawFilledRect(Engine::Vec2{trackX, thumbY}, Engine::Vec2{barWidth, thumbH},
+                                        Engine::Color{90, 140, 210, 220});
+            }
         };
         float leftX = centerX - panelW - gap * 0.5f;
         float rightX = centerX + gap * 0.5f;
         if (!archetypes_.empty()) {
-            drawList(archetypes_, selectedArchetype_, menuSelection_ == 0, leftX, "Archetypes");
+            drawList(archetypes_, selectedArchetype_, menuSelection_ == 0, leftX, "Archetypes", archetypeScroll_);
         }
         if (!difficulties_.empty()) {
-            drawList(difficulties_, selectedDifficulty_, menuSelection_ == 1, rightX, "Difficulties");
+            drawList(difficulties_, selectedDifficulty_, menuSelection_ == 1, rightX, "Difficulties", difficultyScroll_);
         }
         // Summary card
         Engine::Color cardCol{24, 34, 48, 220};
         float summaryY = listStartY + panelH + 18.0f;
         render_->drawFilledRect(Engine::Vec2{centerX - 260.0f, summaryY}, Engine::Vec2{520.0f, 86.0f}, cardCol);
+        // Render selected archetype idle preview (animated) to the right of the archetype list
+        if (!archetypes_.empty() && textureManager_) {
+            const auto& a = archetypes_[std::clamp(selectedArchetype_, 0, static_cast<int>(archetypes_.size() - 1))];
+            auto files = heroSpriteFilesFor(a);
+            std::filesystem::path base = std::filesystem::path("assets") / "Sprites" / "Characters" / files.folder;
+            Engine::TexturePtr move = loadTextureOptional((base / files.movementFile).string());
+            if (move) {
+                const int movementColumns = 4;
+                const int movementRows = (move->height() % 31 == 0) ? 31 : std::max(1, move->height() / (move->height() / std::max(1, move->width() / movementColumns)));
+                int moveFrameW = std::max(1, move->width() / movementColumns);
+                int moveFrameH = std::max(1, move->height() / movementRows);
+                int frames = std::max(1, move->width() / moveFrameW);
+                float frameDur = 0.12f;
+                int row = 2;  // idle front (0-based)
+                int frame = static_cast<int>(menuPulse_ / frameDur) % frames;
+                Engine::IntRect src{frame * moveFrameW, row * moveFrameH, moveFrameW, moveFrameH};
+                float scale = 2.0f;
+                float visW = static_cast<float>(moveFrameW) * scale;
+                float visH = static_cast<float>(moveFrameH) * scale;
+                float baselineY = listStartY + panelH - 8.0f;
+                float px = leftX + panelW + 134.0f;  // shift right by 100px
+                float py = baselineY - visH + 100.0f; // shift down by 100px
+                if (a.id == "tank" || a.id == "special") {
+                    px -= 10.0f;
+                    py += 10.0f;
+                }
+                render_->drawTextureRegion(*move, Engine::Vec2{px, py}, Engine::Vec2{visW, visH}, src);
+            }
+        }
         if (!archetypes_.empty()) {
             const auto& a = archetypes_[std::clamp(selectedArchetype_, 0, static_cast<int>(archetypes_.size() - 1))];
             std::ostringstream stats;
@@ -5115,6 +5483,12 @@ void GameRoot::loadMenuPresets() {
                         static_cast<uint8_t>(a["color"].size() > 3 ? a["color"][3].get<int>() : 255)};
                 }
                 def.offensiveType = offensiveTypeFromString(a.value("offensiveType", std::string("Ranged")));
+                if (archetypeSupportsSecondaryWeapon(def)) {
+                    def.offensiveType = Game::OffensiveType::Melee;  // base offense; bow only when swapped
+                }
+                if (isMeleeOnlyArchetype(def.id) || isMeleeOnlyArchetype(def.name)) {
+                    def.offensiveType = Game::OffensiveType::Melee;
+                }
                 if (!def.name.empty()) {
                     archetypes_.push_back(def);
                 }
@@ -5148,15 +5522,15 @@ void GameRoot::loadMenuPresets() {
         addArchetype("healer", "Healer", "Supportive sustain, balanced speed, lighter offense.", 1.05f, 1.0f, 0.95f,
                      Engine::Color{170, 220, 150, 255}, Game::OffensiveType::Ranged);
         addArchetype("damage", "Damage Dealer", "Glass-cannon firepower, slightly faster pacing.", 0.95f, 1.05f, 1.15f,
-                     Engine::Color{255, 180, 120, 255}, Game::OffensiveType::Ranged);
+                     Engine::Color{255, 180, 120, 255}, Game::OffensiveType::Melee);
         addArchetype("assassin", "Assassin", "Very quick and lethal but fragile.", 0.85f, 1.25f, 1.2f,
                      Engine::Color{255, 110, 180, 255}, Game::OffensiveType::Melee);
         addArchetype("builder", "Builder", "Sturdier utility specialist with slower advance.", 1.1f, 0.95f, 0.9f,
                      Engine::Color{200, 200, 120, 255}, Game::OffensiveType::Builder);
         addArchetype("support", "Support", "All-rounder tuned for team buffs.", 1.0f, 1.0f, 1.0f,
-                     Engine::Color{150, 210, 230, 255}, Game::OffensiveType::Ranged);
+                     Engine::Color{150, 210, 230, 255}, Game::OffensiveType::Melee);
         addArchetype("special", "Special", "Experimental kit with slight boosts across the board.", 1.1f, 1.05f, 1.05f,
-                     Engine::Color{200, 160, 240, 255}, Game::OffensiveType::Ranged);
+                     Engine::Color{200, 160, 240, 255}, Game::OffensiveType::Melee);
     }
 
     auto addDifficulty = [&](const std::string& id, const std::string& name, const std::string& desc, float hpMul,
@@ -5455,6 +5829,14 @@ void GameRoot::applyArchetypePreset() {
     if (archetypes_.empty()) return;
     selectedArchetype_ = std::clamp(selectedArchetype_, 0, static_cast<int>(archetypes_.size() - 1));
     activeArchetype_ = archetypes_[selectedArchetype_];
+    if (isMeleeOnlyArchetype(activeArchetype_.id) || isMeleeOnlyArchetype(activeArchetype_.name)) {
+        activeArchetype_.offensiveType = Game::OffensiveType::Melee;
+    }
+    if (archetypeSupportsSecondaryWeapon(activeArchetype_)) {
+        activeArchetype_.offensiveType = Game::OffensiveType::Melee;
+    }
+    heroBaseOffense_ = activeArchetype_.offensiveType;
+    usingSecondaryWeapon_ = false;
     heroMaxHpPreset_ = heroMaxHpBase_ * activeArchetype_.hpMul * globalModifiers_.playerHealthMult;
     heroShieldPreset_ = heroShieldBase_ * activeArchetype_.hpMul * globalModifiers_.playerShieldsMult;
     heroMoveSpeedPreset_ = heroMoveSpeedBase_ * activeArchetype_.speedMul * globalModifiers_.playerSpeedMult;
@@ -5466,17 +5848,14 @@ void GameRoot::applyArchetypePreset() {
 
 std::string GameRoot::resolveArchetypeTexture(const GameRoot::ArchetypeDef& def) const {
     if (!def.texturePath.empty()) return def.texturePath;
-    // Default mapping based on id/name.
-    const std::string base = "assets/Sprites/Characters/";
-    if (def.id == "assassin") return base + "Assassin.png";
-    if (def.id == "healer") return base + "Healer.png";
-    if (def.id == "damage") return base + "DamageDealer.png";
-    if (def.id == "tank") return base + "Tank.png";
-    if (def.id == "builder") return base + "Builder.png";
-    if (def.id == "support") return base + "Support.png";
-    if (def.id == "special") return base + "Special.png";
-    // Fallback to manifest heroTexture.
-    return manifest_.heroTexture.empty() ? base + "DamageDealer.png" : manifest_.heroTexture;
+    const auto files = heroSpriteFilesFor(def);
+    if (!files.folder.empty() && !files.movementFile.empty()) {
+        std::filesystem::path p = std::filesystem::path("assets") / "Sprites" / "Characters" / files.folder / files.movementFile;
+        return p.string();
+    }
+    // Fallback to manifest heroTexture (defaults to Damage Dealer path).
+    const std::string fallback = "assets/Sprites/Characters/Damage Dealer/Dps.png";
+    return manifest_.heroTexture.empty() ? fallback : manifest_.heroTexture;
 }
 
 void GameRoot::buildAbilities() {
@@ -5572,12 +5951,12 @@ void GameRoot::buildAbilities() {
 
     if (!loaded) {
         const std::string archetype = activeArchetype_.id;
-        if (archetype == "damage" || archetype == "damage dealer" || archetype == "dd") {
-            pushAbility({"Primary Fire", "Standard projectile.", "M1", 0.0f, 0, "primary"});
-            pushAbility({"Scatter Shot", "Close-range cone blast.", "1", 6.0f, 30, "scatter"});
-            pushAbility({"Rage", "Boost damage and fire rate briefly.", "2", 12.0f, 40, "rage"});
-            pushAbility({"Nova Barrage", "Heavy projectiles in all directions.", "3", 10.0f, 45, "nova"});
-            pushAbility({"Death Blossom", "Ultimate barrage; huge damage.", "4", 35.0f, 60, "ultimate"});
+    if (archetype == "damage" || archetype == "damage dealer" || archetype == "dd") {
+        pushAbility({"Primary Fire", "Standard projectile.", "M1", 0.0f, 0, "primary"});
+        pushAbility({"Scatter Shot", "Close-range cone blast.", "1", 6.0f, 30, "scatter"});
+        pushAbility({"Rage", "Boost damage and fire rate briefly.", "2", 12.0f, 40, "rage"});
+        pushAbility({"Nova Barrage", "Heavy projectiles in all directions.", "3", 10.0f, 45, "nova"});
+        pushAbility({"Death Blossom", "Ultimate barrage; huge damage.", "4", 35.0f, 60, "ultimate"});
         } else if (archetype == "tank") {
             pushAbility({"Primary Fire", "Sturdy rounds.", "M1", 0.0f, 0, "primary"});
             pushAbility({"Shield Bash", "Short stun bash.", "1", 8.0f, 30, "generic"});
@@ -6185,6 +6564,39 @@ void GameRoot::drawAbilityHud(const Engine::InputState& input) {
     render_->drawFilledRect(Engine::Vec2{rect.x - 6.0f, rect.y - 6.0f},
                             Engine::Vec2{rect.w + 12.0f, rect.h + 12.0f}, Engine::Color{14, 18, 26, 200});
 
+    // Wizard element indicator
+    if (activeArchetype_.id == "wizard") {
+        auto elementName = [&]() -> std::string {
+            switch (wizardElement_) {
+                case WizardElement::Lightning: return "Lightning";
+                case WizardElement::Dark: return "Dark";
+                case WizardElement::Fire: return "Fire";
+                case WizardElement::Ice: return "Ice";
+                case WizardElement::Earth: return "Earth";
+                case WizardElement::Wind: return "Wind";
+                default: return "Element";
+            }
+        };
+        auto elementColor = [&]() -> Engine::Color {
+            switch (wizardElement_) {
+                case WizardElement::Lightning: return Engine::Color{200, 220, 255, 235};
+                case WizardElement::Dark: return Engine::Color{150, 110, 200, 235};
+                case WizardElement::Fire: return Engine::Color{255, 170, 120, 235};
+                case WizardElement::Ice: return Engine::Color{170, 220, 255, 235};
+                case WizardElement::Earth: return Engine::Color{180, 200, 140, 235};
+                case WizardElement::Wind: return Engine::Color{200, 240, 230, 235};
+                default: return Engine::Color{220, 220, 220, 235};
+            }
+        };
+        int primaryLevel = (!abilityStates_.empty()) ? abilityStates_[0].level : 1;
+        int stage = std::clamp((primaryLevel + 1) / 2, 1, 3);
+        std::ostringstream lbl;
+        lbl << "Element: " << elementName() << " (Stage " << stage << ")";
+        float textX = rect.x + rect.w - 180.0f;  // shift left to avoid clipping
+        float textY = rect.y - 18.0f;
+        drawTextUnified(lbl.str(), Engine::Vec2{textX, textY}, 0.95f, elementColor());
+    }
+
     auto upgradeCost = [](const AbilitySlot& slot) {
         return slot.upgradeCost + (slot.level - 1) * (slot.upgradeCost / 2);
     };
@@ -6297,6 +6709,7 @@ void GameRoot::drawAbilityHud(const Engine::InputState& input) {
 }
 
 void GameRoot::drawCharacterScreen(const Engine::InputState& input) {
+    (void)input;
     if (!render_ || !characterScreenOpen_) return;
     const float uiScale = 1.2f;  // 20% larger text
     Engine::Color scrim{10, 12, 20, 180};
@@ -6461,41 +6874,87 @@ void GameRoot::spawnHero() {
         Engine::Gameplay::applyUpgradesToUnit(*hp, heroBaseStatsScaled_, heroUpgrades_, false);
     }
     registry_.emplace<Engine::ECS::HeroTag>(hero_, Engine::ECS::HeroTag{});
-    registry_.emplace<Game::OffensiveTypeTag>(hero_, Game::OffensiveTypeTag{activeArchetype_.offensiveType});
+    heroBaseOffense_ = activeArchetype_.offensiveType;
+    usingSecondaryWeapon_ = false;
+    registry_.emplace<Game::SecondaryWeapon>(hero_, Game::SecondaryWeapon{usingSecondaryWeapon_});
+    refreshHeroOffenseTag();
 
     // Dual-sheet character support (movement + combat).
     Engine::TexturePtr moveTex{};
     Engine::TexturePtr combatTex{};
     {
-        auto folder = activeArchetype_.name.empty() ? std::string("Damage Dealer") : activeArchetype_.name;
-        std::string prefix = folder;
-        prefix.erase(std::remove(prefix.begin(), prefix.end(), ' '), prefix.end());  // e.g. "Damage Dealer" -> "DamageDealer"
-
+        auto files = heroSpriteFilesFor(activeArchetype_);
+        if (files.folder.empty()) {
+            files.folder = activeArchetype_.name.empty() ? std::string("Damage Dealer") : activeArchetype_.name;
+        }
         const char* home = std::getenv("HOME");
         auto tryLoad = [&](const std::string& rel) -> Engine::TexturePtr {
+            if (rel.empty()) return {};
+            std::filesystem::path relPath = std::filesystem::path("assets") / "Sprites" / "Characters" / files.folder / rel;
+            std::filesystem::path path = relPath;
             if (home && *home) {
-                std::filesystem::path p = std::filesystem::path(home) / "assets" / "Sprites" / "Characters" / folder / rel;
-                if (std::filesystem::exists(p)) return loadTextureOptional(p.string());
+                std::filesystem::path homePath = std::filesystem::path(home) / relPath;
+                if (std::filesystem::exists(homePath)) {
+                    path = homePath;
+                }
             }
-            std::filesystem::path p = std::filesystem::path("assets") / "Sprites" / "Characters" / folder / rel;
-            if (std::filesystem::exists(p)) return loadTextureOptional(p.string());
+            if (std::filesystem::exists(path)) return loadTextureOptional(path.string());
             return {};
         };
 
-        moveTex = tryLoad(prefix + "Movement.png");
-        combatTex = tryLoad(prefix + "Combat.png");
+        moveTex = tryLoad(files.movementFile);
+        combatTex = tryLoad(files.combatFile);
+        // Legacy fallback to flat naming if custom archetype assets are present.
+        if (!moveTex) {
+            std::string legacy = files.folder;
+            std::string compact = legacy;
+            compact.erase(std::remove(compact.begin(), compact.end(), ' '), compact.end());
+            moveTex = tryLoad(compact + ".png");
+        }
+        if (!combatTex) {
+            std::string legacy = files.folder;
+            std::string compact = legacy;
+            compact.erase(std::remove(compact.begin(), compact.end(), ' '), compact.end());
+            combatTex = tryLoad(compact + "_Combat.png");
+        }
     }
 
     if (moveTex && combatTex) {
-        registry_.emplace<Game::HeroSpriteSheets>(hero_, Game::HeroSpriteSheets{moveTex, combatTex, 16, 16, 0.12f, 0.10f});
+        const int movementColumns = 4;
+        const int movementRows = 31;
+        int moveFrameW = std::max(1, moveTex->width() / movementColumns);
+        int moveFrameH = (moveTex->height() % movementRows == 0)
+                             ? std::max(1, moveTex->height() / movementRows)
+                             : std::max(1, moveTex->height() / std::max(1, moveTex->height() / moveFrameW));
+        int moveFrames = std::max(1, moveTex->width() / moveFrameW);
+
+        const int combatColumns = 4;
+        int combatFrameW = std::max(1, combatTex->width() / combatColumns);
+        int combatFrameH = combatFrameW;
+        if (combatTex->height() % 20 == 0) {
+            combatFrameH = std::max(1, combatTex->height() / 20);
+        }
+        float moveFrameDur = 0.12f;
+        float combatFrameDur = 0.10f;
+
+        registry_.emplace<Game::HeroSpriteSheets>(hero_,
+                                                  Game::HeroSpriteSheets{moveTex,
+                                                                         combatTex,
+                                                                         moveFrameW,
+                                                                         moveFrameH,
+                                                                         combatFrameW,
+                                                                         combatFrameH,
+                                                                         heroSize_,
+                                                                         moveFrameDur,
+                                                                         combatFrameDur});
         if (!registry_.has<Game::HeroAttackCycle>(hero_)) {
             registry_.emplace<Game::HeroAttackCycle>(hero_, Game::HeroAttackCycle{0});
         }
         if (auto* rend = registry_.get<Engine::ECS::Renderable>(hero_)) {
             rend->texture = moveTex;
         }
-        const int frames = std::max(1, moveTex->width() / 16);
-        registry_.emplace<Engine::ECS::SpriteAnimation>(hero_, Engine::ECS::SpriteAnimation{16, 16, frames, 0.12f});
+        registry_.emplace<Engine::ECS::SpriteAnimation>(
+            hero_, Engine::ECS::SpriteAnimation{moveFrameW, moveFrameH, moveFrames, moveFrameDur});
     } else {
         // Fallback to single-sheet hero texture if loaded.
         std::string heroPath = !heroTexturePath_.empty() ? heroTexturePath_ : manifest_.heroTexture;
@@ -6520,6 +6979,8 @@ void GameRoot::resetRun() {
     registry_ = {};
     clearBuildPreview();
     hero_ = Engine::ECS::kInvalidEntity;
+    usingSecondaryWeapon_ = false;
+    swapWeaponHeld_ = false;
     remoteEntities_.clear();
     remoteStates_.clear();
     remoteTargets_.clear();
@@ -6531,6 +6992,10 @@ void GameRoot::resetRun() {
     miniUnitSupplyCap_ = 10;
     if (activeArchetype_.offensiveType == Game::OffensiveType::Builder) {
         miniUnitSupplyMax_ = std::max(miniUnitSupplyMax_, 2);
+    }
+    if (activeArchetype_.id == "summoner") {
+        miniUnitSupplyMax_ = std::max(miniUnitSupplyMax_, 6);
+        miniUnitSupplyCap_ = 12;
     }
     level_ = 1;
     xp_ = 0;
@@ -6570,6 +7035,12 @@ void GameRoot::resetRun() {
     moveTarget_ = {};
     moveTargetActive_ = false;
     moveCommandPrev_ = false;
+    druidForm_ = DruidForm::Human;
+    druidChosen_ = DruidForm::Human;
+    druidChoiceMade_ = false;
+    wizardElement_ = WizardElement::Fire;
+    lightningDomeTimer_ = 0.0f;
+    flameWalls_.clear();
     camera_ = {};
     restartPrev_ = true;  // consume the key that triggered the reset.
     waveWarmup_ = waveWarmupBase_;

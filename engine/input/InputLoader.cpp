@@ -61,6 +61,9 @@ std::optional<InputBindings> InputLoader::loadFromFile(const std::string& path) 
     if (j.contains("dash")) {
         bindings.dash = readStrings(j["dash"]);
     }
+    if (j.contains("swapWeapon")) {
+        bindings.swapWeapon = readStrings(j["swapWeapon"]);
+    }
     if (j.contains("interact")) {
         bindings.interact = readStrings(j["interact"]);
     }
