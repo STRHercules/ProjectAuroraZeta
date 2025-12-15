@@ -127,14 +127,14 @@ jobs:
         id: detect-android
         run: |
           if [ -f ./gradlew ]; then
-            echo "wrapper=./gradlew" >> "$GITHUB_OUTPUT"
+            echo "wrapper=gradlew" >> "$GITHUB_OUTPUT"
             echo "workdir=." >> "$GITHUB_OUTPUT"
             echo "Using root-level Gradle wrapper"
             exit 0
           fi
 
           if [ -f ./android/gradlew ]; then
-            echo "wrapper=./android/gradlew" >> "$GITHUB_OUTPUT"
+            echo "wrapper=gradlew" >> "$GITHUB_OUTPUT"
             echo "workdir=android" >> "$GITHUB_OUTPUT"
             echo "Using Gradle wrapper from android/"
             exit 0
@@ -157,7 +157,13 @@ jobs:
           cmake: 3.22.1
           components: |-
             build-tools;34.0.0
+            platforms;android-34
             platform-tools
+
+      - name: Install Android build essentials (Linux)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build
 
       - name: Cache Gradle
         uses: actions/cache@v4
@@ -182,9 +188,9 @@ jobs:
             exit 1
           fi
 
-          chmod +x "$WRAPPER"
           cd "$WORKDIR"
-          "$WRAPPER" --no-daemon assembleDebug
+          chmod +x "$WRAPPER"
+          "./$WRAPPER" --no-daemon assembleDebug
 
       - name: Upload Android artifact
         uses: actions/upload-artifact@v4
