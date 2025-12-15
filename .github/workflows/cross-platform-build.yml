@@ -118,18 +118,24 @@ jobs:
   android:
     name: Build (Android)
     runs-on: ubuntu-latest
+    if: ${{ hashFiles('gradlew', 'android/gradlew') != '' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Ensure Android project is present
+      - name: Detect Android Gradle wrapper
+        id: detect-android
         run: |
-          if [ -x ./gradlew ]; then
+          if [ -f ./gradlew ]; then
+            echo "wrapper=./gradlew" >> "$GITHUB_OUTPUT"
+            echo "workdir=." >> "$GITHUB_OUTPUT"
             echo "Using root-level Gradle wrapper"
             exit 0
           fi
 
-          if [ -x ./android/gradlew ]; then
+          if [ -f ./android/gradlew ]; then
+            echo "wrapper=./android/gradlew" >> "$GITHUB_OUTPUT"
+            echo "workdir=android" >> "$GITHUB_OUTPUT"
             echo "Using Gradle wrapper from android/"
             exit 0
           fi
@@ -168,14 +174,15 @@ jobs:
           ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
         run: |
           set -e
-          if [ -x ./gradlew ]; then
-            WRAPPER=./gradlew
-            WORKDIR=.
-          else
-            WRAPPER=./android/gradlew
-            WORKDIR=android
+          WRAPPER="${{ steps.detect-android.outputs.wrapper }}"
+          WORKDIR="${{ steps.detect-android.outputs.workdir }}"
+
+          if [ -z "$WRAPPER" ] || [ -z "$WORKDIR" ]; then
+            echo "Android Gradle wrapper not detected" >&2
+            exit 1
           fi
 
+          chmod +x "$WRAPPER"
           cd "$WORKDIR"
           "$WRAPPER" --no-daemon assembleDebug
 
