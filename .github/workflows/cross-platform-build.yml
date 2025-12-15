@@ -125,27 +125,26 @@ jobs:
       - name: Detect Android Gradle wrapper
         id: detect-android
         run: |
+          set -euo pipefail
+
           FOUND="false"
-          WRAPPER=""
+          WRAPPER_PATH=""
           WORKDIR=""
 
-          if [ -f ./gradlew ]; then
+          WRAPPER_PATH=$(find . -maxdepth 4 -type f -name gradlew \
+            -not -path './.git/*' -not -path './build/*' | head -n 1 || true)
+
+          if [ -n "$WRAPPER_PATH" ]; then
             FOUND="true"
-            WRAPPER="gradlew"
-            WORKDIR="."
-            echo "Using root-level Gradle wrapper"
-          elif [ -f ./android/gradlew ]; then
-            FOUND="true"
-            WRAPPER="gradlew"
-            WORKDIR="android"
-            echo "Using Gradle wrapper from android/"
+            WORKDIR=$(dirname "$WRAPPER_PATH")
+            echo "Android Gradle wrapper detected at ${WRAPPER_PATH}"
           else
             echo "Android Gradle wrapper not found. Add an Android project with Gradle wrapper (see docs/AndroidBuild.md). Skipping Android build." >&2
           fi
 
           {
             echo "found=${FOUND}"
-            echo "wrapper=${WRAPPER}"
+            echo "wrapper_path=${WRAPPER_PATH}"
             echo "workdir=${WORKDIR}"
           } >> "$GITHUB_OUTPUT"
 
@@ -196,19 +195,18 @@ jobs:
         if: env.ANDROID_FOUND == 'true'
         env:
           ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
-        working-directory: ${{ steps.detect-android.outputs.workdir }}
         shell: bash
         run: |
           set -euo pipefail
-          WRAPPER="${{ steps.detect-android.outputs.wrapper }}"
+          WRAPPER_PATH="${{ steps.detect-android.outputs.wrapper_path }}"
 
-          if [ -z "$WRAPPER" ]; then
-            echo "Android Gradle wrapper not detected" >&2
+          if [ -z "$WRAPPER_PATH" ]; then
+            echo "Android Gradle wrapper path missing from detection step" >&2
             exit 1
           fi
 
-          chmod +x "$WRAPPER"
-          "./$WRAPPER" --no-daemon assembleDebug
+          chmod +x "$WRAPPER_PATH"
+          "$WRAPPER_PATH" --no-daemon assembleDebug
 
       - name: Locate built APKs
         if: env.ANDROID_FOUND == 'true'
