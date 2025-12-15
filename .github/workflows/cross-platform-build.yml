@@ -118,7 +118,6 @@ jobs:
   android:
     name: Build (Android)
     runs-on: ubuntu-latest
-    if: ${{ hashFiles('gradlew', 'android/gradlew') != '' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -127,6 +126,7 @@ jobs:
         id: detect-android
         run: |
           if [ -f ./gradlew ]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
             echo "wrapper=gradlew" >> "$GITHUB_OUTPUT"
             echo "workdir=." >> "$GITHUB_OUTPUT"
             echo "Using root-level Gradle wrapper"
@@ -134,22 +134,25 @@ jobs:
           fi
 
           if [ -f ./android/gradlew ]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
             echo "wrapper=gradlew" >> "$GITHUB_OUTPUT"
             echo "workdir=android" >> "$GITHUB_OUTPUT"
             echo "Using Gradle wrapper from android/"
             exit 0
           fi
 
-          echo "Android Gradle wrapper not found. Add an Android project with Gradle wrapper (see docs/AndroidBuild.md)." >&2
-          exit 1
+          echo "found=false" >> "$GITHUB_OUTPUT"
+          echo "Android Gradle wrapper not found. Add an Android project with Gradle wrapper (see docs/AndroidBuild.md). Skipping Android build." >&2
 
       - name: Set up JDK
+        if: steps.detect-android.outputs.found == 'true'
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
       - name: Set up Android SDK
+        if: steps.detect-android.outputs.found == 'true'
         uses: android-actions/setup-android@v3
         with:
           api-level: 34
@@ -161,11 +164,13 @@ jobs:
             platform-tools
 
       - name: Install Android build essentials (Linux)
+        if: steps.detect-android.outputs.found == 'true'
         run: |
           sudo apt-get update
           sudo apt-get install -y ninja-build
 
       - name: Cache Gradle
+        if: steps.detect-android.outputs.found == 'true'
         uses: actions/cache@v4
         with:
           path: |
@@ -176,6 +181,7 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Build debug APK
+        if: steps.detect-android.outputs.found == 'true'
         env:
           ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
         run: |
@@ -193,6 +199,7 @@ jobs:
           "./$WRAPPER" --no-daemon assembleDebug
 
       - name: Upload Android artifact
+        if: steps.detect-android.outputs.found == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: project-aurora-zeta-android
