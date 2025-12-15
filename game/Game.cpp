@@ -6110,7 +6110,7 @@ void GameRoot::drawResourceCluster() {
     baseBarH = std::max({texH(hpBarTex_, baseBarH), texH(shieldBarTex_, baseBarH), texH(energyBarTex_, baseBarH), texH(dashBarTex_, baseBarH)});
     const float barW = baseBarW * barScale;
     const float barH = baseBarH * barScale;
-    const float gap = 18.0f * barScale;
+    const float gap = 12.0f * barScale;
     const int barCount = 4;
     const float totalW = barCount * barW + (barCount - 1) * gap;
     const float startX = static_cast<float>(viewportWidth_) * 0.5f - totalW * 0.5f;
@@ -6119,7 +6119,7 @@ void GameRoot::drawResourceCluster() {
     auto centeredTextPosY = [&](float baseY) { return baseY + (barH - 12.0f) * 0.5f; };
 
     auto drawBar = [&](int index, float fill, const Engine::Color& fallbackCol, const std::string& label,
-                       const std::string& value, const Engine::TexturePtr& tex) {
+                       const std::string& value, const Engine::TexturePtr& tex, float textOffsetX = 0.0f) {
         float x = startX + static_cast<float>(index) * (barW + gap);
         // No background; filled portion grows left -> right from the bar start.
         if (tex && fill > 0.0f) {
@@ -6142,7 +6142,7 @@ void GameRoot::drawResourceCluster() {
         // Center text inside bar.
         std::string combined = label + " " + value;
         // rough center by measuring approximate width via character count (bitmap font lacks metrics); this is acceptable for UI text here.
-        float textX = x + barW * 0.5f - static_cast<float>(combined.size()) * 4.5f;
+        float textX = x + barW * 0.5f - static_cast<float>(combined.size()) * 4.5f + textOffsetX;
         drawTextUnified(combined, Engine::Vec2{textX, ty}, 0.95f, Engine::Color{235, 245, 255, 235});
     };
 
@@ -6159,9 +6159,9 @@ void GameRoot::drawResourceCluster() {
         dashText << std::fixed << std::setprecision(1) << dashCooldownTimer_ << "s";
     }
 
-    drawBar(0, uiHpFill_, Engine::Color{204, 92, 92, 235}, "Health", hpText.str(), hpBarTex_);
+    drawBar(0, uiHpFill_, Engine::Color{204, 92, 92, 235}, "Health", hpText.str(), hpBarTex_, 2.0f);
     drawBar(1, uiShieldFill_, Engine::Color{108, 166, 255, 235}, "Shield", shieldText.str(), shieldBarTex_);
-    drawBar(2, uiEnergyFill_, Engine::Color{120, 200, 255, 235}, "Energy", energyText.str(), energyBarTex_);
+    drawBar(2, uiEnergyFill_, Engine::Color{120, 200, 255, 235}, "Energy", energyText.str(), energyBarTex_, 9.0f);
     drawBar(3, uiDashFill_, Engine::Color{110, 160, 120, 230}, "Dash", dashText.str(), dashBarTex_);
 }
 
