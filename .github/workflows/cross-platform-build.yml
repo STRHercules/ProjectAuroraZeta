@@ -184,26 +184,41 @@ jobs:
         if: steps.detect-android.outputs.found == 'true'
         env:
           ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
+        working-directory: ${{ steps.detect-android.outputs.workdir }}
+        shell: bash
         run: |
-          set -e
+          set -euo pipefail
           WRAPPER="${{ steps.detect-android.outputs.wrapper }}"
-          WORKDIR="${{ steps.detect-android.outputs.workdir }}"
 
-          if [ -z "$WRAPPER" ] || [ -z "$WORKDIR" ]; then
+          if [ -z "$WRAPPER" ]; then
             echo "Android Gradle wrapper not detected" >&2
             exit 1
           fi
 
-          cd "$WORKDIR"
           chmod +x "$WRAPPER"
           "./$WRAPPER" --no-daemon assembleDebug
+
+      - name: Locate built APKs
+        if: steps.detect-android.outputs.found == 'true'
+        id: locate-apk
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          WORKDIR="${{ steps.detect-android.outputs.workdir }}"
+          APK_LIST=$(find "$WORKDIR" -type f -path "*/build/outputs/apk/*/*.apk" | sort)
+
+          if [ -z "$APK_LIST" ]; then
+            echo "No APK artifacts found after assembleDebug." >&2
+            exit 1
+          fi
+
+          printf "paths<<'EOF'\n%s\nEOF\n" "$APK_LIST" >> "$GITHUB_OUTPUT"
 
       - name: Upload Android artifact
         if: steps.detect-android.outputs.found == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: project-aurora-zeta-android
-          path: |
-            android/app/build/outputs/apk/debug/*.apk
-            app/build/outputs/apk/debug/*.apk
+          path: ${{ steps.locate-apk.outputs.paths }}
           if-no-files-found: error
