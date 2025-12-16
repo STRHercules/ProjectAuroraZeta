@@ -4,24 +4,11 @@
 
 # Escort facing opposite direction they are running.
 
-# When a player is killed/downed they should only play the knockdown animation once, and pause on the last frame. 
-* If in multiplayer, after they are revived, they will then get up.
-* When a player is killed in singleplayer, prevent them from moving or using any abilities while 'dead'.
-
 # Chat
 * Ability for players to chat in Multiplayer Lobby/Match
 
 # Add training time to Mini-Units
 * RTS Style queue?
-
-# Need to ensure All players in a multiplayer match are fighting the same exact monsters, not monsters in their own respective clients.
-* We also need to ensure that no menu *pauses* the match for any player, if any player opens any menus.
-    * Pausing will be reserved in multiplayer to a dedicated 'Pause' option in the Esc menu, which will pause for all players.
-        * While in the 'paused' state, players and enemies cannot move.
-        * While in the 'paused' state, all mechanics will also pause. (Regeneration, timers, Summons, Mini Units, etc)
-        * While in the 'paused' state, the 'Pause' button in the Esc menu will be replaced with; 'Resume'.
-            * Any player can 'Resume' the game if 'Paused'.
-            * Resuming takes places after a 5 second countdown after clicking 'Resume' to avoid immediate resume-related deaths. 
 
 # Map Design
 * Fabricated assets to place in-world

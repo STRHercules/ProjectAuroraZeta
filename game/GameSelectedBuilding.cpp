@@ -32,7 +32,7 @@ void GameRoot::drawSelectedBuildingPanel(int mouseX, int mouseY, bool leftClickE
     float w = 270.0f;
     float h = (b->type == Game::BuildingType::Barracks) ? 170.0f : 120.0f;
     float x = 20.0f;
-    float y = static_cast<float>(viewportHeight_) - h - 20.0f;
+    float y = static_cast<float>(viewportHeight_) - h - kHudBottomSafeMargin;
     render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{w, h}, panel);
     std::string title = "Building: ";
     switch (b->type) {

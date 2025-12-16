@@ -72,6 +72,19 @@
 
 namespace Game {
 
+struct MiniUnitRageBuff {
+    float timer{0.0f};
+    float hpMul{1.0f};
+    float dmgMul{1.0f};
+    float atkRateMul{1.0f};
+    float healMul{1.0f};
+};
+
+// Reserve bottom screen space for core resource bars so other HUD panels don't overlap them.
+constexpr float kHudBottomSafeMargin = 120.0f;
+// Global scale multiplier applied to all mini-unit sprites and their hitboxes.
+constexpr float kMiniUnitScale = 1.5f;
+
 class GameRoot final : public Engine::ApplicationListener {
 public:
     bool onInitialize(Engine::Application& app) override;
@@ -120,6 +133,9 @@ private:
     void connectDirect();
     void connectDirectAddress(const std::string& address);
     void updateNetwork(double dt);
+    void applyMiniUnitBuff(Game::MiniUnitClass cls, float mul);
+    void activateMiniUnitRage(float duration, float dmgMul, float atkRateMul, float hpMul, float healMul);
+    void updateMiniUnitRage(float dt);
     void detectLocalIp();
     void applyRemoteSnapshot(const Game::Net::SnapshotMsg& snap);
     void leaveNetworkSession(bool isHostQuit);
@@ -502,6 +518,15 @@ private:
     int miniUnitSupplyMax_{0};
     float globalSpeedMul_{1.0f};
     int miniUnitSupplyCap_{10};
+    // Persistent builder-driven buffs for mini-unit classes (multiplicative).
+    float miniBuffLight_{1.0f};
+    float miniBuffHeavy_{1.0f};
+    float miniBuffMedic_{1.0f};
+    // Temporary rage timer for mini-units.
+    float miniRageTimer_{0.0f};
+    float miniRageDamageMul_{1.0f};
+    float miniRageAttackRateMul_{1.0f};
+    float miniRageHealMul_{1.0f};
     int level_{1};
     int xp_{0};
     int xpToNext_{60};

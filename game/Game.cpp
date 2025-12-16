@@ -917,7 +917,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             const float hudW = 300.0f;
             const float hudH = 70.0f;
             const float hudX = static_cast<float>(viewportWidth_) * 0.5f - hudW * 0.5f;
-            const float hudY = static_cast<float>(viewportHeight_) - hudH - 18.0f;
+            const float hudY = static_cast<float>(viewportHeight_) - hudH - kHudBottomSafeMargin;
             mouseOverUI |= pointInRect(lastMouseX_, lastMouseY_, hudX, hudY, hudW, hudH);
         }
 
@@ -1001,7 +1001,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         const float hudW = 300.0f;
         const float hudH = 70.0f;
         const float hudX = static_cast<float>(viewportWidth_) * 0.5f - hudW * 0.5f;
-        const float hudY = static_cast<float>(viewportHeight_) - hudH - 18.0f;
+        const float hudY = static_cast<float>(viewportHeight_) - hudH - kHudBottomSafeMargin;
         const float toggleW = 92.0f;
         const float toggleH = 26.0f;
         const float toggleX = hudX + hudW - toggleW - 12.0f;
@@ -1517,8 +1517,14 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
     }
 
     if (miniUnitSystem_ && !paused_) {
+        // Apply temporary rage multipliers to the mini-unit system.
+        miniUnitSystem_->setGlobalDamageMul(miniRageTimer_ > 0.0f ? miniRageDamageMul_ : 1.0f);
+        miniUnitSystem_->setGlobalAttackRateMul(miniRageTimer_ > 0.0f ? miniRageAttackRateMul_ : 1.0f);
+        miniUnitSystem_->setGlobalHealMul(miniRageTimer_ > 0.0f ? miniRageHealMul_ : 1.0f);
         miniUnitSystem_->update(registry_, step);
     }
+    // Decay and revert mini-unit rage buffs.
+    updateMiniUnitRage(static_cast<float>(step.deltaSeconds));
 
     // Buildings that auto-produce mini units (barracks).
     if (!paused_) {
@@ -2603,48 +2609,6 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             }
         }
 
-        // Mini-unit selection HUD (bottom-center).
-        if (!selectedMiniUnits_.empty()) {
-            int lightN = 0, heavyN = 0, medicN = 0;
-            bool allCombatOn = true;
-            bool anyCombatOn = false;
-            for (auto ent : selectedMiniUnits_) {
-                if (auto* mu = registry_.get<Game::MiniUnit>(ent)) {
-                    switch (mu->cls) {
-                        case Game::MiniUnitClass::Light: ++lightN; break;
-                        case Game::MiniUnitClass::Heavy: ++heavyN; break;
-                        case Game::MiniUnitClass::Medic: ++medicN; break;
-                    }
-                    allCombatOn &= mu->combatEnabled;
-                    anyCombatOn |= mu->combatEnabled;
-                }
-            }
-            const float hudW = 300.0f;
-            const float hudH = 70.0f;
-            const float hudX = static_cast<float>(viewportWidth_) * 0.5f - hudW * 0.5f;
-            const float hudY = static_cast<float>(viewportHeight_) - hudH - 18.0f;
-            render_->drawFilledRect(Engine::Vec2{hudX, hudY}, Engine::Vec2{hudW, hudH},
-                                    Engine::Color{18, 24, 34, 215});
-            std::ostringstream sel;
-            sel << "Selected: " << selectedMiniUnits_.size()
-                << "  L " << lightN << "  H " << heavyN << "  M " << medicN;
-            drawTextUnified(sel.str(), Engine::Vec2{hudX + 10.0f, hudY + 8.0f}, 0.9f,
-                            Engine::Color{220, 240, 255, 240});
-            std::string combatLabel = allCombatOn ? "Combat: ON" : (anyCombatOn ? "Combat: MIXED" : "Combat: OFF");
-            drawTextUnified(combatLabel, Engine::Vec2{hudX + 10.0f, hudY + 34.0f}, 0.85f,
-                            Engine::Color{200, 230, 240, 230});
-
-            const float toggleW = 92.0f;
-            const float toggleH = 26.0f;
-            const float toggleX = hudX + hudW - toggleW - 12.0f;
-            const float toggleY = hudY + hudH - toggleH - 10.0f;
-            Engine::Color toggleBg = allCombatOn ? Engine::Color{40, 90, 60, 230} : Engine::Color{60, 50, 50, 230};
-            render_->drawFilledRect(Engine::Vec2{toggleX, toggleY}, Engine::Vec2{toggleW, toggleH}, toggleBg);
-            drawTextUnified(allCombatOn ? "Stop" : "Engage",
-                            Engine::Vec2{toggleX + 10.0f, toggleY + 5.0f}, 0.85f,
-                            Engine::Color{240, 255, 240, 240});
-        }
-
         // Off-screen pickup indicator for nearest pickup.
         Engine::Vec2 screenCenter{static_cast<float>(viewportWidth_) * 0.5f, static_cast<float>(viewportHeight_) * 0.5f};
         Engine::Vec2 nearestScreen{};
@@ -2814,6 +2778,47 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 drawTextUnified(note.str(), Engine::Vec2{10.0f, 82.0f}, 0.9f, Engine::Color{180, 240, 180, 200});
             }
             drawResourceCluster();
+            // Mini-unit selection HUD (drawn after resource bars so it sits above them).
+            if (!selectedMiniUnits_.empty()) {
+                int lightN = 0, heavyN = 0, medicN = 0;
+                bool allCombatOn = true;
+                bool anyCombatOn = false;
+                for (auto ent : selectedMiniUnits_) {
+                    if (auto* mu = registry_.get<Game::MiniUnit>(ent)) {
+                        switch (mu->cls) {
+                            case Game::MiniUnitClass::Light: ++lightN; break;
+                            case Game::MiniUnitClass::Heavy: ++heavyN; break;
+                            case Game::MiniUnitClass::Medic: ++medicN; break;
+                        }
+                        allCombatOn &= mu->combatEnabled;
+                        anyCombatOn |= mu->combatEnabled;
+                    }
+                }
+                const float hudW = 300.0f;
+                const float hudH = 70.0f;
+                const float hudX = static_cast<float>(viewportWidth_) * 0.5f - hudW * 0.5f;
+                const float hudY = static_cast<float>(viewportHeight_) - hudH - kHudBottomSafeMargin;
+                render_->drawFilledRect(Engine::Vec2{hudX, hudY}, Engine::Vec2{hudW, hudH},
+                                        Engine::Color{18, 24, 34, 215});
+                std::ostringstream sel;
+                sel << "Selected: " << selectedMiniUnits_.size()
+                    << "  L " << lightN << "  H " << heavyN << "  M " << medicN;
+                drawTextUnified(sel.str(), Engine::Vec2{hudX + 10.0f, hudY + 8.0f}, 0.9f,
+                                Engine::Color{220, 240, 255, 240});
+                std::string combatLabel = allCombatOn ? "Combat: ON" : (anyCombatOn ? "Combat: MIXED" : "Combat: OFF");
+                drawTextUnified(combatLabel, Engine::Vec2{hudX + 10.0f, hudY + 34.0f}, 0.85f,
+                                Engine::Color{200, 230, 240, 230});
+
+                const float toggleW = 92.0f;
+                const float toggleH = 26.0f;
+                const float toggleX = hudX + hudW - toggleW - 12.0f;
+                const float toggleY = hudY + hudH - toggleH - 10.0f;
+                Engine::Color toggleBg = allCombatOn ? Engine::Color{40, 90, 60, 230} : Engine::Color{60, 50, 50, 230};
+                render_->drawFilledRect(Engine::Vec2{toggleX, toggleY}, Engine::Vec2{toggleW, toggleH}, toggleBg);
+                drawTextUnified(allCombatOn ? "Stop" : "Engage",
+                                Engine::Vec2{toggleX + 10.0f, toggleY + 5.0f}, 0.85f,
+                                Engine::Color{240, 255, 240, 240});
+            }
             // Inventory badge anchored above ability bar.
             {
                 const float badgeW = 280.0f;
@@ -3021,7 +3026,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             const float panelW = 260.0f;
             const float panelH = 220.0f;
             const float rx = 22.0f;
-            const float ry = static_cast<float>(viewportHeight_) - panelH - 22.0f;
+            const float ry = static_cast<float>(viewportHeight_) - panelH - kHudBottomSafeMargin;
             mouseOverBottomLeftUI |= pointInRect(lastMouseX_, lastMouseY_, rx, ry, panelW, panelH);
         }
         if (selectedBuilding_ != Engine::ECS::kInvalidEntity &&
@@ -3031,7 +3036,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             const float panelW = 270.0f;
             const float panelH = (b && b->type == Game::BuildingType::Barracks) ? 170.0f : 120.0f;
             const float rx = 20.0f;
-            const float ry = static_cast<float>(viewportHeight_) - panelH - 20.0f;
+            const float ry = static_cast<float>(viewportHeight_) - panelH - kHudBottomSafeMargin;
             mouseOverBottomLeftUI |= pointInRect(lastMouseX_, lastMouseY_, rx, ry, panelW, panelH);
         }
 
@@ -4441,20 +4446,22 @@ Engine::ECS::Entity GameRoot::spawnMiniUnit(const MiniUnitDef& def, const Engine
     auto e = registry_.create();
     registry_.emplace<Engine::ECS::Transform>(e, pos);
     registry_.emplace<Engine::ECS::Velocity>(e, Engine::Vec2{0.0f, 0.0f});
-    float size = 16.0f;
-    registry_.emplace<Engine::ECS::AABB>(e, Engine::ECS::AABB{Engine::Vec2{size * 0.5f, size * 0.5f}});
+    const int frameW = def.frameWidth > 0 ? def.frameWidth : 16;
+    const int frameH = def.frameHeight > 0 ? def.frameHeight : frameW;
     Engine::TexturePtr tex{};
     if (textureManager_ && !def.texturePath.empty()) {
         tex = loadTextureOptional(def.texturePath);
     }
-    if (tex) {
-        size = static_cast<float>(std::max(def.frameWidth, 16));
-    }
+
+    const float baseWidth = tex ? static_cast<float>(std::max(frameW, 16)) : static_cast<float>(std::max(frameW, 16));
+    const float aspect = frameW > 0 ? static_cast<float>(frameH) / static_cast<float>(frameW) : 1.0f;
+    Engine::Vec2 renderSize{baseWidth * kMiniUnitScale, baseWidth * aspect * kMiniUnitScale};
+
+    registry_.emplace<Engine::ECS::AABB>(e, Engine::ECS::AABB{Engine::Vec2{renderSize.x * 0.5f, renderSize.y * 0.5f}});
     registry_.emplace<Engine::ECS::Renderable>(e,
-        Engine::ECS::Renderable{Engine::Vec2{size, size}, Engine::Color{160, 240, 200, 255}, tex});
+        Engine::ECS::Renderable{renderSize, Engine::Color{160, 240, 200, 255}, tex});
+
     if (tex) {
-        int frameW = def.frameWidth > 0 ? def.frameWidth : 16;
-        int frameH = def.frameHeight > 0 ? def.frameHeight : frameW;
         int frames = std::max(1, tex->width() / frameW);
         float frameDur = def.frameDuration > 0.0f ? def.frameDuration : 0.14f;
         registry_.emplace<Engine::ECS::SpriteAnimation>(e, Engine::ECS::SpriteAnimation{frameW, frameH, frames, frameDur});
@@ -4467,16 +4474,27 @@ Engine::ECS::Entity GameRoot::spawnMiniUnit(const MiniUnitDef& def, const Engine
     float shieldArmor = def.shieldArmor;
     if (armor <= 0.0f && def.cls == Game::MiniUnitClass::Heavy) armor = 1.0f;
     if (shieldArmor <= 0.0f && def.cls == Game::MiniUnitClass::Heavy) shieldArmor = armor;
-    hp.healthArmor = armor;
-    hp.shieldArmor = shieldArmor;
+    // Apply persistent builder buffs per class.
+    float classMul = 1.0f;
+    switch (def.cls) {
+        case Game::MiniUnitClass::Light: classMul = miniBuffLight_; break;
+        case Game::MiniUnitClass::Heavy: classMul = miniBuffHeavy_; break;
+        case Game::MiniUnitClass::Medic: classMul = miniBuffMedic_; break;
+    }
+    hp.maxHealth *= classMul;
+    hp.currentHealth *= classMul;
+    hp.maxShields *= classMul;
+    hp.currentShields *= classMul;
+    hp.healthArmor = armor * classMul;
+    hp.shieldArmor = shieldArmor * classMul;
     registry_.emplace<Engine::ECS::Health>(e, hp);
     registry_.emplace<Game::MiniUnit>(e, Game::MiniUnit{def.cls, 0, false, 0.0f, 0.0f});
     registry_.emplace<Game::MiniUnitCommand>(e, Game::MiniUnitCommand{false, {}});
     // Cache stats per-unit for data-driven AI/RTS control.
     Game::MiniUnitStats stats{};
     stats.moveSpeed = (def.moveSpeed > 0.0f ? def.moveSpeed : 160.0f) * globalSpeedMul_;
-    stats.damage = def.damage;
-    stats.healPerSecond = def.healPerSecond;
+    stats.damage = def.damage * classMul;
+    stats.healPerSecond = def.healPerSecond * classMul;
     // Per-class defaults if not specified in json.
     if (def.cls == Game::MiniUnitClass::Light) {
         stats.attackRange = def.attackRange > 0.0f ? def.attackRange : 180.0f;
@@ -4495,6 +4513,93 @@ Engine::ECS::Entity GameRoot::spawnMiniUnit(const MiniUnitDef& def, const Engine
     registry_.emplace<Game::MiniUnitStats>(e, stats);
     registry_.emplace<Game::OffensiveTypeTag>(e, Game::OffensiveTypeTag{def.offensiveType});
     return e;
+}
+
+void GameRoot::applyMiniUnitBuff(Game::MiniUnitClass cls, float mul) {
+    if (mul <= 0.0f) return;
+    switch (cls) {
+        case Game::MiniUnitClass::Light: miniBuffLight_ *= mul; break;
+        case Game::MiniUnitClass::Heavy: miniBuffHeavy_ *= mul; break;
+        case Game::MiniUnitClass::Medic: miniBuffMedic_ *= mul; break;
+    }
+    registry_.view<Game::MiniUnit, Game::MiniUnitStats, Engine::ECS::Health>(
+        [&](Engine::ECS::Entity, Game::MiniUnit& mu, Game::MiniUnitStats& stats, Engine::ECS::Health& hp) {
+            if (mu.cls != cls) return;
+            hp.maxHealth *= mul;
+            hp.currentHealth *= mul;
+            hp.maxShields *= mul;
+            hp.currentShields *= mul;
+            hp.healthArmor *= mul;
+            hp.shieldArmor *= mul;
+            stats.damage *= mul;
+            stats.healPerSecond *= mul;
+        });
+}
+
+void GameRoot::activateMiniUnitRage(float duration, float dmgMul, float atkRateMul, float hpMul, float healMul) {
+    miniRageTimer_ = std::max(miniRageTimer_, duration);
+    miniRageDamageMul_ = dmgMul;
+    miniRageAttackRateMul_ = atkRateMul;
+    miniRageHealMul_ = healMul;
+    if (miniUnitSystem_) {
+        miniUnitSystem_->setGlobalDamageMul(miniRageDamageMul_);
+        miniUnitSystem_->setGlobalAttackRateMul(miniRageAttackRateMul_);
+        miniUnitSystem_->setGlobalHealMul(miniRageHealMul_);
+    }
+    registry_.view<Game::MiniUnit, Game::MiniUnitStats, Engine::ECS::Health>(
+        [&](Engine::ECS::Entity e, Game::MiniUnit&, Game::MiniUnitStats& stats, Engine::ECS::Health& hp) {
+            if (registry_.has<Game::MiniUnitRageBuff>(e)) {
+                if (auto* r = registry_.get<Game::MiniUnitRageBuff>(e)) r->timer = duration;
+                return;
+            }
+            hp.maxHealth *= hpMul;
+            hp.currentHealth = std::min(hp.maxHealth, hp.currentHealth * hpMul);
+            hp.maxShields *= hpMul;
+            hp.currentShields = std::min(hp.maxShields, hp.currentShields * hpMul);
+            hp.healthArmor *= hpMul;
+            hp.shieldArmor *= hpMul;
+            stats.damage *= dmgMul;
+            stats.attackRate *= atkRateMul;
+            stats.healPerSecond *= healMul;
+            registry_.emplace<Game::MiniUnitRageBuff>(e, Game::MiniUnitRageBuff{duration, hpMul, dmgMul, atkRateMul, healMul});
+        });
+}
+
+void GameRoot::updateMiniUnitRage(float dt) {
+    bool anyActive = false;
+    registry_.view<Game::MiniUnitRageBuff, Game::MiniUnitStats, Engine::ECS::Health>(
+        [&](Engine::ECS::Entity e, Game::MiniUnitRageBuff& r, Game::MiniUnitStats& stats, Engine::ECS::Health& hp) {
+            r.timer -= dt;
+            if (r.timer <= 0.0f) {
+                // Revert stats.
+                hp.maxHealth /= r.hpMul;
+                hp.currentHealth = std::min(hp.maxHealth, hp.currentHealth / r.hpMul);
+                hp.maxShields /= r.hpMul;
+                hp.currentShields = std::min(hp.maxShields, hp.currentShields / r.hpMul);
+                hp.healthArmor /= r.hpMul;
+                hp.shieldArmor /= r.hpMul;
+                stats.damage /= r.dmgMul;
+                stats.attackRate /= r.atkRateMul;
+                stats.healPerSecond /= r.healMul;
+                registry_.remove<Game::MiniUnitRageBuff>(e);
+            } else {
+                anyActive = true;
+            }
+        });
+    if (miniRageTimer_ > 0.0f) {
+        miniRageTimer_ = std::max(0.0f, miniRageTimer_ - dt);
+        if (miniRageTimer_ <= 0.0f && miniUnitSystem_) {
+            miniUnitSystem_->setGlobalDamageMul(1.0f);
+            miniUnitSystem_->setGlobalAttackRateMul(1.0f);
+            miniUnitSystem_->setGlobalHealMul(1.0f);
+        }
+    }
+    // If no per-unit buff remains, ensure globals reset.
+    if (!anyActive && miniRageTimer_ <= 0.0f && miniUnitSystem_) {
+        miniUnitSystem_->setGlobalDamageMul(1.0f);
+        miniUnitSystem_->setGlobalAttackRateMul(1.0f);
+        miniUnitSystem_->setGlobalHealMul(1.0f);
+    }
 }
 
 void GameRoot::placeBuilding(const Engine::Vec2& pos) {
@@ -6463,6 +6568,14 @@ void GameRoot::buildAbilities() {
     stormTimer_ = 0.0;
     chainBase_ = 0;
     turrets_.clear();
+    // Builder-specific scalars reset each build.
+    miniBuffLight_ = 1.0f;
+    miniBuffHeavy_ = 1.0f;
+    miniBuffMedic_ = 1.0f;
+    miniRageTimer_ = 0.0f;
+    miniRageDamageMul_ = 1.0f;
+    miniRageAttackRateMul_ = 1.0f;
+    miniRageHealMul_ = 1.0f;
 
     // Load from data file
     std::ifstream f("data/abilities.json");
@@ -6529,7 +6642,20 @@ void GameRoot::buildAbilities() {
 
     if (!loaded) {
         const std::string archetype = activeArchetype_.id;
-    if (archetype == "damage" || archetype == "damage dealer" || archetype == "dd") {
+    if (archetype == "builder") {
+        // Custom Builder kit: three upgrade abilities plus a mini-unit overdrive ultimate.
+        auto push = [&](const std::string& name, const std::string& desc, const std::string& key, float cd, int cost, const std::string& type, int icon) {
+            AbilityDef d{name, desc, key, cd, cost, type, icon};
+            pushAbility(d);
+            abilities_.back().maxLevel = 1000000;
+            abilityStates_.back().maxLevel = 1000000;
+        };
+        push("Upgrade Light Units", "Permanently buff Light mini-units by +2% to all stats per purchase.", "1", 0.6f, 20, "builder_up_light", 7);
+        push("Upgrade Heavy Units", "Permanently buff Heavy mini-units by +2% to all stats per purchase.", "2", 0.6f, 25, "builder_up_heavy", 12);
+        push("Upgrade Medic Units", "Permanently buff Medic mini-units by +2% to all stats per purchase.", "3", 0.6f, 22, "builder_up_medic", 44);
+        push("Mini-Unit Overdrive", "30s rage: faster attacks, bonus health, bonus damage for all mini-units.", "4", 45.0f, 35, "builder_rage", 55);
+        loaded = true;
+    } else if (archetype == "damage" || archetype == "damage dealer" || archetype == "dd") {
         pushAbility({"Primary Fire", "Standard projectile.", "M1", 0.0f, 0, "primary"});
         pushAbility({"Scatter Shot", "Close-range cone blast.", "1", 6.0f, 30, "scatter"});
         pushAbility({"Rage", "Boost damage and fire rate briefly.", "2", 12.0f, 40, "rage"});
@@ -6865,7 +6991,8 @@ void GameRoot::drawBuildMenuOverlay(int mouseX, int mouseY, bool leftClickEdge) 
     if (!render_ || !buildMenuOpen_ || activeArchetype_.offensiveType != Game::OffensiveType::Builder) return;
     const float panelW = 260.0f;
     const float panelH = 220.0f;
-    Engine::Vec2 topLeft{22.0f, static_cast<float>(viewportHeight_) - panelH - 22.0f};
+    const float panelY = static_cast<float>(viewportHeight_) - panelH - kHudBottomSafeMargin;
+    Engine::Vec2 topLeft{22.0f, panelY};
     render_->drawFilledRect(topLeft, Engine::Vec2{panelW, panelH}, Engine::Color{20, 26, 38, 230});
     drawTextUnified("Build Menu (V)", Engine::Vec2{topLeft.x + 12.0f, topLeft.y + 10.0f}, 1.0f,
                     Engine::Color{210, 240, 255, 240});
@@ -6876,24 +7003,24 @@ void GameRoot::drawBuildMenuOverlay(int mouseX, int mouseY, bool leftClickEdge) 
                                   {Game::BuildingType::Turret, "Turret (Defense)"},
                                   {Game::BuildingType::Barracks, "Barracks (Spawns)"},
                                   {Game::BuildingType::Bunker, "Bunker (Garrison)"}}};
-    float y = topLeft.y + 60.0f;
+    float rowY = topLeft.y + 60.0f;
     const float rowH = 32.0f;
     for (const auto& e : entries) {
         bool hover = mouseX >= static_cast<int>(topLeft.x + 10.0f) && mouseX <= static_cast<int>(topLeft.x + panelW - 10.0f) &&
-                     mouseY >= static_cast<int>(y) && mouseY <= static_cast<int>(y + rowH);
+                     mouseY >= static_cast<int>(rowY) && mouseY <= static_cast<int>(rowY + rowH);
         Engine::Color bg = hover ? Engine::Color{40, 60, 80, 230} : Engine::Color{28, 36, 48, 210};
-        render_->drawFilledRect(Engine::Vec2{topLeft.x + 8.0f, y}, Engine::Vec2{panelW - 16.0f, rowH}, bg);
+        render_->drawFilledRect(Engine::Vec2{topLeft.x + 8.0f, rowY}, Engine::Vec2{panelW - 16.0f, rowH}, bg);
         auto it = buildingDefs_.find(buildingKey(e.type));
         int cost = (it != buildingDefs_.end()) ? it->second.costCopper : 0;
         std::ostringstream label;
         label << e.label << " - " << cost << "c";
-        drawTextUnified(label.str(), Engine::Vec2{topLeft.x + 14.0f, y + 6.0f}, 0.9f,
+        drawTextUnified(label.str(), Engine::Vec2{topLeft.x + 14.0f, rowY + 6.0f}, 0.9f,
                         Engine::Color{220, 240, 255, 240});
         if (hover && leftClickEdge) {
             beginBuildPreview(e.type);
             buildMenuOpen_ = false;
         }
-        y += rowH + 6.0f;
+        rowY += rowH + 6.0f;
     }
     std::ostringstream cp;
     cp << "Copper: " << copper_;
@@ -7876,7 +8003,7 @@ void GameRoot::updateRemoteCombat(const Engine::TimeStep& step) {
 void GameRoot::refreshPauseState() {
     // In multiplayer, overlays (shop, level-up, build, inventory) do NOT pause the match.
     bool overlayPause = !multiplayerEnabled_ &&
-                        (itemShopOpen_ || abilityShopOpen_ || levelChoiceOpen_ || characterScreenOpen_ || buildMenuOpen_);
+                        (itemShopOpen_ || abilityShopOpen_ || levelChoiceOpen_ || characterScreenOpen_);
     paused_ = userPaused_ || overlayPause || defeated_;
 }
 

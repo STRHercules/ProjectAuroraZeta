@@ -137,10 +137,10 @@ void MiniUnitSystem::update(Engine::ECS::Registry& registry, const Engine::TimeS
                 } else {
                     vel.value = {0.0f, 0.0f};
                     if (auto* hpF = registry.get<Engine::ECS::Health>(friendEnt)) {
-                        hpF->currentHealth = std::min(hpF->maxHealth, hpF->currentHealth + stats.healPerSecond * dt);
+                        hpF->currentHealth = std::min(hpF->maxHealth, hpF->currentHealth + stats.healPerSecond * globalHealMul_ * dt);
                         // Shields heal very slowly (medic focus on health).
                         if (hpF->maxShields > 0.0f) {
-                            hpF->currentShields = std::min(hpF->maxShields, hpF->currentShields + stats.healPerSecond * 0.25f * dt);
+                            hpF->currentShields = std::min(hpF->maxShields, hpF->currentShields + stats.healPerSecond * globalHealMul_ * 0.25f * dt);
                         }
                     }
                 }
@@ -195,13 +195,13 @@ void MiniUnitSystem::update(Engine::ECS::Registry& registry, const Engine::TimeS
                     if (auto* enemyHp = registry.get<Engine::ECS::Health>(enemyEnt)) {
                         if (enemyHp->alive()) {
                             Engine::Gameplay::DamageEvent dmg{};
-                            dmg.baseDamage = stats.damage;
+                            dmg.baseDamage = stats.damage * globalDamageMul_;
                             dmg.type = Engine::Gameplay::DamageType::Normal;
                             Engine::Gameplay::BuffState buff{};
                             Engine::Gameplay::applyDamage(*enemyHp, dmg, buff);
                         }
                     }
-                    mu.attackCooldown = std::max(0.1f, stats.attackRate);
+                    mu.attackCooldown = std::max(0.1f, stats.attackRate * globalAttackRateMul_);
                 }
             } else {
                 mu.attackCooldown = std::max(0.0f, mu.attackCooldown - dt);

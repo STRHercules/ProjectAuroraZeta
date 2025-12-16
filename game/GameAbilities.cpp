@@ -291,6 +291,32 @@ void GameRoot::executeAbility(int index) {
         }
     };
 
+    // Builder-specific ability hooks: upgrade mini-units and trigger overdrive.
+    if (activeArchetype_.offensiveType == Game::OffensiveType::Builder) {
+        if (slot.type == "builder_up_light" || slot.type == "builder_up_heavy" || slot.type == "builder_up_medic") {
+            spendEnergy();
+            setCooldown(slot.cooldownMax);
+            const float mul = 1.05f;
+            if (slot.type == "builder_up_light") applyMiniUnitBuff(Game::MiniUnitClass::Light, mul);
+            if (slot.type == "builder_up_heavy") applyMiniUnitBuff(Game::MiniUnitClass::Heavy, mul);
+            if (slot.type == "builder_up_medic") applyMiniUnitBuff(Game::MiniUnitClass::Medic, mul);
+            slot.level += 1;
+            st.level = slot.level;
+            return;
+        }
+        if (slot.type == "builder_rage") {
+            spendEnergy();
+            setCooldown(slot.cooldownMax);
+            const float duration = 30.0f;
+            const float dmgMul = 1.35f;
+            const float atkRateMul = 0.65f;  // faster attacks
+            const float hpMul = 1.25f;
+            const float healMul = 1.35f;
+            activateMiniUnitRage(duration, dmgMul, atkRateMul, hpMul, healMul);
+            return;
+        }
+    }
+
     if (slot.type == "scatter") {
         // Cone blast of pellets
         spendEnergy();

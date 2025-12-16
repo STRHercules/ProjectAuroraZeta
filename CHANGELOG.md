@@ -24,7 +24,22 @@
     * Ghosts can move around, but not interact (Attack/Abilities)
     * Ghosts resurrect at the start of the following Round.
 * Multiplayer is now synced to the Host's match.
+    * Vision is shared in multiplayer
     * Clients no longer see their own copies of monsters.
     * Clients can now interact with the Host's monsters.
         * Do Damage
         * Take Damage
+* Adjusted Builder GUI location
+* Further buffed all mini-units and boosted medic healing in data/units.json:
+      - Light: HP 130, damage 18.
+      - Heavy: HP 520, shields 180, damage 14, armor/shieldArmor 3.
+      - Medic: HP 180, shields 80, damage 8, heal/sec 22.
+      - Beatle: HP 180, damage 20.
+      - Snake: HP 280, shields 80, damage 30, armor/shieldArmor 2.5.
+* Builder construction menu **V** no longer opens the ESC/Pause window.
+* Builder Abilities refined:
+    * Ability 1: Unlimited scaling cost purchase of 5% boost to Light Units per upgrade.
+    * Ability 2: Unlimited scaling cost purchase of 5% boost to Heavy Units per upgrade.
+    * Ability 3: Unlimited scaling cost purchase of 5% boost to Medic Units per upgrade.
+    * Ultimate: Grants a 'Rage' boost to all units for 30s.
+* Increased scale of Mini-Units
