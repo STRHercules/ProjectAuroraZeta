@@ -8,32 +8,93 @@ This document defines distinct “AI agent” roles for working on **Project Aur
 
 All agents must follow these constraints:
 
-1. **Language & Stack**
+1. **Consult `TASK.md` first**
+   - Before implementing anything, check `TASK.md` for the current goal, constraints, and any required steps.
+   - If `TASK.md` is empty or does not apply to the current request, proceed with the prompt, but record key assumptions in `TRACELOG.md`.
+
+2. **Language & Stack**
    - Main language: **C++20** (or C# if explicitly directed).
    - No use of game engines like Unity, Unreal, or Godot.
    - Lightweight libraries (SDL2, OpenGL, etc.) are allowed.
 
-2. **Architecture Respect**
+3. **Architecture Respect**
    - Keep engine-agnostic code inside `/engine`.
    - Keep game-specific code (heroes, Zeta’s lore, waves) inside `/game`.
    - Do not introduce tight coupling across these layers.
 
-3. **Build Discipline**
+4. **Build Discipline**
    - Do not introduce changes that break the build.
    - If refactoring, update all affected code paths.
    - Prefer small, incremental changes over large rewrites.
 
-4. **Documentation**
+5. **Documentation**
    - When creating new systems, add short docstrings and/or markdown notes as needed.
    - Maintain updated comments in `GAME_SPEC.md` and related docs when behavior changes.
+   - Leave clear and concise comments detailing the process for non-obvious logic (the “why”, not just the “what”).
 
-5. **Data-Driven Design**
+6. **Data-Driven Design**
    - Expose tunable values (HP, damage, spawn rates, difficulty multipliers) in data files.
    - Avoid hardcoding balancing numbers in code.
 
-6. **Testing & Validation**
+7. **Testing & Validation**
    - Whenever possible, add simple tests or test harnesses for core logic.
    - Manually describe how to test new features in commit notes or comments.
+
+8. **Repo Hygiene & Ship Discipline**
+   - **Run a build before finalizing changes.**
+     - A change is not “done” until the project compiles successfully for the target(s) you touched.
+     - If a build fails, **do not commit “broken” work**—fix it first (or clearly document what’s failing and why in `TRACELOG.md` if you must hand off).
+   - **Increment the in-game build number on every meaningful change.**
+     - Update the HUD/version string in `Game.cpp`:
+       - `Pre-Alpha | Build vX.Y.ZZZ` (e.g., `Build v0.0.101`)
+     - Treat the displayed build number as the canonical “player-visible build”.
+   - **Keep a running engineering trail in `TRACELOG.md`.**
+     - Every commit must append a new entry including:
+       - Prompt/task request
+       - What changed (high-level)
+       - Steps taken
+       - Rationale / tradeoffs
+       - How to test (including the build you ran)
+   - **Keep forward-looking improvements in `SUGGESTIONS.md`.**
+     - After a successful build, add at least one of:
+       - Refactor opportunities
+       - Performance ideas
+       - UX polish ideas
+       - Follow-up tasks that would improve maintainability
+   - **Update `README.md` when user-facing behavior changes.**
+     - If the game’s build/run steps, controls, features, or config formats change, update `README.md`.
+     - If behavior/spec changes, also update `GAME_SPEC.md` as appropriate.
+
+### Recommended `TRACELOG.md` entry format
+
+Use something like this (append-only):
+
+```md
+## YYYY-MM-DD — <short change title>
+
+**Prompt / Task**
+- ...
+
+**What Changed**
+- ...
+
+**Steps Taken**
+- ...
+
+**Rationale / Tradeoffs**
+- ...
+
+**Build / Test**
+- Build: <how/where you built it>
+- Manual test: <quick steps>
+```
+
+### Recommended `SUGGESTIONS.md` entry format
+
+```md
+## YYYY-MM-DD — Suggestions after <short change title>
+- ...
+```
 
 ---
 
@@ -206,14 +267,15 @@ All agents must follow these constraints:
 1. **Plan**
    - ArchitectAgent defines or refines milestone and assigns tasks to EngineAgent, GameplayAgent, etc.
 2. **Implement**
-   - Each agent works within its domain, referencing `GAME_SPEC.md`.
+   - Each agent works within its domain, referencing `GAME_SPEC.md` (and `TASK.md` when applicable).
 3. **Integrate**
    - After implementing features, agents ensure code builds and runs.
 4. **Validate**
    - QaAgent performs sanity checks and updates test checklist.
 5. **Document**
    - Agents update relevant sections in `GAME_SPEC.md` when behavior changes.
-   - MetaProgressionAgent updates any persistence/format docs when save structure changes.
+   - Agents append `TRACELOG.md` and `SUGGESTIONS.md` entries per the shared rules.
+   - Update `README.md` when user-facing behavior or run/build steps change.
 
 ---
 
@@ -232,4 +294,17 @@ These are examples you (the human) can use when instantiating agents:
 
 ---
 
-By adhering to these role definitions and shared rules, multiple Codex instances (or similar AI developers) can collaboratively build and maintain the Project Aurora Zeta codebase while preserving a coherent architecture and design.
+## 5. Commit Checklist
+
+Use this checklist before every commit/PR is considered “ready”:
+
+- [ ] **Consulted `TASK.md`** (or documented why it didn’t apply).
+- [ ] **Project builds with no errors** for the affected target(s) (and you can state what you built).
+- [ ] **Build number incremented** in `Game.cpp` (the `Pre-Alpha | Build vX.Y.ZZZ` string).
+- [ ] **Architecture respected** (`/engine` stays engine-agnostic; `/game` contains game-specific behavior).
+- [ ] **No balancing hardcodes** (tunable values moved to data files where applicable).
+- [ ] **Clear comments added** for any non-obvious logic (explain the “why”).
+- [ ] **Docs updated** (`GAME_SPEC.md` and/or `README.md` if behavior, controls, or run/build steps changed).
+- [ ] **`TRACELOG.md` updated** with prompt, steps, rationale, and how to test (including the build you ran).
+- [ ] **`SUGGESTIONS.md` updated** with refactors/ideas/follow-ups discovered during implementation.
+- [ ] **Manual validation described** (quick steps someone else can follow to confirm it works).

@@ -2,8 +2,6 @@
 * Expose as much as possible to make it as easy as possible to mod
     * Develop mod tools?
 
-# Escort facing opposite direction they are running.
-
 # Chat
 * Ability for players to chat in Multiplayer Lobby/Match
 
