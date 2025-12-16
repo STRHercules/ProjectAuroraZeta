@@ -12,6 +12,7 @@
 #include <functional>
 #include <optional>
 #include <array>
+#include <cmath>
 #include <unordered_set>
 #ifdef _WIN32
 #    ifndef NOMINMAX
@@ -302,6 +303,7 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     float heroMoveSpeed = heroMoveSpeed_;
     float heroHp = heroMaxHp_;
     float heroShields = heroShield_;
+    float meleeShieldBonus = meleeShieldBonus_;
     float heroHealthArmor = heroHealthArmor_;
     float heroShieldArmor = heroShieldArmor_;
     float heroShieldRegen = heroShieldRegen_;
@@ -386,6 +388,7 @@ bool GameRoot::onInitialize(Engine::Application& app) {
                 heroMoveSpeed = j["hero"].value("moveSpeed", heroMoveSpeed);
                 heroSize = j["hero"].value("size", heroSize);
                 heroShields = j["hero"].value("shields", heroShields);
+                meleeShieldBonus = j["hero"].value("meleeShieldBonus", meleeShieldBonus);
                 heroHealthArmor = j["hero"].value("healthArmor", heroHealthArmor);
                 heroShieldArmor = j["hero"].value("shieldArmor", heroShieldArmor);
                 heroShieldRegen = j["hero"].value("shieldRegen", heroShieldRegen);
@@ -532,6 +535,7 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     heroMoveSpeed *= globalSpeedMul_;
     waveSettingsBase_ = waveSettings;
     waveSettingsDefault_ = waveSettings;
+    contactDamageBase_ = waveSettingsBase_.contactDamage;
     projectileSpeed_ = projectileSpeed;
     projectileDamage_ = projectileDamage;
     projectileDamageBase_ = projectileDamage;
@@ -548,6 +552,8 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     heroShield_ = heroShields;
     heroShieldBase_ = heroShields;
     heroShieldPreset_ = heroShields;
+    meleeShieldBonusBase_ = meleeShieldBonus;
+    meleeShieldBonus_ = meleeShieldBonus;
     heroBaseStats_ = Engine::Gameplay::BaseStats{heroHealthArmor, heroShieldArmor};
     heroBaseStatsScaled_ = heroBaseStats_;
     heroHealthArmor_ = heroHealthArmor;
@@ -565,7 +571,9 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     waveInterval_ = waveInterval;
     graceDuration_ = graceDuration;
     copperPerKill_ = copperPerKill;
+    copperPerKillBase_ = copperPerKill;
     waveClearBonus_ = waveClearBonus;
+    waveClearBonusBase_ = waveClearBonus;
     enemyLowThreshold_ = enemyLowThreshold;
     combatDuration_ = combatDuration;
     intermissionDuration_ = intermissionDuration;
@@ -588,6 +596,10 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     showDamageNumbers_ = showDamageNumbers;
     screenShake_ = screenShake;
     salvageReward_ = salvageReward;
+    copperPickupMinBase_ = copperPickupMin_;
+    copperPickupMaxBase_ = copperPickupMax_;
+    bossCopperDropBase_ = bossCopperDrop_;
+    miniBossCopperDropBase_ = miniBossCopperDrop_;
     xpPerKill_ = xpPerKill;
     xpPerWave_ = xpPerWave;
     xpPerDamageDealt_ = xpPerDmgDealt;
@@ -716,22 +728,32 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         buildMenuOpen_ = false;
         clearBuildPreview();
     }
-    if (!inMenu_ && pausePressed) {
-        userPaused_ = !userPaused_;
-        pauseMenuBlink_ = 0.0;
-    }
-    if (userPaused_ && menuBackEdge) {
-        // Return to main menu from pause
-        inMenu_ = true;
-        menuPage_ = MenuPage::Main;
-        menuSelection_ = 0;
+    auto closeOverlays = [&]() {
         userPaused_ = false;
         paused_ = false;
         itemShopOpen_ = false;
         abilityShopOpen_ = false;
         levelChoiceOpen_ = false;
+        characterScreenOpen_ = false;
+        buildMenuOpen_ = false;
+        clearBuildPreview();
         pauseMenuBlink_ = 0.0;
         pauseClickPrev_ = false;
+    };
+    if (!inMenu_) {
+        bool anyOverlay = userPaused_ || itemShopOpen_ || abilityShopOpen_ || levelChoiceOpen_ || characterScreenOpen_ ||
+                          buildMenuOpen_;
+        if (pausePressed) {
+            if (anyOverlay) {
+                closeOverlays();
+            } else {
+                userPaused_ = !userPaused_;
+                pauseMenuBlink_ = 0.0;
+            }
+        }
+        if (menuBackEdge && anyOverlay) {
+            closeOverlays();
+        }
     }
     if (characterEdge && !inMenu_) {
         characterScreenOpen_ = !characterScreenOpen_;
@@ -899,7 +921,8 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             mouseOverUI |= pointInRect(lastMouseX_, lastMouseY_, hudX, hudY, hudW, hudH);
         }
 
-        if (leftEdge && !mouseOverUI) {
+        bool canDragSelect = activeArchetype_.offensiveType == Game::OffensiveType::Builder || activeArchetype_.id == "summoner";
+        if (leftEdge && !mouseOverUI && canDragSelect) {
             selectingMiniUnits_ = true;
             selectionStart_ = worldMouse;
             selectionEnd_ = worldMouse;
@@ -2208,6 +2231,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                         waveBannerTimer_ = 1.25;
                         waveClearedPending_ = false;
                         clearBannerTimer_ = 0.0;
+                        applyWaveScaling(wave_);
                         if (wave_ == bossWave_) {
                             bossBannerTimer_ = 2.0;
                         }
@@ -2754,13 +2778,16 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 drawTextUnified(note.str(), Engine::Vec2{10.0f, 82.0f}, 0.9f, Engine::Color{180, 240, 180, 200});
             }
             drawResourceCluster();
-            // Inventory badge anchored bottom-left.
+            // Inventory badge anchored above ability bar.
             {
                 const float badgeW = 280.0f;
                 const float badgeH = 50.0f;
                 const float margin = 16.0f;
-                float x = margin;
-                float y = static_cast<float>(viewportHeight_) - badgeH - margin;
+                HUDRect abilityRect = abilityHudRect(static_cast<int>(abilities_.size()), viewportWidth_, viewportHeight_);
+                // Right-align with the ability bar and place just above it.
+                float x = abilityRect.x + abilityRect.w - badgeW;
+                if (x < margin) x = margin;  // clamp to screen
+                float y = abilityRect.y - badgeH - margin;
                 render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{badgeW, badgeH},
                                         Engine::Color{18, 24, 34, 215});
                 auto rarityCol = [](ItemRarity r) {
@@ -3251,6 +3278,22 @@ bool GameRoot::performMeleeAttack(const Engine::TimeStep& step, const Engine::Ac
     bool haveTarget = false;
     float visionRange = heroVisionRadiusTiles_ * static_cast<float>(fogTileSize_ > 0 ? fogTileSize_ : 32);
     float meleeRange = std::min(visionRange, meleeConfig_.range);
+    auto addReach = [&](float extra) { meleeRange += extra; };
+    // Dragoon spear: extend melee reach by ~1.5 tiles (48 units).
+    if (activeArchetype_.id == "support" || activeArchetype_.name == "Dragoon") {
+        addReach(48.0f);
+    }
+    // Core melee roster extra reach (+12 units): Knight, Militia (when in melee), Assassin, Crusader, Druid beast forms.
+    const std::string id = activeArchetype_.id;
+    const bool isKnight = (id == "tank");
+    const bool isMilitia = (id == "damage");
+    const bool isAssassin = (id == "assassin");
+    const bool isCrusader = (id == "special");
+    const bool isDruidForm = (id == "druid" && druidForm_ != DruidForm::Human);
+    const bool militiaInMelee = isMilitia && heroBaseOffense_ == Game::OffensiveType::Melee;
+    if (isKnight || isAssassin || isCrusader || isDruidForm || militiaInMelee) {
+        addReach(12.0f);
+    }
     float meleeRange2 = meleeRange * meleeRange;
     const bool allowManualTargeting = movementMode_ != MovementMode::RTS;  // StarCraft-style: no left-click attack in RTS mode.
     if (allowManualTargeting && actions.primaryFire) {
@@ -3702,6 +3745,8 @@ void GameRoot::applyGlobalModifiersToPresets() {
     heroBaseStatsScaled_ = heroBaseStats_;
     heroBaseStatsScaled_.baseHealthArmor = heroBaseStats_.baseHealthArmor * globalModifiers_.playerArmorMult;
     heroBaseStatsScaled_.baseShieldArmor = heroBaseStats_.baseShieldArmor * globalModifiers_.playerArmorMult;
+    heroShieldRegenBase_ *= globalModifiers_.playerShieldRegenMult;
+    heroShieldRegen_ = heroShieldRegenBase_;
     attackSpeedBaseMul_ = globalModifiers_.playerAttackSpeedMult;
     applyArchetypePreset();
     rebuildWaveSettings();
@@ -3828,11 +3873,11 @@ void GameRoot::spawnShopkeeper(const Engine::Vec2& aroundPos) {
     float r = std::uniform_real_distribution<float>(260.0f, 420.0f)(rng_);
     float a = std::uniform_real_distribution<float>(0.0f, 6.28318f)(rng_);
     Engine::Vec2 pos{aroundPos.x + std::cos(a) * r, aroundPos.y + std::sin(a) * r};
-    // Lazy-load shop building texture once.
+    // Lazy-load shop building texture once (force the dedicated trader sprite).
     if (!shopTexture_) {
-        shopTexture_ = loadTextureOptional("assets/Sprites/Buildings/house1.png");
+        shopTexture_ = loadTextureOptional("assets/Sprites/Buildings/tradershop.png");
         if (!shopTexture_) {
-            Engine::logWarn("Shop texture missing (assets/Sprites/Buildings/house1.png); falling back to placeholder box.");
+            Engine::logWarn("Shop texture missing (assets/Sprites/Buildings/tradershop.png); falling back to placeholder box.");
         }
     }
     shopkeeper_ = registry_.create();
@@ -4184,7 +4229,7 @@ GameRoot::HeroSpriteFiles GameRoot::heroSpriteFilesFor(const GameRoot::Archetype
 
 bool isMeleeOnlyArchetype(const std::string& idOrName) {
     static const std::unordered_set<std::string> meleeIds = {
-        "tank", "assassin", "support", "special"};
+        "tank", "assassin", "support", "special", "damage"};
     std::string key = idOrName;
     std::transform(key.begin(), key.end(), key.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
     // normalize spaces
@@ -4967,7 +5012,7 @@ void GameRoot::renderMenu() {
         return mx >= x && mx <= x + w && my >= y && my <= y + h;
     };
     drawTextUnified("PROJECT AURORA ZETA", Engine::Vec2{centerX - 140.0f, topY}, 1.7f, Engine::Color{180, 230, 255, 240});
-    drawTextUnified("Pre-Alpha | Build v0.0.1",
+    drawTextUnified("Pre-Alpha | Build v0.0.101",
                     Engine::Vec2{centerX, topY + 28.0f},
                     0.85f, Engine::Color{150, 200, 230, 220});
 
@@ -5521,13 +5566,13 @@ void GameRoot::loadMenuPresets() {
                      Engine::Color{110, 190, 255, 255}, Game::OffensiveType::Melee);
         addArchetype("healer", "Healer", "Supportive sustain, balanced speed, lighter offense.", 1.05f, 1.0f, 0.95f,
                      Engine::Color{170, 220, 150, 255}, Game::OffensiveType::Ranged);
-        addArchetype("damage", "Damage Dealer", "Glass-cannon firepower, slightly faster pacing.", 0.95f, 1.05f, 1.15f,
+        addArchetype("damage", "Damage Dealer", "Can swap between Melee and Ranged using (Alt)", 0.95f, 1.05f, 1.15f,
                      Engine::Color{255, 180, 120, 255}, Game::OffensiveType::Melee);
         addArchetype("assassin", "Assassin", "Very quick and lethal but fragile.", 0.85f, 1.25f, 1.2f,
                      Engine::Color{255, 110, 180, 255}, Game::OffensiveType::Melee);
         addArchetype("builder", "Builder", "Sturdier utility specialist with slower advance.", 1.1f, 0.95f, 0.9f,
                      Engine::Color{200, 200, 120, 255}, Game::OffensiveType::Builder);
-        addArchetype("support", "Support", "All-rounder tuned for team buffs.", 1.0f, 1.0f, 1.0f,
+        addArchetype("support", "Support", "Equipped with a long-range polearm.", 1.0f, 1.0f, 1.0f,
                      Engine::Color{150, 210, 230, 255}, Game::OffensiveType::Melee);
         addArchetype("special", "Special", "Experimental kit with slight boosts across the board.", 1.1f, 1.05f, 1.05f,
                      Engine::Color{200, 160, 240, 255}, Game::OffensiveType::Melee);
@@ -5813,9 +5858,53 @@ void GameRoot::rebuildWaveSettings() {
         std::max(1, static_cast<int>(std::floor(static_cast<float>(baseBatch) * globalModifiers_.enemyCountMult)));
     waveSettingsBase_.batchSize = std::min(16, scaledBatch);
     waveBatchBase_ = waveSettingsBase_.batchSize;
-    contactDamage_ = waveSettingsBase_.contactDamage;
+    contactDamageBase_ = waveSettingsBase_.contactDamage;
+    contactDamage_ = contactDamageBase_;
     if (collisionSystem_) collisionSystem_->setContactDamage(contactDamage_);
     if (collisionSystem_) collisionSystem_->setThornConfig(thornConfig_.reflectPercent, thornConfig_.maxReflectPerHit);
+}
+
+float GameRoot::contactDamageCurve(int wave) const {
+    const float w = static_cast<float>(std::max(1, wave));
+    // Early safety: ramp from 18% at wave1 to 100% by ~wave11.
+    float earlyT = std::clamp((w - 1.0f) / 10.0f, 0.0f, 1.0f);
+    float earlyMul = 0.18f + earlyT * 0.82f;
+    // Late pressure: from wave20 onward climb toward +120% by wave60.
+    float lateT = std::clamp((w - 20.0f) / 40.0f, 0.0f, 1.0f);
+    float lateMul = 1.0f + 1.2f * lateT;
+    return earlyMul * lateMul;
+}
+
+float GameRoot::copperRewardCurve(int wave) const {
+    const float w = static_cast<float>(std::max(1, wave));
+    // Mild boost through early teens to keep upgrades flowing.
+    float earlyT = std::clamp((w - 1.0f) / 12.0f, 0.0f, 1.0f);
+    float earlyMul = 1.0f + 0.30f * earlyT;  // up to +30%
+    // Mid/late-game acceleration to offset tanky enemies (caps ~+250% by wave60).
+    float lateT = std::clamp((w - 15.0f) / 45.0f, 0.0f, 1.0f);
+    float lateMul = 1.0f + 2.5f * lateT;
+    return earlyMul * lateMul;
+}
+
+void GameRoot::applyWaveScaling(int wave) {
+    const int w = std::max(1, wave);
+    // Contact damage scaling
+    contactDamage_ = contactDamageBase_ * contactDamageCurve(w);
+    if (collisionSystem_) collisionSystem_->setContactDamage(contactDamage_);
+
+    // Economy scaling
+    const float rewardMul = copperRewardCurve(w);
+    auto scaleInt = [](int base, float mul) {
+        return std::max(1, static_cast<int>(std::round(static_cast<float>(base) * mul)));
+    };
+    copperPerKill_ = scaleInt(copperPerKillBase_, rewardMul);
+    copperPickupMin_ = scaleInt(copperPickupMinBase_, rewardMul);
+    copperPickupMax_ = std::max(copperPickupMin_, scaleInt(copperPickupMaxBase_, rewardMul));
+    bossCopperDrop_ = scaleInt(bossCopperDropBase_, rewardMul);
+    miniBossCopperDrop_ = scaleInt(miniBossCopperDropBase_, rewardMul);
+    // Partial scaling on wave clear bonus to avoid runaway economy.
+    float clearMul = 1.0f + (rewardMul - 1.0f) * 0.65f;
+    waveClearBonus_ = scaleInt(waveClearBonusBase_, clearMul);
 }
 
 void GameRoot::applyDifficultyPreset() {
@@ -5838,7 +5927,16 @@ void GameRoot::applyArchetypePreset() {
     heroBaseOffense_ = activeArchetype_.offensiveType;
     usingSecondaryWeapon_ = false;
     heroMaxHpPreset_ = heroMaxHpBase_ * activeArchetype_.hpMul * globalModifiers_.playerHealthMult;
-    heroShieldPreset_ = heroShieldBase_ * activeArchetype_.hpMul * globalModifiers_.playerShieldsMult;
+    heroShieldPreset_ = heroShieldBase_;
+    // Melee archetypes start with a substantial shield pool for survivability.
+    if (activeArchetype_.offensiveType == Game::OffensiveType::Melee) {
+        heroShieldPreset_ += 100.0f;
+    }
+    // Apply any melee shield bonus (kept additive for future tuning).
+    if (activeArchetype_.offensiveType == Game::OffensiveType::Melee) {
+        heroShieldPreset_ += meleeShieldBonus_ * activeArchetype_.hpMul * globalModifiers_.playerShieldsMult;
+    }
+    heroShieldPreset_ *= globalModifiers_.playerShieldsMult;
     heroMoveSpeedPreset_ = heroMoveSpeedBase_ * activeArchetype_.speedMul * globalModifiers_.playerSpeedMult;
     projectileDamagePreset_ = projectileDamageBase_ * activeArchetype_.damageMul * globalModifiers_.playerAttackPowerMult;
     heroColorPreset_ = activeArchetype_.color;
@@ -5974,19 +6072,18 @@ void GameRoot::buildAbilities() {
 }
 
 void GameRoot::rollLevelChoices() {
-    std::uniform_int_distribution<int> pickType(0, 2);
     std::uniform_real_distribution<float> variance(0.9f, 1.15f);
-    float dmg = levelDmgBonus_ * variance(rng_);
-    float hp = levelHpBonus_ * variance(rng_);
-    float spd = levelSpeedBonus_ * variance(rng_);
-    LevelChoice base[3] = {
-        {LevelChoiceType::Damage, dmg},
-        {LevelChoiceType::Health, hp},
-        {LevelChoiceType::Speed, spd},
-    };
+    auto jitter = [&](float v) { return v * variance(rng_); };
+    std::array<LevelChoice, 5> pool = {{
+        {LevelChoiceType::Damage, jitter(levelDmgBonus_)},
+        {LevelChoiceType::Health, jitter(levelHpBonus_)},
+        {LevelChoiceType::Speed, jitter(levelSpeedBonus_)},
+        {LevelChoiceType::Shield, 5.0f},
+        {LevelChoiceType::Recharge, 0.01f},  // +1% shield regen
+    }};
+    std::uniform_int_distribution<int> pickType(0, static_cast<int>(pool.size()) - 1);
     for (int i = 0; i < 3; ++i) {
-        int t = pickType(rng_);
-        levelChoices_[i] = base[t];
+        levelChoices_[i] = pool[pickType(rng_)];
     }
 }
 
@@ -6009,6 +6106,25 @@ void GameRoot::applyLevelChoice(int index) {
         case LevelChoiceType::Speed:
             heroMoveSpeed_ += choice.amount;
             break;
+        case LevelChoiceType::Shield:
+            heroShield_ += choice.amount;
+            heroShieldPreset_ += choice.amount;
+            if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
+                hp->maxShields += choice.amount;
+                hp->currentShields = std::min(hp->maxShields, hp->currentShields + choice.amount);
+            }
+            break;
+        case LevelChoiceType::Recharge: {
+            // Treat amount as fractional increase (e.g., 0.01 = +1%).
+            float baseline = heroShieldRegen_ > 0.0f ? heroShieldRegen_ : 0.5f;
+            float newRate = baseline * (1.0f + choice.amount);
+            heroShieldRegen_ = newRate;
+            heroShieldRegenBase_ = newRate;
+            if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
+                hp->shieldRegenRate = heroShieldRegen_;
+            }
+            break;
+        }
     }
     levelChoiceOpen_ = false;
     paused_ = userPaused_ || itemShopOpen_ || abilityShopOpen_ || (characterScreenOpen_ && !multiplayerEnabled_);
@@ -6054,6 +6170,16 @@ void GameRoot::drawLevelChoiceOverlay() {
                 title = "Sprint";
                 desc = "+ " + std::to_string(static_cast<int>(c.amount)) + " move";
                 tcol = Engine::Color{200, 220, 255, 240};
+                break;
+            case LevelChoiceType::Shield:
+                title = "Ward";
+                desc = "+ " + std::to_string(static_cast<int>(c.amount)) + " shields";
+                tcol = Engine::Color{150, 220, 255, 240};
+                break;
+            case LevelChoiceType::Recharge:
+                title = "Recharge";
+                desc = "+ " + std::to_string(static_cast<int>(std::round(c.amount * 100.0f))) + "% shield regen";
+                tcol = Engine::Color{170, 245, 255, 240};
                 break;
         }
         drawTextUnified(title, Engine::Vec2{x + 14.0f, y + 12.0f}, 1.05f, tcol);
@@ -6489,10 +6615,8 @@ void GameRoot::drawResourceCluster() {
     baseBarH = std::max({texH(hpBarTex_, baseBarH), texH(shieldBarTex_, baseBarH), texH(energyBarTex_, baseBarH), texH(dashBarTex_, baseBarH)});
     const float barW = baseBarW * barScale;
     const float barH = baseBarH * barScale;
-    const float gap = 12.0f * barScale;
-    const int barCount = 4;
-    const float totalW = barCount * barW + (barCount - 1) * gap;
-    const float startX = static_cast<float>(viewportWidth_) * 0.5f - totalW * 0.5f;
+    const float gap = 6.0f * barScale;  // tighter spacing
+    const float startX = 16.0f;  // left aligned
     const float y = static_cast<float>(viewportHeight_) - (barH + 20.0f);
 
     auto centeredTextPosY = [&](float baseY) { return baseY + (barH - 12.0f) * 0.5f; };
@@ -6990,6 +7114,13 @@ void GameRoot::resetRun() {
     miniUnitSupplyUsed_ = 0;
     miniUnitSupplyMax_ = 0;
     miniUnitSupplyCap_ = 10;
+    copperPerKill_ = copperPerKillBase_;
+    copperPickupMin_ = copperPickupMinBase_;
+    copperPickupMax_ = copperPickupMaxBase_;
+    bossCopperDrop_ = bossCopperDropBase_;
+    miniBossCopperDrop_ = miniBossCopperDropBase_;
+    waveClearBonus_ = waveClearBonusBase_;
+    contactDamage_ = contactDamageBase_;
     if (activeArchetype_.offensiveType == Game::OffensiveType::Builder) {
         miniUnitSupplyMax_ = std::max(miniUnitSupplyMax_, 2);
     }

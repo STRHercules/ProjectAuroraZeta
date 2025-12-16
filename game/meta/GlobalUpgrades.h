@@ -14,6 +14,7 @@ struct UpgradeLevels {
     int speed{0};
     int armor{0};
     int shields{0};
+    int recharge{0};
     int lifesteal{0};
     int regeneration{0};
     int lives{0};
@@ -28,6 +29,7 @@ struct GlobalModifiers {
     float playerSpeedMult{1.0f};
     float playerArmorMult{1.0f};
     float playerShieldsMult{1.0f};
+    float playerShieldRegenMult{1.0f};
     float playerLifestealAdd{0.0f};   // percent (e.g., 0.01 == +1%)
     float playerRegenAdd{0.0f};       // flat HP/sec
     int   playerLivesAdd{0};          // extra lives granted at run start

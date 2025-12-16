@@ -21,7 +21,7 @@
     {
       "id": "damage",
       "name": "Damage Dealer",
-      "description": "Glass-cannon firepower, slightly faster pacing.",
+      "description": "Can swap between Melee and Ranged using (Alt)",
       "hpMul": 0.95,
       "speedMul": 1.05,
       "damageMul": 1.15,
@@ -48,7 +48,7 @@
     {
       "id": "support",
       "name": "Support",
-      "description": "All-rounder tuned for team buffs.",
+      "description": "Equipped with a long-range polearm.",
       "hpMul": 1.0,
       "speedMul": 1.0,
       "damageMul": 1.0,

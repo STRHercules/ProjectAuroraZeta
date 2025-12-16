@@ -32,7 +32,7 @@ public:
     void clearOutcome() { lastSuccess_ = lastFail_ = false; }
 
 private:
-    void spawnEscort(Engine::ECS::Registry& registry, const Engine::Vec2& heroPos);
+    void spawnEscort(Engine::ECS::Registry& registry, const Engine::Vec2& heroPos, int wave);
     void spawnBounty(Engine::ECS::Registry& registry, const Engine::Vec2& heroPos, int eventId);
     void spawnSpireHunt(Engine::ECS::Registry& registry, const Engine::Vec2& heroPos, int eventId);
     void tickSpawners(Engine::ECS::Registry& registry, const Engine::TimeStep& step);

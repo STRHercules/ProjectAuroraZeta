@@ -81,6 +81,7 @@ std::vector<uint8_t> SaveManager::serialize(const SaveData& data) const {
     upgrades["speed"] = data.upgrades.speed;
     upgrades["armor"] = data.upgrades.armor;
     upgrades["shields"] = data.upgrades.shields;
+    upgrades["recharge"] = data.upgrades.recharge;
     upgrades["lifesteal"] = data.upgrades.lifesteal;
     upgrades["regeneration"] = data.upgrades.regeneration;
     upgrades["lives"] = data.upgrades.lives;
@@ -116,6 +117,7 @@ bool SaveManager::deserialize(const std::vector<uint8_t>& bytes, SaveData& outDa
             outData.upgrades.speed = g.value("speed", 0);
             outData.upgrades.armor = g.value("armor", 0);
             outData.upgrades.shields = g.value("shields", 0);
+            outData.upgrades.recharge = g.value("recharge", 0);
             outData.upgrades.lifesteal = g.value("lifesteal", 0);
             outData.upgrades.regeneration = g.value("regeneration", 0);
             outData.upgrades.lives = g.value("lives", 0);

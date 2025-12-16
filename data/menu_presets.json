@@ -22,13 +22,13 @@
     },
     {
       "id": "damage",
-      "name": "Militia",
-      "description": "Glass-cannon firepower, slightly faster pacing.",
+    "name": "Militia",
+      "description": "Can swap between Melee and Ranged using (Alt)",
       "hpMul": 0.95,
       "speedMul": 1.05,
       "damageMul": 1.15,
       "color": [255, 180, 120, 255],
-      "offensiveType": "Ranged"
+    "offensiveType": "Melee"
     },
     {
       "id": "assassin",
@@ -52,23 +52,23 @@
     },
     {
       "id": "support",
-      "name": "Dragoon",
-      "description": "All-rounder tuned for team buffs.",
-      "hpMul": 1.0,
-      "speedMul": 1.0,
-      "damageMul": 1.0,
-      "color": [150, 210, 230, 255],
-      "offensiveType": "Ranged"
+    "name": "Dragoon",
+    "description": "Equipped with a long-range polearm.",
+    "hpMul": 1.0,
+    "speedMul": 1.0,
+    "damageMul": 1.0,
+    "color": [150, 210, 230, 255],
+    "offensiveType": "Melee"
     },
     {
       "id": "special",
-      "name": "Crusader",
+    "name": "Crusader",
       "description": "Experimental kit with slight boosts across the board.",
       "hpMul": 1.1,
       "speedMul": 1.05,
       "damageMul": 1.05,
       "color": [200, 160, 240, 255],
-      "offensiveType": "Ranged"
+    "offensiveType": "Melee"
     },
     {
       "id": "summoner",

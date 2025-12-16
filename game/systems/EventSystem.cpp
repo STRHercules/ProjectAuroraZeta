@@ -121,7 +121,7 @@ Engine::TexturePtr EventSystem::loadSpireTexture() {
     return {};
 }
 
-void EventSystem::spawnEscort(Engine::ECS::Registry& registry, const Engine::Vec2& heroPos) {
+void EventSystem::spawnEscort(Engine::ECS::Registry& registry, const Engine::Vec2& heroPos, int wave) {
     // Spawn near hero and task the NPC to travel 500–1200 units.
     static thread_local std::mt19937 rng{std::random_device{}()};
     std::uniform_real_distribution<float> spawnAng(0.0f, 6.28318f);
@@ -138,7 +138,7 @@ void EventSystem::spawnEscort(Engine::ECS::Registry& registry, const Engine::Vec
     Engine::Vec2 dest{spawnPos.x + std::cos(angTravel) * distTarget, spawnPos.y + std::sin(angTravel) * distTarget};
 
     Engine::TexturePtr tex = loadEscortTexture();
-    float size = 26.0f;
+    float size = 26.0f * 1.5f;  // 50% larger render scale
     auto escortEnt = registry.create();
     registry.emplace<Engine::ECS::Transform>(escortEnt, spawnPos);
     registry.emplace<Engine::ECS::Velocity>(escortEnt, Engine::Vec2{0.0f, 0.0f});
@@ -147,14 +147,24 @@ void EventSystem::spawnEscort(Engine::ECS::Registry& registry, const Engine::Vec
     registry.emplace<Engine::ECS::Renderable>(escortEnt,
         Engine::ECS::Renderable{Engine::Vec2{size, size}, Engine::Color{180, 230, 255, 255}, tex});
     registry.emplace<Engine::ECS::AABB>(escortEnt, Engine::ECS::AABB{Engine::Vec2{size * 0.5f, size * 0.5f}});
-    registry.emplace<Engine::ECS::Health>(escortEnt, Engine::ECS::Health{1200.0f, 1200.0f});
+    // Scale escort durability with wave so it keeps pace with enemy power curve.
+    int waveIdx = std::max(1, wave);
+    float hpMul = std::pow(1.08f, static_cast<float>(waveIdx - 1));   // mirrors enemy hp growth
+    float armorMul = 1.0f + 0.015f * static_cast<float>(waveIdx - 1); // steady armor gain
+    float regenMul = 1.0f + 0.01f * static_cast<float>(waveIdx - 1);  // modest regen scaling
+    float baseHp = 1200.0f * hpMul;
+    float baseShields = 600.0f * hpMul;
+    float baseHealthArmor = 3.5f * armorMul;
+    float baseShieldArmor = 2.5f * armorMul;
+    float baseShieldRegen = std::min(40.0f, 10.0f * regenMul);
+    registry.emplace<Engine::ECS::Health>(escortEnt, Engine::ECS::Health{baseHp, baseHp});
     if (auto* hp = registry.get<Engine::ECS::Health>(escortEnt)) {
-        hp->maxShields = 600.0f;
-        hp->currentShields = 600.0f;
-        hp->healthArmor = 3.5f;
-        hp->shieldArmor = 2.5f;
+        hp->maxShields = baseShields;
+        hp->currentShields = baseShields;
+        hp->healthArmor = baseHealthArmor;
+        hp->shieldArmor = baseShieldArmor;
         hp->regenDelay = 1.6f;
-        hp->shieldRegenRate = 10.0f;
+        hp->shieldRegenRate = baseShieldRegen;
     }
     registry.emplace<Game::EscortTarget>(escortEnt, Game::EscortTarget{nextEventId_, dest, spawnPos, 65.0f});
     // Escort is protected and non-aggro until countdown ends.
@@ -274,7 +284,7 @@ void EventSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep
         lastEventWave_ = wave;
         int choice = eventCycle_ % 3;
         if (choice == 0) {
-            spawnEscort(registry, heroPos);
+            spawnEscort(registry, heroPos, wave);
             lastEventLabel_ = "Escort Duty";
         } else if (choice == 1) {
             spawnBounty(registry, heroPos, eventId);

@@ -297,3 +297,27 @@ There are also non-aliased versions;
     `Red_Energy_48x48.png`
     `Red_Lightning_Blast_54x18.png`
 These are identically shaped and formatted.
+
+
+## User Interface
+
+Button - `Button_52x14.png`
+Char Box - `CharacterBox_56x57.png`
+Coin Icon - `CoinIcon_16x18.png`
+Button Highlight - `HighlightButton_60x23.png`
+Slot Highlight - `HighlightSlot_26x26.png`
+Hotkey Box - `HotkeyBox_34x34.png`
+Item Box - `ItemBox_24x24.png`
+Rectangle Box - `RectangleBox_96x96.png`
+Title Box - `TitleBox_64x16.png`
+Corner Knot - `CornerKnot_14x14.png`
+Left Arrow - `LeftArrowButton_7x10.png`
+Right Arrow - `RightArrowButton_7x10.png`
+
+Panels -
+    `BottomPatternBG_128x112.png`
+    `BottomPatternPanel_119x17.png`
+    `PatternMiddleBottomBG_199x48.png`
+    `TopPatternBG_116x67.png`
+    `TopPatternPanel_01_33x15.png`
+    `TopPatternPanel_02_33x15.png`

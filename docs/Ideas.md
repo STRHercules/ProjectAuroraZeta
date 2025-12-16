@@ -2,24 +2,14 @@
 * Expose as much as possible to make it as easy as possible to mod
     * Develop mod tools?
 
-# Enemies much weaker at level 1, with ramping difficulty.
-
-# Increase Copper output at higher waves
-
-# Increase Escort health/armor at higher waves
-
 # Escort facing opposite direction they are running.
 
-# Only the Builder class should have the ability to Drag-Select
-
-# Controller Support
+# When a player is killed/downed they should only play the knockdown animation once, and pause on the last frame. 
+* If in multiplayer, after they are revived, they will then get up.
+* When a player is killed in singleplayer, prevent them from moving or using any abilities while 'dead'.
 
 # Chat
 * Ability for players to chat in Multiplayer Lobby/Match
-
-# Traveling Shop sometimes attaching to wrong asset?
-* I saw the Traveling shop attach itself to one of the assassin spawner assets around they time also spawned
-* I also saw the traveling shop attach itself to player projectiles. I can see 'Press E to shop' hovering over projectiles I am firing.
 
 # Add training time to Mini-Units
 * RTS Style queue?
@@ -84,6 +74,8 @@ In Zeta, Characters, Bosses and monsters alike can sometimes perform attacks or 
         * Player - Kills - Alive? - Deaths
 * Boss/Mini Boss Health Bars
     * Persistent on-screen Health bar of currently spawned Boss and/or Mini-Boss.
+
+# Controller Support
 
 # Android Port
 * According to Google, Android supports Raw C++ using SDL.

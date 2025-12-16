@@ -12,7 +12,7 @@ InputKey toInputKey(const std::string& key) {
     if (lower.rfind("key:", 0) == 0) {
         auto k = lower.substr(4);
         if (k == "tab") return InputKey::InventoryCycle;
-        if (k == "w") return InputKey::Ability2;
+        if (k == "w") return InputKey::Forward;
         if (k == "e") return InputKey::Interact;
         if (k == "q") return InputKey::UseItem;
         if (k == "r") return InputKey::Ultimate;

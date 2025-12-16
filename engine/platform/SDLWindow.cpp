@@ -77,7 +77,6 @@ void SDLWindow::pollEvents(Application& app, InputState& input) {
                         break;
                     case SDLK_w:
                         input.setKeyDown(InputKey::Forward, true);
-                        input.setKeyDown(InputKey::Ability2, true);
                         break;
                     case SDLK_s:
                         input.setKeyDown(InputKey::Backward, true);

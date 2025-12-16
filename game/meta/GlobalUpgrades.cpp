@@ -31,6 +31,7 @@ const std::vector<UpgradeDef>& upgradeDefinitions() {
         {"speed", "Speed", "+1% move speed per level", -1, 250, 1.15},
         {"armor", "Armor", "+1% armor per level", -1, 250, 1.15},
         {"shields", "Shields", "+1% shields per level", -1, 250, 1.15},
+        {"recharge", "Recharge", "+1% shield regen per level", -1, 250, 1.15},
         {"lifesteal", "Lifesteal", "+0.5% lifesteal per level", -1, 400, 1.18},
         {"regeneration", "Regeneration", "+0.5 HP/s per level", -1, 400, 1.18},
         {"lives", "Lives", "+1 life (max 3)", 3, 2000, 2.0},
@@ -70,6 +71,7 @@ GlobalModifiers computeModifiers(const UpgradeLevels& rawLevels) {
     m.playerSpeedMult = percent(levels.speed) * m.masteryMult;
     m.playerArmorMult = percent(levels.armor) * m.masteryMult;
     m.playerShieldsMult = percent(levels.shields) * m.masteryMult;
+    m.playerShieldRegenMult = percent(levels.recharge) * m.masteryMult;
     m.playerLifestealAdd = static_cast<float>(kHalfPercent * static_cast<double>(levels.lifesteal)) * m.masteryMult;
     m.playerRegenAdd = 0.5f * static_cast<float>(levels.regeneration) * m.masteryMult;
     m.playerLivesAdd = levels.lives;
@@ -102,6 +104,9 @@ std::string currentEffectString(const UpgradeDef& def, const UpgradeLevels& leve
     }
     if (def.key == "lifesteal") {
         return percentString(kHalfPercent * static_cast<double>(lvl), 2) + " lifesteal";
+    }
+    if (def.key == "recharge") {
+        return percentString(kOnePercent * static_cast<double>(lvl), 2) + " shield regen";
     }
     if (def.key == "regeneration") {
         std::ostringstream ss; ss << (0.5 * lvl) << " HP/s";
@@ -137,6 +142,7 @@ int* levelPtrByKey(UpgradeLevels& levels, std::string_view key) {
     if (key == "speed") return &levels.speed;
     if (key == "armor") return &levels.armor;
     if (key == "shields") return &levels.shields;
+    if (key == "recharge") return &levels.recharge;
     if (key == "lifesteal") return &levels.lifesteal;
     if (key == "regeneration") return &levels.regeneration;
     if (key == "lives") return &levels.lives;

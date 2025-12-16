@@ -15,18 +15,19 @@
   "hero": {
     "hp": 100.0,
     "shields": 0.0,
+    "meleeShieldBonus": 25.0,
     "healthArmor": 0.0,
     "shieldArmor": 0.0,
-    "shieldRegen": 0.0,
+    "shieldRegen": 1.0,
     "healthRegen": 0.0,
-    "regenDelay": 0.0,
+    "regenDelay": 2.0,
     "moveSpeed": 200.0,
     "size": 24.0
   },
   "offensiveTypes": {
-    "Melee": { "healthArmorBonus": 1.0, "shieldArmorBonus": 0.0, "healthRegenBonus": 2.0, "shieldRegenBonus": 0.0 },
+    "Melee": { "healthArmorBonus": 1.0, "shieldArmorBonus": 0.0, "healthRegenBonus": 0.0, "shieldRegenBonus": 0.0 },
     "Plasma": { "healthArmorBonus": 0.0, "shieldArmorBonus": 0.0, "healthRegenBonus": 0.0, "shieldRegenBonus": 0.0 },
-    "ThornTank": { "healthArmorBonus": 0.5, "shieldArmorBonus": 0.5, "healthRegenBonus": 1.0, "shieldRegenBonus": 0.5 },
+    "ThornTank": { "healthArmorBonus": 0.5, "shieldArmorBonus": 0.5, "healthRegenBonus": 0.0, "shieldRegenBonus": 0.0 },
     "Builder": { "healthArmorBonus": 0.0, "shieldArmorBonus": 0.0, "healthRegenBonus": 0.0, "shieldRegenBonus": 0.0 },
     "Ranged": { "healthArmorBonus": 0.0, "shieldArmorBonus": 0.0, "healthRegenBonus": 0.0, "shieldRegenBonus": 0.0 }
   },

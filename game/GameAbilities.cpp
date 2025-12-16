@@ -200,6 +200,7 @@ void GameRoot::executeAbility(int index) {
         if (form == DruidForm::Bear) {
             heroMaxHp_ *= 1.6f;
             heroShield_ *= 1.1f;
+            heroShield_ += 100.0f;  // bear form gains a hefty shield buffer
             heroHealthArmor_ += 2.0f;
             heroShieldArmor_ += 1.5f;
             heroMoveSpeed_ *= 0.82f;

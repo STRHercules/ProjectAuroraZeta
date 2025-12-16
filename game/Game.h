@@ -130,6 +130,9 @@ private:
     bool tryPurchaseUpgrade(int index);
     void resetUpgradeError();
     void rebuildWaveSettings();
+    void applyWaveScaling(int wave);
+    float contactDamageCurve(int wave) const;
+    float copperRewardCurve(int wave) const;
     void buildAbilities();
     void drawAbilityPanel();
     void executeAbility(int index);
@@ -156,7 +159,7 @@ private:
 
     enum class MenuPage { Main, Stats, Options, CharacterSelect, HostConfig, JoinSelect, Lobby, ServerBrowser, Upgrades };
     enum class MovementMode { Modern, RTS };
-    enum class LevelChoiceType { Damage, Health, Speed };
+    enum class LevelChoiceType { Damage, Health, Speed, Shield, Recharge };
     struct LevelChoice {
         LevelChoiceType type{LevelChoiceType::Damage};
         float amount{0.0f};
@@ -355,8 +358,11 @@ private:
     std::vector<FlameWallInstance> flameWalls_{};
     double waveInterval_{2.5};
     double graceDuration_{1.0};
+    float contactDamageBase_{10.0f};
     int copperPerKill_{5};
+    int copperPerKillBase_{5};
     int waveClearBonus_{20};
+    int waveClearBonusBase_{20};
     int enemyLowThreshold_{5};
     double combatDuration_{90.0};
     double intermissionDuration_{30.0};
@@ -367,11 +373,15 @@ private:
     float bossSpeedMultiplier_{0.8f};
     int bossGoldBonus_{60};
     int bossCopperDrop_{160};
+    int bossCopperDropBase_{160};
     int miniBossCopperDrop_{80};
+    int miniBossCopperDropBase_{80};
     float pickupDropChance_{0.25f};
     float pickupPowerupShare_{0.35f};
     int copperPickupMin_{4};
     int copperPickupMax_{10};
+    int copperPickupMinBase_{4};
+    int copperPickupMaxBase_{10};
     int salvageReward_{60};
     // Hotzones
     float hotzoneMapRadius_{900.0f};
@@ -457,6 +467,8 @@ private:
     float heroShieldRegen_{0.0f};
     float heroHealthRegen_{0.0f};
     float heroRegenDelay_{0.0f};
+    float meleeShieldBonus_{0.0f};
+    float meleeShieldBonusBase_{0.0f};
     float heroMoveSpeedBase_{200.0f};
     float heroMaxHpBase_{100.0f};
     float heroShieldBase_{0.0f};
