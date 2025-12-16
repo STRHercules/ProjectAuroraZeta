@@ -91,11 +91,12 @@ Loop per run:
    - Rewards: bonus currency, XP, rare items, “phase shards” for hero evolution. :contentReference[oaicite:7]{index=7}  
 
 5. **Milestone Boss Waves**
-   - Major bosses at big milestones (e.g., waves 20, 40, 60…).
+   - Major bosses at big milestones (e.g., waves 20, 40, 60…) and every 20 waves thereafter.
    - Rewards:
      - Persistent buffs for remainder of run.
      - Phase shards (for hero EX forms).
      - Rare loot.
+   - Boss visual scale is clamped so late-game scaling does not produce map-filling sprites (cap ~110 world units wide).
    - Boss may despawn if not killed quickly → loss of reward.
 
 6. **End-State**

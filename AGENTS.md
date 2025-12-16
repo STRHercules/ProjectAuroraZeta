@@ -61,6 +61,13 @@ All agents must follow these constraints:
        - Performance ideas
        - UX polish ideas
        - Follow-up tasks that would improve maintainability
+   - **Maintain `CHANGELOG.md` entries for each build.**
+     - Every commit that increments the in-game build number must also append a new section to `CHANGELOG.md`.
+     - Follow the existing `CHANGELOG.md` format exactly:
+       - Header: `# vX.Y.ZZZ`
+       - Bulleted list using `*`
+       - Use nested bullets/indentation for sub-points (as shown in the current file).
+     - Write changelog entries as player-facing patch notes: concise, specific, and grouped naturally by feature when possible.
    - **Update `README.md` when user-facing behavior changes.**
      - If the game’s build/run steps, controls, features, or config formats change, update `README.md`.
      - If behavior/spec changes, also update `GAME_SPEC.md` as appropriate.
@@ -94,6 +101,17 @@ Use something like this (append-only):
 ```md
 ## YYYY-MM-DD — Suggestions after <short change title>
 - ...
+```
+
+### Recommended `CHANGELOG.md` entry format
+
+Follow the existing file’s style. Example:
+
+```md
+# v0.0.102
+* Fixed X.
+    * Sub-point detail.
+* Added Y.
 ```
 
 ---
@@ -274,7 +292,7 @@ Use something like this (append-only):
    - QaAgent performs sanity checks and updates test checklist.
 5. **Document**
    - Agents update relevant sections in `GAME_SPEC.md` when behavior changes.
-   - Agents append `TRACELOG.md` and `SUGGESTIONS.md` entries per the shared rules.
+   - Agents append `TRACELOG.md`, `SUGGESTIONS.md`, and `CHANGELOG.md` entries per the shared rules.
    - Update `README.md` when user-facing behavior or run/build steps change.
 
 ---
@@ -301,6 +319,7 @@ Use this checklist before every commit/PR is considered “ready”:
 - [ ] **Consulted `TASK.md`** (or documented why it didn’t apply).
 - [ ] **Project builds with no errors** for the affected target(s) (and you can state what you built).
 - [ ] **Build number incremented** in `Game.cpp` (the `Pre-Alpha | Build vX.Y.ZZZ` string).
+- [ ] **`CHANGELOG.md` updated** with a new `# vX.Y.ZZZ` entry matching the current build number and file formatting.
 - [ ] **Architecture respected** (`/engine` stays engine-agnostic; `/game` contains game-specific behavior).
 - [ ] **No balancing hardcodes** (tunable values moved to data files where applicable).
 - [ ] **Clear comments added** for any non-obvious logic (explain the “why”).

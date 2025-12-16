@@ -45,3 +45,5 @@
 * Increased scale of Mini-Units
 
 # v0.0.103
+* Bosses now spawn every 20 Waves.
+    * Boss scale clamped to a reasonable maximum.

@@ -19,11 +19,6 @@
         * Paths
         * Cliffs?
 
-# Gameplay Pt. 2
-* Monster spawns should be further spread out from the player
-* A giant Boss spawns on Wave 20, they should spawn every 20 Waves.
-    * We need to make sure we cap the scale of these bosses, not making them too large.
-
 # Zones have no assets
 * Currently no idea how to identify these zones in-game
 * Potentially going to convert the zones to static areas on the map (coordinates/quadrants) 

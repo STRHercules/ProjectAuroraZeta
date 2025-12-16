@@ -171,8 +171,8 @@ bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
         registry.emplace<Game::BountyTag>(e, Game::BountyTag{});
     }
 
-    // Boss spawn on milestone.
-    if (wave == bossWave_) {
+    // Boss spawn on milestone (repeats every bossInterval_ after first).
+    if (wave == nextBossWave_) {
         float ang = angleDist(rng_);
         float rad = 260.0f;
         int bosses = std::max(1, playerCount_);
@@ -187,6 +187,12 @@ bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
             const EnemyDefinition* def = pickEnemyDef();
             float sizeMul = def ? def->sizeMultiplier * 1.6f : 2.0f;
             float size = 34.0f * sizeMul;
+            // Cap boss visual scale to avoid runaway growth on high waves/content packs.
+            if (size > bossMaxSize_) {
+                const float clampMul = bossMaxSize_ / size;
+                size *= clampMul;
+                sizeMul *= clampMul;
+            }
             float hpVal = settings_.enemyHp * bossHpMul_ * (def ? def->hpMultiplier : 1.0f);
             float speedVal = settings_.enemySpeed * bossSpeedMul_ * (def ? def->speedMultiplier : 1.0f);
             if (speedVal < 10.0f) speedVal = std::max(speedVal, settings_.enemySpeed * 0.6f);
@@ -221,6 +227,7 @@ bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
                                                                                                def->frameDuration});
             }
         }
+        nextBossWave_ += bossInterval_;
     }
 
     return true;

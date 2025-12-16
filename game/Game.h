@@ -390,7 +390,9 @@ private:
     double intermissionDuration_{30.0};
     int bountyGoldBonus_{40};
     int eventGoldReward_{1};
-    int bossWave_{20};
+    int bossWave_{20};               // first boss wave
+    int bossInterval_{20};           // subsequent boss interval
+    float bossMaxSize_{110.0f};      // hard cap on boss visual size
     float bossHpMultiplier_{12.0f};
     float bossSpeedMultiplier_{0.8f};
     int bossGoldBonus_{60};

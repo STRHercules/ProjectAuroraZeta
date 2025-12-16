@@ -25,11 +25,36 @@
     "size": 24.0
   },
   "offensiveTypes": {
-    "Melee": { "healthArmorBonus": 1.0, "shieldArmorBonus": 0.0, "healthRegenBonus": 0.0, "shieldRegenBonus": 0.0 },
-    "Plasma": { "healthArmorBonus": 0.0, "shieldArmorBonus": 0.0, "healthRegenBonus": 0.0, "shieldRegenBonus": 0.0 },
-    "ThornTank": { "healthArmorBonus": 0.5, "shieldArmorBonus": 0.5, "healthRegenBonus": 0.0, "shieldRegenBonus": 0.0 },
-    "Builder": { "healthArmorBonus": 0.0, "shieldArmorBonus": 0.0, "healthRegenBonus": 0.0, "shieldRegenBonus": 0.0 },
-    "Ranged": { "healthArmorBonus": 0.0, "shieldArmorBonus": 0.0, "healthRegenBonus": 0.0, "shieldRegenBonus": 0.0 }
+    "Melee": {
+      "healthArmorBonus": 1.0,
+      "shieldArmorBonus": 0.0,
+      "healthRegenBonus": 0.0,
+      "shieldRegenBonus": 0.0
+    },
+    "Plasma": {
+      "healthArmorBonus": 0.0,
+      "shieldArmorBonus": 0.0,
+      "healthRegenBonus": 0.0,
+      "shieldRegenBonus": 0.0
+    },
+    "ThornTank": {
+      "healthArmorBonus": 0.5,
+      "shieldArmorBonus": 0.5,
+      "healthRegenBonus": 0.0,
+      "shieldRegenBonus": 0.0
+    },
+    "Builder": {
+      "healthArmorBonus": 0.0,
+      "shieldArmorBonus": 0.0,
+      "healthRegenBonus": 0.0,
+      "shieldRegenBonus": 0.0
+    },
+    "Ranged": {
+      "healthArmorBonus": 0.0,
+      "shieldArmorBonus": 0.0,
+      "healthRegenBonus": 0.0,
+      "shieldRegenBonus": 0.0
+    }
   },
   "melee": {
     "range": 40.0,
@@ -141,6 +166,8 @@
     "wave": 20,
     "hpMultiplier": 12.0,
     "speedMultiplier": 0.8,
-    "killBonus": 60
+    "killBonus": 60,
+    "interval": 20,
+    "maxSize": 110.0
   }
 }

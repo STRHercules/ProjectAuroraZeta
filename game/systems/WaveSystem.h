@@ -1,6 +1,7 @@
 // Spawns enemies at intervals around the playfield.
 #pragma once
 
+#include <algorithm>
 #include <random>
 #include <vector>
 
@@ -38,10 +39,13 @@ public:
     double timeToNext() const { return timer_; }
     void setRound(int round) { currentRound_ = round; }
     void setSpawnBatchInterval(int interval) { spawnBatchInterval_ = std::max(1, interval); }
-    void setBossConfig(int bossWave, float hpMul, float speedMul) {
-        bossWave_ = bossWave;
+    void setBossConfig(int firstWave, int interval, float hpMul, float speedMul, float maxSize) {
+        bossFirstWave_ = std::max(1, firstWave);
+        bossInterval_ = std::max(1, interval);
         bossHpMul_ = hpMul;
         bossSpeedMul_ = speedMul;
+        bossMaxSize_ = maxSize;
+        nextBossWave_ = bossFirstWave_;
     }
     void setPlayerCount(int players) { playerCount_ = std::max(1, players); }
     void setEnemyDefinitions(const std::vector<EnemyDefinition>* defs) { enemyDefs_ = defs; }
@@ -57,7 +61,10 @@ private:
     int currentRound_{1};
     int spawnBatchInterval_{5};
     int roundBatchApplied_{0};
-    int bossWave_{20};
+    int bossFirstWave_{20};
+    int bossInterval_{20};
+    int nextBossWave_{20};
+    float bossMaxSize_{110.0f};
     float bossHpMul_{12.0f};
     float bossSpeedMul_{0.8f};
     int playerCount_{1};

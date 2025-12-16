@@ -324,6 +324,8 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     double intermissionDuration = intermissionDuration_;
     int bountyGold = bountyGoldBonus_;
     int bossWave = bossWave_;
+    int bossInterval = bossInterval_;
+    float bossMaxSize = bossMaxSize_;
     float bossHpMul = bossHpMultiplier_;
     float bossSpeedMul = bossSpeedMultiplier_;
     int bossGold = bossGoldBonus_;
@@ -497,9 +499,11 @@ bool GameRoot::onInitialize(Engine::Application& app) {
             }
             if (j.contains("boss")) {
                 bossWave = j["boss"].value("wave", bossWave);
+                bossInterval = j["boss"].value("interval", bossInterval);
                 bossHpMul = j["boss"].value("hpMultiplier", bossHpMul);
                 bossSpeedMul = j["boss"].value("speedMultiplier", bossSpeedMul);
                 bossGold = j["boss"].value("killBonus", bossGold);
+                bossMaxSize = j["boss"].value("maxSize", bossMaxSize);
             }
             if (j.contains("drops")) {
                 pickupDropChance_ = j["drops"].value("pickupChance", pickupDropChance_);
@@ -525,7 +529,7 @@ bool GameRoot::onInitialize(Engine::Application& app) {
         // Apply bonus charges multiplier to abilities that conceptually use charges (not modeled yet).
     }
     waveSystem_ = std::make_unique<WaveSystem>(rng_, waveSettings);
-    waveSystem_->setBossConfig(bossWave_, bossHpMultiplier_, bossSpeedMultiplier_);
+    waveSystem_->setBossConfig(bossWave_, bossInterval_, bossHpMultiplier_, bossSpeedMultiplier_, bossMaxSize_);
     waveSystem_->setEnemyDefinitions(&enemyDefs_);
     if (eventSystem_) eventSystem_->setEnemyDefinitions(&enemyDefs_);
     waveSystem_->setBaseArmor(Engine::Gameplay::BaseStats{waveSettings.enemyHealthArmor, waveSettings.enemyShieldArmor});
@@ -580,6 +584,8 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     intermissionDuration_ = intermissionDuration;
     bountyGoldBonus_ = bountyGold;
     bossWave_ = bossWave;
+    bossInterval_ = bossInterval;
+    bossMaxSize_ = bossMaxSize;
     bossHpMultiplier_ = bossHpMul;
     bossSpeedMultiplier_ = bossSpeedMul;
     bossGoldBonus_ = bossGold;
@@ -2258,7 +2264,9 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                         waveClearedPending_ = false;
                         clearBannerTimer_ = 0.0;
                         applyWaveScaling(wave_);
-                        if (wave_ == bossWave_) {
+                        const bool isBossWave = (wave_ >= bossWave_) && (bossInterval_ > 0) &&
+                                               ((wave_ - bossWave_) % bossInterval_ == 0);
+                        if (isBossWave) {
                             bossBannerTimer_ = 2.0;
                         }
                     }
@@ -5233,7 +5241,7 @@ void GameRoot::renderMenu() {
         return mx >= x && mx <= x + w && my >= y && my <= y + h;
     };
     drawTextUnified("PROJECT AURORA ZETA", Engine::Vec2{centerX - 140.0f, topY}, 1.7f, Engine::Color{180, 230, 255, 240});
-    drawTextUnified("Pre-Alpha | Build v0.0.102",
+    drawTextUnified("Pre-Alpha | Build v0.0.103",
                     Engine::Vec2{centerX, topY + 28.0f},
                     0.85f, Engine::Color{150, 200, 230, 220});
 
@@ -7830,7 +7838,7 @@ void GameRoot::resetRun() {
 
     if (waveSystem_) {
         waveSystem_ = std::make_unique<WaveSystem>(rng_, waveSettingsBase_);
-        waveSystem_->setBossConfig(bossWave_, bossHpMultiplier_, bossSpeedMultiplier_);
+        waveSystem_->setBossConfig(bossWave_, bossInterval_, bossHpMultiplier_, bossSpeedMultiplier_, bossMaxSize_);
         waveSystem_->setEnemyDefinitions(&enemyDefs_);
         waveSystem_->setBaseArmor(Engine::Gameplay::BaseStats{waveSettingsBase_.enemyHealthArmor, waveSettingsBase_.enemyShieldArmor});
         if (eventSystem_) eventSystem_->setEnemyDefinitions(&enemyDefs_);
