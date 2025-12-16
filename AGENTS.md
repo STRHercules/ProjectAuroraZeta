@@ -111,6 +111,7 @@ Follow the existing file’s style. Example:
 # v0.0.102
 * Fixed X.
     * Sub-point detail.
+      * Sub-Sub point detail.
 * Added Y.
 ```
 

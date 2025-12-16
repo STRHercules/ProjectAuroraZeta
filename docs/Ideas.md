@@ -41,7 +41,7 @@ In Zeta, Characters, Bosses and monsters alike can sometimes perform attacks or 
     * Feared: Force the victim into moving uncontrollably, preventing it from attacking or using abilities
     * Silenced: Prevent the victim from using any kind of active spells and sometimes also passive ones
     * Stasis: Makes the host immune to damage and most effects but also prevent him from performing any actions
-    * Superior Cloaking: Makes the host invisible in a manner that cannot be detected by Detectors
+    * Cloaking: Makes the host invisible in a manner that cannot be detected
     * Unstoppable: Allow the host to be immune to stuns, slows and most speed impeding effects
 
 # GUI/HUD

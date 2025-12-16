@@ -23,3 +23,29 @@
 **Build / Test**
 - Build: `cmake --build build --target game -- -j4` (Linux, 2025-12-16) — success.
 - Manual: not run (scope limited to spawn logic/config update).
+
+## 2025-12-16 — README systems expansion
+
+**Prompt / Task**
+- Expand the README to include all current functions, systems, logic.
+- Include all current character archetypes, their playstyle, abilities, etc.
+- Include information about enemies, bosses, Mini-Units, Summoner Summons.
+- Go into detail about all of that. Include all available hotkeys, and include detail about multiplayer.
+
+**What Changed**
+- Rebuilt README with detailed systems snapshot (waves, hotzones, events, economy, combat, energy).
+- Added archetype table, ability kits, mini-units/summons/structures, enemy/boss/event notes, hotkeys, and multiplayer flow.
+- Linked each section to current data sources and kept existing build/run steps.
+
+**Steps Taken**
+- Reviewed `data/menu_presets.json`, `data/abilities*.json`, `data/gameplay.json`, `data/units.json`, `data/input_bindings.json`, and core systems (WaveSystem, EventSystem, MiniUnitSystem, NetSession).
+- Authored expanded README sections and checked formatting.
+- Ran `cmake --build build --target game -- -j4` after the documentation change.
+
+**Rationale / Tradeoffs**
+- Centralizes player- and contributor-facing information in one up-to-date place.
+- Mirrors live data to avoid drift; avoided speculative or unimplemented features.
+
+**Build / Test**
+- Build: `cmake --build build --target game -- -j4` (Linux, 2025-12-16) — success.
+- Manual: not run (doc-only change).
