@@ -12,6 +12,7 @@
 #include "../components/HeroSpriteSheets.h"
 #include "../components/LookDirection.h"
 #include "../components/SecondaryWeapon.h"
+#include "../components/Ghost.h"
 
 namespace Game {
 
@@ -92,16 +93,22 @@ void resetAnimIfChanged(Engine::ECS::SpriteAnimation& anim,
                         int frameCount,
                         float frameDuration,
                         int frameWidth,
-                        int frameHeight) {
+                        int frameHeight,
+                        bool loop = true,
+                        bool holdOnLast = false) {
     const bool changed = anim.row != row || anim.frameCount != frameCount ||
                          anim.frameWidth != frameWidth || anim.frameHeight != frameHeight ||
-                         std::abs(anim.frameDuration - frameDuration) > 0.0001f;
+                         std::abs(anim.frameDuration - frameDuration) > 0.0001f ||
+                         anim.loop != loop || anim.holdOnLastFrame != holdOnLast;
     if (!changed) return;
     anim.frameWidth = frameWidth;
     anim.frameHeight = frameHeight;
     anim.row = row;
     anim.frameCount = frameCount;
     anim.frameDuration = frameDuration;
+    anim.loop = loop;
+    anim.holdOnLastFrame = holdOnLast;
+    anim.finished = false;
     anim.currentFrame = 0;
     anim.accumulator = 0.0f;
 }
@@ -116,6 +123,7 @@ void HeroSpriteStateSystem::update(Engine::ECS::Registry& registry, const Engine
     const bool secondaryEquipped = registry.has<Game::SecondaryWeapon>(hero) &&
                                     registry.get<Game::SecondaryWeapon>(hero)->active;
     if (!rend || !anim || !sheets || !hp) return;
+    const bool ghost = registry.has<Game::Ghost>(hero) && registry.get<Game::Ghost>(hero)->active;
 
     auto* look = registry.get<Game::LookDirection>(hero);
     LookDir4 lastDir = look ? look->dir : LookDir4::Front;
@@ -153,7 +161,7 @@ void HeroSpriteStateSystem::update(Engine::ECS::Registry& registry, const Engine
     if (look) look->dir = dir;
 
     // Priorities: Knockdown (dead) > Attack > Pickup > Walk > Idle.
-    if (!hp->alive()) {
+    if (!hp->alive() && !ghost) {
         rend->texture = sheets->movement;
         applyRenderSize(sheets, rend, false);
         anim->allowFlipX = false;
@@ -169,7 +177,8 @@ void HeroSpriteStateSystem::update(Engine::ECS::Registry& registry, const Engine
         };
         int row = clampRowToSheet(sheets->movement, sheets->movementFrameHeight, rowKnockdown(dir));
         resetAnimIfChanged(*anim, row, frames, sheets->movementFrameDuration,
-                           sheets->movementFrameWidth, sheets->movementFrameHeight);
+                           sheets->movementFrameWidth, sheets->movementFrameHeight,
+                           /*loop=*/false, /*holdOnLast=*/true);
         return;
     }
 

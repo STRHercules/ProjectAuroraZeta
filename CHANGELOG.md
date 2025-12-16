@@ -16,3 +16,15 @@
 * Slightly extended melee reach of all melee classes, easier to kite now.
 * Moved active item inventory to the right-hand side.
 * Moved Resource bars to left-hand side.
+
+# v0.0.102
+* Death/Knockdown animation now only plays once in Singleplayer.
+    * Movement/Ability use is now restricted when dead.
+* Knockdown will play on death in multiplayer, converting player into a ghost.
+    * Ghosts can move around, but not interact (Attack/Abilities)
+    * Ghosts resurrect at the start of the following Round.
+* Multiplayer is now synced to the Host's match.
+    * Clients no longer see their own copies of monsters.
+    * Clients can now interact with the Host's monsters.
+        * Do Damage
+        * Take Damage

@@ -19,6 +19,7 @@
 #include "../components/PickupBob.h"
 #include "../components/EscortTarget.h"
 #include "../components/BountyTag.h"
+#include "../components/Ghost.h"
 #include "../../engine/render/BitmapTextRenderer.h"
 #include "../../engine/ecs/components/Tags.h"
 #include "../systems/BuffSystem.h"
@@ -45,14 +46,15 @@ void RenderSystem::draw(const Engine::ECS::Registry& registry, const Engine::Cam
                         int viewportH, const Engine::Texture* gridTexture,
                         const std::vector<Engine::TexturePtr>* gridVariants,
                         const Engine::Gameplay::FogOfWarLayer* fog, int fogTileSize,
-                        float fogOriginOffsetX, float fogOriginOffsetY) {
+                        float fogOriginOffsetX, float fogOriginOffsetY,
+                        bool disableEnemyFogCulling) {
     drawGrid(camera, viewportW, viewportH, gridTexture, gridVariants, fog, fogTileSize, fogOriginOffsetX,
              fogOriginOffsetY);
 
     const Engine::Vec2 center{static_cast<float>(viewportW) * 0.5f, static_cast<float>(viewportH) * 0.5f};
     registry.view<Engine::ECS::Transform, Engine::ECS::Renderable>(
         [this, center, &camera, viewportW, viewportH, &registry, fog, fogTileSize, fogOriginOffsetX,
-         fogOriginOffsetY](Engine::ECS::Entity e, const Engine::ECS::Transform& tf,
+         fogOriginOffsetY, disableEnemyFogCulling](Engine::ECS::Entity e, const Engine::ECS::Transform& tf,
                           const Engine::ECS::Renderable& rend) {
             Engine::Vec2 screenPos =
                 Engine::worldToScreen(tf.position, camera, static_cast<float>(viewportW), static_cast<float>(viewportH));
@@ -69,7 +71,7 @@ void RenderSystem::draw(const Engine::ECS::Registry& registry, const Engine::Cam
             }
 
             // Fog culling: hide enemies when tile not visible to player.
-            if (fog && fogTileSize > 0 &&
+            if (!disableEnemyFogCulling && fog && fogTileSize > 0 &&
                 (registry.has<Engine::ECS::EnemyTag>(e) || registry.has<Engine::ECS::BossTag>(e))) {
                 const int tileX = static_cast<int>(
                     std::floor((tf.position.x + fogOriginOffsetX) / static_cast<float>(fogTileSize)));
@@ -102,6 +104,11 @@ void RenderSystem::draw(const Engine::ECS::Registry& registry, const Engine::Cam
             }
             if (registry.has<Game::BountyTag>(e)) {
                 color = Engine::Color{255, static_cast<uint8_t>(std::min(255, color.g + 40)), 120, color.a};
+            }
+            if (const auto* ghost = registry.get<Game::Ghost>(e)) {
+                if (ghost->active) {
+                    color.a = static_cast<uint8_t>(std::min<int>(color.a, 120));
+                }
             }
             if (const auto* flash = registry.get<Game::HitFlash>(e)) {
                 if (flash->timer > 0.0f) {

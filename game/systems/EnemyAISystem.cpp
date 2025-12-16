@@ -77,6 +77,23 @@ void EnemyAISystem::update(Engine::ECS::Registry& registry, Engine::ECS::Entity 
             });
         if (foundMini) return;
 
+        // Tier 3: nearest hero (includes local and remote players).
+        bool foundHero = false;
+        bestD2 = std::numeric_limits<float>::max();
+        registry.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::HeroTag>(
+            [&](Engine::ECS::Entity, const Engine::ECS::Transform& tfH, const Engine::ECS::Health& hpH, const Engine::ECS::HeroTag&) {
+                if (!hpH.alive()) return;
+                float dx = tfH.position.x - from.x;
+                float dy = tfH.position.y - from.y;
+                float d2 = dx * dx + dy * dy;
+                if (!foundHero || d2 < bestD2) {
+                    foundHero = true;
+                    bestD2 = d2;
+                    outTf = &tfH;
+                }
+            });
+        if (foundHero) return;
+
         // Tier 3: hero.
         outTf = heroTf;
     };

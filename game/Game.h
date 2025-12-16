@@ -62,6 +62,7 @@
 #include "components/HeroAttackAnim.h"
 #include "components/HeroPickupAnim.h"
 #include "components/SecondaryWeapon.h"
+#include "components/Ghost.h"
 #include "../engine/gameplay/FogOfWar.h"
 #include "../engine/render/FogOfWarRenderer.h"
 #include "net/NetSession.h"
@@ -78,9 +79,15 @@ public:
     void onShutdown() override;
 
 private:
+    struct ArchetypeDef;
     struct MiniUnitDef;
     struct BuildingDef;
     void handleHeroDeath(const Engine::TimeStep& step);
+    void updateGhostState(const Engine::TimeStep& step);
+    void setupHeroVisualForEntity(Engine::ECS::Entity ent, const ArchetypeDef& def);
+    Game::Net::SnapshotMsg collectNetSnapshot();
+    void updateRemoteCombat(const Engine::TimeStep& step);
+    void refreshPauseState();
     void showDefeatOverlay();
     void processDefeatInput(const Engine::ActionState& actions, const Engine::InputState& input);
     void resetRun();
@@ -114,7 +121,6 @@ private:
     void connectDirectAddress(const std::string& address);
     void updateNetwork(double dt);
     void detectLocalIp();
-    std::vector<Game::Net::PlayerNetState> collectNetSnapshot();
     void applyRemoteSnapshot(const Game::Net::SnapshotMsg& snap);
     void leaveNetworkSession(bool isHostQuit);
     void applyLocalHeroFromLobby();
@@ -561,6 +567,18 @@ private:
     float moveMarkerTimer_{0.0f};
     bool showDamageNumbers_{true};
     bool screenShake_{true};
+    bool heroGhostPendingRise_{false};
+    bool heroGhostActive_{false};
+    float heroGhostRiseTimer_{0.0f};
+    // Client-only damage feedback: track host-reported HP to decide when to shake.
+    float lastSnapshotHeroHp_{-1.0f};
+    bool pendingNetShake_{false};
+    // Snapshot bookkeeping for restart detection.
+    uint32_t lastSnapshotTick_{0};
+    bool forceHealAfterReset_{false};
+    int lastSnapshotWave_{0};
+    std::unordered_map<uint32_t, Engine::ECS::Entity> remoteEnemyEntities_;
+    std::unordered_map<uint32_t, Engine::Vec2> tfPrevEnemyPos_;
     // Session stats
     int totalRuns_{0};
     int bestWave_{0};
@@ -577,6 +595,7 @@ private:
     std::unordered_map<uint32_t, Engine::ECS::Entity> remoteEntities_;
     std::unordered_map<uint32_t, Game::Net::PlayerNetState> remoteStates_;
     std::unordered_map<uint32_t, Engine::Vec2> remoteTargets_;
+    std::unordered_map<uint32_t, double> remoteFireCooldown_;
     std::vector<uint32_t> remoteToRemove_;
     std::array<int, 4> joinIpSegments_{127, 0, 0, 1};
     uint16_t joinPort_{37015};

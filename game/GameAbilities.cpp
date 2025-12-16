@@ -95,6 +95,9 @@ void GameRoot::executeAbility(int index) {
     if (index < 0 || index >= static_cast<int>(abilityStates_.size())) return;
     auto& slot = abilities_[index];
     auto& st = abilityStates_[index];
+    if (const auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
+        if (!hp->alive()) return;
+    }
     if (slot.cooldown > 0.0f) return;
     if (slot.energyCost > 0.0f && energy_ < slot.energyCost) {
         energyWarningTimer_ = 0.6;

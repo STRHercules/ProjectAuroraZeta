@@ -60,6 +60,7 @@
 #include "components/HitFlash.h"
 #include "components/StatusEffects.h"
 #include "components/SpellEffect.h"
+#include "components/Ghost.h"
 #include "systems/BuffSystem.h"
 #include "meta/SaveManager.h"
 #include "meta/GlobalUpgrades.h"
@@ -729,8 +730,6 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         clearBuildPreview();
     }
     auto closeOverlays = [&]() {
-        userPaused_ = false;
-        paused_ = false;
         itemShopOpen_ = false;
         abilityShopOpen_ = false;
         levelChoiceOpen_ = false;
@@ -739,6 +738,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         clearBuildPreview();
         pauseMenuBlink_ = 0.0;
         pauseClickPrev_ = false;
+        refreshPauseState();
     };
     if (!inMenu_) {
         bool anyOverlay = userPaused_ || itemShopOpen_ || abilityShopOpen_ || levelChoiceOpen_ || characterScreenOpen_ ||
@@ -749,6 +749,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             } else {
                 userPaused_ = !userPaused_;
                 pauseMenuBlink_ = 0.0;
+                refreshPauseState();
             }
         }
         if (menuBackEdge && anyOverlay) {
@@ -758,8 +759,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
     if (characterEdge && !inMenu_) {
         characterScreenOpen_ = !characterScreenOpen_;
     }
-    paused_ = userPaused_ || itemShopOpen_ || abilityShopOpen_ || levelChoiceOpen_ ||
-              (characterScreenOpen_ && !multiplayerEnabled_);
+    refreshPauseState();
     if (actions.toggleFollow && (itemShopOpen_ || abilityShopOpen_)) {
         // ignore camera toggle while paused/shop
     }
@@ -1033,13 +1033,16 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
     // Update hero velocity from actions.
     if (hero_ != Engine::ECS::kInvalidEntity) {
         const auto* heroTf = registry_.get<Engine::ECS::Transform>(hero_);
+        const auto* heroHp = registry_.get<Engine::ECS::Health>(hero_);
+        const bool heroAlive = !heroHp || heroHp->alive();
+        const bool heroGhost = registry_.has<Game::Ghost>(hero_) && registry_.get<Game::Ghost>(hero_)->active;
         Engine::Vec2 heroPos = heroTf ? heroTf->position : Engine::Vec2{0.0f, 0.0f};
         const bool leftClick = input.isMouseButtonDown(0);
         const bool rightClick = input.isMouseButtonDown(2);
         const bool midClick = input.isMouseButtonDown(1);
 
         if (auto* vel = registry_.get<Engine::ECS::Velocity>(hero_)) {
-            if (paused_ || defeatDelayActive_ || characterScreenOpen_) {
+            if (paused_ || defeatDelayActive_ || characterScreenOpen_ || ((heroHp && !heroAlive) && !heroGhost)) {
                 vel->value = {0.0f, 0.0f};
             } else if (movementMode_ == MovementMode::Modern) {
                 vel->value = {actions.moveX * heroMoveSpeed_, actions.moveY * heroMoveSpeed_};
@@ -1072,7 +1075,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         // Dash trigger.
         const bool dashEdge = actions.dash && !dashPrev_;
         dashPrev_ = actions.dash;
-        if (!paused_ && !defeatDelayActive_ && !characterScreenOpen_ && dashEdge && dashCooldownTimer_ <= 0.0f) {
+        if (!paused_ && !defeatDelayActive_ && !characterScreenOpen_ && heroAlive && dashEdge && dashCooldownTimer_ <= 0.0f) {
             Engine::Vec2 dir{actions.moveX, actions.moveY};
             if (movementMode_ == MovementMode::RTS) {
                 if (moveTargetActive_) {
@@ -1123,7 +1126,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         abilityUltPrev_ = actions.ultimate;
         interactPrev_ = actions.interact;
         useItemPrev_ = actions.useItem;
-        if (abilityShopOpen_ || itemShopOpen_) {
+    if (abilityShopOpen_ || itemShopOpen_) {
             // Ability shop point-click purchase: any left click buys the currently selected (hovered) card.
             if (abilityShopOpen_) {
                 auto costForLevel = [&](int level) {
@@ -1373,18 +1376,16 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 if (dist2 < 80.0f * 80.0f) {
                     if (itemShopOpen_) {
                         itemShopOpen_ = false;
-                        paused_ = userPaused_ || abilityShopOpen_ ||
-                                  (characterScreenOpen_ && !multiplayerEnabled_);
+                        refreshPauseState();
                     } else {
                         itemShopOpen_ = true;
-                        paused_ = userPaused_ || itemShopOpen_ || abilityShopOpen_ ||
-                                  (characterScreenOpen_ && !multiplayerEnabled_);
+                        refreshPauseState();
                     }
                 }
             }
         }
 
-        if (!paused_ && !characterScreenOpen_) {
+        if (!paused_ && !characterScreenOpen_ && heroAlive) {
             if (ability1Edge) executeAbility(1);
             if (ability2Edge) executeAbility(2);
             if (ability3Edge) executeAbility(3);
@@ -1714,6 +1715,21 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             registry_.remove<Game::Invulnerable>(hero_);
         }
     }
+    // Tick generic invulnerability timers (used for freshly spawned remote players on host).
+    std::vector<Engine::ECS::Entity> invToClear;
+    registry_.view<Game::Invulnerable>([&](Engine::ECS::Entity e, Game::Invulnerable& inv) {
+        // hero_ timer is maintained above from dash/immortal logic.
+        if (e == hero_) return;
+        inv.timer -= static_cast<float>(step.deltaSeconds);
+        if (inv.timer <= 0.0f) {
+            invToClear.push_back(e);
+        }
+    });
+    for (auto e : invToClear) {
+        if (registry_.has<Game::Invulnerable>(e)) {
+            registry_.remove<Game::Invulnerable>(e);
+        }
+    }
     // Tick turrets (timers only; firing handled in combat loop).
     for (auto it = turrets_.begin(); it != turrets_.end();) {
         it->timer -= static_cast<float>(step.deltaSeconds);
@@ -1847,8 +1863,8 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             });
     }
 
-    // Enemy AI.
-    if (enemyAISystem_ && !defeated_ && !paused_) {
+    // Enemy AI (host authoritative).
+    if (enemyAISystem_ && !defeated_ && !paused_ && (!multiplayerEnabled_ || (netSession_ && netSession_->isHost()))) {
         if (freezeTimer_ <= 0.0) {
             enemyAISystem_->update(registry_, hero_, step);
         }
@@ -1857,6 +1873,10 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
     // Hero animation row selection (idle/walk/pickup/attack/knockdown).
     if (heroSpriteStateSystem_ && (!paused_ || defeated_)) {
         heroSpriteStateSystem_->update(registry_, step, hero_);
+        // Update remote player visuals the same way as the local hero.
+        for (const auto& kv : remoteEntities_) {
+            heroSpriteStateSystem_->update(registry_, step, kv.second);
+        }
     }
 
     // Enemy animation row selection (idle/move/swing/death).
@@ -2191,7 +2211,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             waveSpawned_ = false;
             itemShopOpen_ = false;
             abilityShopOpen_ = false;
-            paused_ = userPaused_ || (characterScreenOpen_ && !multiplayerEnabled_);
+            refreshPauseState();
             refreshShopInventory();
             if (multiplayerEnabled_ && reviveNextRound_) {
                 reviveLocalPlayer();
@@ -2212,21 +2232,21 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
 
     // Waves and phases.
     // Phase timing continues unless user-paused (shop should not freeze phase timers).
-    if (!defeated_ && !userPaused_ && !levelChoiceOpen_) {
+    if (!defeated_ && !userPaused_ && (!multiplayerEnabled_ || !levelChoiceOpen_)) {
     if (inCombat_) {
         double stepScale = freezeTimer_ > 0.0 ? 0.0 : 1.0;
         combatTimer_ -= step.deltaSeconds * stepScale;
-        if (waveSystem_) {
-                waveSystem_->setPlayerCount(currentPlayerCount());
-                if (!waveSpawned_) {
-                    // Scale enemy armor upgrades over time.
-                    enemyUpgrades_.groundArmorLevel = wave_ / 5;
-                    enemyUpgrades_.shieldArmorLevel = wave_ / 8;
-                    waveSystem_->setUpgrades(enemyUpgrades_);
-                    bool newWave = waveSystem_->update(registry_, step, hero_, wave_);
-                    waveWarmup_ = std::max(0.0, waveSystem_->timeToNext());
-                    if (newWave) {
-                        waveSpawned_ = true;
+        if (waveSystem_ && (!multiplayerEnabled_ || (netSession_ && netSession_->isHost()))) {
+            waveSystem_->setPlayerCount(currentPlayerCount());
+            if (!waveSpawned_) {
+                // Scale enemy armor upgrades over time.
+                enemyUpgrades_.groundArmorLevel = wave_ / 5;
+                enemyUpgrades_.shieldArmorLevel = wave_ / 8;
+                waveSystem_->setUpgrades(enemyUpgrades_);
+                bool newWave = waveSystem_->update(registry_, step, hero_, wave_);
+                waveWarmup_ = std::max(0.0, waveSystem_->timeToNext());
+                if (newWave) {
+                    waveSpawned_ = true;
                         waveBannerWave_ = wave_;
                         waveBannerTimer_ = 1.25;
                         waveClearedPending_ = false;
@@ -2246,7 +2266,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 waveSpawned_ = false;
                 itemShopOpen_ = false;
                 abilityShopOpen_ = false;
-                paused_ = userPaused_ || (characterScreenOpen_ && !multiplayerEnabled_);
+                refreshPauseState();
                 refreshShopInventory();
                 if (multiplayerEnabled_ && reviveNextRound_) {
                     reviveLocalPlayer();
@@ -2264,21 +2284,24 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 waveSystem_->setRound(round_);
             }
         } else {  // Intermission
-            // If enemies lingering, extend intermission until cleared.
-            if (enemiesAlive_ > 0) {
-                intermissionTimer_ = std::max(intermissionTimer_, 5.0);
-            } else {
-                intermissionTimer_ -= step.deltaSeconds;
+        // If enemies lingering, extend intermission until cleared.
+        if (enemiesAlive_ > 0) {
+            intermissionTimer_ = std::max(intermissionTimer_, 5.0);
+        } else {
+            intermissionTimer_ -= step.deltaSeconds;
+        }
+        waveWarmup_ = intermissionTimer_;
+        if (intermissionTimer_ <= 0.0) {
+            // Start next combat phase
+            if (multiplayerEnabled_ && reviveNextRound_) {
+                reviveLocalPlayer();
             }
-            waveWarmup_ = intermissionTimer_;
-            if (intermissionTimer_ <= 0.0) {
-                // Start next combat phase
-                inCombat_ = true;
-                combatTimer_ = combatDuration_;
-                waveSpawned_ = false;
-                itemShopOpen_ = false;
-                abilityShopOpen_ = false;
-                paused_ = userPaused_ || (characterScreenOpen_ && !multiplayerEnabled_);
+            inCombat_ = true;
+            combatTimer_ = combatDuration_;
+            waveSpawned_ = false;
+            itemShopOpen_ = false;
+            abilityShopOpen_ = false;
+                refreshPauseState();
                 despawnShopkeeper();
                 refreshShopInventory();
                 if (waveSystem_) {
@@ -2292,15 +2315,15 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         }
     }
 
-    // Projectiles (still advance during freeze so player shots travel; keep it simple).
-    if (projectileSystem_ && !defeated_ && !paused_) {
+    // Projectiles (host authoritative to avoid desync).
+    if (projectileSystem_ && !defeated_ && !paused_ && (!multiplayerEnabled_ || (netSession_ && netSession_->isHost()))) {
         projectileSystem_->update(registry_, step);
     }
 
-        // Collision / damage.
-        if (collisionSystem_ && !paused_) {
-            collisionSystem_->update(registry_);
-        }
+    // Collision / damage (host authoritative).
+    if (collisionSystem_ && !paused_ && (!multiplayerEnabled_ || (netSession_ && netSession_->isHost()))) {
+        collisionSystem_->update(registry_);
+    }
 
         if (pickupSystem_ && !paused_ && !defeatDelayActive_) {
             const auto* heroHp = registry_.get<Engine::ECS::Health>(hero_);
@@ -2429,11 +2452,21 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         if (const auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
             float total = hp->currentHealth + hp->currentShields;
             if (lastHeroHp_ < 0.0f) lastHeroHp_ = total;
-            if (total < lastHeroHp_ && screenShake_) {
+            bool shouldShake = false;
+            if (multiplayerEnabled_ && netSession_ && !netSession_->isHost()) {
+                // Client: shake only when host-reported damage arrived this frame.
+                shouldShake = pendingNetShake_;
+                pendingNetShake_ = false;
+                lastHeroHp_ = total;  // keep baseline aligned with latest host value.
+            } else {
+                // Solo or host: shake when local HP actually drops.
+                shouldShake = (total < lastHeroHp_);
+                lastHeroHp_ = total;
+            }
+            if (shouldShake && screenShake_) {
                 shakeTimer_ = 0.25f;
                 shakeMagnitude_ = 6.0f;
             }
-            lastHeroHp_ = total;
         }
     }
     if (shakeTimer_ > 0.0f) {
@@ -2457,6 +2490,8 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
     }
 
     handleHeroDeath(step);
+    updateGhostState(step);
+    updateRemoteCombat(step);
     processDefeatInput(actions, input);
 
     // Update fog-of-war visibility before rendering.
@@ -2480,7 +2515,8 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 gridTileTexturesWeighted_.empty() ? (gridTileTextures_.empty() ? nullptr : &gridTileTextures_)
                                                   : &gridTileTexturesWeighted_;
             renderSystem_->draw(registry_, cameraShaken, viewportWidth_, viewportHeight_, gridPtr, gridVariants,
-                                fogLayer_.get(), fogTileSize_, fogOriginOffsetX_, fogOriginOffsetY_);
+                                fogLayer_.get(), fogTileSize_, fogOriginOffsetX_, fogOriginOffsetY_,
+                                /*disableEnemyFogCulling=*/multiplayerEnabled_);
         }
 
         // Dash trail rendering (simple rectangles).
@@ -3062,6 +3098,10 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         Engine::logInfo(oss.str());
         accumulated_ = 0.0;
     }
+    // Fallback revive during lobby/match transitions (clients only; host revives on round advance).
+    if (multiplayerEnabled_ && netSession_ && !netSession_->isHost() && reviveNextRound_ && !inCombat_) {
+        reviveLocalPlayer();
+    }
 }
 
 bool GameRoot::performRangedAutoFire(const Engine::TimeStep& step, const Engine::ActionState& actions,
@@ -3449,6 +3489,16 @@ void GameRoot::reviveLocalPlayer() {
         hp->healthArmor = heroHealthArmor_;
         hp->shieldArmor = heroShieldArmor_;
     }
+    if (auto* ghost = registry_.get<Game::Ghost>(hero_)) {
+        ghost->active = false;
+    }
+    heroGhostActive_ = false;
+    heroGhostPendingRise_ = false;
+    heroGhostRiseTimer_ = 0.0f;
+    lastSnapshotHeroHp_ = -1.0f;
+    pendingNetShake_ = false;
+    forceHealAfterReset_ = false;
+    lastSnapshotTick_ = 0;
     reviveNextRound_ = false;
     Engine::logInfo("Revived for next round (multiplayer).");
 }
@@ -3460,6 +3510,12 @@ void GameRoot::leaveNetworkSession(bool isHostQuit) {
         }
         netSession_->stop();
     }
+    if (auto* ghost = registry_.get<Game::Ghost>(hero_)) {
+        ghost->active = false;
+    }
+    heroGhostActive_ = false;
+    heroGhostPendingRise_ = false;
+    heroGhostRiseTimer_ = 0.0f;
     // Destroy any remote entities immediately.
     for (auto& kv : remoteEntities_) {
         registry_.destroy(kv.second);
@@ -3572,16 +3628,37 @@ void GameRoot::handleHeroDeath(const Engine::TimeStep& step) {
 
     bool remoteAlive = false;
     if (multiplayerEnabled_) {
-        for (const auto& [id, state] : remoteStates_) {
-            if (id != localPlayerId_ && state.alive) {
-                remoteAlive = true;
-                break;
-            }
-        }
+        // Prefer authoritative host-side health of remote avatars.
+        registry_.view<Engine::ECS::Health, Engine::ECS::HeroTag>(
+            [&](Engine::ECS::Entity e, const Engine::ECS::Health& hpRemote, const Engine::ECS::HeroTag&) {
+                if (e == hero_) return;
+                if (hpRemote.alive()) remoteAlive = true;
+            });
     }
     if (multiplayerEnabled_ && remoteAlive) {
         reviveNextRound_ = true;
-        Engine::logInfo("You are down. Awaiting next round revive (teammates still alive).");
+        if (!heroGhostPendingRise_ && !heroGhostActive_) {
+            heroGhostPendingRise_ = true;
+            // Duration of knockdown animation before ghost stands back up.
+            heroGhostRiseTimer_ = 0.6f;
+            if (const auto* sheets = registry_.get<Game::HeroSpriteSheets>(hero_)) {
+                if (sheets->movement) {
+                    int frames = std::max(1, sheets->movement->width() / std::max(1, sheets->movementFrameWidth));
+                    heroGhostRiseTimer_ = std::max(0.1f, static_cast<float>(frames) * sheets->movementFrameDuration);
+                }
+            }
+            if (auto* ghost = registry_.get<Game::Ghost>(hero_)) {
+                ghost->active = false;
+            } else {
+                registry_.emplace<Game::Ghost>(hero_, Game::Ghost{false});
+            }
+            Engine::logInfo("You are down. Awaiting next round revive (teammates still alive).");
+        }
+        if (auto* vel = registry_.get<Engine::ECS::Velocity>(hero_)) {
+            vel->value = {0.0f, 0.0f};
+        }
+        dashTimer_ = 0.0f;
+        moveTargetActive_ = false;
         return;
     }
 
@@ -3600,6 +3677,37 @@ void GameRoot::handleHeroDeath(const Engine::TimeStep& step) {
     }
     dashTimer_ = 0.0f;
     moveTargetActive_ = false;
+}
+
+void GameRoot::updateGhostState(const Engine::TimeStep& step) {
+    if (!multiplayerEnabled_) return;
+    auto* hp = registry_.get<Engine::ECS::Health>(hero_);
+    auto* ghost = registry_.get<Game::Ghost>(hero_);
+    if (!hp) return;
+    if (!ghost) {
+        registry_.emplace<Game::Ghost>(hero_, Game::Ghost{false});
+        ghost = registry_.get<Game::Ghost>(hero_);
+    }
+
+    if (heroGhostPendingRise_) {
+        heroGhostRiseTimer_ -= static_cast<float>(step.deltaSeconds);
+        if (heroGhostRiseTimer_ <= 0.0f) {
+            heroGhostPendingRise_ = false;
+            heroGhostActive_ = true;
+            ghost->active = true;
+            // Clear finished flag so animation can resume idle/walk while ghost.
+            if (auto* anim = registry_.get<Engine::ECS::SpriteAnimation>(hero_)) {
+                anim->finished = false;
+            }
+        }
+    }
+
+    // If revived (hp restored elsewhere), disable ghost visuals.
+    if (hp->alive() && heroGhostActive_) {
+        heroGhostActive_ = false;
+        heroGhostPendingRise_ = false;
+        ghost->active = false;
+    }
 }
 
 void GameRoot::showDefeatOverlay() {
@@ -3854,15 +3962,23 @@ void GameRoot::updateFogVision() {
     if (!fogLayer_) return;
     fogUnits_.clear();
 
-    if (hero_ != Engine::ECS::kInvalidEntity) {
-        const auto* tf = registry_.get<Engine::ECS::Transform>(hero_);
-        const auto* hp = registry_.get<Engine::ECS::Health>(hero_);
+    auto pushVision = [&](Engine::ECS::Entity ent) {
+        const auto* tf = registry_.get<Engine::ECS::Transform>(ent);
+        const auto* hp = registry_.get<Engine::ECS::Health>(ent);
         const bool alive = !hp || hp->currentHealth > 0.0f;
         if (tf) {
             fogUnits_.push_back(Engine::Gameplay::Unit{tf->position.x + fogOriginOffsetX_,
                                                        tf->position.y + fogOriginOffsetY_,
                                                        heroVisionRadiusTiles_, alive, 0});
         }
+    };
+
+    if (hero_ != Engine::ECS::kInvalidEntity) {
+        pushVision(hero_);
+    }
+    // Include all remote heroes so fog is shared across the squad.
+    for (const auto& kv : remoteEntities_) {
+        pushVision(kv.second);
     }
 
     Engine::Gameplay::updateFogOfWar(*fogLayer_, fogUnits_, 0, fogTileSize_);
@@ -5697,49 +5813,240 @@ void GameRoot::updateNetwork(double dt) {
     // Remove stale remote avatars not present in lobby (host) or peers list (client).
     std::unordered_set<uint32_t> liveIds;
     for (const auto& p : lobbyCache_.players) liveIds.insert(p.id);
-    for (auto it = remoteEntities_.begin(); it != remoteEntities_.end();) {
-        uint32_t rid = it->first;
-        if (liveIds.find(rid) == liveIds.end()) {
-            registry_.destroy(it->second);
-            remoteStates_.erase(rid);
-            remoteTargets_.erase(rid);
-            it = remoteEntities_.erase(it);
-        } else {
-            ++it;
+        for (auto it = remoteEntities_.begin(); it != remoteEntities_.end();) {
+            uint32_t rid = it->first;
+            if (liveIds.find(rid) == liveIds.end()) {
+                registry_.destroy(it->second);
+                remoteStates_.erase(rid);
+                remoteTargets_.erase(rid);
+                remoteFireCooldown_.erase(rid);
+                it = remoteEntities_.erase(it);
+            } else {
+                ++it;
+            }
         }
+    // Fallback revive during lobby/match transitions.
+    if (multiplayerEnabled_ && reviveNextRound_ && !inCombat_) {
+        reviveLocalPlayer();
     }
+    refreshPauseState();
 }
 
-std::vector<Game::Net::PlayerNetState> GameRoot::collectNetSnapshot() {
-    std::vector<Game::Net::PlayerNetState> out;
-    Game::Net::PlayerNetState self{};
-    self.id = localPlayerId_ == 0 ? 1 : localPlayerId_;
+Game::Net::SnapshotMsg GameRoot::collectNetSnapshot() {
+    Game::Net::SnapshotMsg snap{};
+    auto makeState = [&](uint32_t id, Engine::ECS::Entity ent, const Game::Net::PlayerNetState* src) {
+        Game::Net::PlayerNetState s{};
+        s.id = id;
+        s.heroId = src ? src->heroId : activeArchetype_.id;
+        s.level = src ? src->level : level_;
+        s.wave = wave_;
+        if (const auto* tf = registry_.get<Engine::ECS::Transform>(ent)) {
+            s.x = tf->position.x;
+            s.y = tf->position.y;
+        }
+        if (const auto* look = registry_.get<Game::LookDirection>(ent)) {
+            s.lookDir = static_cast<uint8_t>(look->dir);
+        }
+        if (const auto* atk = registry_.get<Game::HeroAttackAnim>(ent)) {
+            s.attacking = atk->timer > 0.0f ? 1 : 0;
+            s.attackTimer = std::max(0.0f, atk->timer);
+        }
+        if (const auto* hp = registry_.get<Engine::ECS::Health>(ent)) {
+            s.hp = hp->currentHealth;
+            s.shields = hp->currentShields;
+            s.alive = hp->currentHealth > 0.0f;
+        } else {
+            s.hp = 0.0f;
+            s.shields = 0.0f;
+            s.alive = false;
+        }
+        return s;
+    };
+
+    // Always include our own state.
+    uint32_t selfId = localPlayerId_ == 0 ? 1 : localPlayerId_;
+    Game::Net::PlayerNetState self = makeState(selfId, hero_, nullptr);
     self.heroId = activeArchetype_.id;
-    if (auto* tf = registry_.get<Engine::ECS::Transform>(hero_)) {
-        self.x = tf->position.x;
-        self.y = tf->position.y;
-    }
-    if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
-        self.hp = hp->currentHealth;
-        self.shields = hp->currentShields;
-        self.alive = hp->currentHealth > 0.0f;
+    snap.players.push_back(self);
+
+    // Host: populate snapshot from server-authoritative remote entities.
+    if (multiplayerEnabled_ && netSession_ && netSession_->isHost()) {
+        for (const auto& [pid, ent] : remoteEntities_) {
+            if (pid == selfId || ent == Engine::ECS::kInvalidEntity) continue;
+            const auto existing = remoteStates_.find(pid);
+            const Game::Net::PlayerNetState* src = existing == remoteStates_.end() ? nullptr : &existing->second;
+            Game::Net::PlayerNetState s = makeState(pid, ent, src);
+            // Keep remoteStates_ mirrored to authoritative values for downstream logic.
+            remoteStates_[pid] = s;
+            snap.players.push_back(s);
+        }
     } else {
-        self.hp = 0.0f;
-        self.alive = false;
+        // Client: only send our own state to host; no need to echo others back.
+        // (remoteStates_ holds host snapshots; re-broadcasting them is redundant and can desync.)
     }
-    self.level = level_;
-    out.push_back(self);
-    for (const auto& [id, state] : remoteStates_) {
-        if (id == self.id) continue;
-        out.push_back(state);
+
+    // Host shares enemy state to keep clients in sync.
+    if (multiplayerEnabled_ && netSession_ && netSession_->isHost()) {
+        registry_.view<Engine::ECS::EnemyTag, Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::SpriteAnimation>(
+            [&](Engine::ECS::Entity e, const Engine::ECS::EnemyTag&, const Engine::ECS::Transform& tf, const Engine::ECS::Health& hp, const Engine::ECS::SpriteAnimation& anim) {
+                Game::Net::EnemyNetState es{};
+                es.id = static_cast<uint32_t>(e);
+                es.x = tf.position.x;
+                es.y = tf.position.y;
+                es.hp = hp.currentHealth;
+                es.shields = hp.currentShields;
+                es.alive = hp.alive();
+                es.frameWidth = anim.frameWidth;
+                es.frameHeight = anim.frameHeight;
+                es.frameDuration = anim.frameDuration;
+                // Attempt to include enemy definition id by matching texture pointer.
+                if (auto* rend = registry_.get<Engine::ECS::Renderable>(e)) {
+                    for (const auto& def : enemyDefs_) {
+                        if (def.texture && rend->texture && def.texture.get() == rend->texture.get()) {
+                            es.defId = def.id;
+                            break;
+                        }
+                    }
+                }
+                snap.enemies.push_back(es);
+            });
     }
-    return out;
+    snap.wave = wave_;
+    return snap;
 }
 
 void GameRoot::applyRemoteSnapshot(const Game::Net::SnapshotMsg& snap) {
+    // Client-side: detect host restart (wave number dropped) and fast-reset local run state.
+    if (!netSession_->isHost()) {
+        if (snap.wave < lastSnapshotWave_) {
+            Engine::logInfo("Host restarted run; resetting local state.");
+            resetRun();
+            forceHealAfterReset_ = true;
+        }
+    }
+
+    // Detect host-reported wave advancement to trigger client-side revive scheduling.
+    if (!netSession_->isHost()) {
+        int hostWave = snap.wave;
+        if (hostWave > lastSnapshotWave_) {
+            wave_ = hostWave;
+            if (reviveNextRound_) {
+                reviveLocalPlayer();
+            }
+        }
+    }
+
+    // Synchronize enemies from host snapshots on clients.
+    if (multiplayerEnabled_ && netSession_ && !netSession_->isHost()) {
+        std::unordered_set<uint32_t> seen;
+        for (const auto& es : snap.enemies) {
+            seen.insert(es.id);
+            Engine::ECS::Entity ent = Engine::ECS::kInvalidEntity;
+            auto it = remoteEnemyEntities_.find(es.id);
+            if (it != remoteEnemyEntities_.end()) {
+                ent = it->second;
+            } else {
+                ent = registry_.create();
+                registry_.emplace<Engine::ECS::EnemyTag>(ent, Engine::ECS::EnemyTag{});
+                registry_.emplace<Engine::ECS::Transform>(ent, Engine::Vec2(es.x, es.y));
+                registry_.emplace<Engine::ECS::Velocity>(ent, Engine::Vec2{0.0f, 0.0f});
+                float size = waveSettingsBase_.enemySize;
+                Engine::TexturePtr tex{};
+                if (!es.defId.empty()) {
+                    for (const auto& def : enemyDefs_) {
+                        if (def.id == es.defId && def.texture) {
+                            tex = def.texture;
+                            size *= def.sizeMultiplier;
+                            break;
+                        }
+                    }
+                }
+                registry_.emplace<Engine::ECS::Renderable>(ent,
+                                                           Engine::ECS::Renderable{Engine::Vec2{size, size},
+                                                                                   Engine::Color{255, 255, 255, 255},
+                                                                                   tex});
+                registry_.emplace<Engine::ECS::AABB>(ent, Engine::ECS::AABB{Engine::Vec2{size * 0.5f, size * 0.5f}});
+                registry_.emplace<Engine::ECS::Health>(ent, Engine::ECS::Health{std::max(1.0f, es.hp), es.hp});
+                Engine::ECS::SpriteAnimation anim{};
+                anim.frameWidth = es.frameWidth;
+                anim.frameHeight = es.frameHeight;
+                anim.frameCount = std::max(1, (tex && es.frameWidth > 0) ? tex->width() / es.frameWidth : 1);
+                anim.frameDuration = es.frameDuration;
+                anim.row = 0;
+                registry_.emplace<Engine::ECS::SpriteAnimation>(ent, anim);
+                remoteEnemyEntities_[es.id] = ent;
+            }
+            if (auto* tf = registry_.get<Engine::ECS::Transform>(ent)) {
+                tf->position = Engine::Vec2(es.x, es.y);
+            }
+            if (auto* hp = registry_.get<Engine::ECS::Health>(ent)) {
+                hp->currentHealth = es.hp;
+                hp->currentShields = es.shields;
+                hp->maxHealth = std::max(hp->maxHealth, es.hp);
+                hp->maxShields = std::max(hp->maxShields, es.shields);
+            }
+            // Approximate velocity for animation/movement direction.
+            if (auto* vel = registry_.get<Engine::ECS::Velocity>(ent)) {
+                Engine::Vec2 prevPos = tfPrevEnemyPos_[es.id];
+                float invDt = 20.0f;  // assume 50ms snapshot spacing
+                vel->value = {(es.x - prevPos.x) * invDt, (es.y - prevPos.y) * invDt};
+                tfPrevEnemyPos_[es.id] = Engine::Vec2(es.x, es.y);
+            }
+        }
+        // Remove enemies not present in latest snapshot.
+        for (auto it = remoteEnemyEntities_.begin(); it != remoteEnemyEntities_.end();) {
+            if (seen.find(it->first) == seen.end()) {
+                registry_.destroy(it->second);
+                it = remoteEnemyEntities_.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+
     for (const auto& p : snap.players) {
-        remoteStates_[p.id] = p;
-        if (p.id == localPlayerId_) continue;
+        const bool isLocal = (p.id == localPlayerId_);
+        if (netSession_->isHost()) {
+            // Host treats incoming player snapshots as movement/hero metadata only; health is authoritative server-side.
+            auto& entry = remoteStates_[p.id];
+            entry.id = p.id;
+            entry.heroId = p.heroId;
+            entry.level = p.level;
+            entry.wave = wave_;
+            entry.alive = p.alive;  // use reported alive for intent; will be overwritten with host health below.
+            if (!isLocal) {
+                entry.x = p.x;
+                entry.y = p.y;
+            }
+        } else {
+            remoteStates_[p.id] = p;
+        }
+
+        if (!netSession_->isHost() && isLocal) {
+            // Client applies host-authoritative health/shield/alive state to its own hero.
+            float prevHp = -1.0f;
+        if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
+            prevHp = hp->currentHealth;
+            hp->maxHealth = std::max(hp->maxHealth, p.hp);
+            hp->currentHealth = std::max(0.0f, p.hp);
+            hp->maxShields = std::max(hp->maxShields, p.shields);
+            hp->currentShields = std::max(0.0f, p.shields);
+        }
+        // Do NOT override local player's look/attack state from host; client drives their own facing/attacks.
+            if (!registry_.has<Game::Ghost>(hero_)) {
+                registry_.emplace<Game::Ghost>(hero_, Game::Ghost{false});
+            }
+            if (auto* ghost = registry_.get<Game::Ghost>(hero_)) {
+                ghost->active = !p.alive;
+            }
+            // Record host-reported HP to drive damage shake only on genuine host damage.
+            lastSnapshotHeroHp_ = p.hp;
+            if (prevHp >= 0.0f && p.hp < prevHp - 0.01f) {
+                pendingNetShake_ = true;
+            }
+            continue;
+        }
+        if (isLocal) continue;
         Engine::ECS::Entity ent = Engine::ECS::kInvalidEntity;
         auto it = remoteEntities_.find(p.id);
         if (it != remoteEntities_.end()) {
@@ -5754,9 +6061,41 @@ void GameRoot::applyRemoteSnapshot(const Game::Net::SnapshotMsg& snap) {
                                                                                Engine::Color{120, 210, 255, 220},
                                                                                Engine::TexturePtr{}});
             registry_.emplace<Engine::ECS::AABB>(ent, Engine::ECS::AABB{Engine::Vec2{size * 0.5f, size * 0.5f}});
-            registry_.emplace<Engine::ECS::Health>(ent, Engine::ECS::Health{p.hp, std::max(1.0f, p.hp)});
-            registry_.emplace<Engine::ECS::SpriteAnimation>(ent,
-                                                            Engine::ECS::SpriteAnimation{16, 16, 4, 0.14f});
+            const ArchetypeDef* def = findArchetypeById(p.heroId);
+            // Mirror archetype-derived base stats for remote players on the host so their shields/Hp are sane.
+            float hpPreset = heroMaxHpBase_ * (def ? def->hpMul : 1.0f) * globalModifiers_.playerHealthMult;
+            float shieldPreset = heroShieldBase_;
+            Game::OffensiveType remoteOffense = def ? def->offensiveType : Game::OffensiveType::Melee;
+            if (archetypeSupportsSecondaryWeapon(def ? *def : activeArchetype_)) {
+                remoteOffense = Game::OffensiveType::Melee;
+            }
+            if (remoteOffense == Game::OffensiveType::Melee) {
+                shieldPreset += 100.0f;
+                shieldPreset += meleeShieldBonus_ * (def ? def->hpMul : 1.0f) * globalModifiers_.playerShieldsMult;
+            }
+            shieldPreset *= globalModifiers_.playerShieldsMult;
+            float spawnHp = (p.hp > 0.1f) ? p.hp : hpPreset;
+            float spawnShields = (p.shields > 0.0f) ? p.shields : shieldPreset;
+            registry_.emplace<Engine::ECS::Health>(ent, Engine::ECS::Health{hpPreset, std::max(1.0f, spawnHp)});
+            if (auto* hp = registry_.get<Engine::ECS::Health>(ent)) {
+                hp->maxShields = std::max(shieldPreset, spawnShields);
+                hp->currentShields = spawnShields;
+                hp->healthArmor = heroBaseStatsScaled_.baseHealthArmor;
+                hp->shieldArmor = heroBaseStatsScaled_.baseShieldArmor;
+                hp->shieldRegenRate = heroShieldRegenBase_;
+                hp->healthRegenRate = heroHealthRegenBase_;
+                hp->regenDelay = heroRegenDelayBase_;
+            }
+            // Brief spawn grace so they don't take contact damage before their first real position update.
+            registry_.emplace<Game::Invulnerable>(ent, Game::Invulnerable{1.5f});
+            registry_.emplace<Engine::ECS::SpriteAnimation>(ent, Engine::ECS::SpriteAnimation{});
+            registry_.emplace<Engine::ECS::HeroTag>(ent, Engine::ECS::HeroTag{});
+            registry_.emplace<Game::Facing>(ent, Game::Facing{1});
+            registry_.emplace<Game::LookDirection>(ent, Game::LookDirection{Game::LookDir4::Front});
+            if (!registry_.has<Game::Ghost>(ent)) {
+                registry_.emplace<Game::Ghost>(ent, Game::Ghost{false});
+            }
+            setupHeroVisualForEntity(ent, def ? *def : activeArchetype_);
             remoteEntities_[p.id] = ent;
         }
         if (auto* tf = registry_.get<Engine::ECS::Transform>(ent)) {
@@ -5784,24 +6123,86 @@ void GameRoot::applyRemoteSnapshot(const Game::Net::SnapshotMsg& snap) {
             }
         }
         if (auto* hp = registry_.get<Engine::ECS::Health>(ent)) {
-            hp->maxHealth = std::max(hp->maxHealth, p.hp);
-            hp->currentHealth = p.hp;
-            hp->maxShields = std::max(hp->maxShields, p.shields);
-            hp->currentShields = p.shields;
+            if (!netSession_->isHost()) {
+                hp->maxHealth = std::max(hp->maxHealth, p.hp);
+                if (p.hp > 0.01f) {
+                    hp->currentHealth = p.hp;
+                }
+                hp->maxShields = std::max(hp->maxShields, p.shields);
+                hp->currentShields = p.shields;
+                if (p.alive) {
+                    hp->currentHealth = std::max(hp->currentHealth, 1.0f);
+                }
+            } else {
+                // Host keeps authoritative health; mirror into remoteStates_ for UI/logic.
+                auto& entry = remoteStates_[p.id];
+                entry.hp = hp->currentHealth;
+                entry.shields = hp->currentShields;
+                entry.alive = hp->alive();
+            }
         }
-        // Update appearance based on heroId
-        if (auto* rend = registry_.get<Engine::ECS::Renderable>(ent)) {
-            Engine::TexturePtr tex{};
-            if (textureManager_) {
-                const ArchetypeDef* def = findArchetypeById(p.heroId);
-                std::string texPath = def ? resolveArchetypeTexture(*def) : manifest_.heroTexture;
-                if (!texPath.empty()) tex = loadTextureOptional(texPath);
-                if (def) {
-                    rend->color = def->color;
+        if (auto* look = registry_.get<Game::LookDirection>(ent)) {
+            look->dir = static_cast<Game::LookDir4>(std::clamp<int>(p.lookDir, 0, 3));
+        }
+        const float incomingAttackT = std::max(0.0f, p.attackTimer);
+        if (incomingAttackT > 0.0f || p.attacking) {
+            if (auto* atk = registry_.get<Game::HeroAttackAnim>(ent)) {
+                atk->timer = std::max(atk->timer, incomingAttackT > 0.0f ? incomingAttackT : 0.2f);
+            } else {
+                registry_.emplace<Game::HeroAttackAnim>(ent, Game::HeroAttackAnim{
+                    incomingAttackT > 0.0f ? incomingAttackT : 0.2f,
+                    {0.0f, 0.0f},
+                    0});
+            }
+        } else if (auto* atk = registry_.get<Game::HeroAttackAnim>(ent)) {
+            if (atk->timer <= 0.0f) {
+                atk->timer = 0.0f;
+            }
+        }
+        // Sync ghost/knockdown visual state for remote players.
+        if (!registry_.has<Game::Ghost>(ent)) {
+            registry_.emplace<Game::Ghost>(ent, Game::Ghost{false});
+        }
+        if (auto* ghost = registry_.get<Game::Ghost>(ent)) {
+            if (netSession_->isHost()) {
+                const auto* hpHost = registry_.get<Engine::ECS::Health>(ent);
+                ghost->active = hpHost ? !hpHost->alive() : false;
+            } else {
+                ghost->active = !p.alive;
+            }
+        }
+        // Keep HP at zero for downed ghosts so revive timing is driven by host round progression.
+        if (!netSession_->isHost()) {
+            if (auto* hp = registry_.get<Engine::ECS::Health>(ent)) {
+                if (!p.alive) {
+                    hp->currentHealth = 0.0f;
+                    hp->currentShields = 0.0f;
                 }
             }
-            if (tex) rend->texture = tex;
         }
+        // Keep visuals in sync with archetype selection updates
+        const ArchetypeDef* def = findArchetypeById(p.heroId);
+        if (def) {
+            setupHeroVisualForEntity(ent, *def);
+        }
+    }
+    if (!netSession_->isHost()) {
+        lastSnapshotWave_ = snap.wave;
+        lastSnapshotTick_ = snap.tick;
+    }
+
+    // Ensure local hero is fully restored right after a detected host reset.
+    if (forceHealAfterReset_ && !netSession_->isHost()) {
+        if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
+            hp->maxHealth = std::max(hp->maxHealth, heroMaxHpPreset_);
+            hp->currentHealth = hp->maxHealth;
+            hp->maxShields = std::max(hp->maxShields, heroShieldPreset_);
+            hp->currentShields = hp->maxShields;
+        }
+        if (auto* ghost = registry_.get<Game::Ghost>(hero_)) {
+            ghost->active = false;
+        }
+        forceHealAfterReset_ = false;
     }
 }
 
@@ -5942,6 +6343,85 @@ void GameRoot::applyArchetypePreset() {
     heroColorPreset_ = activeArchetype_.color;
     heroTexturePath_ = resolveArchetypeTexture(activeArchetype_);
     buildAbilities();
+}
+
+void GameRoot::setupHeroVisualForEntity(Engine::ECS::Entity ent, const GameRoot::ArchetypeDef& def) {
+    auto files = heroSpriteFilesFor(def);
+    auto tryLoad = [&](const std::string& rel) -> Engine::TexturePtr {
+        std::filesystem::path path = std::filesystem::path("assets") / "Sprites" / "Characters" / files.folder / rel;
+        if (const char* home = std::getenv("HOME")) {
+            std::filesystem::path homePath = std::filesystem::path(home) / path;
+            if (std::filesystem::exists(homePath)) {
+                path = homePath;
+            }
+        }
+        if (std::filesystem::exists(path)) return loadTextureOptional(path.string());
+        return {};
+    };
+
+    Engine::TexturePtr moveTex = tryLoad(files.movementFile);
+    Engine::TexturePtr combatTex = tryLoad(files.combatFile);
+    if (!moveTex) {
+        std::string compact = files.folder;
+        compact.erase(std::remove(compact.begin(), compact.end(), ' '), compact.end());
+        moveTex = tryLoad(compact + ".png");
+    }
+    if (!combatTex) {
+        std::string compact = files.folder;
+        compact.erase(std::remove(compact.begin(), compact.end(), ' '), compact.end());
+        combatTex = tryLoad(compact + "_Combat.png");
+    }
+
+    Engine::ECS::Renderable* rend = registry_.get<Engine::ECS::Renderable>(ent);
+    Engine::ECS::SpriteAnimation* anim = registry_.get<Engine::ECS::SpriteAnimation>(ent);
+    if (!anim) {
+        registry_.emplace<Engine::ECS::SpriteAnimation>(ent, Engine::ECS::SpriteAnimation{});
+        anim = registry_.get<Engine::ECS::SpriteAnimation>(ent);
+    }
+    if (!registry_.has<Game::HeroSpriteSheets>(ent)) {
+        registry_.emplace<Game::HeroSpriteSheets>(ent);
+    }
+    auto* sheets = registry_.get<Game::HeroSpriteSheets>(ent);
+
+    if (moveTex) {
+        sheets->movement = moveTex;
+        const int movementColumns = 4;
+        const int movementRows = 31;
+        sheets->movementFrameWidth = std::max(1, moveTex->width() / movementColumns);
+        sheets->movementFrameHeight = (moveTex->height() % movementRows == 0)
+                                          ? std::max(1, moveTex->height() / movementRows)
+                                          : std::max(1, moveTex->height() / std::max(1, moveTex->height() / sheets->movementFrameWidth));
+        sheets->baseRenderSize = heroSize_;
+        sheets->movementFrameDuration = 0.12f;
+        int moveFrames = std::max(1, moveTex->width() / sheets->movementFrameWidth);
+        anim->frameWidth = sheets->movementFrameWidth;
+        anim->frameHeight = sheets->movementFrameHeight;
+        anim->frameCount = moveFrames;
+        anim->frameDuration = sheets->movementFrameDuration;
+        anim->row = sheets->rowIdleFront;
+    }
+    if (combatTex) {
+        sheets->combat = combatTex;
+        const int combatColumns = 4;
+        sheets->combatFrameWidth = std::max(1, combatTex->width() / combatColumns);
+        sheets->combatFrameHeight =
+            (combatTex->height() % 20 == 0) ? std::max(1, combatTex->height() / 20) : sheets->combatFrameWidth;
+        sheets->combatFrameDuration = 0.10f;
+    }
+
+    if (rend) {
+        rend->texture = sheets->movement ? sheets->movement : rend->texture;
+        float frameW = static_cast<float>(sheets->movementFrameWidth);
+        float frameH = static_cast<float>(sheets->movementFrameHeight);
+        float aspect = (frameW > 0.0f) ? (frameH / frameW) : 1.0f;
+        rend->size = {heroSize_, heroSize_ * aspect};
+        if (const auto* defColor = &def.color; defColor) {
+            rend->color = *defColor;
+        }
+    }
+    if (!registry_.has<Game::LookDirection>(ent)) {
+        registry_.emplace<Game::LookDirection>(ent, Game::LookDirection{Game::LookDir4::Front});
+    }
 }
 
 std::string GameRoot::resolveArchetypeTexture(const GameRoot::ArchetypeDef& def) const {
@@ -6127,7 +6607,7 @@ void GameRoot::applyLevelChoice(int index) {
         }
     }
     levelChoiceOpen_ = false;
-    paused_ = userPaused_ || itemShopOpen_ || abilityShopOpen_ || (characterScreenOpen_ && !multiplayerEnabled_);
+    refreshPauseState();
 }
 
 void GameRoot::drawLevelChoiceOverlay() {
@@ -7103,6 +7583,11 @@ void GameRoot::resetRun() {
     registry_ = {};
     clearBuildPreview();
     hero_ = Engine::ECS::kInvalidEntity;
+    heroGhostActive_ = false;
+    heroGhostPendingRise_ = false;
+    heroGhostRiseTimer_ = 0.0f;
+    lastSnapshotHeroHp_ = -1.0f;
+    pendingNetShake_ = false;
     usingSecondaryWeapon_ = false;
     swapWeaponHeld_ = false;
     remoteEntities_.clear();
@@ -7305,6 +7790,94 @@ void GameRoot::clampInventorySelection() {
     if (inventorySelected_ >= static_cast<int>(inventory_.size())) {
         inventorySelected_ = static_cast<int>(inventory_.size()) - 1;
     }
+}
+
+void GameRoot::updateRemoteCombat(const Engine::TimeStep& step) {
+    if (!multiplayerEnabled_ || !netSession_ || !netSession_->isHost()) return;
+    for (const auto& kv : remoteEntities_) {
+        uint32_t pid = kv.first;
+        Engine::ECS::Entity ent = kv.second;
+        if (ent == Engine::ECS::kInvalidEntity) continue;
+        auto* hp = registry_.get<Engine::ECS::Health>(ent);
+        auto* tf = registry_.get<Engine::ECS::Transform>(ent);
+        if (!hp || !tf || !hp->alive()) continue;
+
+        double& cd = remoteFireCooldown_[pid];
+        cd -= step.deltaSeconds;
+        if (cd > 0.0) continue;
+
+        const ArchetypeDef* def = findArchetypeById(remoteStates_[pid].heroId);
+        Game::OffensiveType ot = def ? def->offensiveType : Game::OffensiveType::Ranged;
+
+        Engine::Vec2 bestPos{};
+        float bestD2 = 9999999.0f;
+        Engine::ECS::Entity bestEnemy = Engine::ECS::kInvalidEntity;
+        registry_.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::EnemyTag>(
+            [&](Engine::ECS::Entity enemy, const Engine::ECS::Transform& etf, const Engine::ECS::Health& ehp, Engine::ECS::EnemyTag&) {
+                if (!ehp.alive()) return;
+                float dx = etf.position.x - tf->position.x;
+                float dy = etf.position.y - tf->position.y;
+                float d2 = dx * dx + dy * dy;
+                if (d2 < bestD2) {
+                    bestD2 = d2;
+                    bestPos = etf.position;
+                    bestEnemy = enemy;
+                }
+            });
+        if (bestD2 >= 9999998.0f) continue;
+
+        Engine::Vec2 dir(bestPos.x - tf->position.x, bestPos.y - tf->position.y);
+        float len2 = dir.x * dir.x + dir.y * dir.y;
+        if (len2 < 0.0001f) continue;
+        float inv = 1.0f / std::sqrt(len2);
+        dir.x *= inv;
+        dir.y *= inv;
+        if (ot == Game::OffensiveType::Melee || ot == Game::OffensiveType::ThornTank) {
+            float meleeRange = 70.0f;
+            if (len2 <= meleeRange * meleeRange && bestEnemy != Engine::ECS::kInvalidEntity) {
+                if (auto* ehp = registry_.get<Engine::ECS::Health>(bestEnemy)) {
+                    Engine::Gameplay::DamageEvent dmg{};
+                    dmg.baseDamage = projectileDamage_ * 1.1f;
+                    dmg.type = Engine::Gameplay::DamageType::Normal;
+                    Engine::Gameplay::applyDamage(*ehp, dmg, {});
+                    if (!ehp->alive()) {
+                        hp->currentHealth = std::min(hp->maxHealth, hp->currentHealth + dmg.baseDamage * 0.1f);
+                    }
+                }
+                cd = fireInterval_;
+            } else {
+                cd = fireInterval_ * 0.3;  // retry soon if out of range
+            }
+        } else {
+            float speed = projectileSpeed_;
+            auto p = registry_.create();
+            registry_.emplace<Engine::ECS::Transform>(p, tf->position);
+            registry_.emplace<Engine::ECS::Velocity>(p, dir * speed);
+            float hb = projectileHitboxSize_ * 0.5f;
+            registry_.emplace<Engine::ECS::AABB>(p, Engine::ECS::AABB{Engine::Vec2{hb, hb}});
+            applyProjectileVisual(p, 1.0f, Engine::Color{255, 220, 140, 255}, false);
+            Engine::Gameplay::DamageEvent dmg{};
+            dmg.baseDamage = projectileDamage_;
+            dmg.type = Engine::Gameplay::DamageType::Normal;
+            registry_.emplace<Engine::ECS::Projectile>(p, Engine::ECS::Projectile{dir * speed, dmg, projectileLifetime_, lifestealPercent_, chainBounces_});
+            registry_.emplace<Engine::ECS::ProjectileTag>(p, Engine::ECS::ProjectileTag{});
+
+            cd = fireInterval_;
+        }
+
+        if (auto* look = registry_.get<Game::LookDirection>(ent)) {
+            look->dir = (std::abs(dir.x) > std::abs(dir.y))
+                            ? (dir.x >= 0.0f ? Game::LookDir4::Right : Game::LookDir4::Left)
+                            : (dir.y >= 0.0f ? Game::LookDir4::Front : Game::LookDir4::Back);
+        }
+    }
+}
+
+void GameRoot::refreshPauseState() {
+    // In multiplayer, overlays (shop, level-up, build, inventory) do NOT pause the match.
+    bool overlayPause = !multiplayerEnabled_ &&
+                        (itemShopOpen_ || abilityShopOpen_ || levelChoiceOpen_ || characterScreenOpen_ || buildMenuOpen_);
+    paused_ = userPaused_ || overlayPause || defeated_;
 }
 
 }  // namespace Game

@@ -20,7 +20,8 @@ public:
               const Engine::Texture* gridTexture,
               const std::vector<Engine::TexturePtr>* gridVariants = nullptr,
               const Engine::Gameplay::FogOfWarLayer* fog = nullptr, int fogTileSize = 32,
-              float fogOriginOffsetX = 0.0f, float fogOriginOffsetY = 0.0f);
+              float fogOriginOffsetX = 0.0f, float fogOriginOffsetY = 0.0f,
+              bool disableEnemyFogCulling = false);
 
 private:
     void drawGrid(const Engine::Camera2D& camera, int viewportW, int viewportH, const Engine::Texture* gridTexture,

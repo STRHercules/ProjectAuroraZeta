@@ -30,11 +30,11 @@ struct Peer {
 
 class NetSession {
 public:
-    using SnapshotProvider = std::function<std::vector<PlayerNetState>()>;
+    using SnapshotProvider = std::function<SnapshotMsg()>;
     using SnapshotConsumer = std::function<void(const SnapshotMsg&)>;
 
     NetSession();
-    ~NetSession();
+    virtual ~NetSession();
 
     bool host(const SessionConfig& cfg);
     bool join(const std::string& hostIp, uint16_t hostPort, const std::string& password, const std::string& name);

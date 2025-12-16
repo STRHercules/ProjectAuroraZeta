@@ -30,10 +30,8 @@ void NetSession::beginMatch() {
         }
     } else if (role_ == SessionRole::Client) {
         if (snapshotProvider_) {
-            SnapshotMsg snap{};
-            snap.players = snapshotProvider_();
+            SnapshotMsg snap = snapshotProvider_();
             snap.tick = static_cast<uint32_t>(time_ * 60.0);
-            snap.wave = 0;
             sendMessage(MessageType::Snapshot, hostAddr_, [&](Engine::Net::NetWriter& w) { snap.serialize(w); });
         }
     }
@@ -151,10 +149,8 @@ void NetSession::update(double dt) {
         snapshotTimer_ += dt;
         if (snapshotTimer_ >= 0.05) {
             snapshotTimer_ = 0.0;
-            SnapshotMsg snap{};
-            snap.players = snapshotProvider_();
+            SnapshotMsg snap = snapshotProvider_();
             snap.tick = static_cast<uint32_t>(time_ * 60.0);
-            snap.wave = 0;
             sendMessage(MessageType::Snapshot, hostAddr_, [&](Engine::Net::NetWriter& w) { snap.serialize(w); });
         }
     }
@@ -366,10 +362,8 @@ void NetSession::broadcastLobby() {
 
 void NetSession::broadcastSnapshot() {
     if (!snapshotProvider_) return;
-    SnapshotMsg snap{};
-    snap.players = snapshotProvider_();
+    SnapshotMsg snap = snapshotProvider_();
     snap.tick = static_cast<uint32_t>(time_ * 60.0);
-    snap.wave = 0;
     Engine::Net::NetWriter w;
     prependType(w, MessageType::Snapshot);
     snap.serialize(w);
