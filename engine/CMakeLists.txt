@@ -20,9 +20,13 @@ set(ENGINE_SOURCES
     ecs/components/SpriteAnimation.h
     ecs/components/CombatStats.h
     ecs/components/Health.h
+    ecs/components/Status.h
     ecs/components/Projectile.h
     ecs/components/AABB.h
     ecs/components/Tags.h
+    status/StatusTypes.h
+    status/StatusContainer.h
+    status/StatusContainer.cpp
     gameplay/Combat.h
     math/Vec2.h
     render/RenderDevice.h
@@ -36,6 +40,8 @@ set(ENGINE_SOURCES
     render/BitmapFont.h
     render/BitmapTextRenderer.h
     render/BitmapTextRenderer.cpp
+    ui/MiniMapHUD.h
+    ui/MiniMapHUD.cpp
     gameplay/InputHelpers.h
     input/ActionState.h
     input/ActionMapper.h

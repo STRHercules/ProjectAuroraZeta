@@ -2,6 +2,23 @@
 * Expose as much as possible to make it as easy as possible to mod
     * Develop mod tools?
 
+# Change 'Archetype' to 'Champions'
+
+
+# RPG Style Progression
+* Each character 
+
+# Threat/Aggro and Party Synergy (Optional / Co-op Ready)
+* If you ever do co-op, add:
+    - **Threat** generation per action:
+        - damage generates threat
+        - healing generates threat
+        - taunts force target swap temporarily
+    - Archetype roles become real:
+        - Tank builds threat + mitigation
+        - Healer manages threat spikes
+        - DPS balances burst vs survival
+
 # Chat
 * Ability for players to chat in Multiplayer Lobby/Match
 
@@ -32,21 +49,7 @@
 * Some Characters may grant extra or a defecit of lives.
 * When all players have exhausted all lives, the game ends.
 
-# Status & States
-In Zeta, Characters, Bosses and monsters alike can sometimes perform attacks or spells, or host a passive, applying a special status or state to himself or its target.
-- Below are listed the specific ones I would like:
-    * Armor Reduction: Reduce or Suppress the victim's armor. Armor below O causes the host to take more damage from his enemies
-    * Blindness: Reduce or Suppress the victim's vision
-    * Cauterize: Prevent the victim from regenerating life
-    * Feared: Force the victim into moving uncontrollably, preventing it from attacking or using abilities
-    * Silenced: Prevent the victim from using any kind of active spells and sometimes also passive ones
-    * Stasis: Makes the host immune to damage and most effects but also prevent him from performing any actions
-    * Cloaking: Makes the host invisible in a manner that cannot be detected
-    * Unstoppable: Allow the host to be immune to stuns, slows and most speed impeding effects
-
 # GUI/HUD
-* Mini-Map
-    * Mini-Map will be in the top right, will display the players location at the center, and will display small blips wherever enemies are in real-time.
 * Round/Wave Information
     * Collapsible/Minimize window to display current Round, Wave, Amount of Enemies Remaining
 * Game Stats

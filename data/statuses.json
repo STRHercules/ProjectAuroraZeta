@@ -1,0 +1,79 @@
+{
+  "armorReduction": {
+    "id": "ArmorReduction",
+    "duration": 4.0,
+    "maxStacks": 5,
+    "refreshOnReapply": true,
+    "dispellable": true,
+    "isDebuff": true,
+    "tags": ["Armor"],
+    "magnitude": { "armorDelta": -2.5 }
+  },
+  "blindness": {
+    "id": "Blindness",
+    "duration": 3.5,
+    "maxStacks": 1,
+    "refreshOnReapply": true,
+    "dispellable": true,
+    "isDebuff": true,
+    "tags": ["Vision", "CastingLock"],
+    "magnitude": { "visionMultiplier": 0.35 }
+  },
+  "cauterize": {
+    "id": "Cauterize",
+    "duration": 5.0,
+    "maxStacks": 1,
+    "refreshOnReapply": true,
+    "dispellable": true,
+    "isDebuff": true,
+    "tags": ["RegenBlock"],
+    "magnitude": { "blocksRegen": true }
+  },
+  "feared": {
+    "id": "Feared",
+    "duration": 2.8,
+    "maxStacks": 1,
+    "refreshOnReapply": true,
+    "dispellable": true,
+    "isDebuff": true,
+    "tags": ["CrowdControl", "MovementLock", "CastingLock"],
+    "magnitude": { "moveSpeedMultiplier": 1.0 }
+  },
+  "silenced": {
+    "id": "Silenced",
+    "duration": 3.0,
+    "maxStacks": 1,
+    "refreshOnReapply": true,
+    "dispellable": true,
+    "isDebuff": true,
+    "tags": ["CastingLock"]
+  },
+  "stasis": {
+    "id": "Stasis",
+    "duration": 2.0,
+    "maxStacks": 1,
+    "refreshOnReapply": true,
+    "dispellable": true,
+    "isDebuff": true,
+    "tags": ["Immunity", "MovementLock", "CastingLock"]
+  },
+  "cloaking": {
+    "id": "Cloaking",
+    "duration": 6.0,
+    "maxStacks": 1,
+    "refreshOnReapply": true,
+    "dispellable": true,
+    "isDebuff": false,
+    "tags": ["Stealth"]
+  },
+  "unstoppable": {
+    "id": "Unstoppable",
+    "duration": 3.0,
+    "maxStacks": 1,
+    "refreshOnReapply": true,
+    "uniquePerSource": false,
+    "dispellable": false,
+    "isDebuff": false,
+    "tags": ["Immunity"]
+  }
+}

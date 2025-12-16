@@ -47,3 +47,9 @@
 # v0.0.103
 * Bosses now spawn every 20 Waves.
     * Boss scale clamped to a reasonable maximum.
+
+# v0.0.104
+* Implemented reusable status/state system with stacking, immunities, and debug hotkeys to apply effects.
+    * Damage, regen, casting, and movement now respect Stasis, Silence, Fear, Cauterize, Cloaking, Unstoppable, and Armor Reduction (supports negative armor).
+* Added top-right mini-map overlay that centers on the player and clamps enemy blips at the edge of the radar radius.
+    * Cloaked or stasis targets hide from the mini-map and enemy rendering.

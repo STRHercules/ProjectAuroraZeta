@@ -11,3 +11,8 @@
 - Add an in-game tooltip explaining gold vs. copper and showing current gold wallet in the HUD during intermission.
 - Surface stack caps and current stacks for Traveling Shop effects in the shop UI (e.g., “1/2 Cataclysm Rounds”).
 - Consider lowering gold price numbers or increasing gold income for early testing so players can reasonably buy a legendary per boss cycle.
+
+## 2025-12-16 — Suggestions after status system + mini-map
+- Surface active statuses on the HUD (icons with remaining duration/stacks) so players can see Silence/Stasis/Unstoppable.
+- Drive status magnitudes fully from data and wire real gameplay sources (abilities, enemy attacks) into the new factory instead of debug-only hotkeys.
+- Add boss/elite markers and player facing arrow on the mini-map, and allow zoom radius tuning via config.

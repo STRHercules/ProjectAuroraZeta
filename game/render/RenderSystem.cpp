@@ -24,6 +24,7 @@
 #include "../../engine/ecs/components/Tags.h"
 #include "../systems/BuffSystem.h"
 #include "../components/MiniUnit.h"
+#include "../../engine/ecs/components/Status.h"
 
 namespace Game {
 
@@ -83,6 +84,11 @@ void RenderSystem::draw(const Engine::ECS::Registry& registry, const Engine::Cam
             }
 
             Engine::Color color = rend.color;
+            const auto* status = registry.get<Engine::ECS::Status>(e);
+            const bool cloaked = status && status->container.isStealthed();
+            if (cloaked && isEnemy) {
+                return;  // fully hidden to player
+            }
             // Pulse color for pickups (except static Field Medkit item).
             if (registry.has<Game::Pickup>(e)) {
                 const auto* pick = registry.get<Game::Pickup>(e);
@@ -116,6 +122,9 @@ void RenderSystem::draw(const Engine::ECS::Registry& registry, const Engine::Cam
                     auto boost = static_cast<uint8_t>(std::min(255.0f, color.r + 120.0f * t));
                     color = {boost, boost, std::min<uint8_t>(255, static_cast<uint8_t>(color.b + 40)), color.a};
                 }
+            }
+            if (cloaked && isHero) {
+                color.a = static_cast<uint8_t>(std::min<int>(color.a, 140));
             }
 
             bool flipX = false;

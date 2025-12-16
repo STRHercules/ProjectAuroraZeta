@@ -2,6 +2,7 @@
 #include <cassert>
 #include "../engine/gameplay/Combat.h"
 #include "../engine/gameplay/FogOfWar.h"
+#include "../engine/status/StatusContainer.h"
 
 using namespace Engine::Gameplay;
 
@@ -56,6 +57,42 @@ int main() {
         assert(fog.getState(2, 2) == FogState::Visible);
         // Tile (0,0) remains unexplored.
         assert(fog.getState(0, 0) == FogState::Unexplored);
+    }
+    {
+        Engine::Status::StatusContainer st;
+        Engine::Status::StatusSpec armor{};
+        armor.id = Engine::Status::EStatusId::ArmorReduction;
+        armor.duration = 1.0f;
+        armor.maxStacks = 3;
+        armor.magnitude.armorDelta = -2.0f;
+        st.apply(armor, 1);
+        st.apply(armor, 1);
+        assert(st.has(Engine::Status::EStatusId::ArmorReduction));
+        assert(st.stacks(Engine::Status::EStatusId::ArmorReduction) == 2);
+        assert(st.armorDeltaTotal() == -4.0f);
+        st.update(0.5f);
+        assert(st.has(Engine::Status::EStatusId::ArmorReduction));
+        st.update(1.0f);
+        assert(!st.has(Engine::Status::EStatusId::ArmorReduction));
+    }
+    {
+        UnitStats target{};
+        target.maxHealth = target.currentHealth = 20.0f;
+        target.healthArmor = 0.0f;
+        Engine::Status::StatusContainer st;
+        Engine::Status::StatusSpec armor{};
+        armor.id = Engine::Status::EStatusId::ArmorReduction;
+        armor.magnitude.armorDelta = -5.0f;
+        st.apply(armor, 1);
+        DamageEvent hit{};
+        hit.baseDamage = 10.0f;
+        BuffState buff{};
+        float delta = st.armorDeltaTotal();
+        buff.healthArmorBonus += delta;
+        buff.shieldArmorBonus += delta;
+        applyDamage(target, hit, buff);
+        // 10 - (-5) = 15 damage.
+        assert(target.currentHealth == 5.0f);
     }
     return 0;
 }

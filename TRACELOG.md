@@ -50,6 +50,33 @@
 - Build: `cmake --build build --target game -- -j4` (Linux, 2025-12-16) — success.
 - Manual: not run (doc-only change).
 
+## 2025-12-16 — Status framework + mini-map HUD
+
+**Prompt / Task**
+- Implement TASK.md: add status/state system (8 effects, stacking, immunities) and a HUD mini-map.
+
+**What Changed**
+- Added engine-level status types/container/component plus game-side `ZetaStatusFactory` loading `data/statuses.json`.
+- Integrated status checks into damage, regen, ability casting, movement, AI target choice, and rendering (cloaking/stasis culling).
+- Added debug hotkeys (F1–F4 apply to nearest enemy; F6/F7/F8/F10 to hero; F9 clear) for testing statuses.
+- Introduced top-right mini-map overlay centered on player with clamped enemy blips; hides cloaked/stasis enemies.
+- Updated README (HUD bullet), CHANGELOG v0.0.104, suggestions, and bumped build string.
+
+**Steps Taken**
+- Implemented status enums/specs/container with immunity logic and armor/vision/movement magnitudes.
+- Created status ECS component, wired spawning (hero/enemy/mini-units), ticked status updates each frame, and gated regen/casting/movement.
+- Updated collision/melee/remote combat damage to honor stasis, armor reduction, and damage multipliers; added AI fear/blind handling and cloaking target filters.
+- Added `MiniMapHUD` renderer and hooked it into the render path; collected enemy positions and filtered cloaked/stasis units.
+- Added tests for status stacking/expiry and negative-armor damage; refreshed docs and changelog.
+
+**Rationale / Tradeoffs**
+- Kept engine status generic; game magnitudes live in JSON for tuning without rebuilds.
+- Debug hotkeys provide acceptance coverage until real content applies statuses.
+- Mini-map uses existing RenderDevice primitives to avoid new dependencies.
+
+**Build / Test**
+- Build: `cmake --build build --target game -- -j4` (Linux, 2025-12-16).
+- Tests: `ctest --output-on-failure` (no tests discovered in current CTest config).
 ## 2025-12-16 — README: Traveling Shop, Pickups, Global Upgrades
 
 **Prompt / Task**

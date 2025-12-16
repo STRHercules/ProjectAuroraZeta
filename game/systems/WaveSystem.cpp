@@ -8,6 +8,7 @@
 #include "../../engine/ecs/components/Renderable.h"
 #include "../../engine/ecs/components/AABB.h"
 #include "../../engine/ecs/components/Health.h"
+#include "../../engine/ecs/components/Status.h"
 #include "../../engine/ecs/components/Tags.h"
 #include "../../engine/ecs/components/SpriteAnimation.h"
 #include "../../engine/math/Vec2.h"
@@ -112,6 +113,7 @@ bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
             hp->shieldRegenRate = settings_.enemyShieldRegen;
             hp->regenDelay = settings_.enemyRegenDelay;
         }
+        registry.emplace<Engine::ECS::Status>(e, Engine::ECS::Status{});
         registry.emplace<Engine::ECS::EnemyTag>(e, Engine::ECS::EnemyTag{});
         registry.emplace<Game::EnemyAttributes>(e, Game::EnemyAttributes{speedVal});
         if (tex) {
@@ -159,6 +161,7 @@ bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
             hp->shieldRegenRate = settings_.enemyShieldRegen;
             hp->regenDelay = settings_.enemyRegenDelay;
         }
+        registry.emplace<Engine::ECS::Status>(e, Engine::ECS::Status{});
         registry.emplace<Engine::ECS::EnemyTag>(e, Engine::ECS::EnemyTag{});
         registry.emplace<Game::EnemyAttributes>(e, Game::EnemyAttributes{speedVal});
         if (tex) {
@@ -217,6 +220,7 @@ bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
                 hp->shieldRegenRate = settings_.enemyShieldRegen * 1.1f;
                 hp->regenDelay = settings_.enemyRegenDelay;
             }
+            registry.emplace<Engine::ECS::Status>(e, Engine::ECS::Status{});
             registry.emplace<Engine::ECS::EnemyTag>(e, Engine::ECS::EnemyTag{});
             registry.emplace<Engine::ECS::BossTag>(e, Engine::ECS::BossTag{});
             registry.emplace<Game::EnemyAttributes>(e, Game::EnemyAttributes{speedVal});

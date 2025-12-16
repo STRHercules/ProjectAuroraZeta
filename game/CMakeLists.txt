@@ -18,6 +18,7 @@ set(GAME_SOURCES
     systems/HotzoneSystem.cpp
     systems/ShopSystem.cpp
     systems/MiniUnitSystem.cpp
+    status/ZetaStatusFactory.cpp
     GameSelectedBuilding.cpp
     meta/ItemDefs.cpp
     meta/GlobalUpgrades.cpp

@@ -633,6 +633,7 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     heroVisionRadiusBaseTiles_ = heroVisionRadiusTiles_;
 
     rebuildFogLayer();
+    statusFactory_.load("data/statuses.json");
 
     // Attempt to load a placeholder sprite for hero (optional).
     if (render_ && textureManager_) {
@@ -746,6 +747,77 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         pauseClickPrev_ = false;
         refreshPauseState();
     };
+    // Debug hotkeys to apply/remove statuses quickly (F6-F9).
+    {
+        const Uint8* kb = SDL_GetKeyboardState(nullptr);
+        static bool prevF[9]{false, false, false, false, false, false, false, false, false};
+        auto edge = [&](int idx, SDL_Scancode code) {
+            bool down = kb[code] != 0;
+            bool fire = down && !prevF[idx];
+            prevF[idx] = down;
+            return fire;
+        };
+        auto nearestEnemy = [&](float radius) {
+            Engine::ECS::Entity best = Engine::ECS::kInvalidEntity;
+            float bestD2 = radius * radius;
+            Engine::Vec2 heroPos{};
+            if (const auto* htf = registry_.get<Engine::ECS::Transform>(hero_)) heroPos = htf->position;
+            registry_.view<Engine::ECS::Transform, Engine::ECS::EnemyTag>(
+                [&](Engine::ECS::Entity e, const Engine::ECS::Transform& tf, const Engine::ECS::EnemyTag&) {
+                    float dx = tf.position.x - heroPos.x;
+                    float dy = tf.position.y - heroPos.y;
+                    float d2 = dx * dx + dy * dy;
+                    if (d2 < bestD2) {
+                        bestD2 = d2;
+                        best = e;
+                    }
+                });
+            return best;
+        };
+        auto applyStatus = [&](Engine::ECS::Entity ent, Engine::Status::EStatusId id) {
+            if (ent == Engine::ECS::kInvalidEntity) return;
+            if (auto* st = registry_.get<Engine::ECS::Status>(ent)) {
+                st->container.apply(statusFactory_.make(id), hero_);
+            }
+        };
+        if (edge(0, SDL_SCANCODE_F1)) {
+            applyStatus(nearestEnemy(520.0f), Engine::Status::EStatusId::ArmorReduction);
+        }
+        if (edge(1, SDL_SCANCODE_F2)) {
+            applyStatus(nearestEnemy(520.0f), Engine::Status::EStatusId::Feared);
+        }
+        if (edge(2, SDL_SCANCODE_F3)) {
+            applyStatus(nearestEnemy(520.0f), Engine::Status::EStatusId::Cauterize);
+        }
+        if (edge(3, SDL_SCANCODE_F4)) {
+            applyStatus(nearestEnemy(520.0f), Engine::Status::EStatusId::Blindness);
+        }
+        if (edge(4, SDL_SCANCODE_F6)) {
+            if (auto* st = registry_.get<Engine::ECS::Status>(hero_)) {
+                st->container.apply(statusFactory_.make(Engine::Status::EStatusId::Stasis), hero_);
+            }
+        }
+        if (edge(5, SDL_SCANCODE_F7)) {
+            if (auto* st = registry_.get<Engine::ECS::Status>(hero_)) {
+                st->container.apply(statusFactory_.make(Engine::Status::EStatusId::Unstoppable), hero_);
+            }
+        }
+        if (edge(6, SDL_SCANCODE_F8)) {
+            if (auto* st = registry_.get<Engine::ECS::Status>(hero_)) {
+                st->container.apply(statusFactory_.make(Engine::Status::EStatusId::Silenced), hero_);
+            }
+        }
+        if (edge(7, SDL_SCANCODE_F9)) {
+            if (auto* st = registry_.get<Engine::ECS::Status>(hero_)) {
+                st->container.clear(true);
+            }
+        }
+        if (edge(8, SDL_SCANCODE_F10)) {
+            if (auto* st = registry_.get<Engine::ECS::Status>(hero_)) {
+                st->container.apply(statusFactory_.make(Engine::Status::EStatusId::Cloaking), hero_);
+            }
+        }
+    }
     if (!inMenu_) {
         bool anyOverlay = userPaused_ || itemShopOpen_ || abilityShopOpen_ || levelChoiceOpen_ || characterScreenOpen_ ||
                           buildMenuOpen_;
@@ -1048,10 +1120,19 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         const bool midClick = input.isMouseButtonDown(1);
 
         if (auto* vel = registry_.get<Engine::ECS::Velocity>(hero_)) {
-            if (paused_ || defeatDelayActive_ || characterScreenOpen_ || ((heroHp && !heroAlive) && !heroGhost)) {
+            const auto* status = registry_.get<Engine::ECS::Status>(hero_);
+            const bool movementLocked = status && status->container.blocksMovement();
+            const bool feared = status && status->container.isFeared();
+            const float moveMul = status ? status->container.moveSpeedMultiplier() : 1.0f;
+            if (paused_ || defeatDelayActive_ || characterScreenOpen_ || ((heroHp && !heroAlive) && !heroGhost) || movementLocked) {
                 vel->value = {0.0f, 0.0f};
+            } else if (feared) {
+                std::uniform_real_distribution<float> ang(0.0f, 6.28318f);
+                float a = ang(rng_);
+                Engine::Vec2 dir{std::cos(a), std::sin(a)};
+                vel->value = {dir.x * heroMoveSpeed_ * moveMul, dir.y * heroMoveSpeed_ * moveMul};
             } else if (movementMode_ == MovementMode::Modern) {
-                vel->value = {actions.moveX * heroMoveSpeed_, actions.moveY * heroMoveSpeed_};
+                vel->value = {actions.moveX * heroMoveSpeed_ * moveMul, actions.moveY * heroMoveSpeed_ * moveMul};
             } else {
                 const bool allowCommands = !abilityShopOpen_ && !itemShopOpen_ && !levelChoiceOpen_;
                 const bool moveEdge = allowCommands && rightClick && !moveCommandPrev_ && selectedMiniUnits_.empty();
@@ -1075,13 +1156,16 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                         desiredVel = {toTarget.x * invLen, toTarget.y * invLen};
                     }
                 }
-                vel->value = desiredVel;
+                vel->value = {desiredVel.x * moveMul, desiredVel.y * moveMul};
             }
         }
         // Dash trigger.
         const bool dashEdge = actions.dash && !dashPrev_;
         dashPrev_ = actions.dash;
-        if (!paused_ && !defeatDelayActive_ && !characterScreenOpen_ && heroAlive && dashEdge && dashCooldownTimer_ <= 0.0f) {
+        const auto* status = registry_.get<Engine::ECS::Status>(hero_);
+        const bool dashLocked = status && status->container.blocksMovement();
+        if (!paused_ && !defeatDelayActive_ && !characterScreenOpen_ && heroAlive && !dashLocked &&
+            dashEdge && dashCooldownTimer_ <= 0.0f) {
             Engine::Vec2 dir{actions.moveX, actions.moveY};
             if (movementMode_ == MovementMode::RTS) {
                 if (moveTargetActive_) {
@@ -1660,7 +1744,15 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 float dy = tf.position.y - heroPos.y;
                 float d2 = dx * dx + dy * dy;
                 if (d2 <= r2) {
-                    Engine::Gameplay::applyDamage(hp, dome, {});
+                    Engine::Gameplay::BuffState domeBuff{};
+                    if (auto* st = registry_.get<Engine::ECS::Status>(e)) {
+                        if (st->container.isStasis()) return;
+                        float armorDelta = st->container.armorDeltaTotal();
+                        domeBuff.healthArmorBonus += armorDelta;
+                        domeBuff.shieldArmorBonus += armorDelta;
+                        domeBuff.damageTakenMultiplier *= st->container.damageTakenMultiplier();
+                    }
+                    Engine::Gameplay::applyDamage(hp, dome, domeBuff);
                     if (auto* se = registry_.get<Game::StatusEffects>(e)) {
                         se->stunTimer = std::max(se->stunTimer, 0.2f);
                     } else {
@@ -1687,7 +1779,15 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     float dy = tf.position.y - it->pos.y;
                     float d2 = dx * dx + dy * dy;
                     if (d2 <= r2) {
-                        Engine::Gameplay::applyDamage(hp, dmg, {});
+                        Engine::Gameplay::BuffState flameBuff{};
+                        if (auto* st = registry_.get<Engine::ECS::Status>(e)) {
+                            if (st->container.isStasis()) return;
+                            float armorDelta = st->container.armorDeltaTotal();
+                            flameBuff.healthArmorBonus += armorDelta;
+                            flameBuff.shieldArmorBonus += armorDelta;
+                            flameBuff.damageTakenMultiplier *= st->container.damageTakenMultiplier();
+                        }
+                        Engine::Gameplay::applyDamage(hp, dmg, flameBuff);
                         // apply brief burn
                         if (auto* se = registry_.get<Game::StatusEffects>(e)) {
                             se->burnTimer = std::max(se->burnTimer, 1.5f);
@@ -2384,10 +2484,14 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             }
         }
 
-        // Shields/health regeneration ticks.
+        // Status tick + shields/health regeneration.
         if (!paused_) {
             const float dt = static_cast<float>(step.deltaSeconds);
-            registry_.view<Engine::ECS::Health>([dt](Engine::ECS::Entity, Engine::ECS::Health& hp) {
+            registry_.view<Engine::ECS::Status>(
+                [dt](Engine::ECS::Entity, Engine::ECS::Status& st) { st.container.update(dt); });
+            registry_.view<Engine::ECS::Health>([&](Engine::ECS::Entity e, Engine::ECS::Health& hp) {
+                const auto* st = registry_.get<Engine::ECS::Status>(e);
+                if (st && st->container.blocksRegen()) return;
                 Engine::Gameplay::updateRegen(hp, dt);
             });
             if (buffSystem_) {
@@ -2417,7 +2521,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     chainBounces_ = chainBase_;
                 }
             }
-            // Energy regeneration (faster during intermission).
+    // Energy regeneration (faster during intermission).
             float regen = inCombat_ ? energyRegen_ : energyRegenIntermission_;
             energy_ = std::min(energyMax_, energy_ + regen * static_cast<float>(step.deltaSeconds));
             if (energyWarningTimer_ > 0.0) {
@@ -2578,6 +2682,42 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         if (fogLayer_ && fogTexture_ && sdlRenderer_) {
             Engine::renderFog(sdlRenderer_, *fogLayer_, fogTileSize_, fogOriginOffsetX_, fogOriginOffsetY_,
                               cameraShaken, viewportWidth_, viewportHeight_, fogTexture_);
+        }
+
+        // Mini-map HUD overlay (top-right).
+        if (miniMapEnabled_) {
+            miniMapEnemyCache_.clear();
+            miniMapPickupCache_.clear();
+            miniMapGoldCache_.clear();
+            Engine::Vec2 heroPos{0.0f, 0.0f};
+            if (const auto* htf = registry_.get<Engine::ECS::Transform>(hero_)) heroPos = htf->position;
+            registry_.view<Engine::ECS::Transform, Engine::ECS::EnemyTag>(
+                [&](Engine::ECS::Entity ent, const Engine::ECS::Transform& tf, const Engine::ECS::EnemyTag&) {
+                    if (const auto* st = registry_.get<Engine::ECS::Status>(ent)) {
+                        if (st->container.isStasis() || st->container.isStealthed()) return;
+                    }
+                    miniMapEnemyCache_.push_back(tf.position);
+                });
+            registry_.view<Engine::ECS::Transform, Game::Pickup>(
+                [&](Engine::ECS::Entity, const Engine::ECS::Transform& tf, const Game::Pickup& p) {
+                    switch (p.kind) {
+                        case Game::Pickup::Kind::Gold:
+                            miniMapGoldCache_.push_back(tf.position);
+                            break;
+                        case Game::Pickup::Kind::Copper:
+                        case Game::Pickup::Kind::Powerup:
+                        case Game::Pickup::Kind::Item:
+                        case Game::Pickup::Kind::Revive:
+                            miniMapPickupCache_.push_back(tf.position);
+                            break;
+                    }
+                });
+            Engine::UI::MiniMapConfig cfg{};
+            cfg.sizePx = miniMapSize_;
+            cfg.paddingPx = miniMapPadding_;
+            cfg.worldRadius = miniMapWorldRadius_;
+            miniMapHud_.setConfig(cfg);
+            miniMapHud_.draw(*render_, heroPos, miniMapEnemyCache_, miniMapPickupCache_, miniMapGoldCache_, viewportWidth_, viewportHeight_);
         }
 
         // Mini-unit selection rectangle and selected rings (RTS UI).
@@ -3429,6 +3569,13 @@ bool GameRoot::performMeleeAttack(const Engine::TimeStep& step, const Engine::Ac
             Engine::Gameplay::BuffState buff{};
             if (auto* armorBuff = registry_.get<Game::ArmorBuff>(e)) {
                 buff = armorBuff->state;
+            }
+            if (auto* st = registry_.get<Engine::ECS::Status>(e)) {
+                if (st->container.isStasis()) return;
+                float armorDelta = st->container.armorDeltaTotal();
+                buff.healthArmorBonus += armorDelta;
+                buff.shieldArmorBonus += armorDelta;
+                buff.damageTakenMultiplier *= st->container.damageTakenMultiplier();
             }
             Engine::Gameplay::applyDamage(health, dmgEvent, buff);
 
@@ -4496,6 +4643,7 @@ Engine::ECS::Entity GameRoot::spawnMiniUnit(const MiniUnitDef& def, const Engine
     hp.healthArmor = armor * classMul;
     hp.shieldArmor = shieldArmor * classMul;
     registry_.emplace<Engine::ECS::Health>(e, hp);
+    registry_.emplace<Engine::ECS::Status>(e, Engine::ECS::Status{});
     registry_.emplace<Game::MiniUnit>(e, Game::MiniUnit{def.cls, 0, false, 0.0f, 0.0f});
     registry_.emplace<Game::MiniUnitCommand>(e, Game::MiniUnitCommand{false, {}});
     // Cache stats per-unit for data-driven AI/RTS control.
@@ -5241,7 +5389,7 @@ void GameRoot::renderMenu() {
         return mx >= x && mx <= x + w && my >= y && my <= y + h;
     };
     drawTextUnified("PROJECT AURORA ZETA", Engine::Vec2{centerX - 140.0f, topY}, 1.7f, Engine::Color{180, 230, 255, 240});
-    drawTextUnified("Pre-Alpha | Build v0.0.103",
+    drawTextUnified("Pre-Alpha | Build v0.0.104",
                     Engine::Vec2{centerX, topY + 28.0f},
                     0.85f, Engine::Color{150, 200, 230, 220});
 
@@ -7596,6 +7744,7 @@ void GameRoot::spawnHero() {
     const float heroHalf = heroSize_ * 0.5f;
     registry_.emplace<Engine::ECS::AABB>(hero_, Engine::ECS::AABB{Engine::Vec2{heroHalf, heroHalf}});
     registry_.emplace<Engine::ECS::Health>(hero_, Engine::ECS::Health{heroMaxHp_, heroMaxHp_});
+    registry_.emplace<Engine::ECS::Status>(hero_, Engine::ECS::Status{});
     if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
         hp->tags = {Engine::Gameplay::Tag::Biological, Engine::Gameplay::Tag::Light};
         hp->maxShields = heroShield_;
@@ -7974,7 +8123,15 @@ void GameRoot::updateRemoteCombat(const Engine::TimeStep& step) {
                     Engine::Gameplay::DamageEvent dmg{};
                     dmg.baseDamage = projectileDamage_ * 1.1f;
                     dmg.type = Engine::Gameplay::DamageType::Normal;
-                    Engine::Gameplay::applyDamage(*ehp, dmg, {});
+                    Engine::Gameplay::BuffState buff{};
+                    if (auto* st = registry_.get<Engine::ECS::Status>(bestEnemy)) {
+                        if (st->container.isStasis()) return;
+                        float armorDelta = st->container.armorDeltaTotal();
+                        buff.healthArmorBonus += armorDelta;
+                        buff.shieldArmorBonus += armorDelta;
+                        buff.damageTakenMultiplier *= st->container.damageTakenMultiplier();
+                    }
+                    Engine::Gameplay::applyDamage(*ehp, dmg, buff);
                     if (!ehp->alive()) {
                         hp->currentHealth = std::min(hp->maxHealth, hp->currentHealth + dmg.baseDamage * 0.1f);
                     }

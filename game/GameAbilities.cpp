@@ -6,6 +6,7 @@
 #include "../engine/ecs/components/Renderable.h"
 #include "../engine/ecs/components/AABB.h"
 #include "../engine/ecs/components/Health.h"
+#include "../engine/ecs/components/Status.h"
 #include "../engine/ecs/components/Projectile.h"
 #include "../engine/ecs/components/Tags.h"
 #include "../engine/ecs/components/SpriteAnimation.h"
@@ -97,6 +98,11 @@ void GameRoot::executeAbility(int index) {
     auto& st = abilityStates_[index];
     if (const auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
         if (!hp->alive()) return;
+    }
+    if (const auto* status = registry_.get<Engine::ECS::Status>(hero_)) {
+        if (status->container.blocksCasting()) {
+            return;
+        }
     }
     if (slot.cooldown > 0.0f) return;
     if (slot.energyCost > 0.0f && energy_ < slot.energyCost) {
@@ -487,7 +493,15 @@ void GameRoot::executeAbility(int index) {
                 Engine::Gameplay::DamageEvent dmg{};
                 dmg.type = Engine::Gameplay::DamageType::Spell;
                 dmg.baseDamage = dmgBase;
-                Engine::Gameplay::applyDamage(hp, dmg, {});
+                Engine::Gameplay::BuffState buff{};
+                if (auto* st = registry_.get<Engine::ECS::Status>(e)) {
+                    if (st->container.isStasis()) return;
+                    float armorDelta = st->container.armorDeltaTotal();
+                    buff.healthArmorBonus += armorDelta;
+                    buff.shieldArmorBonus += armorDelta;
+                    buff.damageTakenMultiplier *= st->container.damageTakenMultiplier();
+                }
+                Engine::Gameplay::applyDamage(hp, dmg, buff);
                 // Apply stun
                 float stunDur = 0.6f + 0.2f * wizardStage();
                 if (auto* se = registry_.get<Game::StatusEffects>(e)) {

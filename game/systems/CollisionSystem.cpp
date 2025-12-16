@@ -25,6 +25,7 @@
 #include "../components/Building.h"
 #include "../components/EscortTarget.h"
 #include "../components/EscortPreMove.h"
+#include "../../engine/ecs/components/Status.h"
 
 namespace {
 bool aabbOverlap(const Engine::ECS::Transform& ta, const Engine::ECS::AABB& aa, const Engine::ECS::Transform& tb,
@@ -55,7 +56,17 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                         if (auto* armorBuff = registry.get<Game::ArmorBuff>(targetEnt)) {
                             buff = armorBuff->state;
                         }
-                        Engine::Gameplay::applyDamage(health, proj.damage, buff);
+                        bool stasis = false;
+                        if (auto* st = registry.get<Engine::ECS::Status>(targetEnt)) {
+                            stasis = st->container.isStasis();
+                            float armorDelta = st->container.armorDeltaTotal();
+                            buff.healthArmorBonus += armorDelta;
+                            buff.shieldArmorBonus += armorDelta;
+                            buff.damageTakenMultiplier *= st->container.damageTakenMultiplier();
+                        }
+                        if (!stasis) {
+                            Engine::Gameplay::applyDamage(health, proj.damage, buff);
+                        }
 
                         // Elemental spell effects (Wizard)
                         if (registry.has<Game::SpellEffect>(projEnt)) {
@@ -98,7 +109,15 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                                                 Engine::Gameplay::DamageEvent thorn{};
                                                 thorn.type = Engine::Gameplay::DamageType::Spell;
                                                 thorn.baseDamage = proj.damage.baseDamage * 0.35f;
-                                                Engine::Gameplay::applyDamage(hp2, thorn, {});
+                                                Engine::Gameplay::BuffState thornBuff{};
+                                                if (auto* st2 = registry.get<Engine::ECS::Status>(e2)) {
+                                                    if (st2->container.isStasis()) return;
+                                                    float armorDelta = st2->container.armorDeltaTotal();
+                                                    thornBuff.healthArmorBonus += armorDelta;
+                                                    thornBuff.shieldArmorBonus += armorDelta;
+                                                    thornBuff.damageTakenMultiplier *= st2->container.damageTakenMultiplier();
+                                                }
+                                                Engine::Gameplay::applyDamage(hp2, thorn, thornBuff);
                                             }
                                         });
                                     break;
@@ -132,7 +151,15 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                                     if (d2 <= radius2) {
                                         Engine::Gameplay::DamageEvent splash = proj.damage;
                                         splash.baseDamage *= aoe->damageMultiplier;
-                                        Engine::Gameplay::applyDamage(hp2, splash, {});
+                                        Engine::Gameplay::BuffState splashBuff{};
+                                        if (auto* st2 = registry.get<Engine::ECS::Status>(e2)) {
+                                            if (st2->container.isStasis()) return;
+                                            float armorDelta = st2->container.armorDeltaTotal();
+                                            splashBuff.healthArmorBonus += armorDelta;
+                                            splashBuff.shieldArmorBonus += armorDelta;
+                                            splashBuff.damageTakenMultiplier *= st2->container.damageTakenMultiplier();
+                                        }
+                                        Engine::Gameplay::applyDamage(hp2, splash, splashBuff);
                                     }
                                 });
                         }
@@ -248,6 +275,13 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                         if (auto* armorBuff = registry.get<Game::ArmorBuff>(heroEnt)) {
                             buff = armorBuff->state;
                         }
+                        if (auto* stHero = registry.get<Engine::ECS::Status>(heroEnt)) {
+                            if (stHero->container.isStasis()) return;
+                            float armorDelta = stHero->container.armorDeltaTotal();
+                            buff.healthArmorBonus += armorDelta;
+                            buff.shieldArmorBonus += armorDelta;
+                            buff.damageTakenMultiplier *= stHero->container.damageTakenMultiplier();
+                        }
                         Engine::Gameplay::applyDamage(heroHp, contact, buff);
                         float dealt = (preHealth + preShields) - (heroHp.currentHealth + heroHp.currentShields);
                         if (dealt > 0.0f) {
@@ -273,6 +307,13 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                                         Engine::Gameplay::BuffState enemyBuff{};
                                         if (auto* armorBuff = registry.get<Game::ArmorBuff>(enemyEnt)) {
                                             enemyBuff = armorBuff->state;
+                                        }
+                                        if (auto* stE = registry.get<Engine::ECS::Status>(enemyEnt)) {
+                                            if (stE->container.isStasis()) return;
+                                            float armorDelta = stE->container.armorDeltaTotal();
+                                            enemyBuff.healthArmorBonus += armorDelta;
+                                            enemyBuff.shieldArmorBonus += armorDelta;
+                                            enemyBuff.damageTakenMultiplier *= stE->container.damageTakenMultiplier();
                                         }
                                         Engine::Gameplay::applyDamage(*enemyHp, reflectDmg, enemyBuff);
                                     }
@@ -313,6 +354,13 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                         Engine::Gameplay::BuffState buff{};
                         if (auto* armorBuff = registry.get<Game::ArmorBuff>(escortEnt)) {
                             buff = armorBuff->state;
+                        }
+                        if (auto* stEscort = registry.get<Engine::ECS::Status>(escortEnt)) {
+                            if (stEscort->container.isStasis()) return;
+                            float armorDelta = stEscort->container.armorDeltaTotal();
+                            buff.healthArmorBonus += armorDelta;
+                            buff.shieldArmorBonus += armorDelta;
+                            buff.damageTakenMultiplier *= stEscort->container.damageTakenMultiplier();
                         }
                         Engine::Gameplay::applyDamage(escortHp, contact, buff);
                         if (auto* flash = registry.get<Game::HitFlash>(escortEnt)) {
@@ -355,6 +403,13 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                         if (auto* armorBuff = registry.get<Game::ArmorBuff>(miniEnt)) {
                             buff = armorBuff->state;
                         }
+                        if (auto* stMini = registry.get<Engine::ECS::Status>(miniEnt)) {
+                            if (stMini->container.isStasis()) return;
+                            float armorDelta = stMini->container.armorDeltaTotal();
+                            buff.healthArmorBonus += armorDelta;
+                            buff.shieldArmorBonus += armorDelta;
+                            buff.damageTakenMultiplier *= stMini->container.damageTakenMultiplier();
+                        }
                         Engine::Gameplay::applyDamage(miniHp, contact, buff);
                         if (auto* flash = registry.get<Game::HitFlash>(miniEnt)) {
                             flash->timer = 0.12f;
@@ -389,6 +444,13 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                         Engine::Gameplay::BuffState buff{};
                         if (auto* armorBuff = registry.get<Game::ArmorBuff>(bEnt)) {
                             buff = armorBuff->state;
+                        }
+                        if (auto* stB = registry.get<Engine::ECS::Status>(bEnt)) {
+                            if (stB->container.isStasis()) return;
+                            float armorDelta = stB->container.armorDeltaTotal();
+                            buff.healthArmorBonus += armorDelta;
+                            buff.shieldArmorBonus += armorDelta;
+                            buff.damageTakenMultiplier *= stB->container.damageTakenMultiplier();
                         }
                         Engine::Gameplay::applyDamage(bHp, contact, buff);
                         if (auto* flash = registry.get<Game::HitFlash>(bEnt)) {

@@ -14,6 +14,7 @@
 #include "../components/EscortTarget.h"
 #include "../components/EscortPreMove.h"
 #include "../../engine/ecs/components/Health.h"
+#include "../../engine/ecs/components/Status.h"
 #include "../components/StatusEffects.h"
 
 namespace Game {
@@ -22,6 +23,10 @@ void EnemyAISystem::update(Engine::ECS::Registry& registry, Engine::ECS::Entity 
     const auto* heroTf = registry.get<Engine::ECS::Transform>(hero);
     if (!heroTf) return;
     const float dt = static_cast<float>(step.deltaSeconds);
+    bool heroCloaked = false;
+    if (auto* stHero = registry.get<Engine::ECS::Status>(hero)) {
+        heroCloaked = stHero->container.isStealthed();
+    }
     auto pickNearestEscort = [&](const Engine::Vec2& from, const Engine::ECS::Transform*& outTf) {
         outTf = nullptr;
         float bestD2 = std::numeric_limits<float>::max();
@@ -81,8 +86,11 @@ void EnemyAISystem::update(Engine::ECS::Registry& registry, Engine::ECS::Entity 
         bool foundHero = false;
         bestD2 = std::numeric_limits<float>::max();
         registry.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::HeroTag>(
-            [&](Engine::ECS::Entity, const Engine::ECS::Transform& tfH, const Engine::ECS::Health& hpH, const Engine::ECS::HeroTag&) {
+            [&](Engine::ECS::Entity hEnt, const Engine::ECS::Transform& tfH, const Engine::ECS::Health& hpH, const Engine::ECS::HeroTag&) {
                 if (!hpH.alive()) return;
+                if (auto* st = registry.get<Engine::ECS::Status>(hEnt)) {
+                    if (st->container.isStealthed()) return;
+                }
                 float dx = tfH.position.x - from.x;
                 float dy = tfH.position.y - from.y;
                 float d2 = dx * dx + dy * dy;
@@ -95,7 +103,7 @@ void EnemyAISystem::update(Engine::ECS::Registry& registry, Engine::ECS::Entity 
         if (foundHero) return;
 
         // Tier 3: hero.
-        outTf = heroTf;
+        outTf = heroCloaked ? nullptr : heroTf;
     };
 
     registry.view<Engine::ECS::Transform, Engine::ECS::Velocity, Engine::ECS::Health, Game::EnemyAttributes>(
@@ -109,6 +117,31 @@ void EnemyAISystem::update(Engine::ECS::Registry& registry, Engine::ECS::Entity 
             bool stunned = false;
             Engine::Vec2 blindDir{0.0f, 0.0f};
             bool blinded = false;
+            if (auto* st = registry.get<Engine::ECS::Status>(e)) {
+                if (st->container.isStasis()) {
+                    vel.value = {0.0f, 0.0f};
+                    return;
+                }
+                speedMul *= st->container.moveSpeedMultiplier();
+                if (st->container.isFeared()) {
+                    Engine::Vec2 away{tf.position.x - heroTf->position.x, tf.position.y - heroTf->position.y};
+                    float len2 = away.x * away.x + away.y * away.y;
+                    if (len2 > 0.0001f) {
+                        float inv = 1.0f / std::sqrt(len2);
+                        away.x *= inv;
+                        away.y *= inv;
+                    } else {
+                        away = {0.0f, 1.0f};
+                    }
+                    vel.value = {away.x * attr.moveSpeed * speedMul, away.y * attr.moveSpeed * speedMul};
+                    return;
+                }
+                if (st->container.has(Engine::Status::EStatusId::Blindness)) {
+                    blinded = true;
+                    float seed = tf.position.x * 0.31f + tf.position.y * 0.17f + dt * 3.1f;
+                    blindDir = {std::cos(seed), std::sin(seed)};
+                }
+            }
             if (auto* se = registry.get<Game::StatusEffects>(e)) {
                 if (se->burnTimer > 0.0f && se->burnDps > 0.0f) {
                     Engine::Gameplay::DamageEvent burn{};

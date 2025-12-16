@@ -18,6 +18,8 @@
 #include "../engine/assets/FontLoader.h"
 #include "../engine/render/BitmapTextRenderer.h"
 #include "../engine/gameplay/Combat.h"
+#include "../engine/ecs/components/Status.h"
+#include "../engine/ui/MiniMapHUD.h"
 #include <random>
 #include <fstream>
 #include <array>
@@ -69,6 +71,7 @@
 #include "net/LobbyState.h"
 #include "net/SessionConfig.h"
 #include "net/NetMessages.h"
+#include "status/ZetaStatusFactory.h"
 
 namespace Game {
 
@@ -358,6 +361,7 @@ private:
     Engine::InputBindings bindings_{};
     Engine::ActionMapper actionMapper_{};
     Engine::AssetManifest manifest_{};
+    ZetaStatusFactory statusFactory_{};
     Game::OffensiveType heroBaseOffense_{Game::OffensiveType::Melee};
     bool usingSecondaryWeapon_{false};
     bool swapWeaponHeld_{false};
@@ -743,6 +747,15 @@ private:
     float uiShieldFill_{0.0f};
     float uiEnergyFill_{0.0f};
     float uiDashFill_{0.0f};
+    // Mini-map HUD
+    Engine::UI::MiniMapHUD miniMapHud_{};
+    bool miniMapEnabled_{true};
+    float miniMapWorldRadius_{520.0f};
+    float miniMapSize_{180.0f};
+    float miniMapPadding_{12.0f};
+    std::vector<Engine::Vec2> miniMapEnemyCache_;
+    std::vector<Engine::Vec2> miniMapPickupCache_;
+    std::vector<Engine::Vec2> miniMapGoldCache_;
     // Mouse cache
     int lastMouseX_{0};
     int lastMouseY_{0};
