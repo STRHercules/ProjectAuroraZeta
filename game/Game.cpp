@@ -5233,7 +5233,7 @@ void GameRoot::renderMenu() {
         return mx >= x && mx <= x + w && my >= y && my <= y + h;
     };
     drawTextUnified("PROJECT AURORA ZETA", Engine::Vec2{centerX - 140.0f, topY}, 1.7f, Engine::Color{180, 230, 255, 240});
-    drawTextUnified("Pre-Alpha | Build v0.0.101",
+    drawTextUnified("Pre-Alpha | Build v0.0.102",
                     Engine::Vec2{centerX, topY + 28.0f},
                     0.85f, Engine::Color{150, 200, 230, 220});
 
