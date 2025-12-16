@@ -49,3 +49,27 @@
 **Build / Test**
 - Build: `cmake --build build --target game -- -j4` (Linux, 2025-12-16) — success.
 - Manual: not run (doc-only change).
+
+## 2025-12-16 — README: Traveling Shop, Pickups, Global Upgrades
+
+**Prompt / Task**
+- Extend the README detailing the Traveling Shop and its contents.
+- Add a section about all powerups/pickups/items.
+- Add information about the global upgrades.
+- Include anything else relevant that was missing.
+
+**What Changed**
+- Added three README sections: Traveling Shop (gold flow, unlock, prices, stock), Powerups/Pickups/Items (effects, drop sources, use rules), and Global Upgrades (costs, caps, modifiers).
+- Clarified gold sources (boss/event/bounty), revive pickup, and item stack caps.
+
+**Steps Taken**
+- Read `game/Game.cpp`, `game/meta/ItemDefs.cpp`, `game/meta/GlobalUpgrades.*`, `data/gameplay.json`, and pickup logic to align values.
+- Documented dynamic prices and caps from `effectiveShopCost` and gold catalog.
+- Updated README with the new sections.
+
+**Rationale / Tradeoffs**
+- Keep player/contributor docs in sync with live data-driven values.
+- Document stack caps and pricing to reduce confusion around gold vs. copper economies.
+
+**Build / Test**
+- Not run (documentation-only change).

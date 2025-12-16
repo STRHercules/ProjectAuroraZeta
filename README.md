@@ -22,6 +22,47 @@ The current build includes:
 - **Builder & summons**: builder/summoner rely on supply (starts 0; builder start min 2, summoner start 6, cap 10–12; houses add +2). Mini-units and buildings are loaded from `data/units.json`.
 - **Networking**: host/client with hashed password check, lobby sync (hero, difficulty, max players, chat), 20 Hz snapshots during matches; default port 37015, max players default 4.
 
+## Traveling Shop (Gold)
+- **Unlock**: killing any boss sets `travelShopUnlocked = true`; during the next intermission (while you have gold) a shopkeeper spawns 260–420u from the hero. Interact with `E` to open.
+- **Currency**: prices use **gold** (per-run, then banked). Sources: boss kill = 3g (`gold.boss`), successful events = 1g, bounty elites drop a gold bag equal to `rewards.bountyBonus`.
+- **Stock** (legendary-only, 4 cards per roll; capped effects are hidden). Dynamic prices per effect:
+  - Cataclysm Rounds: +50% all damage, 1000g then 2500g (max 2).
+  - Temporal Accelerator: +50% attack speed, 1500g (max 1).
+  - Nanite Surge: +25% HP/Shields/Energy, 1500g (max 1).
+  - Cooldown Nexus: −25% cooldowns, 500g then 1000g (max 2).
+  - Survey Optics: +3 range & +3 vision, 500/1000/1500/2000/2500g (max 5).
+  - Charge Matrix: +1 ability charges (for charge-based skills), 500g (max 3).
+  - Speed Boots: +1 move speed, 200g each (max 10).
+  - Vital Austerity: −25% vital ability costs, 500g (max 3).
+- **Flow**: inventory pulls from the gold catalog, shuffles each refresh, respects caps, and shows a gold wallet readout in the overlay.
+
+## Powerups, Pickups & Items
+- **Currency pickups**: Copper bags (4–10c) from normal kills; Gold bags (boss 3g, bounty `bountyBonus`, event +1g). Copper funds in-run shops; gold funds the traveling shop and vault deposits.
+- **Powerups** (25% drop rate; 35% of drops become powerups): Heal (full HP/shields, regen delay reset), Kaboom (kills all enemies), Recharge (refills shields + energy), Frenzy (30s +25% fire rate), Immortal (30s invulnerability timer), Freeze (5s global time-stop).
+- **Revive pickup**: Bosses also drop a Revive Tome (+1 life).
+- **Shop/dropped items (copper)**:
+  - Power Coil (+10 damage, 40c), Reinforced Plating (+25 HP, 45c), Vector Thrusters (+8% move speed, 35c)
+  - Field Medkit (Use/Q, heal 35% HP, 30c), Cryo Capsule (freeze time 2.5s, 70c), Deployable Turret (12s, 90c)
+  - Chrono Prism (+15% attack speed aura & slow, 140c), Phase Leech (5% lifesteal, 150c), Storm Core (projectiles chain +2, 160c)
+- **Use rules**: Support items sit in quick-use (`Q`); others apply instantly on purchase/pickup. Traveling shop items apply immediately and count toward their stack caps.
+
+## Global Upgrades (Vault Gold Meta)
+- **Where**: Main Menu → Upgrades. Spends vault gold (auto-deposited once per match via deposit guard).
+- **Effects per level** (∞ unless noted; multiplicative, then multiplied by Mastery):
+  - Attack Power +1% (250 base, 1.15× growth)
+  - Attack Speed +1% (250, 1.15×)
+  - Health +1% (250, 1.15×)
+  - Speed +1% (250, 1.15×)
+  - Armor +1% (250, 1.15×)
+  - Shields +1% (250, 1.15×)
+  - Recharge (shield regen) +1% (250, 1.15×)
+  - Lifesteal +0.5% (400, 1.18×)
+  - Regeneration +0.5 HP/s (400, 1.18×)
+  - Lives +1, max 3 (2000, 2.0×)
+  - Difficulty +1% enemy power & count (800, 1.20×)
+  - Mastery +10% to all stats incl. difficulty, max 1 (250000, 5.0×)
+- **Application**: Modifiers are recomputed on load and applied to hero presets (HP/shields/armor/regen/move/damage), lifesteal & regen adders, extra lives, and enemy power/count multipliers; mastery multiplies the whole set.
+
 ## Hero Archetypes & Offensive Types (from `data/menu_presets.json`)
 | Archetype (id) | Offensive Type (fallback mapping) | Stat Multipliers (HP / DMG / Speed) | Playstyle note |
 | --- | --- | --- | --- |
