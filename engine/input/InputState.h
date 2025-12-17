@@ -25,6 +25,8 @@ enum class InputKey {
     SwapWeapon,
     Interact,
     UseItem,
+    Hotbar1,
+    Hotbar2,
     Ability1,
     Ability2,
     Ability3,

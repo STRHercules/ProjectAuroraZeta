@@ -23,7 +23,9 @@
   "ability2": ["key:2"],
   "ability3": ["key:3"],
   "ultimate": ["key:4"],
-  "reload": ["key:f", "key:f1"],
+  "hotbar1": ["key:r"],
+  "hotbar2": ["key:f"],
+  "reload": ["key:f1"],
   "menuBack": ["key:m"],
   "buildMenu": ["v"],
   "swapWeapon": ["lalt"]

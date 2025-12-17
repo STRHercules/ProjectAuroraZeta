@@ -13,6 +13,7 @@ public:
         : device_(device), font_(std::move(font)) {}
 
     void drawText(const std::string& text, const Vec2& topLeft, float scale, const Color& color) override;
+    Vec2 measureText(const std::string& text, float scale) const;
 
 private:
     RenderDevice& device_;

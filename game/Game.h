@@ -2,6 +2,7 @@
 #pragma once
 
 #include <cstddef>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -18,6 +19,7 @@
 #include "../engine/assets/FontLoader.h"
 #include "../engine/render/BitmapTextRenderer.h"
 #include "../engine/gameplay/Combat.h"
+#include "../engine/gameplay/RPGStats.h"
 #include "../engine/ecs/components/Status.h"
 #include "../engine/ui/MiniMapHUD.h"
 #include <random>
@@ -51,6 +53,7 @@
 #include "systems/MiniUnitSystem.h"
 #include "meta/SaveManager.h"
 #include "meta/GlobalUpgrades.h"
+#include "rpg/RPGContent.h"
 #include "EnemyDefinition.h"
 #include "components/OffensiveType.h"
 #include "components/Building.h"
@@ -114,6 +117,8 @@ private:
     void updateMenuInput(const Engine::ActionState& actions, const Engine::InputState& input, double dt);
     void drawTextTTF(const std::string& text, const Engine::Vec2& pos, float scale, Engine::Color color);
     void drawTextUnified(const std::string& text, const Engine::Vec2& pos, float scale, Engine::Color color);
+    Engine::Vec2 measureTextUnified(const std::string& text, float scale) const;
+    std::string ellipsizeTextUnified(const std::string& text, float maxWidth, float scale) const;
     bool hasTTF() const { return uiFont_ != nullptr && sdlRenderer_ != nullptr; }
     void rollLevelChoices();
     void applyLevelChoice(int index);
@@ -129,6 +134,9 @@ private:
     bool addItemToInventory(const ItemDefinition& def);
     bool sellItemFromInventory(std::size_t idx, int& copperOut);
     void clampInventorySelection();
+    void refreshInventoryCapacityFromBag(bool dropOverflow);
+    void dropInventoryOverflow(const Engine::Vec2& dropBase);
+    void spawnPickupEntity(const Pickup& payload, const Engine::Vec2& pos, Engine::Color color, float size, float amp, float speed);
     void loadMenuPresets();
     void reviveLocalPlayer();
     void buildNetSession();
@@ -168,6 +176,29 @@ private:
     void loadUnitDefinitions();
     void loadPickupTextures();
     void loadProjectileTextures();
+    void loadRpgData();
+    void updateRpgConsumables(double dt);
+    void updateRpgTalentAllocation();
+    Engine::Gameplay::RPG::StatContribution collectRpgEquippedContribution() const;
+    Engine::Gameplay::RPG::StatContribution collectRpgTalentContribution() const;
+    void updateHeroRpgStats();
+    enum class RpgLootSource { Normal, MiniBoss, Boss, Shop };
+    Game::RPG::LootTable filteredRpgLootTable(RpgLootSource src) const;
+    Game::RPG::LootTable filteredRpgConsumableTable(RpgLootSource src) const;
+    Game::RPG::LootTable filteredRpgBagTable(RpgLootSource src) const;
+    ItemDefinition buildRpgItemDef(const Game::RPG::GeneratedItem& rolled, bool priceInGold) const;
+    std::optional<ItemDefinition> rollRpgEquipment(RpgLootSource src, bool priceInGold);
+    std::optional<ItemDefinition> rollRpgConsumable(RpgLootSource src, bool priceInGold);
+    std::optional<ItemDefinition> rollRpgBag(RpgLootSource src, bool priceInGold);
+    bool equipInventoryItem(std::size_t idx);
+    bool unequipRpgSlot(Game::RPG::EquipmentSlot slot);
+    const Game::RPG::ItemTemplate* findRpgTemplateById(const std::string& id) const;
+    const Game::RPG::ItemTemplate* findRpgTemplateFor(const ItemDefinition& def) const;
+    Engine::TexturePtr getEquipmentIconSheet(const std::string& sheetName);
+    void drawItemIcon(const ItemDefinition& def, const Engine::Vec2& pos, float size) ;
+    void pushCombatDebugLine(const std::string& line);
+    void updateCombatDebugLines(double dt);
+    void drawCombatDebugOverlay();
     Engine::TexturePtr loadTextureOptional(const std::string& path);
     void drawBuildMenuOverlay(int mouseX, int mouseY, bool leftClickEdge);
     void beginBuildPreview(Game::BuildingType type);
@@ -217,6 +248,10 @@ private:
         Engine::Color color{90, 200, 255, 255};
         std::string texturePath;
         Game::OffensiveType offensiveType{Game::OffensiveType::Ranged};
+        Engine::Gameplay::RPG::Attributes rpgAttributes{};
+        std::vector<std::string> specialties;
+        std::vector<std::string> perks;
+        std::string biography;
     };
     struct DifficultyDef {
         std::string id;
@@ -406,6 +441,20 @@ private:
     int miniBossCopperDropBase_{80};
     float pickupDropChance_{0.25f};
     float pickupPowerupShare_{0.35f};
+    float pickupItemShare_{0.15f};
+    // RPG equipment drop tuning (used when useRpgLoot_ is enabled).
+    float rpgEquipChanceNormal_{0.12f};
+    int rpgEquipMiniBossCount_{2};
+    int rpgEquipBossCount_{3};
+    float rpgMiniBossGemChance_{0.65f};
+    float rpgConsumableChanceNormal_{0.08f};
+    int rpgConsumableMiniBossCount_{1};
+    int rpgConsumableBossCount_{2};
+    float rpgBagChanceMiniBoss_{0.12f};
+    float rpgBagChanceBoss_{0.25f};
+    // Traveling shop: chance and count of RPG equipment offers (gold shop).
+    float rpgShopEquipChance_{0.65f};
+    int rpgShopEquipCount_{2};
     int copperPickupMin_{4};
     int copperPickupMax_{10};
     int copperPickupMinBase_{4};
@@ -685,7 +734,20 @@ private:
     std::unique_ptr<Game::PickupSystem> pickupSystem_;
     std::unique_ptr<Game::EventSystem> eventSystem_;
     std::unique_ptr<Game::HotzoneSystem> hotzoneSystem_;
+    bool useRpgCombat_{false};
+    bool combatDebugOverlay_{false};
+    Engine::Gameplay::RPG::ResolverConfig rpgResolverConfig_{};
+    std::unordered_map<std::string, int> rpgTalentRanks_{};
+    int rpgTalentPointsSpent_{0};
+    int rpgTalentLevelCached_{0};
+    std::string rpgTalentArchetypeCached_{};
+    struct CombatDebugLine {
+        std::string text;
+        double ttl{0.0};
+    };
+    std::vector<CombatDebugLine> combatDebugLines_{};
     std::unique_ptr<Engine::TextureManager> textureManager_;
+    std::unordered_map<std::string, Engine::TexturePtr> equipmentIconSheets_{};
     Engine::TexturePtr abilityIconTex_{};
     Engine::TexturePtr hpBarTex_{};
     Engine::TexturePtr shieldBarTex_{};
@@ -702,6 +764,15 @@ private:
     bool buildPreviewActive_{false};
     bool buildPreviewClickPrev_{false};
     bool buildPreviewRightPrev_{false};
+    bool characterScreenClickPrev_{false};
+    bool characterScreenRightPrev_{false};
+    std::optional<std::size_t> characterScreenSocketTargetSlotIdx_{};
+    // Character screen drag/drop state (inventory + socketing).
+    bool characterDragActive_{false};
+    bool characterDragArmed_{false};
+    std::size_t characterDragInvIdx_{0};
+    int characterDragStartX_{0};
+    int characterDragStartY_{0};
     bool travelShopUnlocked_{false};
     bool waveClearedPending_{false};
     bool paused_{false};
@@ -808,16 +879,42 @@ private:
     std::unordered_map<std::string, BuildingDef> buildingDefs_;
     std::vector<ItemDefinition> itemCatalog_;
     std::vector<ItemDefinition> goldCatalog_;
+    bool useRpgLoot_{false};
+    Game::RPG::LootTable rpgLootTable_{};
+    std::vector<Game::RPG::ConsumableDef> rpgConsumables_;
+    std::unordered_map<std::string, std::vector<Game::RPG::TalentNode>> rpgTalents_;
+    std::mt19937 rpgRng_{std::random_device{}()};
     // Inventory
     std::vector<ItemInstance> inventory_;
-    int inventoryCapacity_{16};
+    int baseInventoryCapacity_{24};
+    int inventoryCapacity_{24};
     int inventorySelected_{-1};
+    std::array<std::optional<ItemInstance>, static_cast<std::size_t>(Game::RPG::EquipmentSlot::Count)> equipped_{};
+    float inventoryGridScroll_{0.0f};
     bool inventoryScrollLeftPrev_{false};
     bool inventoryScrollRightPrev_{false};
     bool inventoryCyclePrev_{false};
     Engine::ECS::Entity shopkeeper_{Engine::ECS::kInvalidEntity};
     bool interactPrev_{false};
     bool useItemPrev_{false};
+    // Hotbar (2 slots): store item definition ids from inventory (consumables only).
+    std::array<std::optional<int>, 2> hotbarItemIds_{};
+    bool hotbar1Prev_{false};
+    bool hotbar2Prev_{false};
+    // RPG consumables/buffs (data-driven via data/rpg/consumables.json).
+    std::unordered_map<std::string, double> rpgConsumableCooldowns_{};
+    struct ActiveConsumableOverTime {
+        Game::RPG::ConsumableResource resource{Game::RPG::ConsumableResource::Health};
+        float fractionPerSecond{0.0f};
+        double ttl{0.0};
+    };
+    std::vector<ActiveConsumableOverTime> rpgConsumableOverTime_{};
+    struct ActiveRpgBuff {
+        Engine::Gameplay::RPG::StatContribution contribution{};
+        double ttl{0.0};
+    };
+    std::vector<ActiveRpgBuff> rpgActiveBuffs_{};
+    Engine::Gameplay::RPG::StatContribution rpgActiveBuffContribution_{};
 
     struct TurretInstance {
         Engine::Vec2 pos;

@@ -7,6 +7,7 @@
 #include "../../engine/ecs/components/Transform.h"
 #include "../../engine/ecs/components/Velocity.h"
 #include "../../engine/ecs/components/Health.h"
+#include "../../engine/ecs/components/Status.h"
 #include "../../engine/ecs/components/Tags.h"
 #include "../../engine/gameplay/Combat.h"
 #include "../components/MiniUnit.h"
@@ -14,6 +15,7 @@
 #include "../components/MiniUnitStats.h"
 #include "../components/TauntTarget.h"
 #include "../components/SummonedUnit.h"
+#include "RpgDamage.h"
 
 namespace Game {
 
@@ -198,7 +200,22 @@ void MiniUnitSystem::update(Engine::ECS::Registry& registry, const Engine::TimeS
                             dmg.baseDamage = stats.damage * globalDamageMul_;
                             dmg.type = Engine::Gameplay::DamageType::Normal;
                             Engine::Gameplay::BuffState buff{};
-                            Engine::Gameplay::applyDamage(*enemyHp, dmg, buff);
+                            if (auto* st = registry.get<Engine::ECS::Status>(enemyEnt)) {
+                                if (st->container.isStasis()) {
+                                    // do nothing
+                                } else {
+                                    float armorDelta = st->container.armorDeltaTotal();
+                                    buff.healthArmorBonus += armorDelta;
+                                    buff.shieldArmorBonus += armorDelta;
+                                    buff.damageTakenMultiplier *= st->container.damageTakenMultiplier();
+                                }
+                            }
+                            if (useRpgCombat_ && rng_) {
+                                (void)Game::RpgDamage::apply(registry, e, enemyEnt, *enemyHp, dmg, buff, true, rpgConfig_, *rng_,
+                                                             "mini", debugSink_);
+                            } else {
+                                Engine::Gameplay::applyDamage(*enemyHp, dmg, buff);
+                            }
                         }
                     }
                     mu.attackCooldown = std::max(0.1f, stats.attackRate * globalAttackRateMul_);

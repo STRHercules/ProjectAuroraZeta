@@ -70,6 +70,12 @@ std::optional<InputBindings> InputLoader::loadFromFile(const std::string& path) 
     if (j.contains("useItem")) {
         bindings.useItem = readStrings(j["useItem"]);
     }
+    if (j.contains("hotbar1")) {
+        bindings.hotbar1 = readStrings(j["hotbar1"]);
+    }
+    if (j.contains("hotbar2")) {
+        bindings.hotbar2 = readStrings(j["hotbar2"]);
+    }
     if (j.contains("ability1")) {
         bindings.ability1 = readStrings(j["ability1"]);
     }

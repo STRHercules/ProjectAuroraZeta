@@ -7,7 +7,7 @@
 namespace Game {
 
 enum class ItemKind { Combat, Support, Unique };
-enum class ItemRarity { Common, Rare, Legendary };
+enum class ItemRarity { Common, Uncommon, Rare, Epic, Legendary };
 enum class ItemEffect {
     Damage,
     Health,
@@ -37,6 +37,19 @@ struct ItemDefinition {
     int cost{0};
     ItemEffect effect{ItemEffect::Damage};
     float value{0.0f};
+    std::vector<std::string> affixes;
+
+    // Optional RPG loot metadata (used when useRpgLoot/useRpgCombat are enabled).
+    std::string rpgTemplateId;
+    // Optional RPG consumable hook (ties into data/rpg/consumables.json).
+    std::string rpgConsumableId;
+    std::vector<std::string> rpgAffixIds;
+    int rpgSocketsMax{0};
+    struct RpgSocketedGem {
+        std::string templateId;
+        std::vector<std::string> affixIds;
+    };
+    std::vector<RpgSocketedGem> rpgSocketed;
 };
 
 // Returns a static catalog of themed items used for shop/inventory.

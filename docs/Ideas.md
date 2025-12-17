@@ -2,12 +2,6 @@
 * Expose as much as possible to make it as easy as possible to mod
     * Develop mod tools?
 
-# Change 'Archetype' to 'Champions'
-
-
-# RPG Style Progression
-* Each character 
-
 # Threat/Aggro and Party Synergy (Optional / Co-op Ready)
 * If you ever do co-op, add:
     - **Threat** generation per action:

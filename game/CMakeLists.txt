@@ -6,6 +6,7 @@ set(GAME_SOURCES
     systems/CameraSystem.cpp
     systems/ProjectileSystem.cpp
     systems/CollisionSystem.cpp
+    systems/RpgDamage.cpp
     systems/EnemyAISystem.cpp
     systems/WaveSystem.cpp
     systems/EnemySpriteStateSystem.cpp
@@ -23,6 +24,8 @@ set(GAME_SOURCES
     meta/ItemDefs.cpp
     meta/GlobalUpgrades.cpp
     meta/SaveManager.cpp
+    rpg/RPGContent.cpp
+    rpg/RPGLoaders.cpp
     net/NetSession.cpp
 )
 

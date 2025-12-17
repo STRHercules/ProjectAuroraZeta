@@ -8,6 +8,7 @@
 #include "../../engine/ecs/components/Renderable.h"
 #include "../../engine/ecs/components/AABB.h"
 #include "../../engine/ecs/components/Health.h"
+#include "../../engine/ecs/components/RPGStats.h"
 #include "../../engine/ecs/components/Status.h"
 #include "../../engine/ecs/components/Tags.h"
 #include "../../engine/ecs/components/SpriteAnimation.h"
@@ -113,6 +114,24 @@ bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
             hp->shieldRegenRate = settings_.enemyShieldRegen;
             hp->regenDelay = settings_.enemyRegenDelay;
         }
+        registry.emplace<Engine::ECS::RPGStats>(e, Engine::ECS::RPGStats{});
+        if (auto* rpg = registry.get<Engine::ECS::RPGStats>(e)) {
+            rpg->baseFromHealth = true;
+            // Seed a minimal RPG snapshot so enemies participate in shared combat rules (ACC/EVA/crit scaling).
+            // Keep this conservative and wave-scaled so legacy tuning doesn't explode.
+            const int lvl = std::max(1, wave + 1);
+            rpg->attributes.STR = lvl / 12;
+            rpg->attributes.DEX = lvl / 14;
+            rpg->attributes.INT = lvl / 18;
+            rpg->attributes.END = lvl / 12;
+            rpg->attributes.LCK = lvl / 20;
+            rpg->base.baseAttackPower = std::max(1.0f, settings_.contactDamage);
+            rpg->base.baseSpellPower = rpg->base.baseAttackPower;
+            rpg->base.baseAccuracy = 1.0f + static_cast<float>(lvl) * 0.05f;
+            rpg->base.baseCritChance = 0.02f;
+            rpg->base.baseEvasion = static_cast<float>(lvl) * 0.08f;
+            rpg->dirty = true;
+        }
         registry.emplace<Engine::ECS::Status>(e, Engine::ECS::Status{});
         registry.emplace<Engine::ECS::EnemyTag>(e, Engine::ECS::EnemyTag{});
         registry.emplace<Game::EnemyAttributes>(e, Game::EnemyAttributes{speedVal});
@@ -160,6 +179,22 @@ bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
             hp->shieldArmor = settings_.enemyShieldArmor;
             hp->shieldRegenRate = settings_.enemyShieldRegen;
             hp->regenDelay = settings_.enemyRegenDelay;
+        }
+        registry.emplace<Engine::ECS::RPGStats>(e, Engine::ECS::RPGStats{});
+        if (auto* rpg = registry.get<Engine::ECS::RPGStats>(e)) {
+            rpg->baseFromHealth = true;
+            const int lvl = std::max(1, wave + 1);
+            rpg->attributes.STR = lvl / 10 + 1;
+            rpg->attributes.DEX = lvl / 12 + 1;
+            rpg->attributes.INT = lvl / 16;
+            rpg->attributes.END = lvl / 10 + 1;
+            rpg->attributes.LCK = lvl / 18;
+            rpg->base.baseAttackPower = std::max(1.0f, settings_.contactDamage * 1.25f);
+            rpg->base.baseSpellPower = rpg->base.baseAttackPower;
+            rpg->base.baseAccuracy = 2.0f + static_cast<float>(lvl) * 0.06f;
+            rpg->base.baseCritChance = 0.03f;
+            rpg->base.baseEvasion = static_cast<float>(lvl) * 0.10f;
+            rpg->dirty = true;
         }
         registry.emplace<Engine::ECS::Status>(e, Engine::ECS::Status{});
         registry.emplace<Engine::ECS::EnemyTag>(e, Engine::ECS::EnemyTag{});
@@ -219,6 +254,22 @@ bool WaveSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep&
                 hp->currentShields = hp->maxShields;
                 hp->shieldRegenRate = settings_.enemyShieldRegen * 1.1f;
                 hp->regenDelay = settings_.enemyRegenDelay;
+            }
+            registry.emplace<Engine::ECS::RPGStats>(e, Engine::ECS::RPGStats{});
+            if (auto* rpg = registry.get<Engine::ECS::RPGStats>(e)) {
+                rpg->baseFromHealth = true;
+                const int lvl = std::max(1, wave + 1);
+                rpg->attributes.STR = lvl / 8 + 2;
+                rpg->attributes.DEX = lvl / 10 + 2;
+                rpg->attributes.INT = lvl / 14 + 1;
+                rpg->attributes.END = lvl / 8 + 2;
+                rpg->attributes.LCK = lvl / 16;
+                rpg->base.baseAttackPower = std::max(1.0f, settings_.contactDamage * 1.6f);
+                rpg->base.baseSpellPower = rpg->base.baseAttackPower;
+                rpg->base.baseAccuracy = 3.0f + static_cast<float>(lvl) * 0.08f;
+                rpg->base.baseCritChance = 0.04f;
+                rpg->base.baseEvasion = static_cast<float>(lvl) * 0.12f;
+                rpg->dirty = true;
             }
             registry.emplace<Engine::ECS::Status>(e, Engine::ECS::Status{});
             registry.emplace<Engine::ECS::EnemyTag>(e, Engine::ECS::EnemyTag{});

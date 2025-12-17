@@ -299,6 +299,175 @@ There are also non-aliased versions;
 These are identically shaped and formatted.
 
 
+## Equipment
+* `Gear.png`
+    192x96 Sheet
+    16x16 Assets
+    (Left to Right)
+    Row 1:
+        Green Ring, Blue Ring, Orange Ring, Purple Ring, Grey Ring, Yellow Ring, Green Amulet, Iron Amulet, Basic Amulet, Diamond Amulet, Heart Amulet, Purple Amulet
+    Row 2: 
+        Copper Chest (M), Copper Cape, Iron Chest (M), Iron Cape, Silver Chest (M), Silver Cape, Gold Chest (M), Gold Cape, Admantium Chest (M), Admantium Cape, Legendary Chest (M), Legendary Cape
+    Row 3: 
+        Copper Helmet, Copper Wiz Cap, Iron Helmet, Iron Wizard Cap, Silver Helmet, Silver Wizard Cap, Gold Helmet, Gold Wizard Cap, Admantium Helmet, Admantium Wizard Cap, Legendary Helmet, Legendary Wizard Cap
+    Row 4:
+        Copper Chest (F), Copper Hood, Iron Chest (F), Iron Hood, Silver Chest (F), Silver Hood, Gold Chest (F), Gold Hood, Admantium Chest (F), Admantium Hood, Legendary Chest (F), Legendary Hood
+    Row 5:
+        Copper Legs, Copper Gloves, Iron Legs, Iron Gloves, Silver Legs, Silver Gloves, Gold Legs, Gold Gloves, Admantium Legs, Admantium Gloves, Legendary Legs, Legendary Gloves
+    Row 6:
+        Copper Boots, Copper Belt, Iron Boots, Iron Belt, Silver Boots, Silver Belt, Gold Boots, Gold Belt, Admantium Boots, Admantium Belt, Legendary Boots, Legendary Belt
+
+* `Gems.png`
+    112x32
+    16x16 Assets
+    (Left to Right)
+    Row 1: 
+        Small Green Gem, Small Red Gem, Small Orange Gem, Small Purple Gem, Small Crystal, Small Jet, Small Diamond
+    Row 2:
+        Large Green Gem, Large Red Gem, Large Orange Gem, Large Purple Gem, Large Crystal, Large Jet, Large Diamond
+
+* `Runes.png`
+    96x32
+    16x16 Assets
+    (Left to Right)
+    Row 1:
+        Wind Rune, Damage Rune, Shield Rune, Arrow Rune, Life Rune, Gold Rune
+    Row 2:
+        Ghost Rune, Energy Rune, Speed Rune, Star Rune, Rocket Rune, Magic Rune
+
+* `Tomes.png`
+    48x32
+    16x16 Assets
+    (Left to Right)
+    Row 1:
+        Brown Tome, Red Tome, Green Magic Tome
+    Row 2:
+        Red Magic Tome, Blue Magic Tome, Yellow Magic Tome
+
+* `Shields.png`
+    48x32
+    16x16 Assets
+    (Left to Right)
+    Row 1:
+        Wooden Round Shield, Wooden Tower Shield, Heater Shield
+    Row 2:
+        Golden Shield, Diamond Shield, Legendary Shield
+
+* `Quivers.png`
+    48x32
+    16x16 Assets
+    (Left to Right)
+    Row 1:
+        Wooden Quiver, Iron Quiver, Silver Quiver
+    Row 2:
+        Golden Quiver, Diamond Quiver, Legendary Quiver
+
+* `Melee_Weapons.png`
+    48x80
+    16x16 Assets
+    (Left to Right)
+    Row 1:
+        Curved Spear, Long Spear, Legendary Spear
+    Row 2:
+        Wooden Sword, Iron Sword, Scimitar
+    Row 3:
+        Silver Sword, Bastard Sword, Beastslayer
+    Row 4:
+        Zwihander, Old Blade, Broadsword
+    Row 5:
+        Golden Broadsword, Diamond Broadsword, Legendary Broadsword
+
+* `Ranged_Weapons.png`
+    48x80
+    16x16 Assets
+    (Left to Right)
+    Row 1:
+        Wooden Crossbow, Iron Crossbow, Legndary Crossbow
+    Row 2:
+        Wooden Bow, Wooden Longbow, Iron Longbow
+    Row 3:
+        Redwood Longbow, Elven Longbow, Reinforced Longbow
+    Row 4:
+        Hunter's Bow, Diamond String Bow, Emerald String Bow
+    Row 5:
+        Golden Longbow, Diamond Longbow, Legendary Longbow
+
+* `Magic_Weapons.png`
+    48x80
+    16x16 Assets
+    (Left to Right)
+    Row 1:
+        Basic Wand, Diamond Wand, Legendary Wand
+    Row 2:
+        Water Staff, Aqua Staff, Staff of the Depths
+    Row 3:
+        Wooden Staff, Nature Staff, Staff of the Oculus
+    Row 4:
+        Thunder Staff, Lightning Staff, Staff of Storms
+    Row 5:
+        Ember Staff, Flame Staff, Staff of the Inferno
+
+* `Scrolls.png`
+    48x32 Sheet
+    16x16 Assets
+    (Left to Right)
+    Row 1:
+        Map, Runed Scroll, Dark Scroll
+    Row 2: 
+        Torn Page, Scroll, Burnt Page
+    
+* `Arrows.png`
+    80x16 Sheet
+    16x16 Assets
+    (Left to Right)
+    Row 1: 
+        Wooden Arrow, Iron Arrow, Diamond Arrow, Emerald Arrow, Legendary Arrow
+
+* `Foods.png`
+    32x112 Sheet
+    16x16 Assets
+    (Left to Right)
+    Row 1: 
+        Carrot, Small Fish
+    Row 2:
+        Orange, Blue Fish
+    Row 3: 
+        Strawberry, Yellow Fish
+    Row 4:
+        Watermelon, Green Fish
+    Row 5:
+        Red Apple, Clownfish
+    Row 6: 
+        Green Apple, Cherry
+    Row 7:
+        Potato, Candy
+
+* `Containers.png`
+    64x16 Sheet
+    16x16 Assets
+    (Left to Right)
+    Row 1: 
+        Small Bag, Medium Pack, Small Chest, Chest
+
+* `Bags.png`
+    128x32
+    16x16 Assets
+    (Left of Right)
+    Row 1:
+        Brown Bag, Blue Bag, Full Brown Bag, Full Blue Bag, Stringed Brown Bag, Stringed Blue Bag, Full Stringed Brown Bag, Full Stringed Blue Bag
+    Row 2:
+        Green Bag, Red Bag, Full Green Bag, Full Red Bag, Stringed Green Bag, Stringed Red Bag, Full Stringed Green Bag, Full Stringed Red Bag
+
+* `Potions.png`
+    144x32 Sheet
+    16x16 Assets
+    (Left to Right)
+    Row 1:
+        Small Health Potion 100%, Small Health Potion 50%, Small Health Potion 25%, Large Health Potion 100%, Large Health Potion 50%, Large Health Potion 25%, Giant Health Potion 100%, Giant Health Potion 50%, Giant Health Potion 25%
+    Row 2: 
+        Small Rejuvination Potion 100%, Small Rejuvination Potion 50%, Small Rejuvination Potion 25%, Large Rejuvination Potion 100%, Large Rejuvination Potion 50%, Large Rejuvination Potion 25%, Giant Rejuvination Potion 100%, Giant Rejuvination Potion 50%, Giant Rejuvination Potion 25%
+
+
 ## User Interface
 
 Button - `Button_52x14.png`

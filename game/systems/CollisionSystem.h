@@ -1,8 +1,12 @@
 // Simple projectile-enemy collision and damage.
 #pragma once
 
+#include <functional>
+#include <string>
+
 #include "../../engine/ecs/Registry.h"
 #include "../../engine/core/Time.h"
+#include "../../engine/gameplay/RPGCombat.h"
 
 namespace Game {
 
@@ -19,6 +23,11 @@ public:
         xpPerDamageDealt_ = perDamageDealt;
         xpPerDamageTaken_ = perDamageTaken;
     }
+    void setRpgCombat(bool enabled, const Engine::Gameplay::RPG::ResolverConfig& cfg) {
+        useRpgCombat_ = enabled;
+        rpgConfig_ = cfg;
+    }
+    void setCombatDebugSink(std::function<void(const std::string&)> sink) { debugSink_ = std::move(sink); }
     void update(Engine::ECS::Registry& registry);
 
 private:
@@ -29,6 +38,10 @@ private:
     float xpPerDamageTaken_{0.0f};
     float thornReflectPercent_{0.0f};
     float thornMaxReflect_{0.0f};
+    bool useRpgCombat_{false};
+    Engine::Gameplay::RPG::ResolverConfig rpgConfig_{};
+    std::mt19937 rng_{std::random_device{}()};
+    std::function<void(const std::string&)> debugSink_{};
 };
 
 }  // namespace Game

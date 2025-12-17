@@ -30,6 +30,10 @@ add_executable(upgrades_tests tests/UpgradesTests.cpp)
 target_link_libraries(upgrades_tests PRIVATE zeta_game engine)
 target_include_directories(upgrades_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
+add_executable(rpg_tests tests/RPGSystemsTests.cpp)
+target_link_libraries(rpg_tests PRIVATE engine)
+target_include_directories(rpg_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
 if (WIN32)
     target_link_options(zeta PRIVATE -mconsole)
 endif()

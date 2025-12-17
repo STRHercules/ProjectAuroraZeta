@@ -1,0 +1,16 @@
+{
+  "talents": {
+    "tank": [
+      { "id": "iron_wall", "name": "Iron Wall", "description": "+10 Armor", "maxRank": 3,
+        "bonus": { "flat": { "armor": 10 } } },
+      { "id": "unyielding", "name": "Unyielding", "description": "+5 Tenacity", "maxRank": 3,
+        "bonus": { "flat": { "tenacity": 5 } } }
+    ],
+    "wizard": [
+      { "id": "arcane_finesse", "name": "Arcane Finesse", "description": "+6 Spell Power", "maxRank": 5,
+        "bonus": { "flat": { "spellPower": 6 } } },
+      { "id": "critical_sparks", "name": "Critical Sparks", "description": "+2% Crit Chance", "maxRank": 3,
+        "bonus": { "flat": { "critChance": 0.02 } } }
+    ]
+  }
+}

@@ -102,7 +102,12 @@ void SDLWindow::pollEvents(Application& app, InputState& input) {
                     case SDLK_e:
                         input.setKeyDown(InputKey::Interact, true);
                         break;
+                    case SDLK_r:
+                        input.setKeyDown(InputKey::Hotbar1, true);
+                        break;
                     case SDLK_f:
+                        input.setKeyDown(InputKey::Hotbar2, true);
+                        break;
                     case SDLK_F1:
                         input.setKeyDown(InputKey::Reload, true);
                         break;
@@ -202,7 +207,12 @@ void SDLWindow::pollEvents(Application& app, InputState& input) {
                     case SDLK_e:
                         input.setKeyDown(InputKey::Interact, false);
                         break;
+                    case SDLK_r:
+                        input.setKeyDown(InputKey::Hotbar1, false);
+                        break;
                     case SDLK_f:
+                        input.setKeyDown(InputKey::Hotbar2, false);
+                        break;
                     case SDLK_F1:
                         input.setKeyDown(InputKey::Reload, false);
                         break;

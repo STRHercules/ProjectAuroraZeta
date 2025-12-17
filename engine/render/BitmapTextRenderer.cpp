@@ -27,4 +27,26 @@ void BitmapTextRenderer::drawText(const std::string& text, const Vec2& topLeft, 
     }
 }
 
+Vec2 BitmapTextRenderer::measureText(const std::string& text, float scale) const {
+    if (text.empty()) return Vec2{0.0f, 0.0f};
+    float maxW = 0.0f;
+    float lineW = 0.0f;
+    int lines = 1;
+    for (char c : text) {
+        if (c == '\n') {
+            maxW = std::max(maxW, lineW);
+            lineW = 0.0f;
+            lines += 1;
+            continue;
+        }
+        unsigned char uc = static_cast<unsigned char>(c);
+        if (uc < 32 || uc >= 128) continue;
+        const Glyph& g = font_.glyphs[uc - 32];
+        lineW += static_cast<float>(g.xAdvance) * scale;
+    }
+    maxW = std::max(maxW, lineW);
+    const float h = static_cast<float>(std::max(1, font_.lineHeight)) * scale * static_cast<float>(lines);
+    return Vec2{maxW, h};
+}
+
 }  // namespace Engine

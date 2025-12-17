@@ -1,5 +1,8 @@
 {
   "speedMultiplier": 0.8,
+  "useRpgCombat": true,
+  "useRpgLoot": true,
+  "combatDebugOverlay": false,
   "enemy": {
     "hp": 40.0,
     "shields": 20.0,
@@ -123,7 +126,9 @@
     "speedCost": 20,
     "damageBonus": 5.0,
     "hpBonus": 20.0,
-    "speedBonus": 20.0
+    "speedBonus": 20.0,
+    "rpgEquipChance": 0.65,
+    "rpgEquipCount": 2
   },
   "abilityShop": {
     "baseCost": 8,
@@ -143,6 +148,16 @@
   "drops": {
     "pickupChance": 0.25,
     "powerupShare": 0.35,
+    "itemShare": 0.15,
+    "rpgEquipChanceNormal": 0.12,
+    "rpgEquipMiniBossCount": 2,
+    "rpgEquipBossCount": 3,
+    "rpgMiniBossGemChance": 0.65,
+    "rpgConsumableChanceNormal": 0.08,
+    "rpgConsumableMiniBossCount": 1,
+    "rpgConsumableBossCount": 2,
+    "rpgBagChanceMiniBoss": 0.12,
+    "rpgBagChanceBoss": 0.25,
     "copperMin": 4,
     "copperMax": 10,
     "bossCopper": 160,

@@ -4,6 +4,7 @@
 * https://electriclemon.itch.io/fantasy-rpg-monster-boss-vampire-lord-and-minions
 
 # Tilesets
+* https://seliel-the-shaper.itch.io/autumn-forest
 * https://electriclemon.itch.io/lonesome-forest-retro-tileset-1
 * https://electriclemon.itch.io/old-town-retro-rpg-tileset-2
 * https://electriclemon.itch.io/dungeons-pixel-grit

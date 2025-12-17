@@ -16,3 +16,70 @@
 - Surface active statuses on the HUD (icons with remaining duration/stacks) so players can see Silence/Stasis/Unstoppable.
 - Drive status magnitudes fully from data and wire real gameplay sources (abilities, enemy attacks) into the new factory instead of debug-only hotkeys.
 - Add boss/elite markers and player facing arrow on the mini-map, and allow zoom radius tuning via config.
+
+## 2025-12-16 — Suggestions after RPG combat/loot foundation
+- Replace existing damage flow with the new resolver end-to-end (projectiles/melee/hotzones) behind a feature flag to validate parity.
+- Externalize loot/talent/consumable tables to JSON and pipe drops/equipment into the aggregation pipeline; add UI readout of rolled affixes.
+- Add deterministic seed toggle in options to drive RNG shaping/PRD and expose a lightweight combat debug overlay for hit breakdowns.
+
+## 2025-12-16 — Suggestions after RPG live stat snapshots + debug overlay
+- Add a real equipment/paper-doll layer so only equipped RPG loot contributes to aggregation (instead of all inventory items).
+- Add a small talent allocation UI (with save/load) and expose the “points every 10 levels” rule in the character screen.
+- Extend enemy definitions to optionally carry RPG attributes/resists/tenacity so elites/bosses can have distinct mitigation profiles.
+
+## 2025-12-17 — Suggestions after Equipment drops + paper-doll + icons
+- Render dropped equipment pickups using their actual icon region (plus rarity-colored glow) so item drops are readable in-world.
+- Add an item details tooltip panel (base stats + rolled affixes + slot) on hover in the Character screen.
+- Add basic inventory quality-of-life: sort by slot/rarity, quick-equip best-in-slot, and a “sell junk” button for Common items.
+
+## 2025-12-17 — Suggestions after Tiered RPG drops + shop equipment offers
+- Add explicit drop pools/tiers to `data/rpg/loot.json` (instead of name matching) so content authors can control “where this can drop” precisely.
+- Add a separate currency field for inventory items so selling/pickup conversions don’t mix gold/copper semantics.
+- Allow shop card removal after purchase (and/or “reroll shop” cost) to make gold shop behavior clearer.
+
+## 2025-12-17 — Suggestions after Modernized character inventory UI
+- Add a compare view (equipped vs hovered) showing stat deltas before equipping.
+- Add quick actions: right-click to equip/unequip, shift-click to sell (when shop is open), and sort/filter buttons.
+- Add proper text measurement or truncation helpers so long item names don’t clip in small equipment cards.
+
+## 2025-12-17 — Suggestions after Gem socketing + rune trinkets
+- Add a dedicated “Socket” mode (drag-and-drop gems onto gear) and allow socketing items while they’re still in inventory (not just equipped).
+- Expose socket counts and gem tags explicitly in `data/rpg/loot.json` instead of inferred rules.
+- Add unsocket/remove rules (e.g., destroy gem, pay copper, or salvage gem) and a UI button per socket.
+
+## 2025-12-17 — Suggestions after gear stat readout fix
+- Add a small in-game toggle for `useRpgCombat` (Options) and show a short explanation tooltip on the Character screen.
+- Add “Compare” deltas (hovered vs equipped) so players can see exactly what equipping will change.
+
+## 2025-12-17 — Suggestions after window height increase
+- Add a simple scroll area for Stats/Details on very small resolutions so content never clips even if more lines are added later.
+
+## 2025-12-17 — Suggestions after gem unsocket right-click
+- Consider adding a confirm step or “Hold Right-Click” option to avoid accidental gem destruction.
+
+## 2025-12-17 — Suggestions after compare view
+- Add a toggle to compare “item vs currently equipped item” bonuses (raw item stats) in addition to full derived stat deltas.
+
+## 2025-12-17 — Suggestions after character select preview tweak
+- Move Character Select layout constants into a small config struct (or `data/ui.json`) so UI positioning can be tweaked without rebuilding.
+
+## 2025-12-17 — Suggestions after HUD text alignment
+- Consider adding a small UI safe-area calibration option for HUD offsets so players on ultrawide/TV setups can nudge bars/labels.
+
+## 2025-12-17 — Suggestions after shield recenter
+- Consider removing per-bar offsets entirely now that text measurement is accurate, and only keep them if the art implies a non-centered “sweet spot”.
+
+## 2025-12-17 — Suggestions after health recenter
+- If Energy still needs a nudge, consider baking the offsets into a single `kResourceBarTextOffsetX` default and only overriding per-bar when absolutely necessary.
+
+## 2025-12-17 — Suggestions after character renames
+- Ensure the fallback bitmap font includes common accented glyphs (e.g., “í” in “María”) or always prefer TTF for UI text.
+
+## 2025-12-17 — Suggestions after RPG consumables + bags
+- Add a small HUD indicator for consumable cooldown groups (e.g., “Food CD”, “Potion CD”) so players understand why Use Item didn’t fire.
+- Move enemy RPG seeding constants into `data/gameplay.json` so tuning doesn’t require a rebuild.
+- Add drag-from-equipment to inventory (and a drop-target highlight) to make bag swap/unequip flows more discoverable.
+
+## 2025-12-17 — Suggestions after Hotbar R/F
+- Add a small cooldown overlay + stack count on hotbar slots so it’s obvious when the item is unusable/on cooldown.
+- Allow hotbar to target a consumable *stack* (by inventory slot id + quantity) rather than a single instance id.

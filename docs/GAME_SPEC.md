@@ -537,6 +537,22 @@ Codex should implement the game in a sequence of small, verifiable milestones.
   - Synchronize hero actions, enemy states, waves.
 - Keep simulation deterministic enough for wave shooter.
 
+### New in v0.0.106 – RPG Combat / Loot / Talents
+
+- Shared RPG stat model (STR/DEX/INT/END/LCK → derived AP/SP/AS/MS/ACC/EVA/CRIT/ARM/RES/TEN/shields) with clampable resists and armor curve `ARM/(ARM+K)`.
+- Single combat resolver order: hit quality → dodge/parry → crit → roll band (shaped) → armor/resist → shields → on-hit statuses with tenacity “saving throw” and CC fatigue (DR: 1.0 → 0.7 → 0.5 → immune).
+- Data-first attack/loot/talent structs live under `engine/gameplay/RPG*` and `game/rpg/`, usable by players and AI.
+- Loot generator rolls rarity (Luck-aware), base templates, and affixes; equipment contributions feed the aggregation pipeline.
+- Talent nodes award match-permanent stat contributions; consumables share cooldown categories (heal/cleanse/buff/bomb/food).
+- Character select now shows archetype biography, core attributes, specialties, and perk blurb sourced from `data/rpg/archetypes.json`.
+- Feature flags in `data/gameplay.json` (`useRpgCombat`, `useRpgLoot`, `rpgCombat` block) allow incremental rollout; loot/consumables/talents load from `data/rpg/*.json` with fallbacks.
+
+### New in v0.0.108 – RPG Equipment Expansion
+
+- Expanded `data/rpg/loot.json` to cover the full equipment sprite sheets under `assets/Sprites/Equipment/` (armor, weapons, gems, runes, tomes, shields, quivers, arrows, scroll).
+- Added a paper-doll equipment container and Character screen click-to-equip flow; only equipped items contribute to live RPG stat aggregation.
+- Loot templates include icon metadata (`iconSheet/iconRow/iconCol`); `scripts/gen_rpg_loot.py` regenerates the table deterministically.
+
 ---
 
 ## 12. Coding Norms (Instructions for Codex)

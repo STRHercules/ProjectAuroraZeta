@@ -53,3 +53,113 @@
     * Damage, regen, casting, and movement now respect Stasis, Silence, Fear, Cauterize, Cloaking, Unstoppable, and Armor Reduction (supports negative armor).
 * Added top-right mini-map overlay that centers on the player and clamps enemy blips at the edge of the radar radius.
     * Cloaked or stasis targets hide from the mini-map and enemy rendering.
+
+# v0.0.105
+* Added modular RPG combat pipeline (attributes → derived stats → resolver) with armored/resist mitigation, shaped rolls, tenacity saving throws, and CC fatigue.
+* Implemented data-first loot/talent/consumable models plus Luck-aware loot generator and stat aggregation helpers.
+* Character select now shows archetype biography, attributes, specialties, and perk blurbs sourced from `data/rpg/archetypes.json`.
+* New unit tests cover armor curve, resist clamps, CC diminishing returns, and stat aggregation.
+
+# v0.0.106
+* Added `useRpgCombat` flag and resolver config in `data/gameplay.json`; projectile/contact damage routes through the RPG resolver when enabled.
+* Externalized loot/consumables/talents to `data/rpg/*.json`; when `useRpgLoot` is on, drops roll affixes and inventory shows affix lines.
+* Inventory panel now lists affix bullet points for items; build string updated to v0.0.106.
+
+# v0.0.107
+* Loot affixes and RPG talents now modify live combat stats in RPG combat mode (damage scaling, armor, max HP/shields).
+    * RPG stats are aggregated into per-entity snapshots used by the resolver.
+* RPG resolver integration extended to DoTs and auras (burn/earth ticks, lightning dome, flame walls, wizard lightning bolt).
+    * Warp Flux hotzone damage bonus now applies to flame wall ticks/burn.
+* Added `combatDebugOverlay` flag in `data/gameplay.json` to show a live RPG combat debug panel.
+
+# v0.0.108
+* Added full equipment loot table (167 items) covering armor, weapons, gems, runes, tomes, shields, quivers, arrows, and scrolls.
+    * Items roll RPG affixes and can be equipped (press **I**) to modify live RPG combat stats.
+    * Equipment icons render from the `assets/Sprites/Equipment` sprite sheets in the equipment/inventory UI.
+* Improved RPG loot rolls so rarity selects templates from the rolled tier and avoids duplicate affixes.
+* Fixed text overlap in the Select Character & Difficulty summary panel.
+
+# v0.0.109
+* RPG equipment drops are now tiered:
+    * Regular monsters drop low-grade wooden/copper/basic gear.
+    * Mini-bosses drop multiple items and often include gems.
+    * Bosses drop multiple high-grade items and still unlock the Traveling Shop.
+* Traveling Shop can now roll RPG equipment items with affixes alongside existing gold shop offers.
+* RPG equipment pickups are more visible in-world (uses the money bag pickup icon).
+
+# v0.0.110
+* Modernized the Character screen inventory UI:
+    * Inventory is now a grid with selection/rarity highlighting.
+    * Added hover tooltips and a dedicated item details panel (shows RPG bonus breakdown + affixes).
+    * Equipment slots are presented as compact cards with clearer empty/filled state.
+
+# v0.0.111
+* Fixed a crash when equipping/unequipping items from the Character screen.
+
+# v0.0.112
+* Character screen tweaks:
+    * Equipment panel is taller so all slots are visible (no overlap with Stats).
+    * Default inventory capacity increased to 24 slots.
+    * Equipping into an occupied slot now swaps items instead of failing when inventory is full.
+
+# v0.0.113
+* Gems are now socketable items instead of trinkets:
+    * Hover an equipped weapon/gear to set the socket target, then click a gem to insert it into an empty socket.
+    * Socketed gems apply their RPG stats/affixes to live stat aggregation.
+* Runes remain equippable trinkets.
+
+# v0.0.114
+* Character screen polish:
+    * Equipment slot text aligns better with the icon row.
+    * RPG rarity is no longer shown as `[Uncommon]` text; item names are color-coded by rarity instead.
+
+# v0.0.115
+* Character screen improvements:
+    * Equipment slot text is raised to better align with icons.
+    * Inventory items can be drag-and-dropped:
+      * Drag onto another inventory cell to swap positions.
+      * Drag gems onto an equipped item with open sockets to socket them.
+
+# v0.0.116
+* Slightly increased Character screen text scale for readability.
+
+# v0.0.117
+* Equipped gear now updates the Character screen Stats panel (HP/Shields/Damage/Attack Speed/Move Speed).
+* RPG combat is enabled by default so equipped stats/affixes affect live combat.
+
+# v0.0.118
+* Increased the Character/Inventory window height so stats and item details don’t clip off-screen.
+
+# v0.0.119
+* Right-clicking equipped gear now removes socketed gems one-at-a-time (gem is destroyed; socket is freed).
+
+# v0.0.120
+* Character screen improvements:
+    * Added a compare view showing stat deltas when hovering an inventory item (preview before equipping).
+    * Long equipment names are now truncated with ellipsis so they don’t clip in slot cards.
+
+# v0.0.121
+* Character select: moved the live hero preview sprite so it doesn’t overlap the lower text panels.
+
+# v0.0.122
+* HUD: adjusted Health/Shields/Energy bar text positioning so labels are centered correctly.
+
+# v0.0.123
+* HUD: fixed Shield bar text centering (was offset too far right).
+
+# v0.0.124
+* HUD: fixed Health bar text centering (was offset too far right).
+
+# v0.0.125
+* Character roster: renamed archetypes to character names (Jack, María, George, Robin, Raven, Sally, Ellis, Sage, Jade, Gunther).
+
+# v0.0.126
+* Loot drops now show rarity containers (bags/chests) and consumables show their own icons.
+* Added foods + potions as RPG consumables (health/shield restoration + regen) with shared cooldown groups.
+* Added equippable Bags that expand inventory capacity; overflow drops to ground on unequip.
+* Routed melee + mini-unit damage through the RPG resolver and seeded enemy RPG snapshots for shared combat rules.
+
+# v0.0.127
+* Character screen: added two hotbar slots (R/F) for consumables; drag an item onto a slot and press the hotkey to consume it.
+* Character screen: Equipment panel height now accounts for the Bag slot row (no clipping/overlap).
+* Input: `R`/`F` are now reserved for hotbar use (Reload moved to `F1`).

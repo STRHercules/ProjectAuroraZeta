@@ -36,6 +36,7 @@
 #include "../engine/ecs/components/AABB.h"
 #include "../engine/ecs/components/Health.h"
 #include "../engine/ecs/components/Projectile.h"
+#include "../engine/ecs/components/RPGStats.h"
 #include "../engine/ecs/components/Tags.h"
 #include "../engine/gameplay/Combat.h"
 #include "../engine/input/InputState.h"
@@ -58,6 +59,7 @@
 #include "components/Shopkeeper.h"
 #include "components/OffensiveType.h"
 #include "components/HitFlash.h"
+#include "systems/RpgDamage.h"
 #include "components/StatusEffects.h"
 #include "components/SpellEffect.h"
 #include "components/Ghost.h"
@@ -206,6 +208,9 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     hotzoneSystem_ = std::make_unique<HotzoneSystem>(static_cast<float>(hotzoneRotation_), 1.25f, 1.5f, 1.2f, 1.15f,
                                                      hotzoneMapRadius_, hotzoneRadiusMin_, hotzoneRadiusMax_,
                                                      hotzoneMinSeparation_, hotzoneSpawnClearance_, rng_());
+    auto combatDebugSink = [this](const std::string& line) { this->pushCombatDebugLine(line); };
+    if (collisionSystem_) collisionSystem_->setCombatDebugSink(combatDebugSink);
+    if (enemyAISystem_) enemyAISystem_->setCombatDebugSink(combatDebugSink);
     // Wave settings loaded later from gameplay config.
     textureManager_ = std::make_unique<Engine::TextureManager>(*render_);
     {
@@ -257,6 +262,8 @@ bool GameRoot::onInitialize(Engine::Application& app) {
         bindings_.toggleFollow = {"c"};
         bindings_.interact = {"key:e"};
         bindings_.useItem = {"key:q"};
+        bindings_.hotbar1 = {"key:r"};
+        bindings_.hotbar2 = {"key:f"};
         bindings_.restart = {"backspace"};
         bindings_.dash = {"space"};
         bindings_.characterScreen = {"i"};
@@ -290,6 +297,7 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     loadUnitDefinitions();
     loadPickupTextures();
     loadProjectileTextures();
+    loadRpgData();
     itemCatalog_ = defaultItemCatalog();
     goldCatalog_ = goldShopCatalog();
     // capture baseline fire interval for attack speed stacking
@@ -341,6 +349,10 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     float dashDuration = dashDuration_;
     float dashCooldown = dashCooldown_;
     float dashInvulnFrac = dashInvulnFraction_;
+    bool useRpgCombat = useRpgCombat_;
+    bool useRpgLoot = useRpgLoot_;
+    bool combatDebugOverlay = combatDebugOverlay_;
+    auto rpgCfg = rpgResolverConfig_;
     bool showDamageNumbers = showDamageNumbers_;
     bool screenShake = screenShake_;
     int xpPerKill = xpPerKill_;
@@ -359,6 +371,7 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     float energyMax = energyMax_;
     float energyRegen = energyRegen_;
     float energyIntermission = energyRegenIntermission_;
+    float pickupItemShare = pickupItemShare_;
     {
         std::ifstream gp("data/gameplay.json");
         if (gp.is_open()) {
@@ -366,6 +379,17 @@ bool GameRoot::onInitialize(Engine::Application& app) {
             gp >> j;
             float globalSpeedMul = j.value("speedMultiplier", 1.0f);
             globalSpeedMul_ = std::clamp(globalSpeedMul, 0.1f, 3.0f);
+            useRpgCombat = j.value("useRpgCombat", useRpgCombat);
+            useRpgLoot = j.value("useRpgLoot", useRpgLoot);
+            combatDebugOverlay = j.value("combatDebugOverlay", combatDebugOverlay);
+            if (j.contains("rpgCombat") && j["rpgCombat"].is_object()) {
+                const auto& rc = j["rpgCombat"];
+                rpgCfg.armorConstant = rc.value("armorConstant", rpgCfg.armorConstant);
+                rpgCfg.dodgeCap = rc.value("dodgeCap", rpgCfg.dodgeCap);
+                rpgCfg.critCap = rc.value("critCap", rpgCfg.critCap);
+                rpgCfg.resistMin = rc.value("resistMin", rpgCfg.resistMin);
+                rpgCfg.resistMax = rc.value("resistMax", rpgCfg.resistMax);
+            }
             if (j.contains("enemy")) {
                 waveSettings.enemyHp = j["enemy"].value("hp", waveSettings.enemyHp);
                 waveSettings.enemyShields = j["enemy"].value("shields", waveSettings.enemyShields);
@@ -508,10 +532,24 @@ bool GameRoot::onInitialize(Engine::Application& app) {
             if (j.contains("drops")) {
                 pickupDropChance_ = j["drops"].value("pickupChance", pickupDropChance_);
                 pickupPowerupShare_ = j["drops"].value("powerupShare", pickupPowerupShare_);
+                pickupItemShare = j["drops"].value("itemShare", pickupItemShare);
+                rpgEquipChanceNormal_ = j["drops"].value("rpgEquipChanceNormal", rpgEquipChanceNormal_);
+                rpgEquipMiniBossCount_ = j["drops"].value("rpgEquipMiniBossCount", rpgEquipMiniBossCount_);
+                rpgEquipBossCount_ = j["drops"].value("rpgEquipBossCount", rpgEquipBossCount_);
+                rpgMiniBossGemChance_ = j["drops"].value("rpgMiniBossGemChance", rpgMiniBossGemChance_);
+                rpgConsumableChanceNormal_ = j["drops"].value("rpgConsumableChanceNormal", rpgConsumableChanceNormal_);
+                rpgConsumableMiniBossCount_ = j["drops"].value("rpgConsumableMiniBossCount", rpgConsumableMiniBossCount_);
+                rpgConsumableBossCount_ = j["drops"].value("rpgConsumableBossCount", rpgConsumableBossCount_);
+                rpgBagChanceMiniBoss_ = j["drops"].value("rpgBagChanceMiniBoss", rpgBagChanceMiniBoss_);
+                rpgBagChanceBoss_ = j["drops"].value("rpgBagChanceBoss", rpgBagChanceBoss_);
                 copperPickupMin_ = j["drops"].value("copperMin", copperPickupMin_);
                 copperPickupMax_ = j["drops"].value("copperMax", copperPickupMax_);
                 bossCopperDrop_ = j["drops"].value("bossCopper", bossCopperDrop_);
                 miniBossCopperDrop_ = j["drops"].value("miniBossCopper", miniBossCopperDrop_);
+            }
+            if (j.contains("shop") && j["shop"].is_object()) {
+                rpgShopEquipChance_ = j["shop"].value("rpgEquipChance", rpgShopEquipChance_);
+                rpgShopEquipCount_ = j["shop"].value("rpgEquipCount", rpgShopEquipCount_);
             }
             if (j.contains("dash")) {
                 dashSpeedMul = j["dash"].value("speedMultiplier", dashSpeedMul);
@@ -603,6 +641,7 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     showDamageNumbers_ = showDamageNumbers;
     screenShake_ = screenShake;
     salvageReward_ = salvageReward;
+    pickupItemShare_ = std::clamp(pickupItemShare, 0.0f, 1.0f);
     copperPickupMinBase_ = copperPickupMin_;
     copperPickupMaxBase_ = copperPickupMax_;
     bossCopperDropBase_ = bossCopperDrop_;
@@ -630,6 +669,14 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     fireCooldown_ = 0.0;
     if (collisionSystem_) collisionSystem_->setContactDamage(contactDamage_);
     if (collisionSystem_) collisionSystem_->setThornConfig(thornConfig_.reflectPercent, thornConfig_.maxReflectPerHit);
+    useRpgCombat_ = useRpgCombat;
+    useRpgLoot_ = useRpgLoot;
+    combatDebugOverlay_ = combatDebugOverlay;
+    rpgResolverConfig_ = rpgCfg;
+    if (collisionSystem_) collisionSystem_->setRpgCombat(useRpgCombat_, rpgResolverConfig_);
+    if (enemyAISystem_) enemyAISystem_->setRpgCombat(useRpgCombat_, rpgResolverConfig_, &rng_);
+    if (miniUnitSystem_) miniUnitSystem_->setRpgCombat(useRpgCombat_, rpgResolverConfig_, &rng_);
+    if (miniUnitSystem_) miniUnitSystem_->setCombatDebugSink([this](const std::string& line) { pushCombatDebugLine(line); });
     heroVisionRadiusBaseTiles_ = heroVisionRadiusTiles_;
 
     rebuildFogLayer();
@@ -1210,12 +1257,16 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         bool abilityUltEdge = actions.ultimate && !abilityUltPrev_;
         bool interactEdge = actions.interact && !interactPrev_;
         bool useItemEdge = actions.useItem && !useItemPrev_;
+        bool hotbar1Edge = actions.hotbar1 && !hotbar1Prev_;
+        bool hotbar2Edge = actions.hotbar2 && !hotbar2Prev_;
         ability1Prev_ = actions.ability1;
         ability2Prev_ = actions.ability2;
         ability3Prev_ = actions.ability3;
         abilityUltPrev_ = actions.ultimate;
         interactPrev_ = actions.interact;
         useItemPrev_ = actions.useItem;
+        hotbar1Prev_ = actions.hotbar1;
+        hotbar2Prev_ = actions.hotbar2;
     if (abilityShopOpen_ || itemShopOpen_) {
             // Ability shop point-click purchase: any left click buys the currently selected (hovered) card.
             if (abilityShopOpen_) {
@@ -1350,9 +1401,11 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     float x = startX + static_cast<float>(i) * (cardW + gap);
                     if (mx >= x && mx <= x + cardW && my >= y && my <= y + cardH) {
                         const ItemDefinition& item = shopInventory_[i];
-                        int dynCost = effectiveShopCost(item.effect, item.cost, shopDamagePctPurchases_, shopAttackSpeedPctPurchases_,
-                                                        shopVitalsPctPurchases_, shopCooldownPurchases_, shopRangeVisionPurchases_,
-                                                        shopChargePurchases_, shopSpeedBootsPurchases_, shopVitalAusterityPurchases_);
+                        int dynCost = item.rpgTemplateId.empty()
+                                          ? effectiveShopCost(item.effect, item.cost, shopDamagePctPurchases_, shopAttackSpeedPctPurchases_,
+                                                              shopVitalsPctPurchases_, shopCooldownPurchases_, shopRangeVisionPurchases_,
+                                                              shopChargePurchases_, shopSpeedBootsPurchases_, shopVitalAusterityPurchases_)
+                                          : item.cost;
                         if (dynCost < 0) {
                             continue;  // capped; ignore click
                         }
@@ -1360,6 +1413,17 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                             shopNoFundsTimer_ = 0.6;
                             break;
                         }
+                        if (!item.rpgTemplateId.empty()) {
+                            // RPG equipment purchase: add to inventory (no stat effect is applied until equipped).
+                            if (!addItemToInventory(item)) {
+                                shopNoFundsTimer_ = 0.6;
+                                break;
+                            }
+                            gold_ -= dynCost;
+                            refreshShopInventory();
+                            break;
+                        }
+
                         gold_ -= dynCost;
                         switch (item.effect) {
                             case ItemEffect::Damage:
@@ -1480,10 +1544,133 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             if (ability2Edge) executeAbility(2);
             if (ability3Edge) executeAbility(3);
             if (abilityUltEdge) executeAbility(4);
+            auto consumeAtIndex = [&](int targetIdx) -> bool {
+                if (targetIdx < 0 || targetIdx >= static_cast<int>(inventory_.size())) return false;
+                const auto& inst = inventory_[static_cast<std::size_t>(targetIdx)];
+                const int consumedId = inst.def.id;
+                bool consumed = false;
+                if (!inst.def.rpgConsumableId.empty()) {
+                    const Game::RPG::ConsumableDef* def = nullptr;
+                    for (const auto& c : rpgConsumables_) {
+                        if (c.id == inst.def.rpgConsumableId) { def = &c; break; }
+                    }
+                    if (def && !def->cooldownGroup.empty()) {
+                        const double cd = rpgConsumableCooldowns_[def->cooldownGroup];
+                        if (cd <= 0.0001) {
+                            if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
+                                for (const auto& eff : def->effects) {
+                                    const float maxPool =
+                                        (eff.resource == Game::RPG::ConsumableResource::Shields) ? hp->maxShields : hp->maxHealth;
+                                    if (maxPool <= 0.0f) continue;
+                                    if (eff.category == Game::RPG::ConsumableCategory::Heal ||
+                                        (eff.category == Game::RPG::ConsumableCategory::Food && eff.duration <= 0.0f)) {
+                                        const float delta = std::max(0.0f, eff.magnitude) * maxPool;
+                                        if (eff.resource == Game::RPG::ConsumableResource::Shields) {
+                                            hp->currentShields = std::min(hp->maxShields, hp->currentShields + delta);
+                                        } else {
+                                            hp->currentHealth = std::min(hp->maxHealth, hp->currentHealth + delta);
+                                        }
+                                    } else if (eff.category == Game::RPG::ConsumableCategory::Food && eff.duration > 0.0f) {
+                                        rpgConsumableOverTime_.push_back(
+                                            ActiveConsumableOverTime{eff.resource, std::max(0.0f, eff.magnitude), eff.duration});
+                                    } else if (eff.category == Game::RPG::ConsumableCategory::Buff && eff.duration > 0.0f) {
+                                        Engine::Gameplay::RPG::StatContribution c{};
+                                        c.mult.moveSpeed = eff.magnitude;
+                                        rpgActiveBuffs_.push_back(ActiveRpgBuff{c, eff.duration});
+                                    }
+                                }
+                            }
+                            rpgConsumableCooldowns_[def->cooldownGroup] = std::max(0.0, static_cast<double>(def->cooldown));
+                            consumed = true;
+                        }
+                    }
+                } else {
+                    switch (inst.def.effect) {
+                        case ItemEffect::Heal: {
+                            if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
+                                hp->currentHealth = std::min(hp->maxHealth, hp->currentHealth + inst.def.value * hp->maxHealth);
+                            }
+                            consumed = true;
+                            break;
+                        }
+                        case ItemEffect::FreezeTime:
+                            freezeTimer_ = std::max(freezeTimer_, static_cast<double>(inst.def.value));
+                            consumed = true;
+                            break;
+                        case ItemEffect::Turret: {
+                            TurretInstance t{};
+                            if (const auto* tf = registry_.get<Engine::ECS::Transform>(hero_)) t.pos = tf->position;
+                            t.timer = inst.def.value;
+                            t.fireCooldown = 0.0f;
+                            t.visEntity = registry_.create();
+                            registry_.emplace<Engine::ECS::Transform>(t.visEntity, t.pos);
+                            Engine::TexturePtr tex = pickupTurretTex_;
+                            Engine::Vec2 size{16.0f, 16.0f};
+                            registry_.emplace<Engine::ECS::Renderable>(t.visEntity,
+                                Engine::ECS::Renderable{size, Engine::Color{255, 255, 255, 255}, tex});
+                            turrets_.push_back(t);
+                            consumed = true;
+                            break;
+                        }
+                        case ItemEffect::Lifesteal: {
+                            lifestealBuff_ = inst.def.value;
+                            lifestealPercent_ = lifestealBuff_;
+                            lifestealTimer_ = std::max(lifestealTimer_, 60.0);
+                            consumed = true;
+                            break;
+                        }
+                        case ItemEffect::AttackSpeed: {
+                            attackSpeedBuffMul_ = std::max(attackSpeedBuffMul_, 1.0f + inst.def.value);
+                            chronoTimer_ = std::max(chronoTimer_, 60.0);
+                            fireInterval_ = fireIntervalBase_ / std::max(0.1f, attackSpeedMul_ * attackSpeedBuffMul_);
+                            consumed = true;
+                            break;
+                        }
+                        case ItemEffect::Chain: {
+                            chainBonusTemp_ = std::max(chainBonusTemp_, static_cast<int>(std::round(inst.def.value)));
+                            stormTimer_ = std::max(stormTimer_, 60.0);
+                            chainBounces_ = chainBase_ + chainBonusTemp_;
+                            consumed = true;
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+                if (consumed) {
+                    inventory_.erase(inventory_.begin() + targetIdx);
+                    // Clear hotbar references if they pointed at the consumed item id.
+                    for (auto& slotId : hotbarItemIds_) {
+                        if (slotId.has_value() && slotId.value() == consumedId) slotId.reset();
+                    }
+                    if (inventory_.empty()) inventorySelected_ = -1;
+                    else clampInventorySelection();
+                }
+                return consumed;
+            };
+
+            auto tryConsumeHotbarSlot = [&](int slotIdx) {
+                if (slotIdx < 0 || slotIdx >= 2) return;
+                if (!hotbarItemIds_[slotIdx].has_value()) return;
+                const int id = *hotbarItemIds_[slotIdx];
+                int invIdx = -1;
+                for (std::size_t i = 0; i < inventory_.size(); ++i) {
+                    if (inventory_[i].def.id == id) { invIdx = static_cast<int>(i); break; }
+                }
+                if (invIdx == -1) {
+                    hotbarItemIds_[slotIdx].reset();
+                    return;
+                }
+                (void)consumeAtIndex(invIdx);
+            };
+
+            if (hotbar1Edge) tryConsumeHotbarSlot(0);
+            if (hotbar2Edge) tryConsumeHotbarSlot(1);
             if (useItemEdge) {
                 clampInventorySelection();
                 auto isConsumable = [](const ItemDefinition& d) {
-                    return d.effect == ItemEffect::Heal || d.effect == ItemEffect::FreezeTime ||
+                    return !d.rpgConsumableId.empty() ||
+                           d.effect == ItemEffect::Heal || d.effect == ItemEffect::FreezeTime ||
                            d.effect == ItemEffect::Turret || d.effect == ItemEffect::Lifesteal ||
                            d.effect == ItemEffect::AttackSpeed || d.effect == ItemEffect::Chain;
                 };
@@ -1498,58 +1685,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     }
                 }
                 if (targetIdx != -1) {
-                    const auto& inst = inventory_[targetIdx];
-                    switch (inst.def.effect) {
-                        case ItemEffect::Heal: {
-                            if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
-                                hp->currentHealth = std::min(hp->maxHealth, hp->currentHealth + inst.def.value * hp->maxHealth);
-                            }
-                            break;
-                        }
-                        case ItemEffect::FreezeTime:
-                            freezeTimer_ = std::max(freezeTimer_, static_cast<double>(inst.def.value));
-                            break;
-                        case ItemEffect::Turret: {
-                            TurretInstance t{};
-                            if (const auto* tf = registry_.get<Engine::ECS::Transform>(hero_)) t.pos = tf->position;
-                            t.timer = inst.def.value;
-                            t.fireCooldown = 0.0f;
-                            t.visEntity = registry_.create();
-                            registry_.emplace<Engine::ECS::Transform>(t.visEntity, t.pos);
-                            Engine::TexturePtr tex = pickupTurretTex_;
-                            Engine::Vec2 size{16.0f, 16.0f};
-                            registry_.emplace<Engine::ECS::Renderable>(t.visEntity,
-                                Engine::ECS::Renderable{size, Engine::Color{255, 255, 255, 255}, tex});
-                            turrets_.push_back(t);
-                            break;
-                        }
-                        case ItemEffect::Lifesteal: {
-                            lifestealBuff_ = inst.def.value;
-                            lifestealPercent_ = lifestealBuff_;
-                            lifestealTimer_ = std::max(lifestealTimer_, 60.0);
-                            break;
-                        }
-                        case ItemEffect::AttackSpeed: {
-                            attackSpeedBuffMul_ = std::max(attackSpeedBuffMul_, 1.0f + inst.def.value);
-                            chronoTimer_ = std::max(chronoTimer_, 60.0);
-                            fireInterval_ = fireIntervalBase_ / std::max(0.1f, attackSpeedMul_ * attackSpeedBuffMul_);
-                            break;
-                        }
-                        case ItemEffect::Chain: {
-                            chainBonusTemp_ = std::max(chainBonusTemp_, static_cast<int>(std::round(inst.def.value)));
-                            stormTimer_ = std::max(stormTimer_, 60.0);
-                            chainBounces_ = chainBase_ + chainBonusTemp_;
-                            break;
-                        }
-                        default:
-                            break;
-                    }
-                    inventory_.erase(inventory_.begin() + targetIdx);
-                    if (inventory_.empty()) {
-                        inventorySelected_ = -1;
-                    } else {
-                        clampInventorySelection();
-                    }
+                    (void)consumeAtIndex(targetIdx);
                 }
             }
         }
@@ -1752,7 +1888,8 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                         domeBuff.shieldArmorBonus += armorDelta;
                         domeBuff.damageTakenMultiplier *= st->container.damageTakenMultiplier();
                     }
-                    Engine::Gameplay::applyDamage(hp, dome, domeBuff);
+                    (void)Game::RpgDamage::apply(registry_, hero_, e, hp, dome, domeBuff, useRpgCombat_, rpgResolverConfig_, rng_,
+                                                 "aura_dome", [this](const std::string& line) { pushCombatDebugLine(line); });
                     if (auto* se = registry_.get<Game::StatusEffects>(e)) {
                         se->stunTimer = std::max(se->stunTimer, 0.2f);
                     } else {
@@ -1771,7 +1908,8 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             float r2 = radius * radius;
             Engine::Gameplay::DamageEvent dmg{};
             dmg.type = Engine::Gameplay::DamageType::Spell;
-            dmg.baseDamage = projectileDamage_ * 0.25f * static_cast<float>(step.deltaSeconds);
+            float zoneDmgMul = hotzoneSystem_ ? hotzoneSystem_->damageMultiplier() : 1.0f;
+            dmg.baseDamage = projectileDamage_ * 0.25f * zoneDmgMul * static_cast<float>(step.deltaSeconds);
             registry_.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::EnemyTag>(
                 [&](Engine::ECS::Entity e, Engine::ECS::Transform& tf, Engine::ECS::Health& hp, Engine::ECS::EnemyTag&) {
                     if (!hp.alive()) return;
@@ -1787,16 +1925,17 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                             flameBuff.shieldArmorBonus += armorDelta;
                             flameBuff.damageTakenMultiplier *= st->container.damageTakenMultiplier();
                         }
-                        Engine::Gameplay::applyDamage(hp, dmg, flameBuff);
+                        (void)Game::RpgDamage::apply(registry_, hero_, e, hp, dmg, flameBuff, useRpgCombat_, rpgResolverConfig_, rng_,
+                                                     "aura_flame", [this](const std::string& line) { pushCombatDebugLine(line); });
                         // apply brief burn
                         if (auto* se = registry_.get<Game::StatusEffects>(e)) {
                             se->burnTimer = std::max(se->burnTimer, 1.5f);
-                            se->burnDps = std::max(se->burnDps, projectileDamage_ * 0.15f);
+                            se->burnDps = std::max(se->burnDps, projectileDamage_ * zoneDmgMul * 0.15f);
                         } else {
                             registry_.emplace<Game::StatusEffects>(e, Game::StatusEffects{});
                             if (auto* se2 = registry_.get<Game::StatusEffects>(e)) {
                                 se2->burnTimer = 1.5f;
-                                se2->burnDps = projectileDamage_ * 0.15f;
+                                se2->burnDps = projectileDamage_ * zoneDmgMul * 0.15f;
                             }
                         }
                     }
@@ -1906,7 +2045,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 registry_.emplace<Engine::ECS::Projectile>(proj,
                                                            Engine::ECS::Projectile{Engine::Vec2{dir.x * projectileSpeed_,
                                                                                                  dir.y * projectileSpeed_},
-                                                                                   dmgEvent, projectileLifetime_, lifestealPercent_, chainBounces_});
+                                                                                   dmgEvent, projectileLifetime_, lifestealPercent_, chainBounces_, Engine::ECS::kInvalidEntity});
                 registry_.emplace<Engine::ECS::ProjectileTag>(proj, Engine::ECS::ProjectileTag{});
             }
             // keep turret marker on its position
@@ -1969,7 +2108,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 registry_.emplace<Engine::ECS::Projectile>(proj,
                                                            Engine::ECS::Projectile{Engine::Vec2{dir.x * projectileSpeed_,
                                                                                                  dir.y * projectileSpeed_},
-                                                                                   dmgEvent, projectileLifetime_, 0.0f, 0});
+                                                                                   dmgEvent, projectileLifetime_, 0.0f, 0, be});
                 registry_.emplace<Engine::ECS::ProjectileTag>(proj, Engine::ECS::ProjectileTag{});
                 b.spawnTimer = def.attackRate;
             });
@@ -2067,59 +2206,8 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     float r = rad(rng_);
                     return Engine::Vec2{base.x + std::cos(a) * r, base.y + std::sin(a) * r};
                 };
-                auto spawnPickupEntity = [&](const Pickup& payload, const Engine::Vec2& pos, Engine::Color color,
-                                             float size, float amp, float speed) {
-                    auto drop = registry_.create();
-                    registry_.emplace<Engine::ECS::Transform>(drop, pos);
-                    Engine::TexturePtr tex{};
-                    bool animated = false;
-                    float scale = 1.0f;
-                    if (payload.kind == Pickup::Kind::Copper) { tex = pickupCopperTex_; animated = true; scale = 1.75f; }
-                    if (payload.kind == Pickup::Kind::Gold)   { tex = pickupGoldTex_;   animated = false; scale = 1.3f; }
-                    if (payload.kind == Pickup::Kind::Powerup) {
-                        switch (payload.powerup) {
-                            case Pickup::Powerup::Heal: tex = pickupHealPowerupTex_; break;
-                            case Pickup::Powerup::Kaboom: tex = pickupKaboomTex_; break;
-                            case Pickup::Powerup::Recharge: tex = pickupRechargeTex_; scale *= 1.8f; break;  // make recharge orb much more visible
-                            case Pickup::Powerup::Frenzy: tex = pickupFrenzyTex_; break;
-                            case Pickup::Powerup::Immortal: tex = pickupImmortalTex_; animated = true; break;
-                            case Pickup::Powerup::Freeze: tex = pickupFreezeTex_; break;
-                            default: break;
-                        }
-                    }
-                    if (payload.kind == Pickup::Kind::Item) {
-                        switch (payload.item.effect) {
-                            case ItemEffect::Turret: tex = pickupTurretTex_; break;
-                            case ItemEffect::Heal: tex = pickupHealTex_; break;
-                            case ItemEffect::FreezeTime: tex = pickupFreezeTex_; scale *= 1.8f; break;  // boss Cryo Capsule pickup bigger
-                            case ItemEffect::AttackSpeed: tex = pickupChronoTex_; animated = true; break;
-                            case ItemEffect::Lifesteal: tex = pickupPhaseLeechTex_; animated = true; break;
-                            case ItemEffect::Chain: tex = pickupStormCoreTex_; animated = true; break;
-                            default: break;
-                        }
-                    }
-                    Engine::Vec2 rendSize{size, size};
-                    float aabbHalf = size * 0.5f;
-                    if (tex) {
-                        if (animated) {
-                            rendSize = Engine::Vec2{16.0f * scale, 16.0f * scale};
-                        } else {
-                            rendSize = Engine::Vec2{static_cast<float>(tex->width()) * scale,
-                                                    static_cast<float>(tex->height()) * scale};
-                        }
-                        aabbHalf = std::max(rendSize.x, rendSize.y) * 0.5f;
-                    }
-                    registry_.emplace<Engine::ECS::Renderable>(drop,
-                        Engine::ECS::Renderable{rendSize, color, tex});
-                    registry_.emplace<Engine::ECS::AABB>(drop, Engine::ECS::AABB{Engine::Vec2{aabbHalf, aabbHalf}});
-                    registry_.emplace<Game::Pickup>(drop, payload);
-                    registry_.emplace<Game::PickupBob>(drop, Game::PickupBob{pos, 0.0f, amp, speed});
-                    registry_.emplace<Engine::ECS::PickupTag>(drop, Engine::ECS::PickupTag{});
-                    if (animated && tex) {
-                        registry_.emplace<Engine::ECS::SpriteAnimation>(drop, Engine::ECS::SpriteAnimation{16, 16, 6, 0.08f});
-                    }
-                };
                 auto pickItemByKind = [&](ItemKind kind) -> std::optional<ItemDefinition> {
+                    // Legacy (non-RPG) drops.
                     std::vector<ItemDefinition> pool;
                     for (const auto& def : itemCatalog_) {
                         if (def.kind == kind) pool.push_back(def);
@@ -2127,6 +2215,21 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     if (pool.empty()) return std::nullopt;
                     std::uniform_int_distribution<std::size_t> pick(0, pool.size() - 1);
                     return pool[pick(rng_)];
+                };
+                std::uniform_real_distribution<float> roll01(0.0f, 1.0f);
+                auto colorForRarity = [&](ItemRarity r) {
+                    Engine::Color c{235, 240, 245, 235};
+                    if (r == ItemRarity::Uncommon) c = Engine::Color{135, 235, 155, 235};
+                    if (r == ItemRarity::Rare) c = Engine::Color{135, 190, 255, 235};
+                    if (r == ItemRarity::Epic) c = Engine::Color{185, 135, 255, 235};
+                    if (r == ItemRarity::Legendary) c = Engine::Color{255, 210, 120, 240};
+                    return c;
+                };
+                auto spawnItemDrop = [&](const ItemDefinition& def, float size, float amp, float speed) {
+                    Pickup item{};
+                    item.kind = Pickup::Kind::Item;
+                    item.item = def;
+                    spawnPickupEntity(item, scatterPos(death.pos), colorForRarity(def.rarity), size, amp, speed);
                 };
 
                 if (death.boss) {
@@ -2141,18 +2244,30 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     copperPickup.amount = bossCopperDrop_;
                     spawnPickupEntity(copperPickup, scatterPos(death.pos), Engine::Color{255, 200, 90, 255}, 12.0f, 4.5f, 3.4f);
 
-                    if (auto unique = pickItemByKind(ItemKind::Unique)) {
-                        Pickup item{};
-                        item.kind = Pickup::Kind::Item;
-                        item.item = *unique;
-                        spawnPickupEntity(item, scatterPos(death.pos), Engine::Color{210, 180, 255, 255}, 14.0f, 4.5f, 3.2f);
+                    if (useRpgLoot_) {
+                        for (int i = 0; i < std::max(1, rpgEquipBossCount_); ++i) {
+                            if (auto loot = rollRpgEquipment(RpgLootSource::Boss, false)) {
+                                spawnItemDrop(*loot, 13.0f, 4.2f, 3.0f);
+                            }
+                        }
+                        for (int i = 0; i < std::max(0, rpgConsumableBossCount_); ++i) {
+                            if (auto c = rollRpgConsumable(RpgLootSource::Boss, false)) {
+                                spawnItemDrop(*c, 12.0f, 4.0f, 3.0f);
+                            }
+                        }
+                        if (roll01(rng_) < std::clamp(rpgBagChanceBoss_, 0.0f, 1.0f)) {
+                            if (auto bag = rollRpgBag(RpgLootSource::Boss, false)) {
+                                spawnItemDrop(*bag, 12.0f, 4.2f, 3.0f);
+                            }
+                        }
+                    } else {
+                        if (auto unique = pickItemByKind(ItemKind::Unique)) {
+                            spawnItemDrop(*unique, 14.0f, 4.5f, 3.2f);
+                        }
+                        if (auto support = pickItemByKind(ItemKind::Support)) {
+                            spawnItemDrop(*support, 13.0f, 4.0f, 3.0f);
+                        }
                     }
-                    if (auto support = pickItemByKind(ItemKind::Support)) {
-                    Pickup item{};
-                    item.kind = Pickup::Kind::Item;
-                    item.item = *support;
-                    spawnPickupEntity(item, scatterPos(death.pos), Engine::Color{180, 230, 255, 255}, 13.0f, 4.0f, 3.0f);
-                }
                 Pickup revive{};
                 revive.kind = Pickup::Kind::Revive;
                 spawnPickupEntity(revive, scatterPos(death.pos), Engine::Color{180, 255, 200, 255}, 12.0f, 4.0f, 3.0f);
@@ -2168,17 +2283,46 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     copperPickup.amount = miniBossCopperDrop_;
                     spawnPickupEntity(copperPickup, scatterPos(death.pos), Engine::Color{255, 200, 110, 255}, 11.0f, 4.0f, 3.2f);
 
-                    if (auto support = pickItemByKind(ItemKind::Support)) {
-                        Pickup item{};
-                        item.kind = Pickup::Kind::Item;
-                        item.item = *support;
-                        spawnPickupEntity(item, scatterPos(death.pos), Engine::Color{170, 220, 255, 255}, 11.0f, 3.8f, 3.0f);
+                    if (useRpgLoot_) {
+                        if (roll01(rng_) < std::clamp(rpgMiniBossGemChance_, 0.0f, 1.0f)) {
+                            if (auto gem = rollRpgEquipment(RpgLootSource::MiniBoss, false)) {
+                                spawnItemDrop(*gem, 12.0f, 4.0f, 3.0f);
+                            }
+                        }
+                        for (int i = 0; i < std::max(1, rpgEquipMiniBossCount_); ++i) {
+                            if (auto loot = rollRpgEquipment(RpgLootSource::MiniBoss, false)) {
+                                spawnItemDrop(*loot, 12.0f, 4.0f, 3.0f);
+                            }
+                        }
+                        for (int i = 0; i < std::max(0, rpgConsumableMiniBossCount_); ++i) {
+                            if (auto c = rollRpgConsumable(RpgLootSource::MiniBoss, false)) {
+                                spawnItemDrop(*c, 11.0f, 3.8f, 3.0f);
+                            }
+                        }
+                        if (roll01(rng_) < std::clamp(rpgBagChanceMiniBoss_, 0.0f, 1.0f)) {
+                            if (auto bag = rollRpgBag(RpgLootSource::MiniBoss, false)) {
+                                spawnItemDrop(*bag, 11.0f, 4.0f, 3.0f);
+                            }
+                        }
+                    } else {
+                        if (auto support = pickItemByKind(ItemKind::Support)) {
+                            spawnItemDrop(*support, 11.0f, 3.8f, 3.0f);
+                        }
                     }
                 } else {
-                    std::uniform_real_distribution<float> roll(0.0f, 1.0f);
-                    float drop = roll(rng_);
+                    if (useRpgLoot_ && roll01(rng_) < std::clamp(rpgEquipChanceNormal_, 0.0f, 1.0f)) {
+                        if (auto loot = rollRpgEquipment(RpgLootSource::Normal, false)) {
+                            spawnItemDrop(*loot, 11.0f, 3.8f, 3.0f);
+                        }
+                    }
+                    if (useRpgLoot_ && roll01(rng_) < std::clamp(rpgConsumableChanceNormal_, 0.0f, 1.0f)) {
+                        if (auto c = rollRpgConsumable(RpgLootSource::Normal, false)) {
+                            spawnItemDrop(*c, 10.5f, 3.6f, 3.0f);
+                        }
+                    }
+                    float drop = roll01(rng_);
                     if (drop < pickupDropChance_) {
-                        float powerRoll = roll(rng_);
+                        float powerRoll = roll01(rng_);
                         if (powerRoll < pickupPowerupShare_) {
                             // Powerup drop
                             Pickup p{};
@@ -2427,6 +2571,13 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 roundBannerTimer_ = 1.6;
             }
         }
+    }
+
+    updateCombatDebugLines(step.deltaSeconds);
+    if (hero_ != Engine::ECS::kInvalidEntity) {
+        updateRpgConsumables(step.deltaSeconds);
+        // Keep RPG derived stats fresh for UI/preview even if the resolver is disabled.
+        updateHeroRpgStats();
     }
 
     // Projectiles (host authoritative to avoid desync).
@@ -2826,14 +2977,14 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             if (const auto* heroHealth = registry_.get<Engine::ECS::Health>(hero_)) {
                 float maxPool = heroHealth->maxHealth + heroHealth->maxShields;
                 float currPool = heroHealth->currentHealth + heroHealth->currentShields;
-                dbg << " | HP " << std::setprecision(0) << currPool << "/" << maxPool;
+                //dbg << " | HP " << std::setprecision(0) << currPool << "/" << maxPool;
             }
             dbg << " | Round " << round_ << " | Wave " << wave_ << " | Kills " << kills_;
-            dbg << " | Copper " << copper_ << " | Gold " << gold_;
+            //dbg << " | Copper " << copper_ << " | Gold " << gold_;
             dbg << " | Enemies " << enemiesAlive_;
             dbg << " | WaveClear +" << waveClearBonus_;
             dbg << " | Lv " << level_ << " (" << xp_ << "/" << xpToNext_ << ")";
-            dbg << " | Dash cd " << std::fixed << std::setprecision(1) << dashCooldownTimer_;
+            //dbg << " | Dash cd " << std::fixed << std::setprecision(1) << dashCooldownTimer_;
             drawTextTTF(dbg.str(), Engine::Vec2{10.0f, 10.0f}, 1.0f, Engine::Color{255, 255, 255, 200});
             if (!inCombat_ && waveWarmup_ > 0.0) {
                 std::ostringstream warm;
@@ -2981,11 +3132,13 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                                         Engine::Color{18, 24, 34, 215});
                 auto rarityCol = [](ItemRarity r) {
                     switch (r) {
-                        case ItemRarity::Common: return Engine::Color{200, 220, 240, 240};
-                        case ItemRarity::Rare: return Engine::Color{140, 210, 255, 240};
-                        case ItemRarity::Legendary: return Engine::Color{255, 215, 140, 240};
+                        case ItemRarity::Common: return Engine::Color{235, 240, 245, 235};
+                        case ItemRarity::Uncommon: return Engine::Color{135, 235, 155, 235};
+                        case ItemRarity::Rare: return Engine::Color{135, 190, 255, 235};
+                        case ItemRarity::Epic: return Engine::Color{185, 135, 255, 235};
+                        case ItemRarity::Legendary: return Engine::Color{255, 210, 120, 240};
                     }
-                    return Engine::Color{200, 220, 240, 240};
+                    return Engine::Color{235, 240, 245, 235};
                 };
                 if (inventory_.empty()) {
                     inventorySelected_ = -1;
@@ -3152,6 +3305,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 render_->drawFilledRect(Engine::Vec2{10.0f, 82.0f}, Engine::Vec2{140.0f * tRatio, 8.0f},
                                         Engine::Color{120, 200, 255, 200});
             });
+            drawCombatDebugOverlay();
         }
     // Shop overlays (TTF path)
     if (itemShopOpen_) {
@@ -3377,7 +3531,7 @@ bool GameRoot::performRangedAutoFire(const Engine::TimeStep& step, const Engine:
                                                Engine::ECS::Projectile{Engine::Vec2{dir.x * speedLocal,
                                                                                      dir.y * speedLocal},
                                                                        dmgEvent, projectileLifetime_, lifestealPercent_,
-                                                                       chainBounces_});
+                                                                       chainBounces_, hero_});
     registry_.emplace<Engine::ECS::ProjectileTag>(proj, Engine::ECS::ProjectileTag{});
     if (activeArchetype_.id == "wizard") {
         int stage = 1;
@@ -3473,7 +3627,7 @@ bool GameRoot::performMeleeAttack(const Engine::TimeStep& step, const Engine::Ac
     float meleeRange = std::min(visionRange, meleeConfig_.range);
     auto addReach = [&](float extra) { meleeRange += extra; };
     // Dragoon spear: extend melee reach by ~1.5 tiles (48 units).
-    if (activeArchetype_.id == "support" || activeArchetype_.name == "Dragoon") {
+    if (activeArchetype_.id == "support") {
         addReach(48.0f);
     }
     // Core melee roster extra reach (+12 units): Knight, Militia (when in melee), Assassin, Crusader, Druid beast forms.
@@ -3564,8 +3718,6 @@ bool GameRoot::performMeleeAttack(const Engine::TimeStep& step, const Engine::Ac
             float dot = dir.x * toEnemy.x + dir.y * toEnemy.y;
             if (dot < cosHalfArc) return;
 
-            const float preHealth = health.currentHealth;
-            const float preShields = health.currentShields;
             Engine::Gameplay::BuffState buff{};
             if (auto* armorBuff = registry_.get<Game::ArmorBuff>(e)) {
                 buff = armorBuff->state;
@@ -3577,9 +3729,8 @@ bool GameRoot::performMeleeAttack(const Engine::TimeStep& step, const Engine::Ac
                 buff.shieldArmorBonus += armorDelta;
                 buff.damageTakenMultiplier *= st->container.damageTakenMultiplier();
             }
-            Engine::Gameplay::applyDamage(health, dmgEvent, buff);
-
-            float dealt = (preHealth + preShields) - (health.currentHealth + health.currentShields);
+            float dealt = Game::RpgDamage::apply(registry_, hero_, e, health, dmgEvent, buff, useRpgCombat_, rpgResolverConfig_, rng_,
+                                                 "melee", [this](const std::string& line) { pushCombatDebugLine(line); });
             if (dealt > 0.0f && dealt < Engine::Gameplay::MIN_DAMAGE_PER_HIT) {
                 dealt = Engine::Gameplay::MIN_DAMAGE_PER_HIT;
             }
@@ -4474,6 +4625,709 @@ void GameRoot::loadProjectileTextures() {
     }
 }
 
+void GameRoot::loadRpgData() {
+    rpgLootTable_ = Game::RPG::loadLootTable("data/rpg/loot.json");
+    if (rpgLootTable_.items.empty()) {
+        rpgLootTable_ = Game::RPG::defaultLootTable();
+        Engine::logWarn("data/rpg/loot.json missing or empty; using default RPG loot table.");
+    } else {
+        Engine::logInfo("Loaded RPG loot table from data/rpg/loot.json");
+    }
+    rpgConsumables_ = Game::RPG::loadConsumables("data/rpg/consumables.json");
+    if (rpgConsumables_.empty()) {
+        rpgConsumables_ = Game::RPG::defaultConsumables();
+        Engine::logWarn("data/rpg/consumables.json missing; using defaults.");
+    }
+    rpgTalents_ = Game::RPG::loadTalentTrees("data/rpg/talents.json");
+}
+
+Game::RPG::LootTable GameRoot::filteredRpgLootTable(RpgLootSource src) const {
+    Game::RPG::LootTable out{};
+    out.affixes = rpgLootTable_.affixes;
+    auto hasAny = [&](const std::initializer_list<const char*>& needles, const std::string& s) {
+        for (const char* n : needles) {
+            if (s.find(n) != std::string::npos) return true;
+        }
+        return false;
+    };
+    auto allow = [&](const Game::RPG::ItemTemplate& t) -> bool {
+        using Game::RPG::Rarity;
+        if (t.slot == Game::RPG::EquipmentSlot::Bag) return false;
+        if (t.slot == Game::RPG::EquipmentSlot::Consumable || !t.consumableId.empty()) return false;
+        const std::string& nm = t.name;
+        switch (src) {
+            case RpgLootSource::Normal:
+                // Regular enemies: mostly low-grade wooden/copper/basic/iron gear.
+                if (t.iconSheet == "Gems.png" || t.iconSheet == "Runes.png") return false;
+                if (static_cast<int>(t.rarity) > static_cast<int>(Rarity::Uncommon)) return false;
+                return hasAny({"Wooden", "Copper", "Basic", "Iron", "Green"}, nm);
+            case RpgLootSource::MiniBoss:
+                // Mini bosses: gems are common, plus mid/high-grade equipment.
+                if (t.iconSheet == "Gems.png") return true;
+                return static_cast<int>(t.rarity) >= static_cast<int>(Rarity::Rare);
+            case RpgLootSource::Boss:
+                // Bosses: higher-grade equipment + gems/runes.
+                if (t.iconSheet == "Gems.png" || t.iconSheet == "Runes.png") return true;
+                return static_cast<int>(t.rarity) >= static_cast<int>(Rarity::Epic);
+            case RpgLootSource::Shop:
+                // Traveling shop: higher-grade variety.
+                if (t.iconSheet == "Gems.png") return true;
+                return static_cast<int>(t.rarity) >= static_cast<int>(Rarity::Uncommon);
+        }
+        return true;
+    };
+    for (const auto& t : rpgLootTable_.items) {
+        if (allow(t)) out.items.push_back(t);
+    }
+    // Fallback safety.
+    if (out.items.empty()) out.items = rpgLootTable_.items;
+    return out;
+}
+
+Game::RPG::LootTable GameRoot::filteredRpgConsumableTable(RpgLootSource src) const {
+    Game::RPG::LootTable out{};
+    out.affixes = rpgLootTable_.affixes;
+    auto allow = [&](const Game::RPG::ItemTemplate& t) -> bool {
+        if (!(t.slot == Game::RPG::EquipmentSlot::Consumable || !t.consumableId.empty())) return false;
+        using Game::RPG::Rarity;
+        switch (src) {
+            case RpgLootSource::Normal:
+                return static_cast<int>(t.rarity) <= static_cast<int>(Rarity::Uncommon);
+            case RpgLootSource::MiniBoss:
+                return static_cast<int>(t.rarity) <= static_cast<int>(Rarity::Rare);
+            case RpgLootSource::Boss:
+            case RpgLootSource::Shop:
+                return true;
+        }
+        return true;
+    };
+    for (const auto& t : rpgLootTable_.items) {
+        if (allow(t)) out.items.push_back(t);
+    }
+    return out;
+}
+
+Game::RPG::LootTable GameRoot::filteredRpgBagTable(RpgLootSource src) const {
+    Game::RPG::LootTable out{};
+    out.affixes = rpgLootTable_.affixes;
+    auto allow = [&](const Game::RPG::ItemTemplate& t) -> bool {
+        if (t.slot != Game::RPG::EquipmentSlot::Bag) return false;
+        using Game::RPG::Rarity;
+        switch (src) {
+            case RpgLootSource::Normal:
+                return false;
+            case RpgLootSource::MiniBoss:
+                return static_cast<int>(t.rarity) <= static_cast<int>(Rarity::Epic);
+            case RpgLootSource::Boss:
+            case RpgLootSource::Shop:
+                return true;
+        }
+        return true;
+    };
+    for (const auto& t : rpgLootTable_.items) {
+        if (allow(t)) out.items.push_back(t);
+    }
+    return out;
+}
+
+ItemDefinition GameRoot::buildRpgItemDef(const Game::RPG::GeneratedItem& rolled, bool priceInGold) const {
+    Game::RPG::LootContext ctx{};
+    ctx.level = std::max(1, level_);
+    ctx.luck = static_cast<float>(activeArchetype_.rpgAttributes.LCK) * 0.05f;
+
+    ItemDefinition def{};
+    static int rpgId = 7000;
+    def.id = rpgId++;
+    def.name = rolled.def.name;
+    def.desc = "Equipment";
+    def.kind = ItemKind::Combat;
+    def.effect = ItemEffect::Damage;  // unused by RPG items, but keeps legacy defaults safe
+
+    if (priceInGold) {
+        int base = 2;
+        switch (rolled.def.rarity) {
+            case Game::RPG::Rarity::Common: base = 1; break;
+            case Game::RPG::Rarity::Uncommon: base = 2; break;
+            case Game::RPG::Rarity::Rare: base = 3; break;
+            case Game::RPG::Rarity::Epic: base = 4; break;
+            case Game::RPG::Rarity::Legendary: base = 6; break;
+        }
+        def.cost = base + std::max(0, (ctx.level - 1) / 12);
+    } else {
+        def.cost = (10 + static_cast<int>(rolled.def.rarity) * 10) + std::max(0, ctx.level - 1) * 2;
+    }
+
+    def.affixes.reserve(rolled.affixes.size());
+    def.rpgTemplateId = rolled.def.id;
+    def.rpgAffixIds.reserve(rolled.affixes.size());
+    for (const auto& af : rolled.affixes) {
+        def.affixes.push_back(af.name);
+        def.rpgAffixIds.push_back(af.id);
+    }
+    def.rpgSocketsMax = std::max(0, rolled.def.socketsMax);
+    def.rpgSocketed.clear();
+    switch (rolled.def.rarity) {
+        case Game::RPG::Rarity::Common: def.rarity = ItemRarity::Common; break;
+        case Game::RPG::Rarity::Uncommon: def.rarity = ItemRarity::Uncommon; break;
+        case Game::RPG::Rarity::Rare: def.rarity = ItemRarity::Rare; break;
+        case Game::RPG::Rarity::Epic: def.rarity = ItemRarity::Epic; break;
+        case Game::RPG::Rarity::Legendary: def.rarity = ItemRarity::Legendary; break;
+    }
+
+    auto slotLabel = [&](Game::RPG::EquipmentSlot s) -> const char* {
+        switch (s) {
+            case Game::RPG::EquipmentSlot::Head: return "Head";
+            case Game::RPG::EquipmentSlot::Chest: return "Chest";
+            case Game::RPG::EquipmentSlot::Legs: return "Legs";
+            case Game::RPG::EquipmentSlot::Boots: return "Boots";
+            case Game::RPG::EquipmentSlot::MainHand: return "Main Hand";
+            case Game::RPG::EquipmentSlot::OffHand: return "Off Hand";
+            case Game::RPG::EquipmentSlot::Ring1: return "Ring";
+            case Game::RPG::EquipmentSlot::Ring2: return "Ring";
+            case Game::RPG::EquipmentSlot::Amulet: return "Amulet";
+            case Game::RPG::EquipmentSlot::Trinket: return "Trinket";
+            case Game::RPG::EquipmentSlot::Cloak: return "Cloak";
+            case Game::RPG::EquipmentSlot::Gloves: return "Gloves";
+            case Game::RPG::EquipmentSlot::Belt: return "Belt";
+            case Game::RPG::EquipmentSlot::Ammo: return "Ammo";
+            case Game::RPG::EquipmentSlot::Bag: return "Bag";
+            case Game::RPG::EquipmentSlot::Consumable: return "Consumable";
+            case Game::RPG::EquipmentSlot::Count: break;
+        }
+        return "Equipment";
+    };
+
+    if (rolled.def.socketable) {
+        def.desc = "Socketable Gem";
+    } else if (!rolled.def.consumableId.empty() || rolled.def.slot == Game::RPG::EquipmentSlot::Consumable) {
+        def.kind = ItemKind::Support;
+        def.rpgConsumableId = rolled.def.consumableId;
+        def.desc = "Consumable";
+    } else if (rolled.def.slot == Game::RPG::EquipmentSlot::Bag) {
+        def.desc = std::string("Equipment: Bag (+") + std::to_string(std::max(0, rolled.def.bagSlots)) + " slots)";
+    } else {
+        def.desc = std::string("Equipment: ") + slotLabel(rolled.def.slot);
+    }
+
+    return def;
+}
+
+std::optional<ItemDefinition> GameRoot::rollRpgEquipment(RpgLootSource src, bool priceInGold) {
+    if (rpgLootTable_.items.empty()) return std::nullopt;
+    Game::RPG::LootContext ctx{};
+    ctx.level = std::max(1, level_);
+    ctx.luck = static_cast<float>(activeArchetype_.rpgAttributes.LCK) * 0.05f;
+    Game::RPG::LootTable table = filteredRpgLootTable(src);
+    auto rolled = Game::RPG::generateLoot(table, ctx, rpgRng_);
+    if (rolled.def.id.empty()) return std::nullopt;
+    return buildRpgItemDef(rolled, priceInGold);
+}
+
+std::optional<ItemDefinition> GameRoot::rollRpgConsumable(RpgLootSource src, bool priceInGold) {
+    Game::RPG::LootContext ctx{};
+    ctx.level = std::max(1, level_);
+    ctx.luck = static_cast<float>(activeArchetype_.rpgAttributes.LCK) * 0.05f;
+    Game::RPG::LootTable table = filteredRpgConsumableTable(src);
+    if (table.items.empty()) return std::nullopt;
+    auto rolled = Game::RPG::generateLoot(table, ctx, rpgRng_);
+    if (rolled.def.id.empty()) return std::nullopt;
+    return buildRpgItemDef(rolled, priceInGold);
+}
+
+std::optional<ItemDefinition> GameRoot::rollRpgBag(RpgLootSource src, bool priceInGold) {
+    Game::RPG::LootContext ctx{};
+    ctx.level = std::max(1, level_);
+    ctx.luck = static_cast<float>(activeArchetype_.rpgAttributes.LCK) * 0.05f;
+    Game::RPG::LootTable table = filteredRpgBagTable(src);
+    if (table.items.empty()) return std::nullopt;
+    auto rolled = Game::RPG::generateLoot(table, ctx, rpgRng_);
+    if (rolled.def.id.empty()) return std::nullopt;
+    return buildRpgItemDef(rolled, priceInGold);
+}
+
+namespace {
+void addContribution(Engine::Gameplay::RPG::StatContribution& dst, const Engine::Gameplay::RPG::StatContribution& src, float scalar = 1.0f) {
+    auto addFlat = [&](float& a, float b) { a += b * scalar; };
+    auto addMult = [&](float& a, float b) { a += b * scalar; };
+
+    addFlat(dst.flat.attackPower, src.flat.attackPower);
+    addFlat(dst.flat.spellPower, src.flat.spellPower);
+    addFlat(dst.flat.attackSpeed, src.flat.attackSpeed);
+    addFlat(dst.flat.moveSpeed, src.flat.moveSpeed);
+    addFlat(dst.flat.accuracy, src.flat.accuracy);
+    addFlat(dst.flat.critChance, src.flat.critChance);
+    addFlat(dst.flat.critMult, src.flat.critMult);
+    addFlat(dst.flat.armorPen, src.flat.armorPen);
+    addFlat(dst.flat.evasion, src.flat.evasion);
+    addFlat(dst.flat.armor, src.flat.armor);
+    addFlat(dst.flat.tenacity, src.flat.tenacity);
+    addFlat(dst.flat.shieldMax, src.flat.shieldMax);
+    addFlat(dst.flat.shieldRegen, src.flat.shieldRegen);
+    addFlat(dst.flat.healthMax, src.flat.healthMax);
+    addFlat(dst.flat.healthRegen, src.flat.healthRegen);
+    addFlat(dst.flat.cooldownReduction, src.flat.cooldownReduction);
+    addFlat(dst.flat.resourceRegen, src.flat.resourceRegen);
+    addFlat(dst.flat.goldGainMult, src.flat.goldGainMult);
+    addFlat(dst.flat.rarityScore, src.flat.rarityScore);
+    for (std::size_t i = 0; i < dst.flat.resists.values.size(); ++i) {
+        dst.flat.resists.values[i] += src.flat.resists.values[i] * scalar;
+    }
+
+    addMult(dst.mult.attackPower, src.mult.attackPower);
+    addMult(dst.mult.spellPower, src.mult.spellPower);
+    addMult(dst.mult.attackSpeed, src.mult.attackSpeed);
+    addMult(dst.mult.moveSpeed, src.mult.moveSpeed);
+    addMult(dst.mult.accuracy, src.mult.accuracy);
+    addMult(dst.mult.critChance, src.mult.critChance);
+    addMult(dst.mult.critMult, src.mult.critMult);
+    addMult(dst.mult.armorPen, src.mult.armorPen);
+    addMult(dst.mult.evasion, src.mult.evasion);
+    addMult(dst.mult.armor, src.mult.armor);
+    addMult(dst.mult.tenacity, src.mult.tenacity);
+    addMult(dst.mult.shieldMax, src.mult.shieldMax);
+    addMult(dst.mult.shieldRegen, src.mult.shieldRegen);
+    addMult(dst.mult.healthMax, src.mult.healthMax);
+    addMult(dst.mult.healthRegen, src.mult.healthRegen);
+    addMult(dst.mult.cooldownReduction, src.mult.cooldownReduction);
+    addMult(dst.mult.resourceRegen, src.mult.resourceRegen);
+    addMult(dst.mult.goldGainMult, src.mult.goldGainMult);
+    addMult(dst.mult.rarityScore, src.mult.rarityScore);
+    for (std::size_t i = 0; i < dst.mult.resists.values.size(); ++i) {
+        dst.mult.resists.values[i] += src.mult.resists.values[i] * scalar;
+    }
+}
+}  // namespace
+
+void GameRoot::updateRpgTalentAllocation() {
+    if (rpgTalentArchetypeCached_ != activeArchetype_.id) {
+        rpgTalentRanks_.clear();
+        rpgTalentPointsSpent_ = 0;
+        rpgTalentLevelCached_ = 0;
+        rpgTalentArchetypeCached_ = activeArchetype_.id;
+    }
+    if (level_ == rpgTalentLevelCached_) return;
+    rpgTalentLevelCached_ = level_;
+
+    const int points = std::max(0, level_ / 10);
+    if (points <= rpgTalentPointsSpent_) return;
+
+    auto treeIt = rpgTalents_.find(activeArchetype_.id);
+    if (treeIt == rpgTalents_.end()) return;
+    const auto& nodes = treeIt->second;
+    int available = points - rpgTalentPointsSpent_;
+    for (int i = 0; i < available; ++i) {
+        bool spent = false;
+        for (const auto& node : nodes) {
+            int& rank = rpgTalentRanks_[node.id];
+            if (rank < node.maxRank) {
+                rank += 1;
+                rpgTalentPointsSpent_ += 1;
+                spent = true;
+                break;
+            }
+        }
+        if (!spent) break;
+    }
+}
+
+void GameRoot::updateRpgConsumables(double dt) {
+    if (dt <= 0.0) return;
+    if (hero_ == Engine::ECS::kInvalidEntity) return;
+    if (paused_ || defeated_) return;
+
+    // Cooldowns tick down by group.
+    for (auto it = rpgConsumableCooldowns_.begin(); it != rpgConsumableCooldowns_.end(); ) {
+        it->second = std::max(0.0, it->second - dt);
+        if (it->second <= 0.0001) it = rpgConsumableCooldowns_.erase(it);
+        else ++it;
+    }
+
+    // Over-time effects apply to the Health pools.
+    if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
+        for (auto it = rpgConsumableOverTime_.begin(); it != rpgConsumableOverTime_.end(); ) {
+            it->ttl -= dt;
+            const float maxPool = (it->resource == Game::RPG::ConsumableResource::Shields) ? hp->maxShields : hp->maxHealth;
+            if (maxPool > 0.0f && it->fractionPerSecond > 0.0f) {
+                const float delta = std::max(0.0f, it->fractionPerSecond) * maxPool * static_cast<float>(dt);
+                if (it->resource == Game::RPG::ConsumableResource::Shields) {
+                    hp->currentShields = std::min(hp->maxShields, hp->currentShields + delta);
+                } else {
+                    hp->currentHealth = std::min(hp->maxHealth, hp->currentHealth + delta);
+                }
+            }
+            if (it->ttl <= 0.0) it = rpgConsumableOverTime_.erase(it);
+            else ++it;
+        }
+    }
+
+    // Timed stat buffs fold into a single RPG contribution so aggregation stays fast.
+    rpgActiveBuffContribution_ = {};
+    for (auto it = rpgActiveBuffs_.begin(); it != rpgActiveBuffs_.end(); ) {
+        it->ttl -= dt;
+        if (it->ttl <= 0.0) {
+            it = rpgActiveBuffs_.erase(it);
+            continue;
+        }
+        addContribution(rpgActiveBuffContribution_, it->contribution, 1.0f);
+        ++it;
+    }
+}
+
+const Game::RPG::ItemTemplate* GameRoot::findRpgTemplateById(const std::string& id) const {
+    if (id.empty()) return nullptr;
+    for (const auto& t : rpgLootTable_.items) {
+        if (t.id == id) return &t;
+    }
+    return nullptr;
+}
+
+const Game::RPG::ItemTemplate* GameRoot::findRpgTemplateFor(const ItemDefinition& def) const {
+    return findRpgTemplateById(def.rpgTemplateId);
+}
+
+Engine::TexturePtr GameRoot::getEquipmentIconSheet(const std::string& sheetName) {
+    if (sheetName.empty() || !textureManager_) return {};
+    auto it = equipmentIconSheets_.find(sheetName);
+    if (it != equipmentIconSheets_.end()) return it->second;
+
+    std::filesystem::path rel = std::filesystem::path("assets") / "Sprites" / "Equipment" / sheetName;
+    std::filesystem::path path = rel;
+    if (const char* home = std::getenv("HOME")) {
+        std::filesystem::path hp = std::filesystem::path(home) / rel;
+        if (std::filesystem::exists(hp)) path = hp;
+    }
+    Engine::TexturePtr tex = loadTextureOptional(path.string());
+    equipmentIconSheets_[sheetName] = tex;
+    return tex;
+}
+
+void GameRoot::drawItemIcon(const ItemDefinition& def, const Engine::Vec2& pos, float size) {
+    if (!render_) return;
+    const auto* t = findRpgTemplateFor(def);
+    if (!t || t->iconSheet.empty()) return;
+    Engine::TexturePtr sheet = getEquipmentIconSheet(t->iconSheet);
+    if (!sheet) return;
+    constexpr int kCell = 16;
+    Engine::IntRect src{t->iconCol * kCell, t->iconRow * kCell, kCell, kCell};
+    render_->drawTextureRegion(*sheet, pos, Engine::Vec2{size, size}, src);
+}
+
+Engine::Gameplay::RPG::StatContribution GameRoot::collectRpgEquippedContribution() const {
+    Engine::Gameplay::RPG::StatContribution total{};
+    auto findAffix = [&](const std::string& id) -> const Game::RPG::Affix* {
+        for (const auto& a : rpgLootTable_.affixes) {
+            if (a.id == id) return &a;
+        }
+        return nullptr;
+    };
+    for (const auto& opt : equipped_) {
+        if (!opt.has_value()) continue;
+        const auto& inst = *opt;
+        const auto& def = inst.def;
+        const auto* t = findRpgTemplateById(def.rpgTemplateId);
+        if (t) addContribution(total, t->baseStats, static_cast<float>(std::max(1, inst.quantity)));
+        for (const auto& affId : def.rpgAffixIds) {
+            if (const auto* a = findAffix(affId)) {
+                addContribution(total, a->stats, static_cast<float>(std::max(1, inst.quantity)));
+            }
+        }
+        // Socketed gems (their base stats + rolled affixes).
+        for (const auto& g : def.rpgSocketed) {
+            const auto* gt = findRpgTemplateById(g.templateId);
+            if (gt) addContribution(total, gt->baseStats, static_cast<float>(std::max(1, inst.quantity)));
+            for (const auto& ga : g.affixIds) {
+                if (const auto* a = findAffix(ga)) {
+                    addContribution(total, a->stats, static_cast<float>(std::max(1, inst.quantity)));
+                }
+            }
+        }
+    }
+    return total;
+}
+
+Engine::Gameplay::RPG::StatContribution GameRoot::collectRpgTalentContribution() const {
+    Engine::Gameplay::RPG::StatContribution total{};
+    auto treeIt = rpgTalents_.find(activeArchetype_.id);
+    if (treeIt == rpgTalents_.end()) return total;
+    const auto& nodes = treeIt->second;
+    for (const auto& node : nodes) {
+        auto it = rpgTalentRanks_.find(node.id);
+        if (it == rpgTalentRanks_.end()) continue;
+        int rank = std::max(0, it->second);
+        if (rank <= 0) continue;
+        addContribution(total, node.bonus, static_cast<float>(rank));
+    }
+    return total;
+}
+
+void GameRoot::updateHeroRpgStats() {
+    if (hero_ == Engine::ECS::kInvalidEntity) return;
+
+    updateRpgTalentAllocation();
+    Engine::Gameplay::RPG::StatContribution mods = collectRpgEquippedContribution();
+    addContribution(mods, collectRpgTalentContribution(), 1.0f);
+    addContribution(mods, rpgActiveBuffContribution_, 1.0f);
+
+    if (!registry_.has<Engine::ECS::RPGStats>(hero_)) {
+        registry_.emplace<Engine::ECS::RPGStats>(hero_, Engine::ECS::RPGStats{});
+    }
+    auto* rpg = registry_.get<Engine::ECS::RPGStats>(hero_);
+    if (!rpg) return;
+    rpg->baseFromHealth = false;
+    rpg->attributes = activeArchetype_.rpgAttributes;
+    rpg->modifiers = mods;
+
+    // Use the legacy run-tuned values as the RPG "base template" so RPG scaling stays comparable.
+    rpg->base.baseHealth = heroMaxHp_;
+    rpg->base.baseShields = heroShield_;
+    rpg->base.baseArmor = heroHealthArmor_;
+    rpg->base.baseMoveSpeed = heroMoveSpeed_;
+    rpg->base.baseAttackPower = projectileDamage_;
+    rpg->base.baseSpellPower = projectileDamage_;
+    rpg->base.baseAttackSpeed = std::max(0.1f, attackSpeedMul_ * attackSpeedBuffMul_);
+
+    Engine::Gameplay::RPG::AggregationInput input{};
+    input.attributes = rpg->attributes;
+    input.base = rpg->base;
+    input.contributions = {rpg->modifiers};
+    rpg->derived = Engine::Gameplay::RPG::aggregateDerivedStats(input);
+    rpg->dirty = false;
+
+    // Mirror key derived stats back into the Health component so mitigation/UI match the resolver.
+    if (useRpgCombat_) {
+        if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
+        const float oldMaxHp = std::max(1.0f, hp->maxHealth);
+        const float oldMaxSh = std::max(0.0f, hp->maxShields);
+        const float hpFrac = std::clamp(hp->currentHealth / oldMaxHp, 0.0f, 1.0f);
+        const float shFrac = oldMaxSh > 0.0f ? std::clamp(hp->currentShields / oldMaxSh, 0.0f, 1.0f) : 0.0f;
+
+        hp->maxHealth = std::max(1.0f, rpg->derived.healthMax);
+        hp->maxShields = std::max(0.0f, rpg->derived.shieldMax);
+        hp->healthArmor = rpg->derived.armor;
+        hp->currentHealth = std::min(hp->maxHealth, hpFrac * hp->maxHealth);
+        hp->currentShields = std::min(hp->maxShields, shFrac * hp->maxShields);
+        }
+    }
+}
+
+void GameRoot::spawnPickupEntity(const Pickup& payload, const Engine::Vec2& pos, Engine::Color color,
+                                 float size, float amp, float speed) {
+    auto drop = registry_.create();
+    registry_.emplace<Engine::ECS::Transform>(drop, pos);
+    Engine::TexturePtr tex{};
+    std::optional<Engine::ECS::SpriteAnimation> anim{};
+    float scale = 1.0f;
+    Engine::Color finalColor = color;
+
+    auto setSheetIcon = [&](const std::string& sheet, int row, int col, float iconScale) {
+        Engine::TexturePtr sheetTex = getEquipmentIconSheet(sheet);
+        if (!sheetTex) return false;
+        tex = sheetTex;
+        scale = iconScale;
+        finalColor = Engine::Color{255, 255, 255, 255};
+        const int frameCount = std::max(1, sheetTex->width() / 16);
+        Engine::ECS::SpriteAnimation sa{};
+        sa.frameWidth = 16;
+        sa.frameHeight = 16;
+        sa.frameCount = frameCount;
+        sa.frameDuration = 99999.0f;
+        sa.currentFrame = std::clamp(col, 0, frameCount - 1);
+        sa.row = std::max(0, row);
+        sa.loop = false;
+        sa.holdOnLastFrame = true;
+        anim = sa;
+        return true;
+    };
+
+    if (payload.kind == Pickup::Kind::Copper) { tex = pickupCopperTex_; scale = 1.75f; anim = Engine::ECS::SpriteAnimation{16, 16, 6, 0.08f}; }
+    if (payload.kind == Pickup::Kind::Gold)   { tex = pickupGoldTex_;   scale = 1.3f; }
+    if (payload.kind == Pickup::Kind::Powerup) {
+        switch (payload.powerup) {
+            case Pickup::Powerup::Heal: tex = pickupHealPowerupTex_; break;
+            case Pickup::Powerup::Kaboom: tex = pickupKaboomTex_; break;
+            case Pickup::Powerup::Recharge: tex = pickupRechargeTex_; scale *= 1.8f; break;
+            case Pickup::Powerup::Frenzy: tex = pickupFrenzyTex_; break;
+            case Pickup::Powerup::Immortal: tex = pickupImmortalTex_; anim = Engine::ECS::SpriteAnimation{16, 16, 6, 0.08f}; break;
+            case Pickup::Powerup::Freeze: tex = pickupFreezeTex_; break;
+            default: break;
+        }
+    }
+    if (payload.kind == Pickup::Kind::Item) {
+        if (!payload.item.rpgTemplateId.empty()) {
+            // RPG items: show a rarity container, except for gems/consumables/bags which show their own icon.
+            const auto* t = findRpgTemplateFor(payload.item);
+            bool showSelf = false;
+            if (t) {
+                showSelf = t->socketable ||
+                           t->slot == Game::RPG::EquipmentSlot::Bag ||
+                           t->slot == Game::RPG::EquipmentSlot::Consumable ||
+                           t->iconSheet == "Gems.png" || t->iconSheet == "Runes.png" ||
+                           t->iconSheet == "Foods.png" || t->iconSheet == "Potions.png" || t->iconSheet == "Bags.png";
+            }
+            if (t && showSelf && !t->iconSheet.empty()) {
+                (void)setSheetIcon(t->iconSheet, t->iconRow, t->iconCol, 2.1f);
+            } else {
+                int containerCol = 0;  // Small Bag
+                if (payload.item.rarity == ItemRarity::Rare || payload.item.rarity == ItemRarity::Epic) containerCol = 2;  // Small Chest
+                if (payload.item.rarity == ItemRarity::Legendary) containerCol = 3;  // Chest
+                (void)setSheetIcon("Containers.png", 0, containerCol, 2.2f);
+            }
+        } else {
+            switch (payload.item.effect) {
+                case ItemEffect::Turret: tex = pickupTurretTex_; break;
+                case ItemEffect::Heal: tex = pickupHealTex_; break;
+                case ItemEffect::FreezeTime: tex = pickupFreezeTex_; scale *= 1.8f; break;
+                case ItemEffect::AttackSpeed: tex = pickupChronoTex_; anim = Engine::ECS::SpriteAnimation{16, 16, 6, 0.08f}; break;
+                case ItemEffect::Lifesteal: tex = pickupPhaseLeechTex_; anim = Engine::ECS::SpriteAnimation{16, 16, 6, 0.08f}; break;
+                case ItemEffect::Chain: tex = pickupStormCoreTex_; anim = Engine::ECS::SpriteAnimation{16, 16, 6, 0.08f}; break;
+                default: break;
+            }
+        }
+    }
+
+    Engine::Vec2 rendSize{size, size};
+    float aabbHalf = size * 0.5f;
+    if (tex) {
+        if (anim.has_value()) {
+            rendSize = Engine::Vec2{16.0f * scale, 16.0f * scale};
+        } else {
+            rendSize = Engine::Vec2{static_cast<float>(tex->width()) * scale,
+                                    static_cast<float>(tex->height()) * scale};
+        }
+        aabbHalf = std::max(rendSize.x, rendSize.y) * 0.5f;
+    }
+    registry_.emplace<Engine::ECS::Renderable>(drop, Engine::ECS::Renderable{rendSize, finalColor, tex});
+    registry_.emplace<Engine::ECS::AABB>(drop, Engine::ECS::AABB{Engine::Vec2{aabbHalf, aabbHalf}});
+    registry_.emplace<Game::Pickup>(drop, payload);
+    registry_.emplace<Game::PickupBob>(drop, Game::PickupBob{pos, 0.0f, amp, speed});
+    registry_.emplace<Engine::ECS::PickupTag>(drop, Engine::ECS::PickupTag{});
+    if (anim.has_value() && tex) {
+        registry_.emplace<Engine::ECS::SpriteAnimation>(drop, *anim);
+    }
+}
+
+void GameRoot::dropInventoryOverflow(const Engine::Vec2& dropBase) {
+    if (inventory_.size() <= static_cast<std::size_t>(inventoryCapacity_)) return;
+    std::uniform_real_distribution<float> ang(0.0f, 6.28318f);
+    std::uniform_real_distribution<float> rad(10.0f, 30.0f);
+    auto scatterPos = [&]() {
+        float a = ang(rng_);
+        float r = rad(rng_);
+        return Engine::Vec2{dropBase.x + std::cos(a) * r, dropBase.y + std::sin(a) * r};
+    };
+    while (inventory_.size() > static_cast<std::size_t>(inventoryCapacity_)) {
+        const auto instDrop = inventory_.back();
+        inventory_.pop_back();
+        Pickup p{};
+        p.kind = Pickup::Kind::Item;
+        p.item = instDrop.def;
+        spawnPickupEntity(p, scatterPos(), Engine::Color{235, 240, 245, 235}, 11.0f, 3.8f, 3.0f);
+    }
+    clampInventorySelection();
+}
+
+void GameRoot::refreshInventoryCapacityFromBag(bool dropOverflow) {
+    int extra = 0;
+    const std::size_t bagIdx = static_cast<std::size_t>(Game::RPG::EquipmentSlot::Bag);
+    if (bagIdx < equipped_.size() && equipped_[bagIdx].has_value()) {
+        if (const auto* bt = findRpgTemplateFor(equipped_[bagIdx]->def)) {
+            extra = std::max(0, bt->bagSlots);
+        }
+    }
+    inventoryCapacity_ = std::max(1, baseInventoryCapacity_ + extra);
+    inventoryGridScroll_ = std::max(0.0f, inventoryGridScroll_);
+    if (dropOverflow && inventory_.size() > static_cast<std::size_t>(inventoryCapacity_)) {
+        Engine::Vec2 dropPos{};
+        if (const auto* tf = registry_.get<Engine::ECS::Transform>(hero_)) dropPos = tf->position;
+        dropInventoryOverflow(dropPos);
+    }
+}
+
+bool GameRoot::equipInventoryItem(std::size_t idx) {
+    if (idx >= inventory_.size()) return false;
+    auto& inst = inventory_[idx];
+    const auto* t = findRpgTemplateFor(inst.def);
+    if (!t) return false;
+    if (t->socketable) return false;
+    if (t->slot == Game::RPG::EquipmentSlot::Consumable) return false;
+
+    auto slotIndex = [&](Game::RPG::EquipmentSlot slot) -> std::size_t {
+        return static_cast<std::size_t>(slot);
+    };
+
+    Game::RPG::EquipmentSlot desired = t->slot;
+    std::size_t target = slotIndex(desired);
+    if (desired == Game::RPG::EquipmentSlot::Ring1) {
+        std::size_t r1 = slotIndex(Game::RPG::EquipmentSlot::Ring1);
+        std::size_t r2 = slotIndex(Game::RPG::EquipmentSlot::Ring2);
+        if (!equipped_[r1].has_value()) target = r1;
+        else if (!equipped_[r2].has_value()) target = r2;
+        else target = r1;
+    }
+
+    if (target >= equipped_.size()) return false;
+    if (equipped_[target].has_value()) {
+        // Swap in-place to avoid failing when inventory is full.
+        std::swap(*equipped_[target], inst);
+    } else {
+        equipped_[target] = inst;
+        inventory_.erase(inventory_.begin() + static_cast<std::ptrdiff_t>(idx));
+    }
+    clampInventorySelection();
+    refreshInventoryCapacityFromBag(true);
+    return true;
+}
+
+bool GameRoot::unequipRpgSlot(Game::RPG::EquipmentSlot slot) {
+    const std::size_t idx = static_cast<std::size_t>(slot);
+    if (idx >= equipped_.size()) return false;
+    if (!equipped_[idx].has_value()) return false;
+    inventory_.insert(inventory_.begin(), *equipped_[idx]);
+    equipped_[idx].reset();
+    clampInventorySelection();
+    refreshInventoryCapacityFromBag(true);
+    return true;
+}
+
+void GameRoot::pushCombatDebugLine(const std::string& line) {
+    if (!combatDebugOverlay_) return;
+    combatDebugLines_.push_back(CombatDebugLine{line, 4.0});
+    const std::size_t kMax = 12;
+    if (combatDebugLines_.size() > kMax) {
+        combatDebugLines_.erase(combatDebugLines_.begin(),
+                                combatDebugLines_.begin() + static_cast<std::ptrdiff_t>(combatDebugLines_.size() - kMax));
+    }
+}
+
+void GameRoot::updateCombatDebugLines(double dt) {
+    if (!combatDebugOverlay_) {
+        combatDebugLines_.clear();
+        return;
+    }
+    for (auto& l : combatDebugLines_) l.ttl -= dt;
+    combatDebugLines_.erase(std::remove_if(combatDebugLines_.begin(), combatDebugLines_.end(),
+                                           [](const CombatDebugLine& l) { return l.ttl <= 0.0; }),
+                            combatDebugLines_.end());
+}
+
+void GameRoot::drawCombatDebugOverlay() {
+    if (!combatDebugOverlay_ || !useRpgCombat_) return;
+    if (!render_ || combatDebugLines_.empty()) return;
+
+    const float x = 12.0f;
+    float y = 110.0f;
+    const float w = 520.0f;
+    const float lineH = 18.0f;
+    const float h = 26.0f + static_cast<float>(combatDebugLines_.size()) * lineH;
+    render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{w, h}, Engine::Color{12, 16, 24, 210});
+    drawTextUnified("RPG Combat Debug", Engine::Vec2{x + 10.0f, y + 6.0f}, 0.85f, Engine::Color{200, 230, 255, 235});
+    y += 24.0f;
+    for (const auto& l : combatDebugLines_) {
+        drawTextUnified(l.text, Engine::Vec2{x + 10.0f, y}, 0.75f, Engine::Color{200, 210, 230, 225});
+        y += lineH;
+    }
+}
+
 GameRoot::HeroSpriteFiles GameRoot::heroSpriteFilesFor(const GameRoot::ArchetypeDef& def) const {
     GameRoot::HeroSpriteFiles files{};
     auto set = [&](std::string folder, std::string base) {
@@ -4483,7 +5337,7 @@ GameRoot::HeroSpriteFiles GameRoot::heroSpriteFilesFor(const GameRoot::Archetype
     };
     if (def.id == "assassin") set("Assassin", "Assassin");
     else if (def.id == "healer") set("Healer", "Healer");
-    else if (def.id == "damage" || def.name == "Damage Dealer") set("Damage Dealer", "Dps");
+    else if (def.id == "damage") set("Damage Dealer", "Dps");
     else if (def.id == "tank") set("Tank", "Tank");
     else if (def.id == "builder") set("Builder", "Builder");
     else if (def.id == "support") set("Support", "Support");
@@ -5389,7 +6243,7 @@ void GameRoot::renderMenu() {
         return mx >= x && mx <= x + w && my >= y && my <= y + h;
     };
     drawTextUnified("PROJECT AURORA ZETA", Engine::Vec2{centerX - 140.0f, topY}, 1.7f, Engine::Color{180, 230, 255, 240});
-    drawTextUnified("Pre-Alpha | Build v0.0.104",
+    drawTextUnified("Pre-Alpha | Build v0.0.127",
                     Engine::Vec2{centerX, topY + 28.0f},
                     0.85f, Engine::Color{150, 200, 230, 220});
 
@@ -5634,15 +6488,16 @@ void GameRoot::renderMenu() {
         float leftX = centerX - panelW - gap * 0.5f;
         float rightX = centerX + gap * 0.5f;
         if (!archetypes_.empty()) {
-            drawList(archetypes_, selectedArchetype_, menuSelection_ == 0, leftX, "Archetypes", archetypeScroll_);
+            drawList(archetypes_, selectedArchetype_, menuSelection_ == 0, leftX, "Champions", archetypeScroll_);
         }
         if (!difficulties_.empty()) {
-            drawList(difficulties_, selectedDifficulty_, menuSelection_ == 1, rightX, "Difficulties", difficultyScroll_);
+            drawList(difficulties_, selectedDifficulty_, menuSelection_ == 1, rightX, "Difficulty", difficultyScroll_);
         }
-        // Summary card
+        // Summary card + biography
         Engine::Color cardCol{24, 34, 48, 220};
         float summaryY = listStartY + panelH + 18.0f;
-        render_->drawFilledRect(Engine::Vec2{centerX - 260.0f, summaryY}, Engine::Vec2{520.0f, 86.0f}, cardCol);
+        float summaryH = 170.0f;
+        render_->drawFilledRect(Engine::Vec2{centerX - 260.0f, summaryY}, Engine::Vec2{520.0f, summaryH}, cardCol);
         // Render selected archetype idle preview (animated) to the right of the archetype list
         if (!archetypes_.empty() && textureManager_) {
             const auto& a = archetypes_[std::clamp(selectedArchetype_, 0, static_cast<int>(archetypes_.size() - 1))];
@@ -5663,8 +6518,12 @@ void GameRoot::renderMenu() {
                 float visW = static_cast<float>(moveFrameW) * scale;
                 float visH = static_cast<float>(moveFrameH) * scale;
                 float baselineY = listStartY + panelH - 8.0f;
-                float px = leftX + panelW + 134.0f;  // shift right by 100px
-                float py = baselineY - visH + 100.0f; // shift down by 100px
+                // Character Select live preview placement (manual tweak point):
+                // Adjust these offsets to move the animated hero preview around on the Select Character & Difficulty screen.
+                constexpr float kPreviewOffsetX = 50.0f;   // +right
+                constexpr float kPreviewOffsetY = 80.0f;  // +down
+                float px = leftX + panelW + 134.0f + kPreviewOffsetX;
+                float py = baselineY - visH + 100.0f + kPreviewOffsetY;
                 if (a.id == "tank" || a.id == "special") {
                     px -= 10.0f;
                     py += 10.0f;
@@ -5677,22 +6536,96 @@ void GameRoot::renderMenu() {
             std::ostringstream stats;
             stats << "HP x" << std::fixed << std::setprecision(2) << a.hpMul
                   << " | Speed x" << a.speedMul << " | Damage x" << a.damageMul;
-            drawTextUnified(a.name + ": " + a.description, Engine::Vec2{centerX - 248.0f, summaryY + 10.0f}, 0.95f,
-                            Engine::Color{210, 235, 255, 235});
-            drawTextUnified(stats.str(), Engine::Vec2{centerX - 248.0f, summaryY + 32.0f}, 0.9f,
-                            Engine::Color{180, 220, 240, 230});
-        }
-        if (!difficulties_.empty()) {
-            const auto& d =
-                difficulties_[std::clamp(selectedDifficulty_, 0, static_cast<int>(difficulties_.size() - 1))];
-            std::ostringstream desc;
-            desc << d.name << ": " << d.description;
-            drawTextUnified(desc.str(), Engine::Vec2{centerX - 248.0f, summaryY + 54.0f}, 0.9f,
-                            Engine::Color{200, 220, 255, 220});
+            auto wrapLines = [](const std::string& text, std::size_t maxChars) {
+                std::vector<std::string> lines;
+                std::string remaining = text;
+                while (remaining.size() > maxChars) {
+                    std::size_t cut = remaining.rfind(' ', maxChars);
+                    if (cut == std::string::npos) cut = maxChars;
+                    lines.push_back(remaining.substr(0, cut));
+                    remaining.erase(0, cut + (cut < remaining.size() ? 1 : 0));
+                }
+                if (!remaining.empty()) lines.push_back(remaining);
+                return lines;
+            };
+
+            const float leftTextX = centerX - 248.0f;
+            float leftY = summaryY + 10.0f;
+            // Keep the left column wrapped so it never collides with the attributes column.
+            const std::size_t leftColumnWrapChars = 54;
+
+            // Wrap the archetype header so it never collides with the attribute column.
+            auto headerLines = wrapLines(a.name + ": " + a.description, leftColumnWrapChars);
+            for (std::size_t i = 0; i < headerLines.size() && i < 2; ++i) {
+                drawTextUnified(headerLines[i], Engine::Vec2{leftTextX, leftY}, 0.95f,
+                                Engine::Color{210, 235, 255, 235});
+                leftY += 16.0f;
+            }
+            drawTextUnified(stats.str(), Engine::Vec2{leftTextX, leftY}, 0.9f, Engine::Color{180, 220, 240, 230});
+            leftY += 20.0f;
+
+            // Biography (cap to 2 lines to keep space for difficulty + tags).
+            auto bioLines = wrapLines(a.biography, leftColumnWrapChars);
+            for (std::size_t i = 0; i < bioLines.size() && i < 2; ++i) {
+                drawTextUnified(bioLines[i], Engine::Vec2{leftTextX, leftY}, 0.88f,
+                                Engine::Color{190, 215, 240, 225});
+                leftY += 16.0f;
+            }
+
+            // Attributes column (shifted right so left text can't intrude).
+            float attrX = centerX + 150.0f;
+            float attrY = summaryY + 12.0f;
+            auto attrLine = [&](const std::string& label, int val, float y) {
+                drawTextUnified(label, Engine::Vec2{attrX, y}, 0.9f, Engine::Color{190, 215, 235, 230});
+                drawTextUnified(std::to_string(val), Engine::Vec2{attrX + 70.0f, y}, 0.9f,
+                                Engine::Color{220, 240, 255, 240});
+            };
+            attrLine("STR", a.rpgAttributes.STR, attrY); attrY += 16.0f;
+            attrLine("DEX", a.rpgAttributes.DEX, attrY); attrY += 16.0f;
+            attrLine("INT", a.rpgAttributes.INT, attrY); attrY += 16.0f;
+            attrLine("END", a.rpgAttributes.END, attrY); attrY += 16.0f;
+            attrLine("LCK", a.rpgAttributes.LCK, attrY);
+
+            // Difficulty description within the summary card (below bio, wrapped).
+            if (!difficulties_.empty()) {
+                const auto& d =
+                    difficulties_[std::clamp(selectedDifficulty_, 0, static_cast<int>(difficulties_.size() - 1))];
+                auto diffLines = wrapLines(d.name + ": " + d.description, leftColumnWrapChars);
+                for (std::size_t i = 0; i < diffLines.size() && i < 2; ++i) {
+                    drawTextUnified(diffLines[i], Engine::Vec2{leftTextX, leftY}, 0.88f,
+                                    Engine::Color{200, 220, 255, 220});
+                    leftY += 16.0f;
+                }
+            }
+
+            // Specialties / perks
+            float tagY = std::max(summaryY + 100.0f, leftY + 6.0f);
+            if (!a.specialties.empty()) {
+                std::ostringstream spec;
+                spec << "Specialties: ";
+                for (std::size_t i = 0; i < a.specialties.size(); ++i) {
+                    spec << a.specialties[i];
+                    if (i + 1 < a.specialties.size()) spec << ", ";
+                }
+                auto specLines = wrapLines(spec.str(), leftColumnWrapChars);
+                for (std::size_t i = 0; i < specLines.size() && i < 2; ++i) {
+                    drawTextUnified(specLines[i], Engine::Vec2{leftTextX, tagY}, 0.88f,
+                                    Engine::Color{200, 230, 255, 220});
+                    tagY += 16.0f;
+                }
+            }
+            if (!a.perks.empty()) {
+                auto perkLines = wrapLines("Perks: " + a.perks.front(), leftColumnWrapChars);
+                for (std::size_t i = 0; i < perkLines.size() && i < 2; ++i) {
+                    drawTextUnified(perkLines[i], Engine::Vec2{leftTextX, tagY}, 0.86f,
+                                    Engine::Color{180, 225, 210, 220});
+                    tagY += 16.0f;
+                }
+            }
         }
         // Action buttons
         auto drawAction = [&](const std::string& label, int index, float x) {
-            Engine::Vec2 pos{x, summaryY + 98.0f};
+            Engine::Vec2 pos{x, summaryY + summaryH + 12.0f};
             Engine::Vec2 size{200.0f, 32.0f};
             bool focused = menuSelection_ == index;
             Engine::Color bg{static_cast<uint8_t>(focused ? 90 : 60), static_cast<uint8_t>(focused ? 150 : 110),
@@ -5705,7 +6638,7 @@ void GameRoot::renderMenu() {
         drawAction("Back", 3, centerX + 20.0f);
         Engine::Color hint{180, 210, 240, 220};
         drawTextUnified("Left/Right to switch panels | Up/Down to change selection | Enter/Click to confirm",
-                        Engine::Vec2{centerX - 260.0f, summaryY + 142.0f}, 0.85f, hint);
+                        Engine::Vec2{centerX - 260.0f, summaryY + summaryH + 56.0f}, 0.85f, hint);
     } else if (menuPage_ == MenuPage::HostConfig) {
         Engine::Color c{200, 230, 255, 240};
         drawTextUnified("Host Multiplayer", Engine::Vec2{centerX - 120.0f, topY + 50.0f}, 1.25f, c);
@@ -5880,9 +6813,46 @@ void GameRoot::drawTextUnified(const std::string& text, const Engine::Vec2& pos,
     }
 }
 
+Engine::Vec2 GameRoot::measureTextUnified(const std::string& text, float scale) const {
+    if (hasTTF() && uiFont_) {
+        int w = 0;
+        int h = 0;
+        if (TTF_SizeUTF8(uiFont_, text.c_str(), &w, &h) == 0) {
+            return Engine::Vec2{static_cast<float>(w) * scale, static_cast<float>(h) * scale};
+        }
+    }
+    if (debugText_) {
+        return debugText_->measureText(text, scale);
+    }
+    return Engine::Vec2{0.0f, 0.0f};
+}
+
+std::string GameRoot::ellipsizeTextUnified(const std::string& text, float maxWidth, float scale) const {
+    if (text.empty()) return text;
+    if (maxWidth <= 0.0f) return std::string{};
+    if (measureTextUnified(text, scale).x <= maxWidth) return text;
+    static constexpr const char* kEllipsis = "...";
+    if (measureTextUnified(kEllipsis, scale).x > maxWidth) return std::string{};
+
+    // Binary search for the longest prefix that fits with ellipsis.
+    std::size_t lo = 0;
+    std::size_t hi = text.size();
+    while (lo + 1 < hi) {
+        std::size_t mid = (lo + hi) / 2;
+        std::string candidate = text.substr(0, mid) + kEllipsis;
+        if (measureTextUnified(candidate, scale).x <= maxWidth) {
+            lo = mid;
+        } else {
+            hi = mid;
+        }
+    }
+    return text.substr(0, lo) + kEllipsis;
+}
+
 void GameRoot::loadMenuPresets() {
     archetypes_.clear();
     difficulties_.clear();
+    auto bios = Game::RPG::loadArchetypeBios("data/rpg/archetypes.json");
 
     std::ifstream f("data/menu_presets.json");
     if (f.is_open()) {
@@ -5908,8 +6878,18 @@ void GameRoot::loadMenuPresets() {
                 if (archetypeSupportsSecondaryWeapon(def)) {
                     def.offensiveType = Game::OffensiveType::Melee;  // base offense; bow only when swapped
                 }
-                if (isMeleeOnlyArchetype(def.id) || isMeleeOnlyArchetype(def.name)) {
+                if (isMeleeOnlyArchetype(def.id)) {
                     def.offensiveType = Game::OffensiveType::Melee;
+                }
+                auto bioIt = bios.find(def.id);
+                if (bioIt != bios.end()) {
+                    def.rpgAttributes = bioIt->second.attributes;
+                    def.specialties = bioIt->second.specialties;
+                    def.perks = bioIt->second.perks;
+                    def.biography = bioIt->second.biography;
+                }
+                if (def.biography.empty()) {
+                    def.biography = def.description;
                 }
                 if (!def.name.empty()) {
                     archetypes_.push_back(def);
@@ -5935,24 +6915,44 @@ void GameRoot::loadMenuPresets() {
 
     auto addArchetype = [&](const std::string& id, const std::string& name, const std::string& desc, float hp,
                             float spd, float dmg, Engine::Color col, Game::OffensiveType offense) {
-        ArchetypeDef def{id, name, desc, hp, spd, dmg, col, "", offense};
+        ArchetypeDef def{id, name, desc, hp, spd, dmg, col, "", offense,
+                         Engine::Gameplay::RPG::Attributes{}, {}, {}, desc};
+        auto bioIt = bios.find(id);
+        if (bioIt != bios.end()) {
+            def.rpgAttributes = bioIt->second.attributes;
+            def.specialties = bioIt->second.specialties;
+            def.perks = bioIt->second.perks;
+            def.biography = bioIt->second.biography.empty() ? desc : bioIt->second.biography;
+        } else {
+            // Reasonable defaults if bios missing.
+            def.rpgAttributes = Engine::Gameplay::RPG::Attributes{3, 3, 2, 3, 1};
+            def.specialties = {"Generalist"};
+            def.perks = {};
+            def.biography = desc;
+        }
         archetypes_.push_back(def);
     };
     if (archetypes_.empty()) {
-        addArchetype("tank", "Tank", "High survivability frontliner with slower stride.", 1.35f, 0.9f, 0.9f,
+        addArchetype("tank", "Jack", "High survivability frontliner with slower stride.", 1.35f, 0.9f, 0.9f,
                      Engine::Color{110, 190, 255, 255}, Game::OffensiveType::Melee);
-        addArchetype("healer", "Healer", "Supportive sustain, balanced speed, lighter offense.", 1.05f, 1.0f, 0.95f,
+        addArchetype("healer", "Sally", "Supportive sustain, balanced speed, lighter offense.", 1.05f, 1.0f, 0.95f,
                      Engine::Color{170, 220, 150, 255}, Game::OffensiveType::Ranged);
-        addArchetype("damage", "Damage Dealer", "Can swap between Melee and Ranged using (Alt)", 0.95f, 1.05f, 1.15f,
+        addArchetype("damage", "Robin", "Can swap between Melee and Ranged using (Alt)", 0.95f, 1.05f, 1.15f,
                      Engine::Color{255, 180, 120, 255}, Game::OffensiveType::Melee);
-        addArchetype("assassin", "Assassin", "Very quick and lethal but fragile.", 0.85f, 1.25f, 1.2f,
+        addArchetype("assassin", "María", "Very quick and lethal but fragile.", 0.85f, 1.25f, 1.2f,
                      Engine::Color{255, 110, 180, 255}, Game::OffensiveType::Melee);
-        addArchetype("builder", "Builder", "Sturdier utility specialist with slower advance.", 1.1f, 0.95f, 0.9f,
+        addArchetype("builder", "George", "Sturdier utility specialist with slower advance.", 1.1f, 0.95f, 0.9f,
                      Engine::Color{200, 200, 120, 255}, Game::OffensiveType::Builder);
-        addArchetype("support", "Support", "Equipped with a long-range polearm.", 1.0f, 1.0f, 1.0f,
+        addArchetype("support", "Gunther", "Equipped with a long-range polearm.", 1.0f, 1.0f, 1.0f,
                      Engine::Color{150, 210, 230, 255}, Game::OffensiveType::Melee);
-        addArchetype("special", "Special", "Experimental kit with slight boosts across the board.", 1.1f, 1.05f, 1.05f,
+        addArchetype("special", "Ellis", "Experimental kit with slight boosts across the board.", 1.1f, 1.05f, 1.05f,
                      Engine::Color{200, 160, 240, 255}, Game::OffensiveType::Melee);
+        addArchetype("summoner", "Sage", "Calls beetles and snakes; fragile but protected by summons.", 0.95f, 1.0f, 0.9f,
+                     Engine::Color{170, 140, 230, 255}, Game::OffensiveType::Ranged);
+        addArchetype("druid", "Raven", "Shifts between human ranged and melee beast forms.", 1.1f, 1.0f, 1.0f,
+                     Engine::Color{140, 200, 120, 255}, Game::OffensiveType::Ranged);
+        addArchetype("wizard", "Jade", "Elementalist with cycling primary and high-energy spell kit.", 0.85f, 1.05f, 1.1f,
+                     Engine::Color{120, 190, 255, 255}, Game::OffensiveType::Ranged);
     }
 
     auto addDifficulty = [&](const std::string& id, const std::string& name, const std::string& desc, float hpMul,
@@ -7015,11 +8015,27 @@ static int effectiveShopCost(ItemEffect eff,
 }
 
 void GameRoot::refreshShopInventory() {
-    shopPool_ = travelShopUnlocked_ ? goldCatalog_ : itemCatalog_;
-    // Shuffle and take first 4.
-    std::shuffle(shopPool_.begin(), shopPool_.end(), rng_);
     shopInventory_.clear();
-    for (const auto& def : shopPool_) {
+    shopPool_ = travelShopUnlocked_ ? goldCatalog_ : itemCatalog_;
+    std::shuffle(shopPool_.begin(), shopPool_.end(), rng_);
+
+    std::uniform_real_distribution<float> roll(0.0f, 1.0f);
+    int rpgAdded = 0;
+    std::size_t legacyIdx = 0;
+    const int targetSlots = 4;
+    while (static_cast<int>(shopInventory_.size()) < targetSlots) {
+        // Traveling shop: sometimes offer RPG equipment items (when RPG loot is enabled).
+        if (travelShopUnlocked_ && useRpgLoot_ && rpgAdded < std::max(0, rpgShopEquipCount_) &&
+            roll(rng_) < std::clamp(rpgShopEquipChance_, 0.0f, 1.0f)) {
+            if (auto item = rollRpgEquipment(RpgLootSource::Shop, true)) {
+                shopInventory_.push_back(*item);
+                rpgAdded += 1;
+                continue;
+            }
+        }
+        // Legacy offers.
+        if (legacyIdx >= shopPool_.size()) break;
+        const auto& def = shopPool_[legacyIdx++];
         int cost = effectiveShopCost(def.effect, def.cost, shopDamagePctPurchases_, shopAttackSpeedPctPurchases_,
                                      shopVitalsPctPurchases_, shopCooldownPurchases_, shopRangeVisionPurchases_,
                                      shopChargePurchases_, shopSpeedBootsPurchases_, shopVitalAusterityPurchases_);
@@ -7027,7 +8043,6 @@ void GameRoot::refreshShopInventory() {
         ItemDefinition priced = def;
         priced.cost = cost;
         shopInventory_.push_back(priced);
-        if (shopInventory_.size() >= 4) break;
     }
     if (shopSystem_) {
         shopSystem_->setInventory(shopInventory_);
@@ -7056,33 +8071,48 @@ void GameRoot::drawItemShopOverlay() {
         float x = startX + static_cast<float>(i) * (cardW + gap);
         render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{cardW, cardH}, Engine::Color{32, 46, 66, 220});
         const auto& item = shopInventory_[i];
-        std::string title = shopLabelForEffect(item.effect);
+        std::string title = item.rpgTemplateId.empty() ? shopLabelForEffect(item.effect) : item.name;
         std::ostringstream desc;
-        switch (item.effect) {
-            case ItemEffect::Damage: desc << "+" << static_cast<int>(item.value) << " damage"; break;
-            case ItemEffect::Health: desc << "+" << static_cast<int>(item.value) << " HP"; break;
-            case ItemEffect::Speed: desc << "+" << static_cast<int>(item.value * 100) << "% speed"; break;
-            case ItemEffect::Heal: desc << "Heal " << static_cast<int>(item.value * 100) << "% HP"; break;
-            case ItemEffect::FreezeTime: desc << "Freeze " << item.value << "s"; break;
-            case ItemEffect::Turret: desc << "Turret " << static_cast<int>(item.value) << "s"; break;
-            case ItemEffect::AttackSpeed: desc << "+" << static_cast<int>(item.value * 100) << "% atk speed"; break;
-            case ItemEffect::Lifesteal: desc << static_cast<int>(item.value * 100) << "% lifesteal"; break;
-            case ItemEffect::Chain: desc << "Chains +" << static_cast<int>(item.value); break;
-            case ItemEffect::DamagePercent: desc << "+50% all damage"; break;
-            case ItemEffect::RangeVision: desc << "+3 range and +3 vision"; break;
-            case ItemEffect::AttackSpeedPercent: desc << "+50% attack speed"; break;
-            case ItemEffect::MoveSpeedFlat: desc << "+1 move speed"; break;
-            case ItemEffect::BonusVitalsPercent: desc << "+25% HP/Shields/Energy"; break;
-            case ItemEffect::CooldownFaster: desc << "Abilities cooldown 25% faster"; break;
-            case ItemEffect::AbilityCharges: desc << "Abilities with charges +1 max"; break;
-            case ItemEffect::VitalCostReduction: desc << "-25% vital ability costs"; break;
+        if (!item.rpgTemplateId.empty()) {
+            desc << item.desc;
+        } else {
+            switch (item.effect) {
+                case ItemEffect::Damage: desc << "+" << static_cast<int>(item.value) << " damage"; break;
+                case ItemEffect::Health: desc << "+" << static_cast<int>(item.value) << " HP"; break;
+                case ItemEffect::Speed: desc << "+" << static_cast<int>(item.value * 100) << "% speed"; break;
+                case ItemEffect::Heal: desc << "Heal " << static_cast<int>(item.value * 100) << "% HP"; break;
+                case ItemEffect::FreezeTime: desc << "Freeze " << item.value << "s"; break;
+                case ItemEffect::Turret: desc << "Turret " << static_cast<int>(item.value) << "s"; break;
+                case ItemEffect::AttackSpeed: desc << "+" << static_cast<int>(item.value * 100) << "% atk speed"; break;
+                case ItemEffect::Lifesteal: desc << static_cast<int>(item.value * 100) << "% lifesteal"; break;
+                case ItemEffect::Chain: desc << "Chains +" << static_cast<int>(item.value); break;
+                case ItemEffect::DamagePercent: desc << "+50% all damage"; break;
+                case ItemEffect::RangeVision: desc << "+3 range and +3 vision"; break;
+                case ItemEffect::AttackSpeedPercent: desc << "+50% attack speed"; break;
+                case ItemEffect::MoveSpeedFlat: desc << "+1 move speed"; break;
+                case ItemEffect::BonusVitalsPercent: desc << "+25% HP/Shields/Energy"; break;
+                case ItemEffect::CooldownFaster: desc << "Abilities cooldown 25% faster"; break;
+                case ItemEffect::AbilityCharges: desc << "Abilities with charges +1 max"; break;
+                case ItemEffect::VitalCostReduction: desc << "-25% vital ability costs"; break;
+            }
         }
         drawTextUnified(title, Engine::Vec2{x + 12.0f, y + 10.0f}, 1.0f, Engine::Color{220, 240, 255, 240});
         drawTextUnified(desc.str(), Engine::Vec2{x + 12.0f, y + 34.0f}, 0.95f, Engine::Color{200, 220, 240, 230});
+        if (!item.rpgTemplateId.empty()) {
+            drawItemIcon(item, Engine::Vec2{x + cardW - 30.0f, y + 10.0f}, 18.0f);
+            float ay = y + 52.0f;
+            for (std::size_t a = 0; a < item.affixes.size() && a < 2; ++a) {
+                drawTextUnified("• " + item.affixes[a], Engine::Vec2{x + 12.0f, ay}, 0.78f,
+                                Engine::Color{185, 220, 255, 220});
+                ay += 14.0f;
+            }
+        }
         std::ostringstream cost;
-        int dynCost = effectiveShopCost(item.effect, item.cost, shopDamagePctPurchases_, shopAttackSpeedPctPurchases_,
-                                        shopVitalsPctPurchases_, shopCooldownPurchases_, shopRangeVisionPurchases_,
-                                        shopChargePurchases_, shopSpeedBootsPurchases_, shopVitalAusterityPurchases_);
+        int dynCost = item.rpgTemplateId.empty()
+                          ? effectiveShopCost(item.effect, item.cost, shopDamagePctPurchases_, shopAttackSpeedPctPurchases_,
+                                              shopVitalsPctPurchases_, shopCooldownPurchases_, shopRangeVisionPurchases_,
+                                              shopChargePurchases_, shopSpeedBootsPurchases_, shopVitalAusterityPurchases_)
+                          : item.cost;
         cost << (dynCost < 0 ? 0 : dynCost) << "g";
         bool affordable = dynCost >= 0 && gold_ >= dynCost;
         Engine::Color costCol = affordable ? Engine::Color{180, 255, 200, 240}
@@ -7125,14 +8155,16 @@ void GameRoot::drawItemShopOverlay() {
         Engine::Color bg{34, 46, 66, 220};
         if (i % 2 == 1) bg = Engine::Color{38, 52, 74, 220};
         render_->drawFilledRect(Engine::Vec2{invX, ry}, Engine::Vec2{invW, rowH}, bg);
-        auto rarityCol = [](ItemRarity r) {
-            switch (r) {
-                case ItemRarity::Common: return Engine::Color{190, 210, 230, 240};
-                case ItemRarity::Rare: return Engine::Color{120, 200, 255, 240};
-                case ItemRarity::Legendary: return Engine::Color{255, 210, 120, 240};
-            }
-            return Engine::Color{200, 220, 240, 240};
-        };
+    auto rarityCol = [](ItemRarity r) {
+        switch (r) {
+            case ItemRarity::Common: return Engine::Color{235, 240, 245, 235};
+            case ItemRarity::Uncommon: return Engine::Color{135, 235, 155, 235};
+            case ItemRarity::Rare: return Engine::Color{135, 190, 255, 235};
+            case ItemRarity::Epic: return Engine::Color{185, 135, 255, 235};
+            case ItemRarity::Legendary: return Engine::Color{255, 210, 120, 240};
+        }
+        return Engine::Color{235, 240, 245, 235};
+    };
         drawTextUnified(inventory_[i].def.name, Engine::Vec2{invX + 8.0f, ry + 4.0f}, 0.9f,
                         rarityCol(inventory_[i].def.rarity));
         int refund = std::max(1, inventory_[i].def.cost / 2);
@@ -7384,6 +8416,12 @@ void GameRoot::drawResourceCluster() {
 
     auto centeredTextPosY = [&](float baseY) { return baseY + (barH - 12.0f) * 0.5f; };
 
+    // HUD bar label offsets (manual tweak point):
+    // If Health/Shields/Energy text looks off-center, adjust these.
+    constexpr float kHpBarTextOffsetX = 0.0f;
+    constexpr float kShieldBarTextOffsetX = 0.0f;
+    constexpr float kEnergyBarTextOffsetX = 10.0f;
+
     auto drawBar = [&](int index, float fill, const Engine::Color& fallbackCol, const std::string& label,
                        const std::string& value, const Engine::TexturePtr& tex, float textOffsetX = 0.0f) {
         float x = startX + static_cast<float>(index) * (barW + gap);
@@ -7407,8 +8445,8 @@ void GameRoot::drawResourceCluster() {
         float ty = centeredTextPosY(y) - 4.0f;  // raise text a bit within the bar
         // Center text inside bar.
         std::string combined = label + " " + value;
-        // rough center by measuring approximate width via character count (bitmap font lacks metrics); this is acceptable for UI text here.
-        float textX = x + barW * 0.5f - static_cast<float>(combined.size()) * 4.5f + textOffsetX;
+        float textW = measureTextUnified(combined, 0.95f).x;
+        float textX = x + barW * 0.5f - textW * 0.5f + textOffsetX;
         drawTextUnified(combined, Engine::Vec2{textX, ty}, 0.95f, Engine::Color{235, 245, 255, 235});
     };
 
@@ -7425,9 +8463,9 @@ void GameRoot::drawResourceCluster() {
         dashText << std::fixed << std::setprecision(1) << dashCooldownTimer_ << "s";
     }
 
-    drawBar(0, uiHpFill_, Engine::Color{204, 92, 92, 235}, "Health", hpText.str(), hpBarTex_, 2.0f);
-    drawBar(1, uiShieldFill_, Engine::Color{108, 166, 255, 235}, "Shield", shieldText.str(), shieldBarTex_);
-    drawBar(2, uiEnergyFill_, Engine::Color{120, 200, 255, 235}, "Energy", energyText.str(), energyBarTex_, 9.0f);
+    drawBar(0, uiHpFill_, Engine::Color{204, 92, 92, 235}, "Health", hpText.str(), hpBarTex_, kHpBarTextOffsetX);
+    drawBar(1, uiShieldFill_, Engine::Color{108, 166, 255, 235}, "Shield", shieldText.str(), shieldBarTex_, kShieldBarTextOffsetX);
+    drawBar(2, uiEnergyFill_, Engine::Color{120, 200, 255, 235}, "Energy", energyText.str(), energyBarTex_, kEnergyBarTextOffsetX);
     drawBar(3, uiDashFill_, Engine::Color{110, 160, 120, 230}, "Dash", dashText.str(), dashBarTex_);
 }
 
@@ -7596,134 +8634,806 @@ void GameRoot::drawAbilityHud(const Engine::InputState& input) {
 }
 
 void GameRoot::drawCharacterScreen(const Engine::InputState& input) {
-    (void)input;
     if (!render_ || !characterScreenOpen_) return;
-    const float uiScale = 1.2f;  // 20% larger text
+    const float uiScale = 1.16f;  // slight bump for readability
+    const bool leftClick = input.isMouseButtonDown(0);
+    const bool rightClick = input.isMouseButtonDown(2);
+    const bool leftWasDown = characterScreenClickPrev_;
+    const bool leftEdge = leftClick && !leftWasDown;
+    const bool leftRelease = !leftClick && leftWasDown;
+    const bool rightWasDown = characterScreenRightPrev_;
+    const bool rightEdge = rightClick && !rightWasDown;
+    characterScreenClickPrev_ = leftClick;
+    characterScreenRightPrev_ = rightClick;
+    const int mx = input.mouseX();
+    const int my = input.mouseY();
     Engine::Color scrim{10, 12, 20, 180};
     render_->drawFilledRect(Engine::Vec2{0.0f, 0.0f},
                             Engine::Vec2{static_cast<float>(viewportWidth_), static_cast<float>(viewportHeight_)},
                             scrim);
-    const float margin = 32.0f;
-    float panelW = std::min(1100.0f, static_cast<float>(viewportWidth_) - margin * 2.0f);
-    float panelH = std::min(720.0f, static_cast<float>(viewportHeight_) - margin * 2.0f);
+    // Slightly larger overall window so tall stat/detail sections don't clip on 720p-ish viewports.
+    const float margin = 16.0f;
+    float panelW = std::min(1120.0f, static_cast<float>(viewportWidth_) - margin * 2.0f);
+    float panelH = std::min(760.0f, static_cast<float>(viewportHeight_) - margin * 2.0f);
     float px = static_cast<float>(viewportWidth_) * 0.5f - panelW * 0.5f;
     float py = static_cast<float>(viewportHeight_) * 0.5f - panelH * 0.5f;
-    render_->drawFilledRect(Engine::Vec2{px, py}, Engine::Vec2{panelW, panelH}, Engine::Color{16, 22, 32, 235});
-    drawTextUnified("Character", Engine::Vec2{px + 18.0f, py + 14.0f}, 1.2f * uiScale, Engine::Color{210, 235, 255, 240});
+    // Background + subtle inner border.
+    render_->drawFilledRect(Engine::Vec2{px, py}, Engine::Vec2{panelW, panelH}, Engine::Color{14, 18, 26, 238});
+    render_->drawFilledRect(Engine::Vec2{px + 1.0f, py + 1.0f}, Engine::Vec2{panelW - 2.0f, panelH - 2.0f},
+                            Engine::Color{18, 24, 34, 235});
+
+    auto inside = [&](float x, float y, float w, float h) -> bool {
+        return mx >= static_cast<int>(x) && mx <= static_cast<int>(x + w) &&
+               my >= static_cast<int>(y) && my <= static_cast<int>(y + h);
+    };
+
+    auto rarityCol = [&](ItemRarity r) {
+        // Common - White, Uncommon - Green, Rare - Blue, Epic - Deep Purple, Legendary - Gold
+        switch (r) {
+            case ItemRarity::Common: return Engine::Color{235, 240, 245, 235};
+            case ItemRarity::Uncommon: return Engine::Color{135, 235, 155, 235};
+            case ItemRarity::Rare: return Engine::Color{135, 190, 255, 235};
+            case ItemRarity::Epic: return Engine::Color{185, 135, 255, 235};
+            case ItemRarity::Legendary: return Engine::Color{255, 210, 120, 240};
+        }
+        return Engine::Color{235, 240, 245, 235};
+    };
+
+    auto stripRaritySuffix = [](const std::string& n) -> std::string {
+        // Legacy RPG display used to append " [Common]" etc. Strip it for cleaner UI.
+        static constexpr const char* kSufs[] = {" [Common]", " [Uncommon]", " [Rare]", " [Epic]", " [Legendary]"};
+        for (const char* suf : kSufs) {
+            const std::size_t len = std::strlen(suf);
+            if (n.size() >= len && n.compare(n.size() - len, len, suf) == 0) {
+                return n.substr(0, n.size() - len);
+            }
+        }
+        return n;
+    };
+
+    auto drawPanel = [&](float x, float y, float w, float h, const std::string& title) {
+        render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{w, h}, Engine::Color{10, 14, 22, 210});
+        render_->drawFilledRect(Engine::Vec2{x + 1.0f, y + 1.0f}, Engine::Vec2{w - 2.0f, h - 2.0f}, Engine::Color{14, 18, 26, 215});
+        drawTextUnified(title, Engine::Vec2{x + 12.0f, y + 10.0f}, 1.0f * uiScale, Engine::Color{210, 235, 255, 240});
+    };
+
+    drawTextUnified("Character", Engine::Vec2{px + 18.0f, py + 14.0f}, 1.2f * uiScale, Engine::Color{220, 245, 255, 245});
     drawTextUnified(multiplayerEnabled_ ? "Multiplayer (no pause)" : "Single-player (paused)",
-                    Engine::Vec2{px + 20.0f, py + 36.0f}, 0.9f * uiScale,
-                    multiplayerEnabled_ ? Engine::Color{180, 220, 255, 220} : Engine::Color{200, 240, 200, 220});
+                    Engine::Vec2{px + 20.0f, py + 36.0f}, 0.88f * uiScale,
+                    multiplayerEnabled_ ? Engine::Color{180, 220, 255, 220} : Engine::Color{190, 240, 200, 220});
+    drawTextUnified("Tip: Hover for details • Click inventory to equip • Click equipped slot to unequip",
+                    Engine::Vec2{px + 420.0f, py + 22.0f}, 0.78f * uiScale, Engine::Color{160, 190, 215, 210});
 
-    float colGap = 14.0f;
-    float sectionW = (panelW - 40.0f - colGap) * 0.5f;
-    float leftX = px + 16.0f;
-    float rightX = leftX + sectionW + colGap;
-    float topY = py + 60.0f;
+    // 3-column layout.
+    const float pad = 14.0f;
+    const float contentY = py + 60.0f;
+    const float contentH = panelH - 74.0f;
+    float col1W = std::floor(panelW * 0.30f);
+    float col3W = std::floor(panelW * 0.28f);
+    float col2W = panelW - (col1W + col3W + pad * 4.0f);
+    float col1X = px + pad;
+    float col2X = col1X + col1W + pad;
+    float col3X = col2X + col2W + pad;
 
-    auto drawSectionBox = [&](float x, float y, float w, float h) {
-        render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{w, h}, Engine::Color{12, 16, 24, 220});
+    // Hovered item for tooltip/detail.
+    const ItemDefinition* hoveredDef = nullptr;
+    const ItemDefinition* focusedDef = nullptr;
+    const ItemInstance* focusedInst = nullptr;
+    bool focusedIsEquipped = false;
+    bool hoveredIsEquipped = false;
+    // Defer mutations to avoid invalidating hovered pointers mid-frame.
+    std::optional<std::size_t> pendingEquip{};
+    std::optional<Game::RPG::EquipmentSlot> pendingUnequip{};
+    std::optional<std::size_t> pendingUnsocket{};
+    struct PendingSocket {
+        std::size_t inventoryIdx{0};
+        std::size_t equippedSlotIdx{0};
     };
-
-    // Abilities (read-only)
-    const float abilitiesH = panelH * 0.35f;
-    drawSectionBox(leftX, topY, sectionW, abilitiesH);
-    drawTextUnified("Abilities", Engine::Vec2{leftX + 10.0f, topY + 8.0f}, 1.0f * uiScale, Engine::Color{200, 230, 255, 235});
-    float rowY = topY + 30.0f;
-    const float rowH = 26.0f * uiScale;
-    for (std::size_t i = 0; i < abilities_.size(); ++i) {
-        const auto& slot = abilities_[i];
-        int cost = slot.level >= slot.maxLevel ? -1 : (slot.upgradeCost + (slot.level - 1) * (slot.upgradeCost / 2));
-        drawTextUnified(slot.name, Engine::Vec2{leftX + 12.0f, rowY}, 0.95f * uiScale, Engine::Color{210, 230, 250, 230});
-        std::ostringstream lv;
-        lv << "Lv " << slot.level << "/" << slot.maxLevel;
-        drawTextUnified(lv.str(), Engine::Vec2{leftX + sectionW - 110.0f, rowY}, 0.9f * uiScale,
-                        Engine::Color{180, 220, 190, 220});
-        std::ostringstream costTxt;
-        costTxt << (cost < 0 ? "MAX" : std::to_string(cost) + "c");
-        drawTextUnified(costTxt.str(), Engine::Vec2{leftX + sectionW - 48.0f, rowY}, 0.9f * uiScale,
-                        cost < 0 ? Engine::Color{160, 200, 180, 220}
-                                 : Engine::Color{200, 230, 200, 220});
-        rowY += rowH;
-        if (rowY > topY + abilitiesH - rowH) break;
-    }
-
-    // Attributes + modifiers
-    float attrY = topY + abilitiesH + 14.0f;
-    float attrH = panelH - (attrY - py) - 16.0f;
-    drawSectionBox(leftX, attrY, sectionW, attrH);
-    drawTextUnified("Attributes", Engine::Vec2{leftX + 10.0f, attrY + 8.0f}, 1.0f * uiScale,
-                    Engine::Color{200, 230, 255, 235});
-    auto writeAttr = [&](const std::string& label, const std::string& value, float y) {
-        drawTextUnified(label, Engine::Vec2{leftX + 12.0f, y}, 0.92f * uiScale, Engine::Color{190, 210, 230, 230});
-        drawTextUnified(value, Engine::Vec2{leftX + sectionW - 120.0f, y}, 0.92f * uiScale,
-                        Engine::Color{220, 240, 255, 230});
+    std::optional<PendingSocket> pendingSocket{};
+    struct PendingSwap {
+        std::size_t a{0};
+        std::size_t b{0};
     };
-    float attrRow = attrY + 30.0f;
-    const auto* hp = registry_.get<Engine::ECS::Health>(hero_);
-    float maxHp = hp ? hp->maxHealth : 0.0f;
-    float maxShield = hp ? hp->maxShields : 0.0f;
-    writeAttr("Health", std::to_string(static_cast<int>(maxHp)), attrRow); attrRow += 22.0f * uiScale;
-    writeAttr("Shields", std::to_string(static_cast<int>(maxShield)), attrRow); attrRow += 22.0f * uiScale;
-    writeAttr("Energy", std::to_string(static_cast<int>(energyMax_)), attrRow); attrRow += 22.0f * uiScale;
-    std::ostringstream atk;
-    atk << std::fixed << std::setprecision(2) << attackSpeedMul_;
-    writeAttr("Attack Speed x", atk.str(), attrRow); attrRow += 22.0f * uiScale;
-    std::ostringstream dmg;
-    dmg << static_cast<int>(std::round(projectileDamage_));
-    writeAttr("Damage", dmg.str(), attrRow); attrRow += 22.0f * uiScale;
-    writeAttr("Move Speed", std::to_string(static_cast<int>(heroMoveSpeed_)), attrRow); attrRow += 26.0f * uiScale;
+    std::optional<PendingSwap> pendingSwap{};
+    // Persist the last hovered equipped item as the socket target so the player can
+    // hover a weapon/gear, then move to a gem and click to socket it.
+    auto socketTarget = [&]() -> std::optional<std::size_t> { return characterScreenSocketTargetSlotIdx_; };
+    auto setSocketTarget = [&](std::optional<std::size_t> v) { characterScreenSocketTargetSlotIdx_ = v; };
+    std::optional<std::size_t> hoveredEquipSlotIdx{};
+    std::optional<std::size_t> hoveredInvIdx{};
 
-    // Active modifiers (BuffState)
-    if (registry_.has<Game::ArmorBuff>(hero_)) {
-        if (auto* buff = registry_.get<Game::ArmorBuff>(hero_)) {
-            auto addBuffLine = [&](const std::string& label, float value) {
-                std::ostringstream v; v << std::showpos << std::fixed << std::setprecision(2) << value;
-                writeAttr(label, v.str(), attrRow);
-                attrRow += 22.0f * uiScale;
-            };
-            if (buff->state.healthArmorBonus != 0.0f) addBuffLine("Health Armor", buff->state.healthArmorBonus);
-            if (buff->state.shieldArmorBonus != 0.0f) addBuffLine("Shield Armor", buff->state.shieldArmorBonus);
-            if (buff->state.damageTakenMultiplier != 1.0f) addBuffLine("Damage Taken x", buff->state.damageTakenMultiplier);
+    // ----- Left: Equipment -----
+    // Size the equipment panel to fit the slot grid (Bag slot adds another row).
+    struct SlotCell { Game::RPG::EquipmentSlot slot; const char* label; };
+    const std::array<SlotCell, 15> slotCells{{
+        {Game::RPG::EquipmentSlot::Head,     "Head"},
+        {Game::RPG::EquipmentSlot::MainHand, "Main"},
+        {Game::RPG::EquipmentSlot::Chest,    "Chest"},
+        {Game::RPG::EquipmentSlot::OffHand,  "Off"},
+        {Game::RPG::EquipmentSlot::Legs,     "Legs"},
+        {Game::RPG::EquipmentSlot::Ring1,    "Ring 1"},
+        {Game::RPG::EquipmentSlot::Boots,    "Boots"},
+        {Game::RPG::EquipmentSlot::Ring2,    "Ring 2"},
+        {Game::RPG::EquipmentSlot::Gloves,   "Gloves"},
+        {Game::RPG::EquipmentSlot::Amulet,   "Amulet"},
+        {Game::RPG::EquipmentSlot::Belt,     "Belt"},
+        {Game::RPG::EquipmentSlot::Cloak,    "Cloak"},
+        {Game::RPG::EquipmentSlot::Ammo,     "Ammo"},
+        {Game::RPG::EquipmentSlot::Bag,      "Bag"},
+        {Game::RPG::EquipmentSlot::Trinket,  "Trinket"},
+    }};
+    const float cellPad = 10.0f;
+    const float cellW = (col1W - cellPad * 3.0f) * 0.5f;
+    const float cellH = 34.0f;
+    const float icon = 22.0f;
+    const float startY = contentY + 52.0f;
+    const int equipRows = static_cast<int>((slotCells.size() + 1) / 2);
+    const float requiredEquipH = (startY - contentY) + static_cast<float>(equipRows) * (cellH + 6.0f) + 10.0f;
+    const float minStatsH = 160.0f;
+    const float equipH = std::min(std::max(360.0f, requiredEquipH), contentH - minStatsH - pad);
+
+    drawPanel(col1X, contentY, col1W, equipH, "Equipment");
+    drawTextUnified("Slots", Engine::Vec2{col1X + 12.0f, contentY + 32.0f}, 0.82f * uiScale, Engine::Color{170, 205, 230, 215});
+    for (std::size_t i = 0; i < slotCells.size(); ++i) {
+        int c = static_cast<int>(i % 2);
+        int r = static_cast<int>(i / 2);
+        float x = col1X + cellPad + static_cast<float>(c) * (cellW + cellPad);
+        float y = startY + static_cast<float>(r) * (cellH + 6.0f);
+        bool hov = inside(x, y, cellW, cellH);
+        Engine::Color bg = hov ? Engine::Color{20, 28, 42, 235} : Engine::Color{16, 22, 32, 225};
+        render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{cellW, cellH}, bg);
+
+        const std::size_t slotIdx = static_cast<std::size_t>(slotCells[i].slot);
+        const bool hasItem = slotIdx < equipped_.size() && equipped_[slotIdx].has_value();
+        Engine::Color border = Engine::Color{40, 55, 80, 200};
+        if (hasItem) border = rarityCol(equipped_[slotIdx]->def.rarity);
+        render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{cellW, 1.0f}, border);
+        render_->drawFilledRect(Engine::Vec2{x, y + cellH - 1.0f}, Engine::Vec2{cellW, 1.0f}, border);
+
+        render_->drawFilledRect(Engine::Vec2{x + 8.0f, y + 6.0f}, Engine::Vec2{icon, icon}, Engine::Color{30, 40, 58, 230});
+        if (hasItem) {
+            drawItemIcon(equipped_[slotIdx]->def, Engine::Vec2{x + 8.0f, y + 6.0f}, icon);
+        }
+        drawTextUnified(slotCells[i].label, Engine::Vec2{x + 8.0f + icon + 8.0f, y + 0.0f}, 0.80f * uiScale,
+                        Engine::Color{190, 210, 230, 225});
+        if (hasItem) {
+            const std::string raw = stripRaritySuffix(equipped_[slotIdx]->def.name);
+            const float nameX = x + 8.0f + icon + 8.0f;
+            const float maxNameW = cellW - (nameX - x) - 10.0f;
+            const std::string nm = ellipsizeTextUnified(raw, maxNameW, 0.72f * uiScale);
+            drawTextUnified(nm, Engine::Vec2{x + 8.0f + icon + 8.0f, y + 11.0f}, 0.72f * uiScale,
+                            rarityCol(equipped_[slotIdx]->def.rarity));
+        } else {
+            drawTextUnified("Empty", Engine::Vec2{x + 8.0f + icon + 8.0f, y + 11.0f}, 0.72f * uiScale,
+                            Engine::Color{125, 150, 175, 180});
+        }
+
+        if (hov) {
+            hoveredIsEquipped = true;
+            hoveredEquipSlotIdx = slotIdx;
+            if (hasItem) {
+                hoveredDef = &equipped_[slotIdx]->def;
+                focusedDef = hoveredDef;
+                focusedInst = &(*equipped_[slotIdx]);
+                focusedIsEquipped = true;
+                setSocketTarget(slotIdx);
+            }
+            if (leftEdge && hasItem) pendingUnequip = slotCells[i].slot;
+            if (rightEdge && hasItem) {
+                const auto& def = equipped_[slotIdx]->def;
+                if (!def.rpgSocketed.empty()) {
+                    pendingUnsocket = slotIdx;
+                }
+            }
         }
     }
 
-    // Stats + currencies
-    drawSectionBox(rightX, topY, sectionW, panelH * 0.35f);
-    drawTextUnified("Run Stats", Engine::Vec2{rightX + 10.0f, topY + 8.0f}, 1.0f * uiScale,
-                    Engine::Color{200, 230, 255, 235});
-    float statsY = topY + 32.0f;
-    auto statLine = [&](const std::string& label, const std::string& value) {
-        drawTextUnified(label, Engine::Vec2{rightX + 12.0f, statsY}, 0.92f * uiScale, Engine::Color{190, 210, 230, 230});
-        drawTextUnified(value, Engine::Vec2{rightX + sectionW - 140.0f, statsY}, 0.92f * uiScale,
-                        Engine::Color{220, 240, 255, 230});
-        statsY += 22.0f * uiScale;
-    };
-    statLine("Kills", std::to_string(kills_));
-    statLine("Copper", std::to_string(copper_));
-    statLine("Gold", std::to_string(gold_));
-    statLine("Level", std::to_string(level_));
-    statLine("XP", std::to_string(xp_) + "/" + std::to_string(xpToNext_));
-    statLine("Wave", std::to_string(wave_ + 1));
+    // ----- Left: Stats (fill space) -----
+    float statsY = contentY + equipH + pad;
+    float statsH = contentH - equipH - pad;
+    drawPanel(col1X, statsY, col1W, statsH, "Stats");
 
-    // Inventory table
-    float invY = topY + panelH * 0.35f + 14.0f;
-    float invH = panelH - (invY - py) - 16.0f;
-    drawSectionBox(rightX, invY, sectionW, invH);
-    drawTextUnified("Inventory", Engine::Vec2{rightX + 10.0f, invY + 8.0f}, 1.0f * uiScale,
-                    Engine::Color{200, 230, 255, 235});
-    float rowInvY = invY + 30.0f;
-    const float invRowH = 22.0f * uiScale;
-    for (std::size_t i = 0; i < inventory_.size(); ++i) {
-        const auto& item = inventory_[i];
-        int sell = std::max(1, item.def.cost / 2) * std::max(1, item.quantity);
-        drawTextUnified(item.def.name, Engine::Vec2{rightX + 12.0f, rowInvY}, 0.9f * uiScale,
-                        Engine::Color{210, 235, 255, 230});
-        drawTextUnified(std::to_string(sell) + "c", Engine::Vec2{rightX + sectionW - 90.0f, rowInvY}, 0.9f * uiScale,
-                        Engine::Color{200, 230, 200, 230});
-        drawTextUnified(item.def.desc, Engine::Vec2{rightX + 12.0f, rowInvY + 12.0f}, 0.8f * uiScale,
-                        Engine::Color{180, 205, 225, 220});
-        rowInvY += invRowH + 6.0f * uiScale;
-        if (rowInvY > invY + invH - invRowH) break;
+    const auto* hp = registry_.get<Engine::ECS::Health>(hero_);
+    const float maxHp = hp ? hp->maxHealth : 0.0f;
+    const float maxShield = hp ? hp->maxShields : 0.0f;
+    const auto* rpg = registry_.get<Engine::ECS::RPGStats>(hero_);
+    const bool hasRpg = (rpg != nullptr);
+    float lineY = statsY + 38.0f;
+    auto statLine = [&](const std::string& k, const std::string& v, Engine::Color kc = Engine::Color{185, 205, 225, 220}) {
+        drawTextUnified(k, Engine::Vec2{col1X + 12.0f, lineY}, 0.86f * uiScale, kc);
+        drawTextUnified(v, Engine::Vec2{col1X + col1W - 120.0f, lineY}, 0.86f * uiScale, Engine::Color{220, 240, 255, 230});
+        lineY += 18.0f * uiScale;
+    };
+    if (hasRpg) {
+        statLine("RPG Combat", useRpgCombat_ ? "ON" : "OFF (preview)", useRpgCombat_ ? Engine::Color{170, 235, 190, 230}
+                                                                                   : Engine::Color{235, 210, 150, 230});
+    }
+    statLine("Health", std::to_string(static_cast<int>(hasRpg ? std::round(rpg->derived.healthMax) : maxHp)));
+    statLine("Shields", std::to_string(static_cast<int>(hasRpg ? std::round(rpg->derived.shieldMax) : maxShield)));
+    statLine("Energy", std::to_string(static_cast<int>(energyMax_)));
+    statLine("Damage", std::to_string(static_cast<int>(std::round(hasRpg ? rpg->derived.attackPower : projectileDamage_))));
+    {
+        std::ostringstream s;
+        s.setf(std::ios::fixed);
+        s << std::setprecision(2) << (hasRpg ? rpg->derived.attackSpeed : (attackSpeedMul_ * attackSpeedBuffMul_));
+        statLine("Attack Speed x", s.str());
+    }
+    statLine("Move Speed", std::to_string(static_cast<int>(std::round(hasRpg ? rpg->derived.moveSpeed : heroMoveSpeed_))));
+
+    if (hasRpg) {
+        lineY += 10.0f;
+        drawTextUnified("RPG Details", Engine::Vec2{col1X + 12.0f, lineY}, 0.86f * uiScale,
+                        Engine::Color{200, 230, 255, 235});
+        lineY += 18.0f;
+        statLine("Armor", std::to_string(static_cast<int>(std::round(rpg->derived.armor))));
+        statLine("Crit %", std::to_string(static_cast<int>(std::round(rpg->derived.critChance * 100.0f))));
+        statLine("Tenacity", std::to_string(static_cast<int>(std::round(rpg->derived.tenacity))));
+    }
+
+    // ----- Middle: Inventory grid -----
+    drawPanel(col2X, contentY, col2W, contentH, "Inventory");
+    drawTextUnified("Capacity: " + std::to_string(inventory_.size()) + "/" + std::to_string(inventoryCapacity_),
+                    Engine::Vec2{col2X + col2W - 190.0f, contentY + 12.0f}, 0.80f * uiScale,
+                    Engine::Color{160, 190, 215, 210});
+
+    const float gridPad = 16.0f;
+    float gridX = col2X + gridPad;
+    float gridY = contentY + 42.0f;
+    float gridW = col2W - gridPad * 2.0f;
+    float gridH = contentH - 56.0f;
+    const int cols = 4;
+    const float gap = 10.0f;
+    const float cell = std::floor(std::clamp((gridW - (cols - 1) * gap) / cols, 54.0f, 82.0f));
+    const float iconSz = cell - 14.0f;
+
+    // Hotbar slots (R/F) live above the inventory grid.
+    auto isHotbarEligible = [&](const ItemDefinition& d) {
+        return !d.rpgConsumableId.empty() ||
+               d.effect == ItemEffect::Heal || d.effect == ItemEffect::FreezeTime ||
+               d.effect == ItemEffect::Turret || d.effect == ItemEffect::Lifesteal ||
+               d.effect == ItemEffect::AttackSpeed || d.effect == ItemEffect::Chain;
+    };
+    auto findInventoryIndexById = [&](int id) -> std::optional<std::size_t> {
+        for (std::size_t i = 0; i < inventory_.size(); ++i) {
+            if (inventory_[i].def.id == id) return i;
+        }
+        return std::nullopt;
+    };
+    std::optional<int> hoveredHotbarIdx{};
+    {
+        const float hotH = 44.0f;
+        const float slot = 42.0f;
+        const float hbY = contentY + 38.0f;
+        const float hbX = gridX;
+        drawTextUnified("Hotbar", Engine::Vec2{hbX, hbY - 18.0f}, 0.82f * uiScale, Engine::Color{170, 205, 230, 215});
+        drawTextUnified("R / F", Engine::Vec2{hbX + 80.0f, hbY - 18.0f}, 0.78f * uiScale, Engine::Color{140, 170, 195, 210});
+        for (int s = 0; s < 2; ++s) {
+            float x = hbX + static_cast<float>(s) * (slot + 12.0f);
+            float y = hbY;
+            bool hov = inside(x, y, slot, hotH);
+            if (hov) hoveredHotbarIdx = s;
+            Engine::Color bg = hov ? Engine::Color{24, 34, 48, 235} : Engine::Color{16, 22, 32, 220};
+            render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{slot, hotH}, bg);
+            render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{slot, 2.0f}, Engine::Color{40, 55, 80, 200});
+            render_->drawFilledRect(Engine::Vec2{x, y + hotH - 2.0f}, Engine::Vec2{slot, 2.0f}, Engine::Color{40, 55, 80, 200});
+
+            if (hotbarItemIds_[s].has_value()) {
+                auto invIdx = findInventoryIndexById(*hotbarItemIds_[s]);
+                if (invIdx.has_value() && *invIdx < inventory_.size()) {
+                    const auto& inst = inventory_[*invIdx];
+                    Engine::Color border = rarityCol(inst.def.rarity);
+                    render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{slot, 2.0f}, border);
+                    render_->drawFilledRect(Engine::Vec2{x, y + hotH - 2.0f}, Engine::Vec2{slot, 2.0f}, border);
+                    drawItemIcon(inst.def, Engine::Vec2{x + 10.0f, y + 10.0f}, slot - 20.0f);
+                } else {
+                    hotbarItemIds_[s].reset();
+                }
+            }
+            const char* key = (s == 0) ? "R" : "F";
+            drawTextUnified(key, Engine::Vec2{x + 3.0f, y + hotH - 16.0f}, 0.75f * uiScale, Engine::Color{160, 190, 215, 200});
+            if (hov && rightEdge) {
+                hotbarItemIds_[s].reset();
+            }
+        }
+
+        // Shift grid down to make room.
+        gridY += hotH + 12.0f;
+        gridH -= hotH + 12.0f;
+    }
+
+    const int totalRows = std::max(1, (inventoryCapacity_ + cols - 1) / cols);
+    const int visibleRows = std::max(1, static_cast<int>(std::floor((gridH + gap) / (cell + gap))));
+    const int maxScrollRows = std::max(0, totalRows - visibleRows);
+    const bool gridHover = inside(gridX, gridY, gridW, gridH);
+    if (gridHover && scrollDeltaFrame_ != 0) {
+        inventoryGridScroll_ = std::clamp(inventoryGridScroll_ - static_cast<float>(scrollDeltaFrame_), 0.0f,
+                                          static_cast<float>(maxScrollRows));
+    }
+    const int rowOffset = std::clamp(static_cast<int>(std::round(inventoryGridScroll_)), 0, maxScrollRows);
+
+    // Scrollbar
+    if (maxScrollRows > 0) {
+        const float barW = 10.0f;
+        const float trackX = gridX + gridW - barW;
+        const float trackY = gridY;
+        const float trackH = gridH;
+        render_->drawFilledRect(Engine::Vec2{trackX, trackY}, Engine::Vec2{barW, trackH}, Engine::Color{10, 14, 22, 160});
+        const float thumbH = std::max(18.0f, trackH * (static_cast<float>(visibleRows) / static_cast<float>(totalRows)));
+        const float ratio = static_cast<float>(rowOffset) / static_cast<float>(maxScrollRows);
+        const float thumbY = trackY + (trackH - thumbH) * ratio;
+        render_->drawFilledRect(Engine::Vec2{trackX, thumbY}, Engine::Vec2{barW, thumbH}, Engine::Color{90, 140, 210, 220});
+    }
+
+    const int firstIdx = rowOffset * cols;
+    const int lastIdxExclusive = std::min(inventoryCapacity_, (rowOffset + visibleRows) * cols);
+    for (int i = firstIdx; i < lastIdxExclusive; ++i) {
+        int c = i % cols;
+        int r = (i / cols) - rowOffset;
+        float x = gridX + c * (cell + gap);
+        float y = gridY + r * (cell + gap);
+        bool hov = inside(x, y, cell, cell);
+        Engine::Color bg = hov ? Engine::Color{22, 30, 44, 235} : Engine::Color{16, 22, 32, 220};
+        render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{cell, cell}, bg);
+        if (i == inventorySelected_) {
+            Engine::Color sel{210, 255, 255, 220};
+            render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{cell, 2.0f}, sel);
+            render_->drawFilledRect(Engine::Vec2{x, y + cell - 2.0f}, Engine::Vec2{cell, 2.0f}, sel);
+            render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{2.0f, cell}, sel);
+            render_->drawFilledRect(Engine::Vec2{x + cell - 2.0f, y}, Engine::Vec2{2.0f, cell}, sel);
+        }
+
+        if (i < static_cast<int>(inventory_.size())) {
+            const auto& inst = inventory_[static_cast<std::size_t>(i)];
+            Engine::Color border = rarityCol(inst.def.rarity);
+            render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{cell, 2.0f}, border);
+            render_->drawFilledRect(Engine::Vec2{x, y + cell - 2.0f}, Engine::Vec2{cell, 2.0f}, border);
+            render_->drawFilledRect(Engine::Vec2{x + 7.0f, y + 7.0f}, Engine::Vec2{iconSz, iconSz},
+                                    Engine::Color{30, 40, 58, 230});
+            drawItemIcon(inst.def, Engine::Vec2{x + 7.0f, y + 7.0f}, iconSz);
+            if (inst.quantity > 1) {
+                drawTextUnified(std::to_string(inst.quantity), Engine::Vec2{x + cell - 18.0f, y + cell - 18.0f},
+                                0.75f * uiScale, Engine::Color{220, 240, 255, 220});
+            }
+            if (hov) {
+                hoveredDef = &inst.def;
+                focusedDef = hoveredDef;
+                focusedInst = &inst;
+                focusedIsEquipped = false;
+                hoveredIsEquipped = false;
+                hoveredInvIdx = static_cast<std::size_t>(i);
+                if (leftEdge) {
+                    inventorySelected_ = i;
+                    characterDragArmed_ = true;
+                    characterDragActive_ = false;
+                    characterDragInvIdx_ = static_cast<std::size_t>(i);
+                    characterDragStartX_ = mx;
+                    characterDragStartY_ = my;
+                }
+            }
+        } else {
+            Engine::Color border = Engine::Color{30, 40, 58, 200};
+            render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{cell, 1.0f}, border);
+            render_->drawFilledRect(Engine::Vec2{x, y + cell - 1.0f}, Engine::Vec2{cell, 1.0f}, border);
+        }
+    }
+
+    // Drag/drop state transitions:
+    // - Press on an inventory item arms a drag.
+    // - Move beyond a small threshold starts dragging.
+    // - Release while armed acts as a click (equip/socket).
+    // - Release while dragging attempts drop (swap/equip/socket).
+    if (characterDragArmed_ && leftClick) {
+        const int dx = mx - characterDragStartX_;
+        const int dy = my - characterDragStartY_;
+        if ((dx * dx + dy * dy) >= 36) {  // 6px threshold
+            characterDragActive_ = true;
+            characterDragArmed_ = false;
+        }
+    }
+    if (characterDragActive_) {
+        if (characterDragInvIdx_ < inventory_.size()) {
+            const auto& dragInst = inventory_[characterDragInvIdx_];
+            drawItemIcon(dragInst.def, Engine::Vec2{static_cast<float>(mx) - 14.0f, static_cast<float>(my) - 14.0f}, 28.0f);
+            drawTextUnified(stripRaritySuffix(dragInst.def.name),
+                            Engine::Vec2{static_cast<float>(mx) + 18.0f, static_cast<float>(my) - 10.0f},
+                            0.78f * uiScale, rarityCol(dragInst.def.rarity));
+        }
+        if (leftRelease) {
+            if (characterDragInvIdx_ < inventory_.size()) {
+                const auto* dragT = findRpgTemplateFor(inventory_[characterDragInvIdx_].def);
+                const bool dragIsGem = dragT && dragT->socketable;
+                const bool dragIsConsumable = isHotbarEligible(inventory_[characterDragInvIdx_].def);
+                if (hoveredHotbarIdx.has_value() && dragIsConsumable) {
+                    hotbarItemIds_[*hoveredHotbarIdx] = inventory_[characterDragInvIdx_].def.id;
+                } else
+                if (hoveredEquipSlotIdx.has_value() && *hoveredEquipSlotIdx < equipped_.size()) {
+                    if (dragIsGem && equipped_[*hoveredEquipSlotIdx].has_value()) {
+                        auto& targetDef = equipped_[*hoveredEquipSlotIdx]->def;
+                        if (targetDef.rpgSocketsMax > 0 &&
+                            static_cast<int>(targetDef.rpgSocketed.size()) < targetDef.rpgSocketsMax) {
+                            pendingSocket = PendingSocket{characterDragInvIdx_, *hoveredEquipSlotIdx};
+                        }
+                    } else {
+                        pendingEquip = characterDragInvIdx_;
+                    }
+                } else if (hoveredInvIdx.has_value() && *hoveredInvIdx < inventory_.size()) {
+                    if (*hoveredInvIdx != characterDragInvIdx_) {
+                        pendingSwap = PendingSwap{characterDragInvIdx_, *hoveredInvIdx};
+                    }
+                }
+            }
+            characterDragActive_ = false;
+        }
+        if (characterDragInvIdx_ >= inventory_.size()) {
+            characterDragActive_ = false;
+        }
+    }
+    if (characterDragArmed_ && leftRelease) {
+        // Click behavior (no drag): equip, or socket if gem + socket target has room.
+        characterDragArmed_ = false;
+        if (characterDragInvIdx_ < inventory_.size()) {
+            const auto& inst = inventory_[characterDragInvIdx_];
+            const auto* gemT = findRpgTemplateFor(inst.def);
+            const bool isGem = gemT && gemT->socketable;
+            auto tgt = socketTarget();
+            if (isGem && tgt.has_value() &&
+                *tgt < equipped_.size() && equipped_[*tgt].has_value()) {
+                auto& targetDef = equipped_[*tgt]->def;
+                if (targetDef.rpgSocketsMax > 0 &&
+                    static_cast<int>(targetDef.rpgSocketed.size()) < targetDef.rpgSocketsMax) {
+                    pendingSocket = PendingSocket{characterDragInvIdx_, *tgt};
+                } else {
+                    pendingEquip = characterDragInvIdx_;
+                }
+            } else {
+                pendingEquip = characterDragInvIdx_;
+            }
+        }
+    }
+
+    // ----- Right: Run + Abilities + Details -----
+    const float cardGap = 12.0f;
+    const float runH = 140.0f;
+    const float abilH = 160.0f;
+    float detailsY = contentY + runH + cardGap + abilH + cardGap;
+    float detailsH = contentH - (runH + abilH + cardGap * 2.0f);
+
+    drawPanel(col3X, contentY, col3W, runH, "Run");
+    float ry = contentY + 38.0f;
+    auto runLine = [&](const std::string& k, const std::string& v) {
+        drawTextUnified(k, Engine::Vec2{col3X + 12.0f, ry}, 0.84f * uiScale, Engine::Color{185, 205, 225, 220});
+        drawTextUnified(v, Engine::Vec2{col3X + col3W - 100.0f, ry}, 0.84f * uiScale, Engine::Color{220, 240, 255, 230});
+        ry += 18.0f * uiScale;
+    };
+    runLine("Wave", std::to_string(wave_ + 1));
+    runLine("Kills", std::to_string(kills_));
+    runLine("Copper", std::to_string(copper_));
+    runLine("Gold", std::to_string(gold_));
+    runLine("Level", std::to_string(level_));
+
+    drawPanel(col3X, contentY + runH + cardGap, col3W, abilH, "Abilities");
+    float ay = contentY + runH + cardGap + 36.0f;
+    for (std::size_t i = 0; i < abilities_.size() && i < 6; ++i) {
+        const auto& slot = abilities_[i];
+        std::ostringstream s;
+        s << slot.name << "  Lv " << slot.level;
+        drawTextUnified(s.str(), Engine::Vec2{col3X + 12.0f, ay}, 0.80f * uiScale, Engine::Color{200, 230, 255, 230});
+        ay += 18.0f * uiScale;
+        if (ay > contentY + runH + cardGap + abilH - 18.0f) break;
+    }
+
+    drawPanel(col3X, detailsY, col3W, detailsH, "Details");
+    const ItemDefinition* detail = focusedDef;
+    const ItemInstance* detailInst = focusedInst;
+    bool detailIsEquipped = focusedIsEquipped;
+    if (!detail && inventorySelected_ >= 0 && inventorySelected_ < static_cast<int>(inventory_.size())) {
+        detail = &inventory_[static_cast<std::size_t>(inventorySelected_)].def;
+        detailInst = &inventory_[static_cast<std::size_t>(inventorySelected_)];
+        detailIsEquipped = false;
+    }
+    float dy = detailsY + 38.0f;
+    if (!detail) {
+        drawTextUnified("Hover an item or slot", Engine::Vec2{col3X + 12.0f, dy}, 0.86f * uiScale,
+                        Engine::Color{170, 200, 230, 220});
+    } else {
+        const std::string dn = stripRaritySuffix(detail->name);
+        drawTextUnified(dn, Engine::Vec2{col3X + 12.0f, dy}, 0.92f * uiScale, rarityCol(detail->rarity));
+        dy += 20.0f * uiScale;
+        drawTextUnified(detail->desc, Engine::Vec2{col3X + 12.0f, dy}, 0.78f * uiScale,
+                        Engine::Color{175, 200, 225, 220});
+        dy += 18.0f * uiScale;
+
+        int sell = std::max(1, detail->cost / 2);
+        drawTextUnified("Sell: " + std::to_string(sell) + "c", Engine::Vec2{col3X + 12.0f, dy}, 0.80f * uiScale,
+                        Engine::Color{180, 255, 200, 220});
+        dy += 18.0f * uiScale;
+
+        // RPG stats breakdown (base template + affixes).
+        if (!detail->rpgTemplateId.empty()) {
+            const auto* t = findRpgTemplateFor(*detail);
+            auto findAffix = [&](const std::string& id) -> const Game::RPG::Affix* {
+                for (const auto& a : rpgLootTable_.affixes) if (a.id == id) return &a;
+                return nullptr;
+            };
+            Engine::Gameplay::RPG::StatContribution total{};
+            if (t) addContribution(total, t->baseStats, 1.0f);
+            for (const auto& id : detail->rpgAffixIds) {
+                if (const auto* a = findAffix(id)) addContribution(total, a->stats, 1.0f);
+            }
+            // Socketed gems contributions.
+            for (const auto& g : detail->rpgSocketed) {
+                if (const auto* gt = findRpgTemplateById(g.templateId)) {
+                    addContribution(total, gt->baseStats, 1.0f);
+                }
+                for (const auto& ga : g.affixIds) {
+                    if (const auto* a = findAffix(ga)) addContribution(total, a->stats, 1.0f);
+                }
+            }
+            auto addLine = [&](const std::string& s) {
+                drawTextUnified(s, Engine::Vec2{col3X + 14.0f, dy}, 0.78f * uiScale, Engine::Color{190, 220, 255, 220});
+                dy += 16.0f * uiScale;
+            };
+            auto pct = [&](float v) { return std::to_string(static_cast<int>(std::round(v * 100.0f))) + "%"; };
+            dy += 4.0f;
+            drawTextUnified("Bonuses", Engine::Vec2{col3X + 12.0f, dy}, 0.84f * uiScale, Engine::Color{200, 230, 255, 230});
+            dy += 18.0f * uiScale;
+            if (total.flat.attackPower != 0.0f) addLine((total.flat.attackPower > 0 ? "+" : "") + std::to_string(static_cast<int>(std::round(total.flat.attackPower))) + " Attack Power");
+            if (total.flat.spellPower != 0.0f) addLine((total.flat.spellPower > 0 ? "+" : "") + std::to_string(static_cast<int>(std::round(total.flat.spellPower))) + " Spell Power");
+            if (total.flat.armor != 0.0f) addLine((total.flat.armor > 0 ? "+" : "") + std::to_string(static_cast<int>(std::round(total.flat.armor))) + " Armor");
+            if (total.flat.healthMax != 0.0f) addLine((total.flat.healthMax > 0 ? "+" : "") + std::to_string(static_cast<int>(std::round(total.flat.healthMax))) + " Max Health");
+            if (total.flat.shieldMax != 0.0f) addLine((total.flat.shieldMax > 0 ? "+" : "") + std::to_string(static_cast<int>(std::round(total.flat.shieldMax))) + " Max Shields");
+            if (total.flat.critChance != 0.0f) addLine((total.flat.critChance > 0 ? "+" : "") + pct(total.flat.critChance) + " Crit Chance");
+            if (total.flat.armorPen != 0.0f) addLine((total.flat.armorPen > 0 ? "+" : "") + std::to_string(static_cast<int>(std::round(total.flat.armorPen))) + " Armor Pen");
+            if (total.mult.attackSpeed != 0.0f) addLine((total.mult.attackSpeed > 0 ? "+" : "") + pct(total.mult.attackSpeed) + " Attack Speed");
+            if (total.mult.moveSpeed != 0.0f) addLine((total.mult.moveSpeed > 0 ? "+" : "") + pct(total.mult.moveSpeed) + " Move Speed");
+
+            // Compare view: preview derived stat deltas if this inventory item were equipped.
+            // (Equipped item hover shows its own details; inventory hover previews impact before equipping.)
+            if (!detailIsEquipped && detailInst && t && !t->socketable && hero_ != Engine::ECS::kInvalidEntity) {
+                auto contributionFromEquipped = [&](const auto& eq) {
+                    Engine::Gameplay::RPG::StatContribution contrib{};
+                    auto findAffix2 = [&](const std::string& id) -> const Game::RPG::Affix* {
+                        for (const auto& a : rpgLootTable_.affixes) if (a.id == id) return &a;
+                        return nullptr;
+                    };
+                    for (const auto& opt : eq) {
+                        if (!opt.has_value()) continue;
+                        const auto& inst2 = *opt;
+                        const auto& def2 = inst2.def;
+                        const auto* tt = findRpgTemplateById(def2.rpgTemplateId);
+                        if (tt) addContribution(contrib, tt->baseStats, static_cast<float>(std::max(1, inst2.quantity)));
+                        for (const auto& affId : def2.rpgAffixIds) {
+                            if (const auto* a = findAffix2(affId)) addContribution(contrib, a->stats, static_cast<float>(std::max(1, inst2.quantity)));
+                        }
+                        for (const auto& g : def2.rpgSocketed) {
+                            if (const auto* gt = findRpgTemplateById(g.templateId)) {
+                                addContribution(contrib, gt->baseStats, static_cast<float>(std::max(1, inst2.quantity)));
+                            }
+                            for (const auto& ga : g.affixIds) {
+                                if (const auto* a = findAffix2(ga)) addContribution(contrib, a->stats, static_cast<float>(std::max(1, inst2.quantity)));
+                            }
+                        }
+                    }
+                    return contrib;
+                };
+
+                auto computeDerivedForEquipped = [&](const auto& eq) {
+                    Engine::Gameplay::RPG::StatContribution mods = contributionFromEquipped(eq);
+                    addContribution(mods, collectRpgTalentContribution(), 1.0f);
+                    Engine::Gameplay::RPG::AggregationInput input{};
+                    input.attributes = activeArchetype_.rpgAttributes;
+                    input.base.baseHealth = heroMaxHp_;
+                    input.base.baseShields = heroShield_;
+                    input.base.baseArmor = heroHealthArmor_;
+                    input.base.baseMoveSpeed = heroMoveSpeed_;
+                    input.base.baseAttackPower = projectileDamage_;
+                    input.base.baseSpellPower = projectileDamage_;
+                    input.base.baseAttackSpeed = std::max(0.1f, attackSpeedMul_ * attackSpeedBuffMul_);
+                    input.contributions = {mods};
+                    return Engine::Gameplay::RPG::aggregateDerivedStats(input);
+                };
+
+                auto slotIndex = [&](Game::RPG::EquipmentSlot slot) -> std::size_t {
+                    return static_cast<std::size_t>(slot);
+                };
+                std::size_t target = slotIndex(t->slot);
+                if (t->slot == Game::RPG::EquipmentSlot::Ring1) {
+                    const std::size_t r1 = slotIndex(Game::RPG::EquipmentSlot::Ring1);
+                    const std::size_t r2 = slotIndex(Game::RPG::EquipmentSlot::Ring2);
+                    if (r1 < equipped_.size() && !equipped_[r1].has_value()) target = r1;
+                    else if (r2 < equipped_.size() && !equipped_[r2].has_value()) target = r2;
+                    else target = r1;
+                }
+
+                const Engine::Gameplay::RPG::DerivedStats cur = (registry_.has<Engine::ECS::RPGStats>(hero_) && registry_.get<Engine::ECS::RPGStats>(hero_))
+                                                                  ? registry_.get<Engine::ECS::RPGStats>(hero_)->derived
+                                                                  : computeDerivedForEquipped(equipped_);
+                auto eq2 = equipped_;
+                if (target < eq2.size()) {
+                    eq2[target] = *detailInst;
+                }
+                const Engine::Gameplay::RPG::DerivedStats nxt = computeDerivedForEquipped(eq2);
+
+                auto deltaColor = [&](float d) {
+                    if (d > 0.0001f) return Engine::Color{155, 235, 175, 230};
+                    if (d < -0.0001f) return Engine::Color{255, 165, 165, 230};
+                    return Engine::Color{185, 210, 235, 220};
+                };
+                auto addDeltaLine = [&](const std::string& label, float d, const std::string& suffix = std::string{}) {
+                    if (std::abs(d) < 0.0001f) return;
+                    std::ostringstream s;
+                    s.setf(std::ios::fixed);
+                    s << label << " ";
+                    if (suffix == "%") {
+                        s << (d >= 0.0f ? "+" : "") << std::setprecision(0) << (d * 100.0f) << "%";
+                    } else if (suffix == "x") {
+                        s << (d >= 0.0f ? "+" : "") << std::setprecision(2) << d;
+                    } else {
+                        s << (d >= 0.0f ? "+" : "") << std::setprecision(0) << d;
+                        if (!suffix.empty()) s << suffix;
+                    }
+                    drawTextUnified(s.str(), Engine::Vec2{col3X + 14.0f, dy}, 0.78f * uiScale, deltaColor(d));
+                    dy += 16.0f * uiScale;
+                };
+
+                dy += 6.0f;
+                drawTextUnified("Compare (equip)", Engine::Vec2{col3X + 12.0f, dy}, 0.84f * uiScale, Engine::Color{200, 230, 255, 230});
+                dy += 18.0f * uiScale;
+                addDeltaLine("Attack Power", nxt.attackPower - cur.attackPower);
+                addDeltaLine("Attack Speed", nxt.attackSpeed - cur.attackSpeed, "x");
+                addDeltaLine("Move Speed", nxt.moveSpeed - cur.moveSpeed);
+                addDeltaLine("Max Health", nxt.healthMax - cur.healthMax);
+                addDeltaLine("Max Shields", nxt.shieldMax - cur.shieldMax);
+                addDeltaLine("Armor", nxt.armor - cur.armor);
+                addDeltaLine("Crit", nxt.critChance - cur.critChance, "%");
+            }
+
+            if (detail->rpgSocketsMax > 0) {
+                dy += 4.0f;
+                std::ostringstream s;
+                s << "Sockets: " << detail->rpgSocketed.size() << "/" << detail->rpgSocketsMax;
+                drawTextUnified(s.str(), Engine::Vec2{col3X + 12.0f, dy}, 0.84f * uiScale, Engine::Color{200, 230, 255, 230});
+                dy += 18.0f * uiScale;
+                for (std::size_t i = 0; i < detail->rpgSocketed.size() && i < 3; ++i) {
+                    const auto& g = detail->rpgSocketed[i];
+                    std::string nm = g.templateId;
+                    if (const auto* gt = findRpgTemplateById(g.templateId)) nm = gt->name;
+                    addLine("• " + nm);
+                }
+                if (detail->rpgSocketed.size() < static_cast<std::size_t>(detail->rpgSocketsMax)) {
+                    addLine("• (empty)");
+                }
+            }
+
+            // Show a couple of affix name lines for flavor.
+            if (!detail->affixes.empty()) {
+                dy += 4.0f;
+                drawTextUnified("Affixes", Engine::Vec2{col3X + 12.0f, dy}, 0.84f * uiScale, Engine::Color{200, 230, 255, 230});
+                dy += 18.0f * uiScale;
+                for (std::size_t i = 0; i < detail->affixes.size() && i < 4; ++i) {
+                    addLine("• " + detail->affixes[i]);
+                }
+            }
+        } else if (!detail->affixes.empty()) {
+            drawTextUnified("Affixes", Engine::Vec2{col3X + 12.0f, dy}, 0.84f * uiScale, Engine::Color{200, 230, 255, 230});
+            dy += 18.0f * uiScale;
+            for (std::size_t i = 0; i < detail->affixes.size() && i < 6; ++i) {
+                drawTextUnified("• " + detail->affixes[i], Engine::Vec2{col3X + 14.0f, dy}, 0.78f * uiScale,
+                                Engine::Color{185, 220, 255, 215});
+                dy += 16.0f * uiScale;
+            }
+        }
+    }
+
+    // Hover tooltip near mouse (lightweight; complements Details card).
+    if (hoveredDef) {
+        std::vector<std::string> lines;
+        lines.push_back(stripRaritySuffix(hoveredDef->name));
+        if (!hoveredDef->rpgTemplateId.empty()) lines.push_back(hoveredDef->desc);
+        if (!hoveredDef->affixes.empty()) {
+            for (std::size_t i = 0; i < hoveredDef->affixes.size() && i < 3; ++i) {
+                lines.push_back("• " + hoveredDef->affixes[i]);
+            }
+        }
+        std::string clickHint = hoveredIsEquipped ? "Click: Unequip" : "Click: Equip";
+        if (!hoveredIsEquipped) {
+            const auto* t = findRpgTemplateFor(*hoveredDef);
+            auto tgt = socketTarget();
+            if (t && t->socketable && tgt.has_value() &&
+                *tgt < equipped_.size() && equipped_[*tgt].has_value()) {
+                const auto& targetDef = equipped_[*tgt]->def;
+                if (targetDef.rpgSocketsMax > 0 &&
+                    static_cast<int>(targetDef.rpgSocketed.size()) < targetDef.rpgSocketsMax) {
+                    clickHint = "Click/Drag: Socket into equipped item";
+                    lines.push_back("Target: " + targetDef.name);
+                }
+            }
+        } else {
+            if (hoveredEquipSlotIdx.has_value() && *hoveredEquipSlotIdx < equipped_.size() &&
+                equipped_[*hoveredEquipSlotIdx].has_value()) {
+                const auto& def = equipped_[*hoveredEquipSlotIdx]->def;
+                if (!def.rpgSocketed.empty()) {
+                    lines.push_back("Right-click: Remove gem (destroys it)");
+                }
+            }
+        }
+        if (!hoveredIsEquipped) lines.push_back("Drag: Move / swap / equip");
+        lines.push_back(clickHint);
+
+        float tw = 360.0f;
+        float th = 18.0f + static_cast<float>(lines.size()) * 16.0f;
+        float tx = static_cast<float>(mx) + 18.0f;
+        float ty = static_cast<float>(my) + 18.0f;
+        // clamp within viewport
+        tx = std::min(tx, px + panelW - tw - 10.0f);
+        ty = std::min(ty, py + panelH - th - 10.0f);
+        render_->drawFilledRect(Engine::Vec2{tx, ty}, Engine::Vec2{tw, th}, Engine::Color{8, 12, 18, 235});
+        render_->drawFilledRect(Engine::Vec2{tx + 1.0f, ty + 1.0f}, Engine::Vec2{tw - 2.0f, th - 2.0f}, Engine::Color{16, 22, 32, 235});
+        float ly = ty + 8.0f;
+        for (std::size_t i = 0; i < lines.size(); ++i) {
+            Engine::Color c = (i == 0) ? rarityCol(hoveredDef->rarity) : Engine::Color{185, 210, 235, 220};
+            drawTextUnified(lines[i], Engine::Vec2{tx + 10.0f, ly}, 0.78f * uiScale, c);
+            ly += 16.0f;
+        }
+    }
+
+    // Apply pending interactions at end of draw to avoid use-after-free on pointers above.
+    bool didMutate = false;
+    if (pendingUnsocket.has_value()) {
+        const std::size_t eqIdx = *pendingUnsocket;
+        if (eqIdx < equipped_.size() && equipped_[eqIdx].has_value()) {
+            auto& def = equipped_[eqIdx]->def;
+            if (!def.rpgSocketed.empty()) {
+                def.rpgSocketed.pop_back();  // destroys the gem; frees a socket
+                didMutate = true;
+            }
+        }
+    } else if (pendingUnequip.has_value()) {
+        (void)unequipRpgSlot(*pendingUnequip);
+        didMutate = true;
+        const std::size_t uneqIdx = static_cast<std::size_t>(*pendingUnequip);
+        if (characterScreenSocketTargetSlotIdx_.has_value() && *characterScreenSocketTargetSlotIdx_ == uneqIdx) {
+            if (uneqIdx >= equipped_.size() || !equipped_[uneqIdx].has_value()) {
+                characterScreenSocketTargetSlotIdx_.reset();
+            }
+        }
+    } else if (pendingSwap.has_value()) {
+        if (pendingSwap->a < inventory_.size() && pendingSwap->b < inventory_.size()) {
+            std::swap(inventory_[pendingSwap->a], inventory_[pendingSwap->b]);
+            inventorySelected_ = static_cast<int>(pendingSwap->b);
+            clampInventorySelection();
+            didMutate = true;
+        }
+    } else if (pendingSocket.has_value()) {
+        const std::size_t invIdx = pendingSocket->inventoryIdx;
+        const std::size_t eqIdx = pendingSocket->equippedSlotIdx;
+        if (invIdx < inventory_.size() && eqIdx < equipped_.size() && equipped_[eqIdx].has_value()) {
+            auto& gemInst = inventory_[invIdx];
+            const auto* gemT = findRpgTemplateFor(gemInst.def);
+            auto& targetDef = equipped_[eqIdx]->def;
+            if (gemT && gemT->socketable && targetDef.rpgSocketsMax > 0 &&
+                static_cast<int>(targetDef.rpgSocketed.size()) < targetDef.rpgSocketsMax) {
+                ItemDefinition::RpgSocketedGem g{};
+                g.templateId = gemInst.def.rpgTemplateId;
+                g.affixIds = gemInst.def.rpgAffixIds;
+                targetDef.rpgSocketed.push_back(std::move(g));
+                if (gemInst.quantity > 1) {
+                    gemInst.quantity -= 1;
+                } else {
+                    inventory_.erase(inventory_.begin() + static_cast<std::ptrdiff_t>(invIdx));
+                }
+                clampInventorySelection();
+                didMutate = true;
+            }
+        }
+    } else if (pendingEquip.has_value()) {
+        (void)equipInventoryItem(*pendingEquip);
+        didMutate = true;
+    }
+
+    // Keep derived stats synced immediately for UI feedback while paused.
+    if (didMutate && hero_ != Engine::ECS::kInvalidEntity) {
+        updateHeroRpgStats();
     }
 }
 
@@ -7960,13 +9670,28 @@ void GameRoot::resetRun() {
     travelShopUnlocked_ = false;
     inventory_.clear();
     inventory_.shrink_to_fit();
+    inventoryCapacity_ = baseInventoryCapacity_;
     inventorySelected_ = -1;
+    equipped_.fill(std::nullopt);
+    inventoryGridScroll_ = 0.0f;
+    rpgTalentRanks_.clear();
+    rpgTalentPointsSpent_ = 0;
+    rpgTalentLevelCached_ = 0;
+    rpgTalentArchetypeCached_.clear();
+    combatDebugLines_.clear();
     inventoryScrollLeftPrev_ = false;
     inventoryScrollRightPrev_ = false;
     inventoryCyclePrev_ = false;
     shopkeeper_ = Engine::ECS::kInvalidEntity;
     interactPrev_ = false;
     useItemPrev_ = false;
+    hotbarItemIds_.fill(std::nullopt);
+    hotbar1Prev_ = false;
+    hotbar2Prev_ = false;
+    rpgConsumableCooldowns_.clear();
+    rpgConsumableOverTime_.clear();
+    rpgActiveBuffs_.clear();
+    rpgActiveBuffContribution_ = {};
     chainBounces_ = 0;
     selectedMiniUnits_.clear();
     selectingMiniUnits_ = false;
@@ -8131,9 +9856,10 @@ void GameRoot::updateRemoteCombat(const Engine::TimeStep& step) {
                         buff.shieldArmorBonus += armorDelta;
                         buff.damageTakenMultiplier *= st->container.damageTakenMultiplier();
                     }
-                    Engine::Gameplay::applyDamage(*ehp, dmg, buff);
+                    float dealt = Game::RpgDamage::apply(registry_, ent, bestEnemy, *ehp, dmg, buff, useRpgCombat_, rpgResolverConfig_, rng_,
+                                                         "remote_melee", [this](const std::string& line) { pushCombatDebugLine(line); });
                     if (!ehp->alive()) {
-                        hp->currentHealth = std::min(hp->maxHealth, hp->currentHealth + dmg.baseDamage * 0.1f);
+                        hp->currentHealth = std::min(hp->maxHealth, hp->currentHealth + dealt * 0.1f);
                     }
                 }
                 cd = fireInterval_;
@@ -8151,7 +9877,7 @@ void GameRoot::updateRemoteCombat(const Engine::TimeStep& step) {
             Engine::Gameplay::DamageEvent dmg{};
             dmg.baseDamage = projectileDamage_;
             dmg.type = Engine::Gameplay::DamageType::Normal;
-            registry_.emplace<Engine::ECS::Projectile>(p, Engine::ECS::Projectile{dir * speed, dmg, projectileLifetime_, lifestealPercent_, chainBounces_});
+            registry_.emplace<Engine::ECS::Projectile>(p, Engine::ECS::Projectile{dir * speed, dmg, projectileLifetime_, lifestealPercent_, chainBounces_, ent});
             registry_.emplace<Engine::ECS::ProjectileTag>(p, Engine::ECS::ProjectileTag{});
 
             cd = fireInterval_;

@@ -125,6 +125,10 @@ Loaded from `data/input_bindings.json`; fully remappable via file override.
 - Toggle Ability/Item Shop: `B`
 - Build menu (builder): `V`
 - Character screen: `I`
+  - Click inventory items to equip; click equipped slots to unequip.
+  - Gems are socketable: hover an equipped item with sockets, then click a gem to insert it.
+  - Drag-and-drop: drag inventory items to swap positions; drag a gem onto an equipped item to socket it.
+  - Right-Click an item with a gem socketed to destroy the gem.
 - Pause: `Esc`
 - Restart run (debug helper): `Backspace`
 - Menu back (fallback): `M`
@@ -157,6 +161,10 @@ Loaded from `data/input_bindings.json`; fully remappable via file override.
 
 ## Data-Driven Tuning
 - `data/gameplay.json` — base stats for heroes/enemies/projectiles, wave pacing, rewards, dash, events, hotzones, shop, XP growth, boss scaling.
+  - Feature flags: `useRpgCombat`, `useRpgLoot`, `combatDebugOverlay` (RPG resolver debug panel).
+  - RPG drop/shop tuning: `drops.rpgEquipChanceNormal`, `drops.rpgEquipMiniBossCount`, `drops.rpgEquipBossCount`, `drops.rpgMiniBossGemChance`, `shop.rpgEquipChance`, `shop.rpgEquipCount`.
+- `data/rpg/loot.json` — RPG equipment templates, affixes, and icon coordinates for `assets/Sprites/Equipment/*.png`.
+  - Regenerate via `python3 scripts/gen_rpg_loot.py`.
 - `data/abilities.json` (fallback `data/abilities_default.json`) — ability names, descriptions, cooldowns, costs, semantic types.
 - `data/menu_presets.json` — archetype & difficulty lists, colors, descriptions, offensive types; used for character select.
 - `data/units.json` — mini-unit and building definitions (stats, costs, textures, AI params).

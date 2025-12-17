@@ -15,9 +15,9 @@ InputKey toInputKey(const std::string& key) {
         if (k == "w") return InputKey::Forward;
         if (k == "e") return InputKey::Interact;
         if (k == "q") return InputKey::UseItem;
-        if (k == "r") return InputKey::Ultimate;
+        if (k == "r") return InputKey::Hotbar1;
         if (k == "f1") return InputKey::Reload;
-        if (k == "f") return InputKey::Reload;
+        if (k == "f") return InputKey::Hotbar2;
         if (k == "m") return InputKey::MenuBack;
         if (k == "1") return InputKey::Ability1;
         if (k == "2") return InputKey::Ability2;
@@ -127,6 +127,16 @@ ActionState ActionMapper::sample(const InputState& input) const {
             act.useItem = true;
             break;
         }
+    }
+    act.hotbar1 = input.isDown(InputKey::Hotbar1);
+    for (const auto& key : bindings_.hotbar1) {
+        InputKey mapped = toInputKey(key);
+        if (mapped != InputKey::Count && input.isDown(mapped)) { act.hotbar1 = true; break; }
+    }
+    act.hotbar2 = input.isDown(InputKey::Hotbar2);
+    for (const auto& key : bindings_.hotbar2) {
+        InputKey mapped = toInputKey(key);
+        if (mapped != InputKey::Count && input.isDown(mapped)) { act.hotbar2 = true; break; }
     }
     act.pause = input.isDown(InputKey::Pause);
     for (const auto& key : bindings_.pause) {

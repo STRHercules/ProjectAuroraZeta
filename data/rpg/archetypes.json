@@ -1,0 +1,84 @@
+{
+  "archetypes": [
+    {
+      "id": "tank",
+      "name": "Jack",
+      "bio": "Armored vanguard that anchors lanes and keeps foes busy with shields and taunts.",
+      "attributes": { "STR": 4, "DEX": 2, "INT": 1, "END": 5, "LCK": 1 },
+      "specialties": ["Frontline", "Taunt", "Barrier"],
+      "perks": ["Begins with bonus shields and slightly higher threat radius."]
+    },
+    {
+      "id": "healer",
+      "name": "Sally",
+      "bio": "Support caster who sustains allies and steadies fights when things snowball.",
+      "attributes": { "STR": 1, "DEX": 2, "INT": 4, "END": 3, "LCK": 2 },
+      "specialties": ["Support", "Cleanse", "Heal-over-time"],
+      "perks": ["Consumable cooldowns reduced slightly when healing allies."]
+    },
+    {
+      "id": "damage",
+      "name": "Robin",
+      "bio": "Flexible combatant who swaps stances to exploit enemy weaknesses.",
+      "attributes": { "STR": 3, "DEX": 4, "INT": 1, "END": 2, "LCK": 2 },
+      "specialties": ["Hybrid", "Weapon Swap", "Burst"],
+      "perks": ["First dodge after swap has a brief haste window."]
+    },
+    {
+      "id": "assassin",
+      "name": "María",
+      "bio": "High burst skirmisher relying on speed and positioning over armor.",
+      "attributes": { "STR": 3, "DEX": 5, "INT": 1, "END": 1, "LCK": 3 },
+      "specialties": ["Burst", "Stealth", "Crit"],
+      "perks": ["Critical hits briefly boost move speed."]
+    },
+    {
+      "id": "builder",
+      "name": "George",
+      "bio": "Deploys structures and mini-units to hold ground and farm resources.",
+      "attributes": { "STR": 2, "DEX": 2, "INT": 3, "END": 3, "LCK": 2 },
+      "specialties": ["Structures", "Economy", "Support"],
+      "perks": ["Starts with +1 supply and cheaper first structure."]
+    },
+    {
+      "id": "support",
+      "name": "Gunther",
+      "bio": "Polearm specialist that controls space and buffs allies mid-line.",
+      "attributes": { "STR": 3, "DEX": 3, "INT": 2, "END": 3, "LCK": 2 },
+      "specialties": ["Polearm", "Zone Control", "Buffs"],
+      "perks": ["Polearm sweeps have mild parry strength versus projectiles."]
+    },
+    {
+      "id": "special",
+      "name": "Ellis",
+      "bio": "Experimental kit with balanced stats and light holy utility.",
+      "attributes": { "STR": 3, "DEX": 3, "INT": 2, "END": 3, "LCK": 2 },
+      "specialties": ["Balanced", "Holy", "Sustain"],
+      "perks": ["Takes reduced damage during brief consecrate windows."]
+    },
+    {
+      "id": "summoner",
+      "name": "Sage",
+      "bio": "Relies on beetle and serpent companions; fragile without them.",
+      "attributes": { "STR": 1, "DEX": 2, "INT": 4, "END": 2, "LCK": 3 },
+      "specialties": ["Pets", "Leash", "Control"],
+      "perks": ["Summons inherit a portion of Luck for drop chance."]
+    },
+    {
+      "id": "druid",
+      "name": "Raven",
+      "bio": "Shapeshifts between ranged human form and aggressive beast forms.",
+      "attributes": { "STR": 3, "DEX": 3, "INT": 3, "END": 2, "LCK": 2 },
+      "specialties": ["Shapeshift", "Hybrid", "Regen"],
+      "perks": ["Form swaps cleanse slows and grant brief regen pulses."]
+    },
+    {
+      "id": "wizard",
+      "name": "Jade",
+      "bio": "Elementalist weaving fire and lightning to control the battlefield.",
+      "attributes": { "STR": 1, "DEX": 2, "INT": 5, "END": 2, "LCK": 3 },
+      "specialties": ["Elemental", "Control", "AoE"],
+      "perks": ["Cycle bonus: first spell after element swap gains crit chance."]
+    }
+  ]
+}

@@ -26,6 +26,8 @@ struct InputBindings {
     std::vector<std::string> swapWeapon;
     std::vector<std::string> interact;
     std::vector<std::string> useItem;
+    std::vector<std::string> hotbar1;
+    std::vector<std::string> hotbar2;
     std::vector<std::string> ability1;
     std::vector<std::string> ability2;
     std::vector<std::string> ability3;

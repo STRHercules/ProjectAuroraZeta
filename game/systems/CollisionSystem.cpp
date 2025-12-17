@@ -13,6 +13,7 @@
 #include "../../engine/ecs/components/SpriteAnimation.h"
 #include "../../engine/gameplay/Combat.h"
 #include "BuffSystem.h"
+#include "RpgDamage.h"
 #include "../components/HitFlash.h"
 #include "../components/DamageNumber.h"
 #include "../components/Invulnerable.h"
@@ -65,7 +66,9 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                             buff.damageTakenMultiplier *= st->container.damageTakenMultiplier();
                         }
                         if (!stasis) {
-                            Engine::Gameplay::applyDamage(health, proj.damage, buff);
+                            Engine::ECS::Entity attacker = (proj.owner != Engine::ECS::kInvalidEntity) ? proj.owner : hero_;
+                            (void)Game::RpgDamage::apply(registry, attacker, targetEnt, health, proj.damage, buff,
+                                                         useRpgCombat_, rpgConfig_, rng_, "proj", debugSink_);
                         }
 
                         // Elemental spell effects (Wizard)
@@ -117,7 +120,9 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                                                     thornBuff.shieldArmorBonus += armorDelta;
                                                     thornBuff.damageTakenMultiplier *= st2->container.damageTakenMultiplier();
                                                 }
-                                                Engine::Gameplay::applyDamage(hp2, thorn, thornBuff);
+                                                Engine::ECS::Entity attacker = (proj.owner != Engine::ECS::kInvalidEntity) ? proj.owner : hero_;
+                                                (void)Game::RpgDamage::apply(registry, attacker, e2, hp2, thorn, thornBuff,
+                                                                             useRpgCombat_, rpgConfig_, rng_, "thorn_splash", debugSink_);
                                             }
                                         });
                                     break;
@@ -159,7 +164,9 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                                             splashBuff.shieldArmorBonus += armorDelta;
                                             splashBuff.damageTakenMultiplier *= st2->container.damageTakenMultiplier();
                                         }
-                                        Engine::Gameplay::applyDamage(hp2, splash, splashBuff);
+                                        Engine::ECS::Entity attacker = (proj.owner != Engine::ECS::kInvalidEntity) ? proj.owner : hero_;
+                                        (void)Game::RpgDamage::apply(registry, attacker, e2, hp2, splash, splashBuff,
+                                                                     useRpgCombat_, rpgConfig_, rng_, "aoe", debugSink_);
                                     }
                                 });
                         }
@@ -221,7 +228,7 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                                         Engine::ECS::Projectile{Engine::Vec2{dir.x * speed, dir.y * speed},
                                                                 bounceDmg,
                                                                 proj.lifetime,
-                                                                proj.lifesteal, proj.chain - 1});
+                                                                proj.lifesteal, proj.chain - 1, proj.owner});
                                     registry.emplace<Engine::ECS::ProjectileTag>(np, Engine::ECS::ProjectileTag{});
                                 }
                             }
@@ -282,7 +289,8 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                             buff.shieldArmorBonus += armorDelta;
                             buff.damageTakenMultiplier *= stHero->container.damageTakenMultiplier();
                         }
-                        Engine::Gameplay::applyDamage(heroHp, contact, buff);
+                        (void)Game::RpgDamage::apply(registry, enemyEnt, heroEnt, heroHp, contact, buff,
+                                                     useRpgCombat_, rpgConfig_, rng_, "contact_hero", debugSink_);
                         float dealt = (preHealth + preShields) - (heroHp.currentHealth + heroHp.currentShields);
                         if (dealt > 0.0f) {
                             if (auto* flash = registry.get<Game::HitFlash>(heroEnt)) {
@@ -315,7 +323,8 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                                             enemyBuff.shieldArmorBonus += armorDelta;
                                             enemyBuff.damageTakenMultiplier *= stE->container.damageTakenMultiplier();
                                         }
-                                        Engine::Gameplay::applyDamage(*enemyHp, reflectDmg, enemyBuff);
+                                        (void)Game::RpgDamage::apply(registry, heroEnt, enemyEnt, *enemyHp, reflectDmg, enemyBuff,
+                                                                     useRpgCombat_, rpgConfig_, rng_, "thorn_reflect", debugSink_);
                                     }
                                 }
                             }
@@ -362,7 +371,8 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                             buff.shieldArmorBonus += armorDelta;
                             buff.damageTakenMultiplier *= stEscort->container.damageTakenMultiplier();
                         }
-                        Engine::Gameplay::applyDamage(escortHp, contact, buff);
+                        (void)Game::RpgDamage::apply(registry, enemyEnt, escortEnt, escortHp, contact, buff,
+                                                     useRpgCombat_, rpgConfig_, rng_, "contact_escort", debugSink_);
                         if (auto* flash = registry.get<Game::HitFlash>(escortEnt)) {
                             flash->timer = 0.12f;
                         } else {
@@ -410,7 +420,8 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                             buff.shieldArmorBonus += armorDelta;
                             buff.damageTakenMultiplier *= stMini->container.damageTakenMultiplier();
                         }
-                        Engine::Gameplay::applyDamage(miniHp, contact, buff);
+                        (void)Game::RpgDamage::apply(registry, enemyEnt, miniEnt, miniHp, contact, buff,
+                                                     useRpgCombat_, rpgConfig_, rng_, "contact_mini", debugSink_);
                         if (auto* flash = registry.get<Game::HitFlash>(miniEnt)) {
                             flash->timer = 0.12f;
                         } else {
@@ -452,7 +463,8 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                             buff.shieldArmorBonus += armorDelta;
                             buff.damageTakenMultiplier *= stB->container.damageTakenMultiplier();
                         }
-                        Engine::Gameplay::applyDamage(bHp, contact, buff);
+                        (void)Game::RpgDamage::apply(registry, enemyEnt, bEnt, bHp, contact, buff,
+                                                     useRpgCombat_, rpgConfig_, rng_, "contact_building", debugSink_);
                         if (auto* flash = registry.get<Game::HitFlash>(bEnt)) {
                             flash->timer = 0.12f;
                         } else {

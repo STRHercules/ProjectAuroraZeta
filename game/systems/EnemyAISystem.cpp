@@ -16,6 +16,7 @@
 #include "../../engine/ecs/components/Health.h"
 #include "../../engine/ecs/components/Status.h"
 #include "../components/StatusEffects.h"
+#include "RpgDamage.h"
 
 namespace Game {
 
@@ -106,8 +107,12 @@ void EnemyAISystem::update(Engine::ECS::Registry& registry, Engine::ECS::Entity 
         outTf = heroCloaked ? nullptr : heroTf;
     };
 
+    const bool useRpg = useRpgCombat_;
+    const auto rpgCfg = rpgConfig_;
+    std::mt19937* rpgRng = rng_;
+    auto debugSink = debugSink_;
     registry.view<Engine::ECS::Transform, Engine::ECS::Velocity, Engine::ECS::Health, Game::EnemyAttributes>(
-        [&registry, heroTf, dt, &pickNearestTarget, &pickNearestEscort](Engine::ECS::Entity e, Engine::ECS::Transform& tf, Engine::ECS::Velocity& vel,
+        [&registry, heroTf, dt, hero, useRpg, rpgCfg, rpgRng, debugSink, &pickNearestTarget, &pickNearestEscort](Engine::ECS::Entity e, Engine::ECS::Transform& tf, Engine::ECS::Velocity& vel,
                             Engine::ECS::Health& hp, const Game::EnemyAttributes& attr) {
             if (!hp.alive()) {
                 vel.value = {0.0f, 0.0f};
@@ -147,7 +152,11 @@ void EnemyAISystem::update(Engine::ECS::Registry& registry, Engine::ECS::Entity 
                     Engine::Gameplay::DamageEvent burn{};
                     burn.type = Engine::Gameplay::DamageType::Spell;
                     burn.baseDamage = se->burnDps * dt;
-                    Engine::Gameplay::applyDamage(hp, burn, {});
+                    if (useRpg && rpgRng) {
+                        (void)Game::RpgDamage::apply(registry, hero, e, hp, burn, {}, useRpg, rpgCfg, *rpgRng, "dot_burn", debugSink);
+                    } else {
+                        Engine::Gameplay::applyDamage(hp, burn, {});
+                    }
                     se->burnTimer -= dt;
                     if (se->burnTimer <= 0.0f) se->burnDps = 0.0f;
                 }
@@ -155,7 +164,11 @@ void EnemyAISystem::update(Engine::ECS::Registry& registry, Engine::ECS::Entity 
                     Engine::Gameplay::DamageEvent thorn{};
                     thorn.type = Engine::Gameplay::DamageType::Spell;
                     thorn.baseDamage = se->earthDps * dt;
-                    Engine::Gameplay::applyDamage(hp, thorn, {});
+                    if (useRpg && rpgRng) {
+                        (void)Game::RpgDamage::apply(registry, hero, e, hp, thorn, {}, useRpg, rpgCfg, *rpgRng, "dot_earth", debugSink);
+                    } else {
+                        Engine::Gameplay::applyDamage(hp, thorn, {});
+                    }
                     se->earthTimer -= dt;
                     if (se->earthTimer <= 0.0f) se->earthDps = 0.0f;
                 }

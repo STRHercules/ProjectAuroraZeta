@@ -1,0 +1,4921 @@
+{
+  "affixes": [
+    {
+      "id": "atk_flat_s",
+      "name": "+3 Attack Power",
+      "stats": {
+        "flat": {
+          "attackPower": 3
+        }
+      }
+    },
+    {
+      "id": "atk_flat_m",
+      "name": "+6 Attack Power",
+      "stats": {
+        "flat": {
+          "attackPower": 6
+        }
+      }
+    },
+    {
+      "id": "spell_flat_s",
+      "name": "+4 Spell Power",
+      "stats": {
+        "flat": {
+          "spellPower": 4
+        }
+      }
+    },
+    {
+      "id": "spell_flat_m",
+      "name": "+8 Spell Power",
+      "stats": {
+        "flat": {
+          "spellPower": 8
+        }
+      }
+    },
+    {
+      "id": "armor_flat_s",
+      "name": "+1 Armor",
+      "stats": {
+        "flat": {
+          "armor": 1
+        }
+      }
+    },
+    {
+      "id": "armor_flat_m",
+      "name": "+2 Armor",
+      "stats": {
+        "flat": {
+          "armor": 2
+        }
+      }
+    },
+    {
+      "id": "hp_flat_s",
+      "name": "+12 Max Health",
+      "stats": {
+        "flat": {
+          "healthMax": 12
+        }
+      }
+    },
+    {
+      "id": "hp_flat_m",
+      "name": "+25 Max Health",
+      "stats": {
+        "flat": {
+          "healthMax": 25
+        }
+      }
+    },
+    {
+      "id": "shield_flat_s",
+      "name": "+12 Max Shields",
+      "stats": {
+        "flat": {
+          "shieldMax": 12
+        }
+      }
+    },
+    {
+      "id": "shield_flat_m",
+      "name": "+25 Max Shields",
+      "stats": {
+        "flat": {
+          "shieldMax": 25
+        }
+      }
+    },
+    {
+      "id": "as_mult_s",
+      "name": "+6% Attack Speed",
+      "stats": {
+        "mult": {
+          "attackSpeed": 0.06
+        }
+      }
+    },
+    {
+      "id": "ms_mult_s",
+      "name": "+5% Move Speed",
+      "stats": {
+        "mult": {
+          "moveSpeed": 0.05
+        }
+      }
+    },
+    {
+      "id": "crit_flat_s",
+      "name": "+3% Crit Chance",
+      "stats": {
+        "flat": {
+          "critChance": 0.03
+        }
+      }
+    },
+    {
+      "id": "crit_flat_m",
+      "name": "+6% Crit Chance",
+      "stats": {
+        "flat": {
+          "critChance": 0.06
+        }
+      }
+    },
+    {
+      "id": "ten_flat_s",
+      "name": "+4 Tenacity",
+      "stats": {
+        "flat": {
+          "tenacity": 4
+        }
+      }
+    },
+    {
+      "id": "eva_flat_s",
+      "name": "+3 Evasion",
+      "stats": {
+        "flat": {
+          "evasion": 3
+        }
+      }
+    },
+    {
+      "id": "arp_flat_s",
+      "name": "+3 Armor Pen",
+      "stats": {
+        "flat": {
+          "armorPen": 3
+        }
+      }
+    },
+    {
+      "id": "cdr_flat_s",
+      "name": "+3% Cooldown Reduction",
+      "stats": {
+        "flat": {
+          "cooldownReduction": 0.03
+        }
+      }
+    },
+    {
+      "id": "gold_flat_s",
+      "name": "+5% Gold Gain",
+      "stats": {
+        "flat": {
+          "goldGainMult": 0.05
+        }
+      }
+    },
+    {
+      "id": "rarity_flat_s",
+      "name": "+0.6 Rarity Score",
+      "stats": {
+        "flat": {
+          "rarityScore": 0.6
+        }
+      }
+    },
+    {
+      "id": "fire_res_s",
+      "name": "+8% Fire Resist",
+      "stats": {
+        "flat": {
+          "resists": {
+            "Fire": 0.08
+          }
+        }
+      }
+    },
+    {
+      "id": "frost_res_s",
+      "name": "+8% Frost Resist",
+      "stats": {
+        "flat": {
+          "resists": {
+            "Frost": 0.08
+          }
+        }
+      }
+    },
+    {
+      "id": "shock_res_s",
+      "name": "+8% Shock Resist",
+      "stats": {
+        "flat": {
+          "resists": {
+            "Shock": 0.08
+          }
+        }
+      }
+    },
+    {
+      "id": "poison_res_s",
+      "name": "+8% Poison Resist",
+      "stats": {
+        "flat": {
+          "resists": {
+            "Poison": 0.08
+          }
+        }
+      }
+    },
+    {
+      "id": "arcane_res_s",
+      "name": "+8% Arcane Resist",
+      "stats": {
+        "flat": {
+          "resists": {
+            "Arcane": 0.08
+          }
+        }
+      }
+    }
+  ],
+  "items": [
+    {
+      "id": "green_ring",
+      "name": "Green Ring",
+      "slot": 6,
+      "rarity": 1,
+      "iconSheet": "Gear.png",
+      "iconRow": 0,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "critChance": 0.02
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "crit_flat_s",
+        "crit_flat_m",
+        "atk_flat_s",
+        "spell_flat_s",
+        "rarity_flat_s"
+      ]
+    },
+    {
+      "id": "blue_ring",
+      "name": "Blue Ring",
+      "slot": 6,
+      "rarity": 2,
+      "iconSheet": "Gear.png",
+      "iconRow": 0,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "critChance": 0.03
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "crit_flat_s",
+        "crit_flat_m",
+        "atk_flat_s",
+        "spell_flat_s",
+        "rarity_flat_s"
+      ]
+    },
+    {
+      "id": "orange_ring",
+      "name": "Orange Ring",
+      "slot": 6,
+      "rarity": 3,
+      "iconSheet": "Gear.png",
+      "iconRow": 0,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "critChance": 0.04
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "crit_flat_s",
+        "crit_flat_m",
+        "atk_flat_s",
+        "spell_flat_s",
+        "rarity_flat_s"
+      ]
+    },
+    {
+      "id": "purple_ring",
+      "name": "Purple Ring",
+      "slot": 6,
+      "rarity": 4,
+      "iconSheet": "Gear.png",
+      "iconRow": 0,
+      "iconCol": 3,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "critChance": 0.05
+        }
+      },
+      "maxAffixes": 5,
+      "affixPool": [
+        "crit_flat_s",
+        "crit_flat_m",
+        "atk_flat_s",
+        "spell_flat_s",
+        "rarity_flat_s"
+      ]
+    },
+    {
+      "id": "grey_ring",
+      "name": "Grey Ring",
+      "slot": 6,
+      "rarity": 0,
+      "iconSheet": "Gear.png",
+      "iconRow": 0,
+      "iconCol": 4,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "critChance": 0.01
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "crit_flat_s",
+        "crit_flat_m",
+        "atk_flat_s",
+        "spell_flat_s",
+        "rarity_flat_s"
+      ]
+    },
+    {
+      "id": "yellow_ring",
+      "name": "Yellow Ring",
+      "slot": 6,
+      "rarity": 2,
+      "iconSheet": "Gear.png",
+      "iconRow": 0,
+      "iconCol": 5,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "critChance": 0.03
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "crit_flat_s",
+        "crit_flat_m",
+        "atk_flat_s",
+        "spell_flat_s",
+        "rarity_flat_s"
+      ]
+    },
+    {
+      "id": "green_amulet",
+      "name": "Green Amulet",
+      "slot": 8,
+      "rarity": 0,
+      "iconSheet": "Gear.png",
+      "iconRow": 0,
+      "iconCol": 6,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "healthMax": 10,
+          "tenacity": 2
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "hp_flat_s",
+        "hp_flat_m",
+        "ten_flat_s",
+        "fire_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "iron_amulet",
+      "name": "Iron Amulet",
+      "slot": 8,
+      "rarity": 1,
+      "iconSheet": "Gear.png",
+      "iconRow": 0,
+      "iconCol": 7,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "healthMax": 20,
+          "tenacity": 4
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "hp_flat_s",
+        "hp_flat_m",
+        "ten_flat_s",
+        "fire_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "basic_amulet",
+      "name": "Basic Amulet",
+      "slot": 8,
+      "rarity": 0,
+      "iconSheet": "Gear.png",
+      "iconRow": 0,
+      "iconCol": 8,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "healthMax": 10,
+          "tenacity": 2
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "hp_flat_s",
+        "hp_flat_m",
+        "ten_flat_s",
+        "fire_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "diamond_amulet",
+      "name": "Diamond Amulet",
+      "slot": 8,
+      "rarity": 3,
+      "iconSheet": "Gear.png",
+      "iconRow": 0,
+      "iconCol": 9,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "healthMax": 40,
+          "tenacity": 8
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "hp_flat_s",
+        "hp_flat_m",
+        "ten_flat_s",
+        "fire_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "heart_amulet",
+      "name": "Heart Amulet",
+      "slot": 8,
+      "rarity": 2,
+      "iconSheet": "Gear.png",
+      "iconRow": 0,
+      "iconCol": 10,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "healthMax": 30,
+          "tenacity": 6
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "hp_flat_s",
+        "hp_flat_m",
+        "ten_flat_s",
+        "fire_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "purple_amulet",
+      "name": "Purple Amulet",
+      "slot": 8,
+      "rarity": 4,
+      "iconSheet": "Gear.png",
+      "iconRow": 0,
+      "iconCol": 11,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "healthMax": 50,
+          "tenacity": 10
+        }
+      },
+      "maxAffixes": 5,
+      "affixPool": [
+        "hp_flat_s",
+        "hp_flat_m",
+        "ten_flat_s",
+        "fire_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "copper_chest_m",
+      "name": "Copper Chest (M)",
+      "slot": 1,
+      "rarity": 0,
+      "iconSheet": "Gear.png",
+      "iconRow": 1,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "armor": 1.8,
+          "healthMax": 11
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "armor_flat_s",
+        "hp_flat_s",
+        "ten_flat_s",
+        "fire_res_s"
+      ]
+    },
+    {
+      "id": "copper_cape",
+      "name": "Copper Cape",
+      "slot": 10,
+      "rarity": 0,
+      "iconSheet": "Gear.png",
+      "iconRow": 1,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "armor": 0.9,
+          "evasion": 3
+        },
+        "mult": {
+          "moveSpeed": 0.02
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "eva_flat_s",
+        "ms_mult_s",
+        "fire_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "iron_chest_m",
+      "name": "Iron Chest (M)",
+      "slot": 1,
+      "rarity": 1,
+      "iconSheet": "Gear.png",
+      "iconRow": 1,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "armor": 3.6,
+          "healthMax": 16
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "armor_flat_s",
+        "hp_flat_s",
+        "ten_flat_s",
+        "fire_res_s"
+      ]
+    },
+    {
+      "id": "iron_cape",
+      "name": "Iron Cape",
+      "slot": 10,
+      "rarity": 1,
+      "iconSheet": "Gear.png",
+      "iconRow": 1,
+      "iconCol": 3,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "armor": 1.8,
+          "evasion": 4
+        },
+        "mult": {
+          "moveSpeed": 0.024
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "eva_flat_s",
+        "ms_mult_s",
+        "fire_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "silver_chest_m",
+      "name": "Silver Chest (M)",
+      "slot": 1,
+      "rarity": 2,
+      "iconSheet": "Gear.png",
+      "iconRow": 1,
+      "iconCol": 4,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "armor": 5.4,
+          "healthMax": 21
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "armor_flat_s",
+        "hp_flat_s",
+        "ten_flat_s",
+        "fire_res_s"
+      ]
+    },
+    {
+      "id": "silver_cape",
+      "name": "Silver Cape",
+      "slot": 10,
+      "rarity": 2,
+      "iconSheet": "Gear.png",
+      "iconRow": 1,
+      "iconCol": 5,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "armor": 2.7,
+          "evasion": 5
+        },
+        "mult": {
+          "moveSpeed": 0.028
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "eva_flat_s",
+        "ms_mult_s",
+        "fire_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "gold_chest_m",
+      "name": "Gold Chest (M)",
+      "slot": 1,
+      "rarity": 3,
+      "iconSheet": "Gear.png",
+      "iconRow": 1,
+      "iconCol": 6,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "armor": 7.2,
+          "healthMax": 26
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "armor_flat_s",
+        "hp_flat_s",
+        "ten_flat_s",
+        "fire_res_s"
+      ]
+    },
+    {
+      "id": "gold_cape",
+      "name": "Gold Cape",
+      "slot": 10,
+      "rarity": 3,
+      "iconSheet": "Gear.png",
+      "iconRow": 1,
+      "iconCol": 7,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "armor": 3.6,
+          "evasion": 6
+        },
+        "mult": {
+          "moveSpeed": 0.032
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "eva_flat_s",
+        "ms_mult_s",
+        "fire_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "admantium_chest_m",
+      "name": "Admantium Chest (M)",
+      "slot": 1,
+      "rarity": 3,
+      "iconSheet": "Gear.png",
+      "iconRow": 1,
+      "iconCol": 8,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "armor": 9.0,
+          "healthMax": 31
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "armor_flat_s",
+        "hp_flat_s",
+        "ten_flat_s",
+        "fire_res_s"
+      ]
+    },
+    {
+      "id": "admantium_cape",
+      "name": "Admantium Cape",
+      "slot": 10,
+      "rarity": 3,
+      "iconSheet": "Gear.png",
+      "iconRow": 1,
+      "iconCol": 9,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "armor": 4.5,
+          "evasion": 7
+        },
+        "mult": {
+          "moveSpeed": 0.036000000000000004
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "eva_flat_s",
+        "ms_mult_s",
+        "fire_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "legendary_chest_m",
+      "name": "Legendary Chest (M)",
+      "slot": 1,
+      "rarity": 4,
+      "iconSheet": "Gear.png",
+      "iconRow": 1,
+      "iconCol": 10,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "armor": 10.8,
+          "healthMax": 36
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "armor_flat_s",
+        "hp_flat_s",
+        "ten_flat_s",
+        "fire_res_s"
+      ]
+    },
+    {
+      "id": "legendary_cape",
+      "name": "Legendary Cape",
+      "slot": 10,
+      "rarity": 4,
+      "iconSheet": "Gear.png",
+      "iconRow": 1,
+      "iconCol": 11,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "armor": 5.4,
+          "evasion": 8
+        },
+        "mult": {
+          "moveSpeed": 0.04
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "eva_flat_s",
+        "ms_mult_s",
+        "fire_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "copper_helmet",
+      "name": "Copper Helmet",
+      "slot": 0,
+      "rarity": 0,
+      "iconSheet": "Gear.png",
+      "iconRow": 2,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "armor": 1.0,
+          "healthMax": 11
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "armor_flat_s",
+        "hp_flat_s",
+        "ten_flat_s",
+        "fire_res_s"
+      ]
+    },
+    {
+      "id": "copper_wiz_cap",
+      "name": "Copper Wiz Cap",
+      "slot": 0,
+      "rarity": 0,
+      "iconSheet": "Gear.png",
+      "iconRow": 2,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "spellPower": 3,
+          "armor": 0.5
+        },
+        "mult": {
+          "moveSpeed": 0.01
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s",
+        "armor_flat_s"
+      ]
+    },
+    {
+      "id": "iron_helmet",
+      "name": "Iron Helmet",
+      "slot": 0,
+      "rarity": 1,
+      "iconSheet": "Gear.png",
+      "iconRow": 2,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "armor": 2.0,
+          "healthMax": 16
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "armor_flat_s",
+        "hp_flat_s",
+        "ten_flat_s",
+        "fire_res_s"
+      ]
+    },
+    {
+      "id": "iron_wizard_cap",
+      "name": "Iron Wizard Cap",
+      "slot": 0,
+      "rarity": 1,
+      "iconSheet": "Gear.png",
+      "iconRow": 2,
+      "iconCol": 3,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "spellPower": 6,
+          "armor": 0.9
+        },
+        "mult": {
+          "moveSpeed": 0.02
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s",
+        "armor_flat_s"
+      ]
+    },
+    {
+      "id": "silver_helmet",
+      "name": "Silver Helmet",
+      "slot": 0,
+      "rarity": 2,
+      "iconSheet": "Gear.png",
+      "iconRow": 2,
+      "iconCol": 4,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "armor": 3.0,
+          "healthMax": 21
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "armor_flat_s",
+        "hp_flat_s",
+        "ten_flat_s",
+        "fire_res_s"
+      ]
+    },
+    {
+      "id": "silver_wizard_cap",
+      "name": "Silver Wizard Cap",
+      "slot": 0,
+      "rarity": 2,
+      "iconSheet": "Gear.png",
+      "iconRow": 2,
+      "iconCol": 5,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "spellPower": 9,
+          "armor": 1.3
+        },
+        "mult": {
+          "moveSpeed": 0.03
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s",
+        "armor_flat_s"
+      ]
+    },
+    {
+      "id": "gold_helmet",
+      "name": "Gold Helmet",
+      "slot": 0,
+      "rarity": 3,
+      "iconSheet": "Gear.png",
+      "iconRow": 2,
+      "iconCol": 6,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "armor": 4.0,
+          "healthMax": 26
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "armor_flat_s",
+        "hp_flat_s",
+        "ten_flat_s",
+        "fire_res_s"
+      ]
+    },
+    {
+      "id": "gold_wizard_cap",
+      "name": "Gold Wizard Cap",
+      "slot": 0,
+      "rarity": 3,
+      "iconSheet": "Gear.png",
+      "iconRow": 2,
+      "iconCol": 7,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "spellPower": 12,
+          "armor": 1.7000000000000002
+        },
+        "mult": {
+          "moveSpeed": 0.04
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s",
+        "armor_flat_s"
+      ]
+    },
+    {
+      "id": "admantium_helmet",
+      "name": "Admantium Helmet",
+      "slot": 0,
+      "rarity": 3,
+      "iconSheet": "Gear.png",
+      "iconRow": 2,
+      "iconCol": 8,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "armor": 5.0,
+          "healthMax": 31
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "armor_flat_s",
+        "hp_flat_s",
+        "ten_flat_s",
+        "fire_res_s"
+      ]
+    },
+    {
+      "id": "admantium_wizard_cap",
+      "name": "Admantium Wizard Cap",
+      "slot": 0,
+      "rarity": 3,
+      "iconSheet": "Gear.png",
+      "iconRow": 2,
+      "iconCol": 9,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "spellPower": 12,
+          "armor": 1.7000000000000002
+        },
+        "mult": {
+          "moveSpeed": 0.04
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s",
+        "armor_flat_s"
+      ]
+    },
+    {
+      "id": "legendary_helmet",
+      "name": "Legendary Helmet",
+      "slot": 0,
+      "rarity": 4,
+      "iconSheet": "Gear.png",
+      "iconRow": 2,
+      "iconCol": 10,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "armor": 6.0,
+          "healthMax": 36
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "armor_flat_s",
+        "hp_flat_s",
+        "ten_flat_s",
+        "fire_res_s"
+      ]
+    },
+    {
+      "id": "legendary_wizard_cap",
+      "name": "Legendary Wizard Cap",
+      "slot": 0,
+      "rarity": 4,
+      "iconSheet": "Gear.png",
+      "iconRow": 2,
+      "iconCol": 11,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "spellPower": 15,
+          "armor": 2.1
+        },
+        "mult": {
+          "moveSpeed": 0.05
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s",
+        "armor_flat_s"
+      ]
+    },
+    {
+      "id": "copper_chest_f",
+      "name": "Copper Chest (F)",
+      "slot": 1,
+      "rarity": 0,
+      "iconSheet": "Gear.png",
+      "iconRow": 3,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "armor": 1.8,
+          "healthMax": 11
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "armor_flat_s",
+        "hp_flat_s",
+        "ten_flat_s",
+        "fire_res_s"
+      ]
+    },
+    {
+      "id": "copper_hood",
+      "name": "Copper Hood",
+      "slot": 0,
+      "rarity": 0,
+      "iconSheet": "Gear.png",
+      "iconRow": 3,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "spellPower": 2,
+          "armor": 0.4
+        },
+        "mult": {
+          "moveSpeed": 0.01
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "iron_chest_f",
+      "name": "Iron Chest (F)",
+      "slot": 1,
+      "rarity": 1,
+      "iconSheet": "Gear.png",
+      "iconRow": 3,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "armor": 3.6,
+          "healthMax": 16
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "armor_flat_s",
+        "hp_flat_s",
+        "ten_flat_s",
+        "fire_res_s"
+      ]
+    },
+    {
+      "id": "iron_hood",
+      "name": "Iron Hood",
+      "slot": 0,
+      "rarity": 1,
+      "iconSheet": "Gear.png",
+      "iconRow": 3,
+      "iconCol": 3,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "spellPower": 5,
+          "armor": 0.8
+        },
+        "mult": {
+          "moveSpeed": 0.02
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "silver_chest_f",
+      "name": "Silver Chest (F)",
+      "slot": 1,
+      "rarity": 2,
+      "iconSheet": "Gear.png",
+      "iconRow": 3,
+      "iconCol": 4,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "armor": 5.4,
+          "healthMax": 21
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "armor_flat_s",
+        "hp_flat_s",
+        "ten_flat_s",
+        "fire_res_s"
+      ]
+    },
+    {
+      "id": "silver_hood",
+      "name": "Silver Hood",
+      "slot": 0,
+      "rarity": 2,
+      "iconSheet": "Gear.png",
+      "iconRow": 3,
+      "iconCol": 5,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "spellPower": 8,
+          "armor": 1.2000000000000002
+        },
+        "mult": {
+          "moveSpeed": 0.03
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "gold_chest_f",
+      "name": "Gold Chest (F)",
+      "slot": 1,
+      "rarity": 3,
+      "iconSheet": "Gear.png",
+      "iconRow": 3,
+      "iconCol": 6,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "armor": 7.2,
+          "healthMax": 26
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "armor_flat_s",
+        "hp_flat_s",
+        "ten_flat_s",
+        "fire_res_s"
+      ]
+    },
+    {
+      "id": "gold_hood",
+      "name": "Gold Hood",
+      "slot": 0,
+      "rarity": 3,
+      "iconSheet": "Gear.png",
+      "iconRow": 3,
+      "iconCol": 7,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "spellPower": 11,
+          "armor": 1.6
+        },
+        "mult": {
+          "moveSpeed": 0.04
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "admantium_chest_f",
+      "name": "Admantium Chest (F)",
+      "slot": 1,
+      "rarity": 3,
+      "iconSheet": "Gear.png",
+      "iconRow": 3,
+      "iconCol": 8,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "armor": 9.0,
+          "healthMax": 31
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "armor_flat_s",
+        "hp_flat_s",
+        "ten_flat_s",
+        "fire_res_s"
+      ]
+    },
+    {
+      "id": "admantium_hood",
+      "name": "Admantium Hood",
+      "slot": 0,
+      "rarity": 3,
+      "iconSheet": "Gear.png",
+      "iconRow": 3,
+      "iconCol": 9,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "spellPower": 11,
+          "armor": 1.6
+        },
+        "mult": {
+          "moveSpeed": 0.04
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "legendary_chest_f",
+      "name": "Legendary Chest (F)",
+      "slot": 1,
+      "rarity": 4,
+      "iconSheet": "Gear.png",
+      "iconRow": 3,
+      "iconCol": 10,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "armor": 10.8,
+          "healthMax": 36
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "armor_flat_s",
+        "hp_flat_s",
+        "ten_flat_s",
+        "fire_res_s"
+      ]
+    },
+    {
+      "id": "legendary_hood",
+      "name": "Legendary Hood",
+      "slot": 0,
+      "rarity": 4,
+      "iconSheet": "Gear.png",
+      "iconRow": 3,
+      "iconCol": 11,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "spellPower": 14,
+          "armor": 2.0
+        },
+        "mult": {
+          "moveSpeed": 0.05
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "copper_legs",
+      "name": "Copper Legs",
+      "slot": 2,
+      "rarity": 0,
+      "iconSheet": "Gear.png",
+      "iconRow": 4,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "armor": 1.4,
+          "healthMax": 11
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "armor_flat_s",
+        "hp_flat_s",
+        "ten_flat_s",
+        "fire_res_s"
+      ]
+    },
+    {
+      "id": "copper_gloves",
+      "name": "Copper Gloves",
+      "slot": 11,
+      "rarity": 0,
+      "iconSheet": "Gear.png",
+      "iconRow": 4,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "armor": 0.6
+        },
+        "mult": {
+          "attackSpeed": 0.04
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "as_mult_s",
+        "atk_flat_s",
+        "armor_flat_s"
+      ]
+    },
+    {
+      "id": "iron_legs",
+      "name": "Iron Legs",
+      "slot": 2,
+      "rarity": 1,
+      "iconSheet": "Gear.png",
+      "iconRow": 4,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "armor": 2.8,
+          "healthMax": 16
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "armor_flat_s",
+        "hp_flat_s",
+        "ten_flat_s",
+        "fire_res_s"
+      ]
+    },
+    {
+      "id": "iron_gloves",
+      "name": "Iron Gloves",
+      "slot": 11,
+      "rarity": 1,
+      "iconSheet": "Gear.png",
+      "iconRow": 4,
+      "iconCol": 3,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "armor": 1.2
+        },
+        "mult": {
+          "attackSpeed": 0.046
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "as_mult_s",
+        "atk_flat_s",
+        "armor_flat_s"
+      ]
+    },
+    {
+      "id": "silver_legs",
+      "name": "Silver Legs",
+      "slot": 2,
+      "rarity": 2,
+      "iconSheet": "Gear.png",
+      "iconRow": 4,
+      "iconCol": 4,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "armor": 4.2,
+          "healthMax": 21
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "armor_flat_s",
+        "hp_flat_s",
+        "ten_flat_s",
+        "fire_res_s"
+      ]
+    },
+    {
+      "id": "silver_gloves",
+      "name": "Silver Gloves",
+      "slot": 11,
+      "rarity": 2,
+      "iconSheet": "Gear.png",
+      "iconRow": 4,
+      "iconCol": 5,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "armor": 1.8
+        },
+        "mult": {
+          "attackSpeed": 0.052000000000000005
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "as_mult_s",
+        "atk_flat_s",
+        "armor_flat_s"
+      ]
+    },
+    {
+      "id": "gold_legs",
+      "name": "Gold Legs",
+      "slot": 2,
+      "rarity": 3,
+      "iconSheet": "Gear.png",
+      "iconRow": 4,
+      "iconCol": 6,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "armor": 5.6,
+          "healthMax": 26
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "armor_flat_s",
+        "hp_flat_s",
+        "ten_flat_s",
+        "fire_res_s"
+      ]
+    },
+    {
+      "id": "gold_gloves",
+      "name": "Gold Gloves",
+      "slot": 11,
+      "rarity": 3,
+      "iconSheet": "Gear.png",
+      "iconRow": 4,
+      "iconCol": 7,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "armor": 2.4
+        },
+        "mult": {
+          "attackSpeed": 0.058
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "as_mult_s",
+        "atk_flat_s",
+        "armor_flat_s"
+      ]
+    },
+    {
+      "id": "admantium_legs",
+      "name": "Admantium Legs",
+      "slot": 2,
+      "rarity": 3,
+      "iconSheet": "Gear.png",
+      "iconRow": 4,
+      "iconCol": 8,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "armor": 7.0,
+          "healthMax": 31
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "armor_flat_s",
+        "hp_flat_s",
+        "ten_flat_s",
+        "fire_res_s"
+      ]
+    },
+    {
+      "id": "admantium_gloves",
+      "name": "Admantium Gloves",
+      "slot": 11,
+      "rarity": 3,
+      "iconSheet": "Gear.png",
+      "iconRow": 4,
+      "iconCol": 9,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "armor": 3.0
+        },
+        "mult": {
+          "attackSpeed": 0.064
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "as_mult_s",
+        "atk_flat_s",
+        "armor_flat_s"
+      ]
+    },
+    {
+      "id": "legendary_legs",
+      "name": "Legendary Legs",
+      "slot": 2,
+      "rarity": 4,
+      "iconSheet": "Gear.png",
+      "iconRow": 4,
+      "iconCol": 10,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "armor": 8.4,
+          "healthMax": 36
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "armor_flat_s",
+        "hp_flat_s",
+        "ten_flat_s",
+        "fire_res_s"
+      ]
+    },
+    {
+      "id": "legendary_gloves",
+      "name": "Legendary Gloves",
+      "slot": 11,
+      "rarity": 4,
+      "iconSheet": "Gear.png",
+      "iconRow": 4,
+      "iconCol": 11,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "armor": 3.6
+        },
+        "mult": {
+          "attackSpeed": 0.07
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "as_mult_s",
+        "atk_flat_s",
+        "armor_flat_s"
+      ]
+    },
+    {
+      "id": "copper_boots",
+      "name": "Copper Boots",
+      "slot": 3,
+      "rarity": 0,
+      "iconSheet": "Gear.png",
+      "iconRow": 5,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "armor": 0.8
+        },
+        "mult": {
+          "moveSpeed": 0.03
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "ms_mult_s",
+        "eva_flat_s",
+        "armor_flat_s"
+      ]
+    },
+    {
+      "id": "copper_belt",
+      "name": "Copper Belt",
+      "slot": 12,
+      "rarity": 0,
+      "iconSheet": "Gear.png",
+      "iconRow": 5,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "armor": 0.7,
+          "healthMax": 16
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "hp_flat_s",
+        "armor_flat_s",
+        "ten_flat_s"
+      ]
+    },
+    {
+      "id": "iron_boots",
+      "name": "Iron Boots",
+      "slot": 3,
+      "rarity": 1,
+      "iconSheet": "Gear.png",
+      "iconRow": 5,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "armor": 1.6
+        },
+        "mult": {
+          "moveSpeed": 0.034999999999999996
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "ms_mult_s",
+        "eva_flat_s",
+        "armor_flat_s"
+      ]
+    },
+    {
+      "id": "iron_belt",
+      "name": "Iron Belt",
+      "slot": 12,
+      "rarity": 1,
+      "iconSheet": "Gear.png",
+      "iconRow": 5,
+      "iconCol": 3,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "armor": 1.4,
+          "healthMax": 22
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "hp_flat_s",
+        "armor_flat_s",
+        "ten_flat_s"
+      ]
+    },
+    {
+      "id": "silver_boots",
+      "name": "Silver Boots",
+      "slot": 3,
+      "rarity": 2,
+      "iconSheet": "Gear.png",
+      "iconRow": 5,
+      "iconCol": 4,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "armor": 2.4
+        },
+        "mult": {
+          "moveSpeed": 0.04
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "ms_mult_s",
+        "eva_flat_s",
+        "armor_flat_s"
+      ]
+    },
+    {
+      "id": "silver_belt",
+      "name": "Silver Belt",
+      "slot": 12,
+      "rarity": 2,
+      "iconSheet": "Gear.png",
+      "iconRow": 5,
+      "iconCol": 5,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "armor": 2.1,
+          "healthMax": 28
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "hp_flat_s",
+        "armor_flat_s",
+        "ten_flat_s"
+      ]
+    },
+    {
+      "id": "gold_boots",
+      "name": "Gold Boots",
+      "slot": 3,
+      "rarity": 3,
+      "iconSheet": "Gear.png",
+      "iconRow": 5,
+      "iconCol": 6,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "armor": 3.2
+        },
+        "mult": {
+          "moveSpeed": 0.045
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "ms_mult_s",
+        "eva_flat_s",
+        "armor_flat_s"
+      ]
+    },
+    {
+      "id": "gold_belt",
+      "name": "Gold Belt",
+      "slot": 12,
+      "rarity": 3,
+      "iconSheet": "Gear.png",
+      "iconRow": 5,
+      "iconCol": 7,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "armor": 2.8,
+          "healthMax": 34
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "hp_flat_s",
+        "armor_flat_s",
+        "ten_flat_s"
+      ]
+    },
+    {
+      "id": "admantium_boots",
+      "name": "Admantium Boots",
+      "slot": 3,
+      "rarity": 3,
+      "iconSheet": "Gear.png",
+      "iconRow": 5,
+      "iconCol": 8,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "armor": 4.0
+        },
+        "mult": {
+          "moveSpeed": 0.05
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "ms_mult_s",
+        "eva_flat_s",
+        "armor_flat_s"
+      ]
+    },
+    {
+      "id": "admantium_belt",
+      "name": "Admantium Belt",
+      "slot": 12,
+      "rarity": 3,
+      "iconSheet": "Gear.png",
+      "iconRow": 5,
+      "iconCol": 9,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "armor": 3.5,
+          "healthMax": 40
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "hp_flat_s",
+        "armor_flat_s",
+        "ten_flat_s"
+      ]
+    },
+    {
+      "id": "legendary_boots",
+      "name": "Legendary Boots",
+      "slot": 3,
+      "rarity": 4,
+      "iconSheet": "Gear.png",
+      "iconRow": 5,
+      "iconCol": 10,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "armor": 4.8
+        },
+        "mult": {
+          "moveSpeed": 0.055
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "ms_mult_s",
+        "eva_flat_s",
+        "armor_flat_s"
+      ]
+    },
+    {
+      "id": "legendary_belt",
+      "name": "Legendary Belt",
+      "slot": 12,
+      "rarity": 4,
+      "iconSheet": "Gear.png",
+      "iconRow": 5,
+      "iconCol": 11,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "armor": 4.2,
+          "healthMax": 46
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "hp_flat_s",
+        "armor_flat_s",
+        "ten_flat_s"
+      ]
+    },
+    {
+      "id": "small_green_gem",
+      "name": "Small Green Gem",
+      "slot": 9,
+      "rarity": 0,
+      "iconSheet": "Gems.png",
+      "iconRow": 0,
+      "iconCol": 0,
+      "socketable": true,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "healthMax": 10
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "rarity_flat_s",
+        "gold_flat_s",
+        "crit_flat_s",
+        "fire_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "small_red_gem",
+      "name": "Small Red Gem",
+      "slot": 9,
+      "rarity": 0,
+      "iconSheet": "Gems.png",
+      "iconRow": 0,
+      "iconCol": 1,
+      "socketable": true,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "attackPower": 2
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "rarity_flat_s",
+        "gold_flat_s",
+        "crit_flat_s",
+        "fire_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "small_orange_gem",
+      "name": "Small Orange Gem",
+      "slot": 9,
+      "rarity": 0,
+      "iconSheet": "Gems.png",
+      "iconRow": 0,
+      "iconCol": 2,
+      "socketable": true,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "spellPower": 3
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "rarity_flat_s",
+        "gold_flat_s",
+        "crit_flat_s",
+        "fire_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "small_purple_gem",
+      "name": "Small Purple Gem",
+      "slot": 9,
+      "rarity": 0,
+      "iconSheet": "Gems.png",
+      "iconRow": 0,
+      "iconCol": 3,
+      "socketable": true,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "critChance": 0.02
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "rarity_flat_s",
+        "gold_flat_s",
+        "crit_flat_s",
+        "fire_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "small_crystal",
+      "name": "Small Crystal",
+      "slot": 9,
+      "rarity": 0,
+      "iconSheet": "Gems.png",
+      "iconRow": 0,
+      "iconCol": 4,
+      "socketable": true,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "armor": 1,
+          "shieldMax": 10
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "rarity_flat_s",
+        "gold_flat_s",
+        "crit_flat_s",
+        "fire_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "small_jet",
+      "name": "Small Jet",
+      "slot": 9,
+      "rarity": 0,
+      "iconSheet": "Gems.png",
+      "iconRow": 0,
+      "iconCol": 5,
+      "socketable": true,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "evasion": 2
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "rarity_flat_s",
+        "gold_flat_s",
+        "crit_flat_s",
+        "fire_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "small_diamond",
+      "name": "Small Diamond",
+      "slot": 9,
+      "rarity": 1,
+      "iconSheet": "Gems.png",
+      "iconRow": 0,
+      "iconCol": 6,
+      "socketable": true,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "rarityScore": 0.5
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "rarity_flat_s",
+        "gold_flat_s",
+        "crit_flat_s",
+        "fire_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "large_green_gem",
+      "name": "Large Green Gem",
+      "slot": 9,
+      "rarity": 2,
+      "iconSheet": "Gems.png",
+      "iconRow": 1,
+      "iconCol": 0,
+      "socketable": true,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "healthMax": 20
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "rarity_flat_s",
+        "gold_flat_s",
+        "crit_flat_s",
+        "fire_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "large_red_gem",
+      "name": "Large Red Gem",
+      "slot": 9,
+      "rarity": 2,
+      "iconSheet": "Gems.png",
+      "iconRow": 1,
+      "iconCol": 1,
+      "socketable": true,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "attackPower": 4
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "rarity_flat_s",
+        "gold_flat_s",
+        "crit_flat_s",
+        "fire_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "large_orange_gem",
+      "name": "Large Orange Gem",
+      "slot": 9,
+      "rarity": 2,
+      "iconSheet": "Gems.png",
+      "iconRow": 1,
+      "iconCol": 2,
+      "socketable": true,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "spellPower": 6
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "rarity_flat_s",
+        "gold_flat_s",
+        "crit_flat_s",
+        "fire_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "large_purple_gem",
+      "name": "Large Purple Gem",
+      "slot": 9,
+      "rarity": 2,
+      "iconSheet": "Gems.png",
+      "iconRow": 1,
+      "iconCol": 3,
+      "socketable": true,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "critChance": 0.04
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "rarity_flat_s",
+        "gold_flat_s",
+        "crit_flat_s",
+        "fire_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "large_crystal",
+      "name": "Large Crystal",
+      "slot": 9,
+      "rarity": 2,
+      "iconSheet": "Gems.png",
+      "iconRow": 1,
+      "iconCol": 4,
+      "socketable": true,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "armor": 2,
+          "shieldMax": 20
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "rarity_flat_s",
+        "gold_flat_s",
+        "crit_flat_s",
+        "fire_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "large_jet",
+      "name": "Large Jet",
+      "slot": 9,
+      "rarity": 2,
+      "iconSheet": "Gems.png",
+      "iconRow": 1,
+      "iconCol": 5,
+      "socketable": true,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "evasion": 4
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "rarity_flat_s",
+        "gold_flat_s",
+        "crit_flat_s",
+        "fire_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "large_diamond",
+      "name": "Large Diamond",
+      "slot": 9,
+      "rarity": 3,
+      "iconSheet": "Gems.png",
+      "iconRow": 1,
+      "iconCol": 6,
+      "socketable": true,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "rarityScore": 1.0
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "rarity_flat_s",
+        "gold_flat_s",
+        "crit_flat_s",
+        "fire_res_s",
+        "frost_res_s"
+      ]
+    },
+    {
+      "id": "wind_rune",
+      "name": "Wind Rune",
+      "slot": 9,
+      "rarity": 2,
+      "iconSheet": "Runes.png",
+      "iconRow": 0,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "mult": {
+          "moveSpeed": 0.08
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "rarity_flat_s",
+        "gold_flat_s",
+        "crit_flat_s",
+        "ten_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "damage_rune",
+      "name": "Damage Rune",
+      "slot": 9,
+      "rarity": 2,
+      "iconSheet": "Runes.png",
+      "iconRow": 0,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "attackPower": 6
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "rarity_flat_s",
+        "gold_flat_s",
+        "crit_flat_s",
+        "ten_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "shield_rune",
+      "name": "Shield Rune",
+      "slot": 9,
+      "rarity": 2,
+      "iconSheet": "Runes.png",
+      "iconRow": 0,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "shieldMax": 20
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "rarity_flat_s",
+        "gold_flat_s",
+        "crit_flat_s",
+        "ten_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "arrow_rune",
+      "name": "Arrow Rune",
+      "slot": 9,
+      "rarity": 2,
+      "iconSheet": "Runes.png",
+      "iconRow": 0,
+      "iconCol": 3,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "armorPen": 4
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "rarity_flat_s",
+        "gold_flat_s",
+        "crit_flat_s",
+        "ten_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "life_rune",
+      "name": "Life Rune",
+      "slot": 9,
+      "rarity": 2,
+      "iconSheet": "Runes.png",
+      "iconRow": 0,
+      "iconCol": 4,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "healthMax": 25
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "rarity_flat_s",
+        "gold_flat_s",
+        "crit_flat_s",
+        "ten_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "gold_rune",
+      "name": "Gold Rune",
+      "slot": 9,
+      "rarity": 2,
+      "iconSheet": "Runes.png",
+      "iconRow": 0,
+      "iconCol": 5,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "goldGainMult": 0.08
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "rarity_flat_s",
+        "gold_flat_s",
+        "crit_flat_s",
+        "ten_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "ghost_rune",
+      "name": "Ghost Rune",
+      "slot": 9,
+      "rarity": 3,
+      "iconSheet": "Runes.png",
+      "iconRow": 1,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "evasion": 6
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "rarity_flat_s",
+        "gold_flat_s",
+        "crit_flat_s",
+        "ten_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "energy_rune",
+      "name": "Energy Rune",
+      "slot": 9,
+      "rarity": 3,
+      "iconSheet": "Runes.png",
+      "iconRow": 1,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "resourceRegen": 0.12
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "rarity_flat_s",
+        "gold_flat_s",
+        "crit_flat_s",
+        "ten_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "speed_rune",
+      "name": "Speed Rune",
+      "slot": 9,
+      "rarity": 3,
+      "iconSheet": "Runes.png",
+      "iconRow": 1,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "mult": {
+          "attackSpeed": 0.1
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "rarity_flat_s",
+        "gold_flat_s",
+        "crit_flat_s",
+        "ten_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "star_rune",
+      "name": "Star Rune",
+      "slot": 9,
+      "rarity": 3,
+      "iconSheet": "Runes.png",
+      "iconRow": 1,
+      "iconCol": 3,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "critChance": 0.06
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "rarity_flat_s",
+        "gold_flat_s",
+        "crit_flat_s",
+        "ten_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "rocket_rune",
+      "name": "Rocket Rune",
+      "slot": 9,
+      "rarity": 3,
+      "iconSheet": "Runes.png",
+      "iconRow": 1,
+      "iconCol": 4,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "accuracy": 8
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "rarity_flat_s",
+        "gold_flat_s",
+        "crit_flat_s",
+        "ten_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "magic_rune",
+      "name": "Magic Rune",
+      "slot": 9,
+      "rarity": 3,
+      "iconSheet": "Runes.png",
+      "iconRow": 1,
+      "iconCol": 5,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "spellPower": 12
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "rarity_flat_s",
+        "gold_flat_s",
+        "crit_flat_s",
+        "ten_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "brown_tome",
+      "name": "Brown Tome",
+      "slot": 5,
+      "rarity": 0,
+      "iconSheet": "Tomes.png",
+      "iconRow": 0,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "spellPower": 3,
+          "cooldownReduction": 0.02
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "red_tome",
+      "name": "Red Tome",
+      "slot": 5,
+      "rarity": 1,
+      "iconSheet": "Tomes.png",
+      "iconRow": 0,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "spellPower": 5,
+          "cooldownReduction": 0.03
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "green_magic_tome",
+      "name": "Green Magic Tome",
+      "slot": 5,
+      "rarity": 2,
+      "iconSheet": "Tomes.png",
+      "iconRow": 0,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "spellPower": 8,
+          "cooldownReduction": 0.04
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "red_magic_tome",
+      "name": "Red Magic Tome",
+      "slot": 5,
+      "rarity": 2,
+      "iconSheet": "Tomes.png",
+      "iconRow": 1,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "spellPower": 8,
+          "cooldownReduction": 0.04
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "blue_magic_tome",
+      "name": "Blue Magic Tome",
+      "slot": 5,
+      "rarity": 3,
+      "iconSheet": "Tomes.png",
+      "iconRow": 1,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "spellPower": 12,
+          "cooldownReduction": 0.05
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "yellow_magic_tome",
+      "name": "Yellow Magic Tome",
+      "slot": 5,
+      "rarity": 4,
+      "iconSheet": "Tomes.png",
+      "iconRow": 1,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "spellPower": 16,
+          "cooldownReduction": 0.06
+        }
+      },
+      "maxAffixes": 5,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "wooden_round_shield",
+      "name": "Wooden Round Shield",
+      "slot": 5,
+      "rarity": 0,
+      "iconSheet": "Shields.png",
+      "iconRow": 0,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "armor": 2,
+          "shieldMax": 10
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "armor_flat_s",
+        "armor_flat_m",
+        "shield_flat_s",
+        "ten_flat_s"
+      ]
+    },
+    {
+      "id": "wooden_tower_shield",
+      "name": "Wooden Tower Shield",
+      "slot": 5,
+      "rarity": 1,
+      "iconSheet": "Shields.png",
+      "iconRow": 0,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "armor": 3,
+          "shieldMax": 16
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "armor_flat_s",
+        "armor_flat_m",
+        "shield_flat_s",
+        "ten_flat_s"
+      ]
+    },
+    {
+      "id": "heater_shield",
+      "name": "Heater Shield",
+      "slot": 5,
+      "rarity": 2,
+      "iconSheet": "Shields.png",
+      "iconRow": 0,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "armor": 4,
+          "shieldMax": 22
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "armor_flat_s",
+        "armor_flat_m",
+        "shield_flat_s",
+        "ten_flat_s"
+      ]
+    },
+    {
+      "id": "golden_shield",
+      "name": "Golden Shield",
+      "slot": 5,
+      "rarity": 3,
+      "iconSheet": "Shields.png",
+      "iconRow": 1,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "armor": 6,
+          "shieldMax": 30
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "armor_flat_s",
+        "armor_flat_m",
+        "shield_flat_s",
+        "ten_flat_s"
+      ]
+    },
+    {
+      "id": "diamond_shield",
+      "name": "Diamond Shield",
+      "slot": 5,
+      "rarity": 4,
+      "iconSheet": "Shields.png",
+      "iconRow": 1,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "armor": 8,
+          "shieldMax": 40
+        }
+      },
+      "maxAffixes": 5,
+      "affixPool": [
+        "armor_flat_s",
+        "armor_flat_m",
+        "shield_flat_s",
+        "ten_flat_s"
+      ]
+    },
+    {
+      "id": "legendary_shield",
+      "name": "Legendary Shield",
+      "slot": 5,
+      "rarity": 4,
+      "iconSheet": "Shields.png",
+      "iconRow": 1,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "armor": 8,
+          "shieldMax": 40
+        }
+      },
+      "maxAffixes": 5,
+      "affixPool": [
+        "armor_flat_s",
+        "armor_flat_m",
+        "shield_flat_s",
+        "ten_flat_s"
+      ]
+    },
+    {
+      "id": "wooden_quiver",
+      "name": "Wooden Quiver",
+      "slot": 5,
+      "rarity": 0,
+      "iconSheet": "Quivers.png",
+      "iconRow": 0,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "accuracy": 2
+        },
+        "mult": {
+          "attackSpeed": 0.05
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s",
+        "ms_mult_s"
+      ]
+    },
+    {
+      "id": "iron_quiver",
+      "name": "Iron Quiver",
+      "slot": 5,
+      "rarity": 1,
+      "iconSheet": "Quivers.png",
+      "iconRow": 0,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "accuracy": 4
+        },
+        "mult": {
+          "attackSpeed": 0.07
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s",
+        "ms_mult_s"
+      ]
+    },
+    {
+      "id": "silver_quiver",
+      "name": "Silver Quiver",
+      "slot": 5,
+      "rarity": 2,
+      "iconSheet": "Quivers.png",
+      "iconRow": 0,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "accuracy": 6
+        },
+        "mult": {
+          "attackSpeed": 0.09
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s",
+        "ms_mult_s"
+      ]
+    },
+    {
+      "id": "golden_quiver",
+      "name": "Golden Quiver",
+      "slot": 5,
+      "rarity": 3,
+      "iconSheet": "Quivers.png",
+      "iconRow": 1,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "accuracy": 8
+        },
+        "mult": {
+          "attackSpeed": 0.11
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s",
+        "ms_mult_s"
+      ]
+    },
+    {
+      "id": "diamond_quiver",
+      "name": "Diamond Quiver",
+      "slot": 5,
+      "rarity": 4,
+      "iconSheet": "Quivers.png",
+      "iconRow": 1,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "accuracy": 10
+        },
+        "mult": {
+          "attackSpeed": 0.13
+        }
+      },
+      "maxAffixes": 5,
+      "affixPool": [
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s",
+        "ms_mult_s"
+      ]
+    },
+    {
+      "id": "legendary_quiver",
+      "name": "Legendary Quiver",
+      "slot": 5,
+      "rarity": 4,
+      "iconSheet": "Quivers.png",
+      "iconRow": 1,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "accuracy": 10
+        },
+        "mult": {
+          "attackSpeed": 0.13
+        }
+      },
+      "maxAffixes": 5,
+      "affixPool": [
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s",
+        "ms_mult_s"
+      ]
+    },
+    {
+      "id": "curved_spear",
+      "name": "Curved Spear",
+      "slot": 4,
+      "rarity": 0,
+      "iconSheet": "Melee_Weapons.png",
+      "iconRow": 0,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 3
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "long_spear",
+      "name": "Long Spear",
+      "slot": 4,
+      "rarity": 1,
+      "iconSheet": "Melee_Weapons.png",
+      "iconRow": 0,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 5
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "legendary_spear",
+      "name": "Legendary Spear",
+      "slot": 4,
+      "rarity": 4,
+      "iconSheet": "Melee_Weapons.png",
+      "iconRow": 0,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "attackPower": 16
+        }
+      },
+      "maxAffixes": 5,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "wooden_sword",
+      "name": "Wooden Sword",
+      "slot": 4,
+      "rarity": 0,
+      "iconSheet": "Melee_Weapons.png",
+      "iconRow": 1,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 3
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "iron_sword",
+      "name": "Iron Sword",
+      "slot": 4,
+      "rarity": 1,
+      "iconSheet": "Melee_Weapons.png",
+      "iconRow": 1,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 5
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "scimitar",
+      "name": "Scimitar",
+      "slot": 4,
+      "rarity": 2,
+      "iconSheet": "Melee_Weapons.png",
+      "iconRow": 1,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 8
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "silver_sword",
+      "name": "Silver Sword",
+      "slot": 4,
+      "rarity": 2,
+      "iconSheet": "Melee_Weapons.png",
+      "iconRow": 2,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 8
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "bastard_sword",
+      "name": "Bastard Sword",
+      "slot": 4,
+      "rarity": 3,
+      "iconSheet": "Melee_Weapons.png",
+      "iconRow": 2,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "attackPower": 12
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "beastslayer",
+      "name": "Beastslayer",
+      "slot": 4,
+      "rarity": 4,
+      "iconSheet": "Melee_Weapons.png",
+      "iconRow": 2,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "attackPower": 16
+        }
+      },
+      "maxAffixes": 5,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "zwihander",
+      "name": "Zwihander",
+      "slot": 4,
+      "rarity": 3,
+      "iconSheet": "Melee_Weapons.png",
+      "iconRow": 3,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "attackPower": 12
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "old_blade",
+      "name": "Old Blade",
+      "slot": 4,
+      "rarity": 0,
+      "iconSheet": "Melee_Weapons.png",
+      "iconRow": 3,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 3
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "broadsword",
+      "name": "Broadsword",
+      "slot": 4,
+      "rarity": 2,
+      "iconSheet": "Melee_Weapons.png",
+      "iconRow": 3,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 8
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "golden_broadsword",
+      "name": "Golden Broadsword",
+      "slot": 4,
+      "rarity": 3,
+      "iconSheet": "Melee_Weapons.png",
+      "iconRow": 4,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "attackPower": 12
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "diamond_broadsword",
+      "name": "Diamond Broadsword",
+      "slot": 4,
+      "rarity": 3,
+      "iconSheet": "Melee_Weapons.png",
+      "iconRow": 4,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "attackPower": 12
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "legendary_broadsword",
+      "name": "Legendary Broadsword",
+      "slot": 4,
+      "rarity": 4,
+      "iconSheet": "Melee_Weapons.png",
+      "iconRow": 4,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "attackPower": 16
+        }
+      },
+      "maxAffixes": 5,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "wooden_crossbow",
+      "name": "Wooden Crossbow",
+      "slot": 4,
+      "rarity": 0,
+      "iconSheet": "Ranged_Weapons.png",
+      "iconRow": 0,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 3
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "iron_crossbow",
+      "name": "Iron Crossbow",
+      "slot": 4,
+      "rarity": 1,
+      "iconSheet": "Ranged_Weapons.png",
+      "iconRow": 0,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 5
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "legndary_crossbow",
+      "name": "Legndary Crossbow",
+      "slot": 4,
+      "rarity": 4,
+      "iconSheet": "Ranged_Weapons.png",
+      "iconRow": 0,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "attackPower": 16
+        }
+      },
+      "maxAffixes": 5,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "wooden_bow",
+      "name": "Wooden Bow",
+      "slot": 4,
+      "rarity": 0,
+      "iconSheet": "Ranged_Weapons.png",
+      "iconRow": 1,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 3
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "wooden_longbow",
+      "name": "Wooden Longbow",
+      "slot": 4,
+      "rarity": 1,
+      "iconSheet": "Ranged_Weapons.png",
+      "iconRow": 1,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 5
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "iron_longbow",
+      "name": "Iron Longbow",
+      "slot": 4,
+      "rarity": 1,
+      "iconSheet": "Ranged_Weapons.png",
+      "iconRow": 1,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 5
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "redwood_longbow",
+      "name": "Redwood Longbow",
+      "slot": 4,
+      "rarity": 2,
+      "iconSheet": "Ranged_Weapons.png",
+      "iconRow": 2,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 8
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "elven_longbow",
+      "name": "Elven Longbow",
+      "slot": 4,
+      "rarity": 2,
+      "iconSheet": "Ranged_Weapons.png",
+      "iconRow": 2,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 8
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "reinforced_longbow",
+      "name": "Reinforced Longbow",
+      "slot": 4,
+      "rarity": 2,
+      "iconSheet": "Ranged_Weapons.png",
+      "iconRow": 2,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 8
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "hunters_bow",
+      "name": "Hunter's Bow",
+      "slot": 4,
+      "rarity": 0,
+      "iconSheet": "Ranged_Weapons.png",
+      "iconRow": 3,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 3
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "diamond_string_bow",
+      "name": "Diamond String Bow",
+      "slot": 4,
+      "rarity": 3,
+      "iconSheet": "Ranged_Weapons.png",
+      "iconRow": 3,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "attackPower": 12
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "emerald_string_bow",
+      "name": "Emerald String Bow",
+      "slot": 4,
+      "rarity": 3,
+      "iconSheet": "Ranged_Weapons.png",
+      "iconRow": 3,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "attackPower": 12
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "golden_longbow",
+      "name": "Golden Longbow",
+      "slot": 4,
+      "rarity": 3,
+      "iconSheet": "Ranged_Weapons.png",
+      "iconRow": 4,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "attackPower": 12
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "diamond_longbow",
+      "name": "Diamond Longbow",
+      "slot": 4,
+      "rarity": 3,
+      "iconSheet": "Ranged_Weapons.png",
+      "iconRow": 4,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "attackPower": 12
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "legendary_longbow",
+      "name": "Legendary Longbow",
+      "slot": 4,
+      "rarity": 4,
+      "iconSheet": "Ranged_Weapons.png",
+      "iconRow": 4,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "attackPower": 16
+        }
+      },
+      "maxAffixes": 5,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "as_mult_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "basic_wand",
+      "name": "Basic Wand",
+      "slot": 4,
+      "rarity": 0,
+      "iconSheet": "Magic_Weapons.png",
+      "iconRow": 0,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "spellPower": 3
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "diamond_wand",
+      "name": "Diamond Wand",
+      "slot": 4,
+      "rarity": 3,
+      "iconSheet": "Magic_Weapons.png",
+      "iconRow": 0,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "spellPower": 12
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "legendary_wand",
+      "name": "Legendary Wand",
+      "slot": 4,
+      "rarity": 4,
+      "iconSheet": "Magic_Weapons.png",
+      "iconRow": 0,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "spellPower": 16
+        }
+      },
+      "maxAffixes": 5,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "water_staff",
+      "name": "Water Staff",
+      "slot": 4,
+      "rarity": 0,
+      "iconSheet": "Magic_Weapons.png",
+      "iconRow": 1,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "spellPower": 3
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "aqua_staff",
+      "name": "Aqua Staff",
+      "slot": 4,
+      "rarity": 2,
+      "iconSheet": "Magic_Weapons.png",
+      "iconRow": 1,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "spellPower": 8
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "staff_of_the_depths",
+      "name": "Staff of the Depths",
+      "slot": 4,
+      "rarity": 4,
+      "iconSheet": "Magic_Weapons.png",
+      "iconRow": 1,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "spellPower": 16
+        }
+      },
+      "maxAffixes": 5,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "wooden_staff",
+      "name": "Wooden Staff",
+      "slot": 4,
+      "rarity": 0,
+      "iconSheet": "Magic_Weapons.png",
+      "iconRow": 2,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "spellPower": 3
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "nature_staff",
+      "name": "Nature Staff",
+      "slot": 4,
+      "rarity": 2,
+      "iconSheet": "Magic_Weapons.png",
+      "iconRow": 2,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "spellPower": 8
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "staff_of_the_oculus",
+      "name": "Staff of the Oculus",
+      "slot": 4,
+      "rarity": 4,
+      "iconSheet": "Magic_Weapons.png",
+      "iconRow": 2,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "spellPower": 16
+        }
+      },
+      "maxAffixes": 5,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "thunder_staff",
+      "name": "Thunder Staff",
+      "slot": 4,
+      "rarity": 2,
+      "iconSheet": "Magic_Weapons.png",
+      "iconRow": 3,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "spellPower": 8
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "lightning_staff",
+      "name": "Lightning Staff",
+      "slot": 4,
+      "rarity": 3,
+      "iconSheet": "Magic_Weapons.png",
+      "iconRow": 3,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "spellPower": 12
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "staff_of_storms",
+      "name": "Staff of Storms",
+      "slot": 4,
+      "rarity": 4,
+      "iconSheet": "Magic_Weapons.png",
+      "iconRow": 3,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "spellPower": 16
+        }
+      },
+      "maxAffixes": 5,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "ember_staff",
+      "name": "Ember Staff",
+      "slot": 4,
+      "rarity": 2,
+      "iconSheet": "Magic_Weapons.png",
+      "iconRow": 4,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "spellPower": 8
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "flame_staff",
+      "name": "Flame Staff",
+      "slot": 4,
+      "rarity": 3,
+      "iconSheet": "Magic_Weapons.png",
+      "iconRow": 4,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "spellPower": 12
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "staff_of_the_inferno",
+      "name": "Staff of the Inferno",
+      "slot": 4,
+      "rarity": 4,
+      "iconSheet": "Magic_Weapons.png",
+      "iconRow": 4,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "spellPower": 16
+        }
+      },
+      "maxAffixes": 5,
+      "affixPool": [
+        "spell_flat_s",
+        "spell_flat_m",
+        "cdr_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "wooden_arrow",
+      "name": "Wooden Arrow",
+      "slot": 13,
+      "rarity": 0,
+      "iconSheet": "Arrows.png",
+      "iconRow": 0,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "attackPower": 1,
+          "armorPen": 1
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "atk_flat_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "iron_arrow",
+      "name": "Iron Arrow",
+      "slot": 13,
+      "rarity": 1,
+      "iconSheet": "Arrows.png",
+      "iconRow": 0,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "attackPower": 2,
+          "armorPen": 2
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "atk_flat_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "diamond_arrow",
+      "name": "Diamond Arrow",
+      "slot": 13,
+      "rarity": 3,
+      "iconSheet": "Arrows.png",
+      "iconRow": 0,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "attackPower": 4,
+          "armorPen": 4
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "atk_flat_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "emerald_arrow",
+      "name": "Emerald Arrow",
+      "slot": 13,
+      "rarity": 3,
+      "iconSheet": "Arrows.png",
+      "iconRow": 0,
+      "iconCol": 3,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "attackPower": 4,
+          "armorPen": 4
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "atk_flat_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "legendary_arrow",
+      "name": "Legendary Arrow",
+      "slot": 13,
+      "rarity": 4,
+      "iconSheet": "Arrows.png",
+      "iconRow": 0,
+      "iconCol": 4,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "attackPower": 6,
+          "armorPen": 5
+        }
+      },
+      "maxAffixes": 5,
+      "affixPool": [
+        "atk_flat_s",
+        "crit_flat_s",
+        "arp_flat_s"
+      ]
+    },
+    {
+      "id": "scroll",
+      "name": "Scroll",
+      "slot": 9,
+      "rarity": 2,
+      "iconSheet": "Scroll.png",
+      "iconRow": 0,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {
+        "flat": {
+          "cooldownReduction": 0.06,
+          "rarityScore": 0.5
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "rarity_flat_s",
+        "gold_flat_s",
+        "cdr_flat_s",
+        "arcane_res_s"
+      ]
+    },
+    {
+      "id": "carrot",
+      "name": "Carrot",
+      "slot": 15,
+      "rarity": 0,
+      "iconSheet": "Foods.png",
+      "iconRow": 0,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "food_carrot"
+    },
+    {
+      "id": "small_fish",
+      "name": "Small Fish",
+      "slot": 15,
+      "rarity": 0,
+      "iconSheet": "Foods.png",
+      "iconRow": 0,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "food_small_fish"
+    },
+    {
+      "id": "orange",
+      "name": "Orange",
+      "slot": 15,
+      "rarity": 0,
+      "iconSheet": "Foods.png",
+      "iconRow": 1,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "food_orange"
+    },
+    {
+      "id": "blue_fish",
+      "name": "Blue Fish",
+      "slot": 15,
+      "rarity": 1,
+      "iconSheet": "Foods.png",
+      "iconRow": 1,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "food_blue_fish"
+    },
+    {
+      "id": "strawberry",
+      "name": "Strawberry",
+      "slot": 15,
+      "rarity": 1,
+      "iconSheet": "Foods.png",
+      "iconRow": 2,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "food_strawberry"
+    },
+    {
+      "id": "yellow_fish",
+      "name": "Yellow Fish",
+      "slot": 15,
+      "rarity": 1,
+      "iconSheet": "Foods.png",
+      "iconRow": 2,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "food_yellow_fish"
+    },
+    {
+      "id": "watermelon",
+      "name": "Watermelon",
+      "slot": 15,
+      "rarity": 1,
+      "iconSheet": "Foods.png",
+      "iconRow": 3,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "food_watermelon"
+    },
+    {
+      "id": "green_fish",
+      "name": "Green Fish",
+      "slot": 15,
+      "rarity": 1,
+      "iconSheet": "Foods.png",
+      "iconRow": 3,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "food_green_fish"
+    },
+    {
+      "id": "red_apple",
+      "name": "Red Apple",
+      "slot": 15,
+      "rarity": 0,
+      "iconSheet": "Foods.png",
+      "iconRow": 4,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "food_red_apple"
+    },
+    {
+      "id": "clownfish",
+      "name": "Clownfish",
+      "slot": 15,
+      "rarity": 2,
+      "iconSheet": "Foods.png",
+      "iconRow": 4,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "food_clownfish"
+    },
+    {
+      "id": "green_apple",
+      "name": "Green Apple",
+      "slot": 15,
+      "rarity": 0,
+      "iconSheet": "Foods.png",
+      "iconRow": 5,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "food_green_apple"
+    },
+    {
+      "id": "cherry",
+      "name": "Cherry",
+      "slot": 15,
+      "rarity": 1,
+      "iconSheet": "Foods.png",
+      "iconRow": 5,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "food_cherry"
+    },
+    {
+      "id": "potato",
+      "name": "Potato",
+      "slot": 15,
+      "rarity": 0,
+      "iconSheet": "Foods.png",
+      "iconRow": 6,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "food_potato"
+    },
+    {
+      "id": "candy",
+      "name": "Candy",
+      "slot": 15,
+      "rarity": 2,
+      "iconSheet": "Foods.png",
+      "iconRow": 6,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "food_candy"
+    },
+    {
+      "id": "small_health_potion_100",
+      "name": "Small Health Potion 100%",
+      "slot": 15,
+      "rarity": 0,
+      "iconSheet": "Potions.png",
+      "iconRow": 0,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "potion_hp_small_100"
+    },
+    {
+      "id": "small_health_potion_50",
+      "name": "Small Health Potion 50%",
+      "slot": 15,
+      "rarity": 0,
+      "iconSheet": "Potions.png",
+      "iconRow": 0,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "potion_hp_small_50"
+    },
+    {
+      "id": "small_health_potion_25",
+      "name": "Small Health Potion 25%",
+      "slot": 15,
+      "rarity": 0,
+      "iconSheet": "Potions.png",
+      "iconRow": 0,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "potion_hp_small_25"
+    },
+    {
+      "id": "large_health_potion_100",
+      "name": "Large Health Potion 100%",
+      "slot": 15,
+      "rarity": 2,
+      "iconSheet": "Potions.png",
+      "iconRow": 0,
+      "iconCol": 3,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "potion_hp_large_100"
+    },
+    {
+      "id": "large_health_potion_50",
+      "name": "Large Health Potion 50%",
+      "slot": 15,
+      "rarity": 2,
+      "iconSheet": "Potions.png",
+      "iconRow": 0,
+      "iconCol": 4,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "potion_hp_large_50"
+    },
+    {
+      "id": "large_health_potion_25",
+      "name": "Large Health Potion 25%",
+      "slot": 15,
+      "rarity": 2,
+      "iconSheet": "Potions.png",
+      "iconRow": 0,
+      "iconCol": 5,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "potion_hp_large_25"
+    },
+    {
+      "id": "giant_health_potion_100",
+      "name": "Giant Health Potion 100%",
+      "slot": 15,
+      "rarity": 3,
+      "iconSheet": "Potions.png",
+      "iconRow": 0,
+      "iconCol": 6,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "potion_hp_giant_100"
+    },
+    {
+      "id": "giant_health_potion_50",
+      "name": "Giant Health Potion 50%",
+      "slot": 15,
+      "rarity": 3,
+      "iconSheet": "Potions.png",
+      "iconRow": 0,
+      "iconCol": 7,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "potion_hp_giant_50"
+    },
+    {
+      "id": "giant_health_potion_25",
+      "name": "Giant Health Potion 25%",
+      "slot": 15,
+      "rarity": 3,
+      "iconSheet": "Potions.png",
+      "iconRow": 0,
+      "iconCol": 8,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "potion_hp_giant_25"
+    },
+    {
+      "id": "small_rejuvenation_potion_100",
+      "name": "Small Rejuvenation Potion 100%",
+      "slot": 15,
+      "rarity": 0,
+      "iconSheet": "Potions.png",
+      "iconRow": 1,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "potion_sh_small_100"
+    },
+    {
+      "id": "small_rejuvenation_potion_50",
+      "name": "Small Rejuvenation Potion 50%",
+      "slot": 15,
+      "rarity": 0,
+      "iconSheet": "Potions.png",
+      "iconRow": 1,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "potion_sh_small_50"
+    },
+    {
+      "id": "small_rejuvenation_potion_25",
+      "name": "Small Rejuvenation Potion 25%",
+      "slot": 15,
+      "rarity": 0,
+      "iconSheet": "Potions.png",
+      "iconRow": 1,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "potion_sh_small_25"
+    },
+    {
+      "id": "large_rejuvenation_potion_100",
+      "name": "Large Rejuvenation Potion 100%",
+      "slot": 15,
+      "rarity": 2,
+      "iconSheet": "Potions.png",
+      "iconRow": 1,
+      "iconCol": 3,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "potion_sh_large_100"
+    },
+    {
+      "id": "large_rejuvenation_potion_50",
+      "name": "Large Rejuvenation Potion 50%",
+      "slot": 15,
+      "rarity": 2,
+      "iconSheet": "Potions.png",
+      "iconRow": 1,
+      "iconCol": 4,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "potion_sh_large_50"
+    },
+    {
+      "id": "large_rejuvenation_potion_25",
+      "name": "Large Rejuvenation Potion 25%",
+      "slot": 15,
+      "rarity": 2,
+      "iconSheet": "Potions.png",
+      "iconRow": 1,
+      "iconCol": 5,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "potion_sh_large_25"
+    },
+    {
+      "id": "giant_rejuvenation_potion_100",
+      "name": "Giant Rejuvenation Potion 100%",
+      "slot": 15,
+      "rarity": 3,
+      "iconSheet": "Potions.png",
+      "iconRow": 1,
+      "iconCol": 6,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "potion_sh_giant_100"
+    },
+    {
+      "id": "giant_rejuvenation_potion_50",
+      "name": "Giant Rejuvenation Potion 50%",
+      "slot": 15,
+      "rarity": 3,
+      "iconSheet": "Potions.png",
+      "iconRow": 1,
+      "iconCol": 7,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "potion_sh_giant_50"
+    },
+    {
+      "id": "giant_rejuvenation_potion_25",
+      "name": "Giant Rejuvenation Potion 25%",
+      "slot": 15,
+      "rarity": 3,
+      "iconSheet": "Potions.png",
+      "iconRow": 1,
+      "iconCol": 8,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "consumableId": "potion_sh_giant_25"
+    },
+    {
+      "id": "brown_bag",
+      "name": "Brown Bag",
+      "slot": 14,
+      "rarity": 3,
+      "iconSheet": "Bags.png",
+      "iconRow": 0,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "bagSlots": 4
+    },
+    {
+      "id": "green_bag",
+      "name": "Green Bag",
+      "slot": 14,
+      "rarity": 3,
+      "iconSheet": "Bags.png",
+      "iconRow": 1,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "bagSlots": 8
+    },
+    {
+      "id": "blue_bag",
+      "name": "Blue Bag",
+      "slot": 14,
+      "rarity": 3,
+      "iconSheet": "Bags.png",
+      "iconRow": 0,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "bagSlots": 16
+    },
+    {
+      "id": "red_bag",
+      "name": "Red Bag",
+      "slot": 14,
+      "rarity": 3,
+      "iconSheet": "Bags.png",
+      "iconRow": 1,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "bagSlots": 24
+    },
+    {
+      "id": "brown_stringed_bag",
+      "name": "Brown Stringed Bag",
+      "slot": 14,
+      "rarity": 4,
+      "iconSheet": "Bags.png",
+      "iconRow": 0,
+      "iconCol": 4,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "bagSlots": 48
+    },
+    {
+      "id": "green_stringed_bag",
+      "name": "Green Stringed Bag",
+      "slot": 14,
+      "rarity": 4,
+      "iconSheet": "Bags.png",
+      "iconRow": 1,
+      "iconCol": 4,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "bagSlots": 64
+    },
+    {
+      "id": "blue_stringed_bag",
+      "name": "Blue Stringed Bag",
+      "slot": 14,
+      "rarity": 4,
+      "iconSheet": "Bags.png",
+      "iconRow": 0,
+      "iconCol": 5,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "bagSlots": 80
+    },
+    {
+      "id": "red_stringed_bag",
+      "name": "Red Stringed Bag",
+      "slot": 14,
+      "rarity": 4,
+      "iconSheet": "Bags.png",
+      "iconRow": 1,
+      "iconCol": 5,
+      "socketable": false,
+      "socketsMax": 0,
+      "stats": {},
+      "maxAffixes": 0,
+      "affixPool": [],
+      "bagSlots": 96
+    }
+  ]
+}

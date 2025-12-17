@@ -22,12 +22,17 @@ set(ENGINE_SOURCES
     ecs/components/Health.h
     ecs/components/Status.h
     ecs/components/Projectile.h
+    ecs/components/RPGStats.h
     ecs/components/AABB.h
     ecs/components/Tags.h
     status/StatusTypes.h
     status/StatusContainer.h
     status/StatusContainer.cpp
     gameplay/Combat.h
+    gameplay/RPGStats.h
+    gameplay/RPGStats.cpp
+    gameplay/RPGCombat.h
+    gameplay/RPGCombat.cpp
     math/Vec2.h
     render/RenderDevice.h
     render/NullRenderDevice.h

@@ -11,6 +11,7 @@
 #include "../engine/ecs/components/Tags.h"
 #include "../engine/ecs/components/SpriteAnimation.h"
 #include "../engine/gameplay/Combat.h"
+#include "systems/RpgDamage.h"
 #include "systems/BuffSystem.h"
 #include "components/SummonedUnit.h"
 #include "components/SpellEffect.h"
@@ -141,7 +142,7 @@ void GameRoot::executeAbility(int index) {
                                          ? &projectileVisualArrow_
                                          : nullptr;
         applyProjectileVisual(p, sizeLocal, Engine::Color{255, 220, 140, 255}, false, vis);
-        registry_.emplace<Engine::ECS::Projectile>(p, Engine::ECS::Projectile{dir * speedLocal, dmgEvent, projectileLifetime_, lifestealPercent_, chainBounces_});
+        registry_.emplace<Engine::ECS::Projectile>(p, Engine::ECS::Projectile{dir * speedLocal, dmgEvent, projectileLifetime_, lifestealPercent_, chainBounces_, hero_});
         registry_.emplace<Engine::ECS::ProjectileTag>(p, Engine::ECS::ProjectileTag{});
         return p;
     };
@@ -501,7 +502,8 @@ void GameRoot::executeAbility(int index) {
                     buff.shieldArmorBonus += armorDelta;
                     buff.damageTakenMultiplier *= st->container.damageTakenMultiplier();
                 }
-                Engine::Gameplay::applyDamage(hp, dmg, buff);
+                (void)Game::RpgDamage::apply(registry_, hero_, e, hp, dmg, buff, useRpgCombat_, rpgResolverConfig_, rng_,
+                                             "wizard_lbolt", [this](const std::string& line) { pushCombatDebugLine(line); });
                 // Apply stun
                 float stunDur = 0.6f + 0.2f * wizardStage();
                 if (auto* se = registry_.get<Game::StatusEffects>(e)) {

@@ -18,6 +18,8 @@ struct ActionState {
     bool swapWeapon{false};
     bool interact{false};
     bool useItem{false};
+    bool hotbar1{false};
+    bool hotbar2{false};
     bool dash{false};
     bool ability1{false};
     bool ability2{false};
