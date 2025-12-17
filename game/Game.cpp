@@ -6494,7 +6494,7 @@ void GameRoot::updateMenuInput(const Engine::ActionState& actions, const Engine:
 
 void GameRoot::renderMenu() {
     if (!render_) return;
-    render_->clear({10, 12, 16, 255});
+    render_->clear({0, 0, 0, 255});
 
     const float vw = static_cast<float>(viewportWidth_);
     const float vh = static_cast<float>(viewportHeight_);
@@ -6513,13 +6513,44 @@ void GameRoot::renderMenu() {
     const float margin = 26.0f * s;
     const float titleY = 72.0f * s;
 
-    // Subtle modern backdrop (simple banded gradient + center glow).
-    render_->drawFilledRect(Engine::Vec2{0.0f, 0.0f}, Engine::Vec2{vw, vh * 0.45f}, Engine::Color{18, 26, 40, 120});
-    render_->drawFilledRect(Engine::Vec2{0.0f, vh * 0.55f}, Engine::Vec2{vw, vh * 0.45f}, Engine::Color{6, 8, 12, 160});
-    const float glowW = 860.0f * s;
-    const float glowH = 520.0f * s;
-    render_->drawFilledRect(Engine::Vec2{centerX - glowW * 0.5f, vh * 0.52f - glowH * 0.5f},
-                            Engine::Vec2{glowW, glowH}, Engine::Color{28, 40, 62, 60});
+    // Animated starfield background (flat black + moving white dots).
+    {
+        auto hash01 = [](uint32_t x) -> float {
+            // 32-bit mix -> [0,1). Deterministic across platforms.
+            x ^= x >> 16;
+            x *= 0x7feb352du;
+            x ^= x >> 15;
+            x *= 0x846ca68bu;
+            x ^= x >> 16;
+            return static_cast<float>(x & 0x00FFFFFFu) / static_cast<float>(0x01000000u);
+        };
+
+        const float t = static_cast<float>(menuPulse_);
+        const float maxR = std::hypot(vw, vh) * 0.78f;
+        const int baseCount = 320;
+        const float areaScale = (vw * vh) / (1920.0f * 1080.0f);
+        const int starCount = std::clamp(static_cast<int>(std::round(baseCount * std::clamp(areaScale, 0.6f, 2.2f))), 220, 720);
+        const float twoPi = 6.2831853f;
+
+        for (int i = 0; i < starCount; ++i) {
+            const uint32_t idx = static_cast<uint32_t>(i + 1);
+            const float depth = 0.15f + 0.85f * hash01(idx * 11u + 7u);  // 0..1, higher = brighter/larger
+            const float r = std::sqrt(std::max(0.0f, hash01(idx * 5u + 17u))) * maxR;
+            const float theta0 = twoPi * hash01(idx * 23u + 31u);
+            const float omega = 0.010f + 0.018f * depth;  // rad/sec
+            const float theta = theta0 + t * omega;
+
+            const float x = centerX + std::cos(theta) * r;
+            const float y = (vh * 0.5f) + std::sin(theta) * r;
+            if (x < -6.0f || x > vw + 6.0f || y < -6.0f || y > vh + 6.0f) continue;
+
+            const float tw = 0.65f + 0.35f * std::sin(t * (0.6f + 1.4f * hash01(idx * 3u + 101u)) + twoPi * hash01(idx * 97u + 13u));
+            const float px = (depth > 0.72f) ? (2.0f * std::clamp(s, 0.8f, 1.2f)) : (1.0f * std::clamp(s, 0.8f, 1.2f));
+            const float a = std::clamp((0.35f + 0.65f * depth) * tw, 0.15f, 1.0f);
+            const uint8_t alpha = static_cast<uint8_t>(std::clamp(30.0f + 225.0f * a, 30.0f, 255.0f));
+            render_->drawFilledRect(Engine::Vec2{x - px * 0.5f, y - px * 0.5f}, Engine::Vec2{px, px}, Engine::Color{255, 255, 255, alpha});
+        }
+    }
 
     // Title (top, centered).
     const std::string title = "PROJECT AURORA ZETA";
@@ -6528,7 +6559,7 @@ void GameRoot::renderMenu() {
     drawTextUnified(title, Engine::Vec2{centerX - titleW * 0.5f, titleY}, titleScale, Engine::Color{190, 235, 255, 245});
 
     // Build info (bottom-right).
-    const std::string buildStr = "Pre-Alpha | Build v0.0.136";
+    const std::string buildStr = "Pre-Alpha | Build v0.0.137";
     const float buildScale = std::clamp(0.95f * s, 0.72f, 0.95f);
     const Engine::Vec2 buildSz = measureTextUnified(buildStr, buildScale);
     drawTextUnified(buildStr, Engine::Vec2{vw - margin - buildSz.x, vh - margin - buildSz.y}, buildScale,

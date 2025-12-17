@@ -114,3 +114,6 @@
 ## 2025-12-17 — Suggestions after shop UI modernization
 - Add a small “Hold Shift to buy 5” or “Buy & Equip” affordance (where applicable) to reduce click count.
 - Promote shop selection to keyboard/controller navigation (Up/Down + Enter) for accessibility.
+
+## 2025-12-17 — Suggestions after main menu starfield
+- Add an Options toggle for starfield density/speed (and a “Reduce Motion” accessibility flag).

@@ -203,3 +203,6 @@
     * Traveling Shop updated to a modal layout with Offers, Details, and Inventory Sell panels.
     * Ability Shop updated to a list + details layout with an explicit “Buy Upgrade” button.
     * Added hover/selection highlighting and long-text truncation for cleaner readability.
+
+# v0.0.137
+* Main menu: replaced the static backdrop with an animated starfield screensaver background.

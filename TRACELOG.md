@@ -659,3 +659,15 @@
 - Manual test:
   - Interact with the shopkeeper to open Traveling Shop; hover/select offers and buy from the Buy button; sell items via the inventory list (scroll wheel works).
   - Press `B` to open Ability Shop; hover/select upgrades and buy from the Buy button; verify maxed/insufficient copper states render correctly.
+
+## 2025-12-17 — Main menu animated starfield background
+
+**Prompt / Task**
+- Change the main menu background to an animated “star screensaver” (flat black + moving white dots), keeping menu layout intact.
+
+**What Changed**
+- Replaced the main menu’s static gradient/glow backdrop with a deterministic rotating starfield animation rendered behind the existing UI.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-17).
+- Manual test: launch the game and verify the main menu shows a black starfield background while buttons/text remain unchanged.
