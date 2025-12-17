@@ -121,3 +121,16 @@
 ## 2025-12-17 — Suggestions after RPG status integration + PRD shaping
 - Replace the remaining ad-hoc `Game::StatusEffects` timers (stun/burn/slow) with engine `StatusContainer` specs so all CC/DoT/buffs share one pipeline (including cleanse + Unstoppable).
 - Split RNG streams (`combat`, `loot`, `world`) and add an explicit “seeded run” debug mode so combat repros aren’t perturbed by unrelated randomness.
+
+## 2025-12-17 — Suggestions after seeded world scenery
+- Add a debug overlay/option to display and copy the current `matchSeed` so scenery layouts (and future seeded runs) can be reproduced easily.
+- Add a lightweight spatial hash for scenery colliders to avoid O(N) hero-vs-obstacle checks as prop density grows.
+
+## 2025-12-17 — Suggestions after fog + camera follow fix
+- Consider rendering “Fogged” tiles as dim silhouettes for scenery (instead of fully hidden) to improve navigation while still preserving exploration.
+
+## 2025-12-17 — Suggestions after denser scenery pass
+- Add a `spawn.densityScale` multiplier keyed off map size/biome so designers can quickly tune clutter without rebalancing per-prop weights.
+
+## 2025-12-17 — Suggestions after NPC world collision
+- Add a spatial grid for `SolidTag` colliders so enemies/escorts can query nearby obstacles instead of iterating all scenery every frame.

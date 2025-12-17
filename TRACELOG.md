@@ -704,3 +704,176 @@
 - Manual test:
   - Start a run as Wizard and cast Lightning Bolt at a pack; confirm enemies receive Stasis and CC DR prevents perma-lock.
   - Turn on `combatDebugOverlay` and verify debug lines show crit/dodge/parry and mitigation fields updating.
+
+## 2025-12-17 — Seeded world scenery (v0.0.139)
+
+**Prompt / Task**
+- Add sporadic scenery throughout the map, randomly placed based on the match seed, with partial collision so the player can walk behind tall sprites.
+
+**What Changed**
+- Added `data/scenery.json` to define scenery types, sizes, and per-sprite collider rectangles (data-driven).
+- Spawns a spaced-out set of scenery props at run start using a deterministic RNG seeded per match (and synced via multiplayer StartMatch).
+- Added y-sorted rendering so walk-behind visuals work naturally, and added hero-vs-scenery collision using `Engine::ECS::SolidTag`.
+
+**Steps Taken**
+- Introduced a dedicated match seed and a separate RNG stream for world/scenery placement.
+- Implemented a simple rejection-sampling placer with minimum spacing, center clear radius, and edge margins.
+- Modeled partial colliders as separate invisible entities so sprites can have multiple collision rectangles without needing a new collider component.
+
+**Rationale / Tradeoffs**
+- `TASK.md` (RPG systems) doesn’t cover scenery; implemented this feature independently and kept it data-driven via `data/scenery.json`.
+- Chose y-sorted draw order (based on sprite “feet” Y) instead of hard layering so tall props naturally occlude the player only when appropriate.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-17).
+- Manual test:
+  - Start a run and verify scattered props appear with generous spacing.
+  - Walk into trunks/rocks/bottom halves to confirm collision; walk “behind” the top halves to confirm correct occlusion.
+
+## 2025-12-17 — Fog layering fix for y-sorted render (v0.0.139)
+
+**Prompt / Task**
+- Fix issue where fog overlay caused the hero/scenery/enemies to appear invisible depending on position.
+
+**What Changed**
+- Split world rendering into two passes (grid -> fog overlay -> entities) so fog shading doesn’t fully cover the player and sprites.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-17).
+
+## 2025-12-17 — Fog culling + camera follow guard (v0.0.140)
+
+**Prompt / Task**
+- Fix reports of entities “vanishing” and scenery showing outside fog of war vision.
+
+**What Changed**
+- Applied fog culling to all non-hero entities (scenery/pickups/enemies) so they only render in visible fog tiles.
+- Prevented accidental free-camera mode in Modern movement by forcing camera follow on the hero.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-17).
+
+## 2025-12-17 — Fogged-tile prop rendering (v0.0.141)
+
+**Prompt / Task**
+- Keep scenery visible in explored (fogged) areas, not only within current vision.
+
+**What Changed**
+- Updated fog culling so non-enemy world props (including scenery) render in `Fogged` tiles, while enemies still require `Visible`.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-17).
+
+## 2025-12-17 — Fog tint for explored scenery (v0.0.142)
+
+**Prompt / Task**
+- Scenery should remain visible in explored fogged areas, but dimmed under fog (not full brightness).
+
+**What Changed**
+- Added a fog-tint overlay for non-enemy world props when their tile state is `Fogged`.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-17).
+
+## 2025-12-17 — Standard fog shading for scenery (v0.0.143)
+
+**Prompt / Task**
+- Scenery in explored fogged areas should be shaded by the same fog layer as everything else (no separate tint).
+
+**What Changed**
+- Removed the special-case fog-tint overlay on props and instead render the standard fog overlay above entities.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-17).
+
+## 2025-12-17 — Fix zoom cull early-exit (v0.0.144)
+
+**Prompt / Task**
+- Fix bug where zooming in makes all sprites vanish (only ground remains).
+
+**What Changed**
+- Render culling now correctly `continue`s per-entity instead of returning early from the draw pass.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-17).
+
+## 2025-12-17 — Full-map scenery distribution (v0.0.145)
+
+**Prompt / Task**
+- Scenery should populate the entire 512x512 play area, not only a small radius near the center.
+
+**What Changed**
+- `data/scenery.json`: `spawn.radius: 0` now means “distribute across full map bounds” (uniform over current world bounds).
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-17).
+
+## 2025-12-17 — Denser, tree-heavy scenery (v0.0.146)
+
+**Prompt / Task**
+- Massively increase the amount of scenery on the map, leaning heavily towards trees.
+
+**What Changed**
+- Increased scenery spawn counts and reduced minimum spacing in `data/scenery.json`.
+- Adjusted scenery weights to heavily favor `Tree.png` (with additional `BrokenTree.png`), while making rocks/cliffs rarer.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-17).
+
+## 2025-12-17 — NPC world collision (v0.0.147)
+
+**Prompt / Task**
+- Enemies, bosses, and escorts need to respect scenery collision.
+
+**What Changed**
+- Extended world collision resolution against `SolidTag` to enemies, bosses, and escort targets (in addition to the hero).
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-17).
+
+## 2025-12-17 — Dirt patch floor variant (v0.0.148)
+
+**Prompt / Task**
+- Add `DirtPatch.png` (48x48) to the pool of floor textures used for ground tiling.
+
+**What Changed**
+- Added `assets/Tilesheets/DirtPatch.png` to the default grid texture list and fallback loader (also resolves `~/assets/...`).
+- Weighted non-standard tile sizes (like 48x48) to be rare within the floor variant pool.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-17).
+
+## 2025-12-17 — Larger floor variants + less streaking (v0.0.149)
+
+**Prompt / Task**
+- Fix 48x48 dirt patch appearing as a tiny tile, and reduce visible “lines” of repeated floor sprites.
+
+**What Changed**
+- Floor tiling now uses the smallest tile size as the base grid and draws larger variants (like `DirtPatch.png`) at their native size as sparse overlays.
+- Improved the coordinate hash to avoid stripe artifacts when variant counts are small.
+- Fog-of-war tile sizing now uses the smallest loaded floor tile size to stay stable when a larger variant is present.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-17).
+
+## 2025-12-17 — Fix dirt patch overlay draw order (v0.0.150)
+
+**Prompt / Task**
+- DirtPatch floor overlays weren’t visible.
+
+**What Changed**
+- Floor rendering now draws base tiles first, then draws oversized tile overlays in a second pass so they aren’t overwritten.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-17).
+
+## 2025-12-17 — Rarer dirt patches (v0.0.151)
+
+**Prompt / Task**
+- Make `DirtPatch.png` slightly more rare to avoid clumping.
+
+**What Changed**
+- Reduced floor overlay spawn chance for oversized dirt patches.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-17).

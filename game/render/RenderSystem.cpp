@@ -31,11 +31,15 @@ namespace Game {
 namespace {
 // Simple coordinate hash to keep tile variant selection stable without storing state.
 uint32_t hashCoords(int x, int y) {
-    uint32_t h = 0x811C9DC5u;
-    h ^= static_cast<uint32_t>(x + 0x9E3779B9u);
-    h *= 0x01000193u;
-    h ^= static_cast<uint32_t>(y + 0x7F4A7C15u);
-    h *= 0x01000193u;
+    // Mix inspired by splitmix32-style avalanching. Designed to avoid stripe artifacts when variantCount is small.
+    uint32_t h = 0x9E3779B9u;
+    h ^= static_cast<uint32_t>(x) * 0x85EBCA6Bu;
+    h ^= static_cast<uint32_t>(y) * 0xC2B2AE35u;
+    h ^= h >> 16;
+    h *= 0x7FEB352Du;
+    h ^= h >> 15;
+    h *= 0x846CA68Bu;
+    h ^= h >> 16;
     return h;
 }
 
@@ -49,18 +53,63 @@ void RenderSystem::draw(const Engine::ECS::Registry& registry, const Engine::Cam
                         const Engine::Gameplay::FogOfWarLayer* fog, int fogTileSize,
                         float fogOriginOffsetX, float fogOriginOffsetY,
                         bool disableEnemyFogCulling) {
-    drawGrid(camera, viewportW, viewportH, gridTexture, gridVariants, fog, fogTileSize, fogOriginOffsetX,
-             fogOriginOffsetY);
+    drawGridPass(camera, viewportW, viewportH, gridTexture, gridVariants, fog, fogTileSize, fogOriginOffsetX,
+                 fogOriginOffsetY);
+    drawEntitiesPass(registry, camera, viewportW, viewportH, fog, fogTileSize, fogOriginOffsetX, fogOriginOffsetY,
+                     disableEnemyFogCulling);
+}
 
+void RenderSystem::drawEntitiesPass(const Engine::ECS::Registry& registry, const Engine::Camera2D& camera, int viewportW,
+                                   int viewportH, const Engine::Gameplay::FogOfWarLayer* fog, int fogTileSize,
+                                   float fogOriginOffsetX, float fogOriginOffsetY, bool disableEnemyFogCulling) {
     const Engine::Vec2 center{static_cast<float>(viewportW) * 0.5f, static_cast<float>(viewportH) * 0.5f};
+
+    struct DrawItem {
+        Engine::ECS::Entity e{Engine::ECS::kInvalidEntity};
+        float sortKey{0.0f};  // "feet" y in world space
+    };
+    std::vector<DrawItem> items;
+    items.reserve(2048);
     registry.view<Engine::ECS::Transform, Engine::ECS::Renderable>(
-        [this, center, &camera, viewportW, viewportH, &registry, fog, fogTileSize, fogOriginOffsetX,
-         fogOriginOffsetY, disableEnemyFogCulling](Engine::ECS::Entity e, const Engine::ECS::Transform& tf,
-                          const Engine::ECS::Renderable& rend) {
+        [&items, &registry](Engine::ECS::Entity e, const Engine::ECS::Transform& tf, const Engine::ECS::Renderable& rend) {
+            const bool isEnemy = registry.has<Engine::ECS::EnemyTag>(e) || registry.has<Engine::ECS::BossTag>(e);
+            const bool isHero = registry.has<Engine::ECS::HeroTag>(e);
+            const float visualScale = isEnemy ? kEnemyVisualScale : (isHero ? kHeroVisualScale : 1.0f);
+            const float feetY = tf.position.y + (rend.size.y * 0.5f * visualScale);
+            items.push_back(DrawItem{e, feetY});
+        });
+
+    std::stable_sort(items.begin(), items.end(),
+                     [](const DrawItem& a, const DrawItem& b) { return a.sortKey < b.sortKey; });
+
+    for (const auto& it : items) {
+        const Engine::ECS::Entity e = it.e;
+        const auto* tfPtr = registry.get<Engine::ECS::Transform>(e);
+        const auto* rendPtr = registry.get<Engine::ECS::Renderable>(e);
+        if (!tfPtr || !rendPtr) continue;
+        const Engine::ECS::Transform& tf = *tfPtr;
+        const Engine::ECS::Renderable& rend = *rendPtr;
             Engine::Vec2 screenPos =
                 Engine::worldToScreen(tf.position, camera, static_cast<float>(viewportW), static_cast<float>(viewportH));
             const bool isEnemy = registry.has<Engine::ECS::EnemyTag>(e) || registry.has<Engine::ECS::BossTag>(e);
             const bool isHero = registry.has<Engine::ECS::HeroTag>(e);
+
+            // Fog culling:
+            // - Enemies/bosses: only draw when Visible.
+            // - World props/pickups/etc: draw when Visible OR Fogged (explored), but not when Unexplored.
+            Engine::Gameplay::FogState fogState = Engine::Gameplay::FogState::Visible;
+            if (!disableEnemyFogCulling && fog && fogTileSize > 0 && !isHero) {
+                const int tileX = static_cast<int>(
+                    std::floor((tf.position.x + fogOriginOffsetX) / static_cast<float>(fogTileSize)));
+                const int tileY = static_cast<int>(
+                    std::floor((tf.position.y + fogOriginOffsetY) / static_cast<float>(fogTileSize)));
+                fogState = fog->getState(tileX, tileY);
+                if (isEnemy) {
+                    if (fogState != Engine::Gameplay::FogState::Visible) continue;
+                } else {
+                    if (fogState == Engine::Gameplay::FogState::Unexplored) continue;
+                }
+            }
             const float visualScale = isEnemy ? kEnemyVisualScale : (isHero ? kHeroVisualScale : 1.0f);
             screenPos.x -= rend.size.x * 0.5f * camera.zoom * visualScale;
             screenPos.y -= rend.size.y * 0.5f * camera.zoom * visualScale;
@@ -68,26 +117,14 @@ void RenderSystem::draw(const Engine::ECS::Registry& registry, const Engine::Cam
             const float cullMargin = 64.0f;
             if (screenPos.x > center.x * 2.0f + cullMargin || screenPos.y > center.y * 2.0f + cullMargin ||
                 screenPos.x + scaledSize.x < -cullMargin || screenPos.y + scaledSize.y < -cullMargin) {
-                return;  // simple frustum cull
-            }
-
-            // Fog culling: hide enemies when tile not visible to player.
-            if (!disableEnemyFogCulling && fog && fogTileSize > 0 &&
-                (registry.has<Engine::ECS::EnemyTag>(e) || registry.has<Engine::ECS::BossTag>(e))) {
-                const int tileX = static_cast<int>(
-                    std::floor((tf.position.x + fogOriginOffsetX) / static_cast<float>(fogTileSize)));
-                const int tileY = static_cast<int>(
-                    std::floor((tf.position.y + fogOriginOffsetY) / static_cast<float>(fogTileSize)));
-                if (fog->getState(tileX, tileY) != Engine::Gameplay::FogState::Visible) {
-                    return;
-                }
+                continue;  // simple frustum cull
             }
 
             Engine::Color color = rend.color;
             const auto* status = registry.get<Engine::ECS::Status>(e);
             const bool cloaked = status && status->container.isStealthed();
             if (cloaked && isEnemy) {
-                return;  // fully hidden to player
+                continue;  // fully hidden to player
             }
             // Pulse color for pickups (except static Field Medkit item).
             if (registry.has<Game::Pickup>(e)) {
@@ -207,14 +244,14 @@ void RenderSystem::draw(const Engine::ECS::Registry& registry, const Engine::Cam
                     device_.drawFilledRect(markPos, Engine::Vec2{6.0f, 6.0f}, Engine::Color{255, 180, 80, 240});
                 }
             }
-        });
+    }
 }
 
-void RenderSystem::drawGrid(const Engine::Camera2D& camera, int viewportW, int viewportH,
-                            const Engine::Texture* gridTexture,
-                            const std::vector<Engine::TexturePtr>* gridVariants,
-                            const Engine::Gameplay::FogOfWarLayer* fog, int fogTileSize,
-                            float /*fogOriginOffsetX*/, float /*fogOriginOffsetY*/) {
+void RenderSystem::drawGridPass(const Engine::Camera2D& camera, int viewportW, int viewportH,
+                                const Engine::Texture* gridTexture,
+                                const std::vector<Engine::TexturePtr>* gridVariants,
+                                const Engine::Gameplay::FogOfWarLayer* fog, int fogTileSize,
+                                float /*fogOriginOffsetX*/, float /*fogOriginOffsetY*/) {
     const float viewWidth = viewportW / camera.zoom;
     const float viewHeight = viewportH / camera.zoom;
     const float left = camera.position.x - viewWidth * 0.5f;
@@ -223,26 +260,105 @@ void RenderSystem::drawGrid(const Engine::Camera2D& camera, int viewportW, int v
     const float bottom = camera.position.y + viewHeight * 0.5f;
 
     if (gridVariants && !gridVariants->empty()) {
-        const auto& first = *(*gridVariants)[0];
-        const float tileW = static_cast<float>(first.width());
-        const float tileH = static_cast<float>(first.height());
-        const float firstX = std::floor(left / tileW) * tileW;
-        const float firstY = std::floor(top / tileH) * tileH;
-        const std::size_t variantCount = gridVariants->size();
-        for (float y = firstY; y < bottom; y += tileH) {
-            for (float x = firstX; x < right; x += tileW) {
-                int tileX = static_cast<int>(std::floor(x / tileW));
-                int tileY = static_cast<int>(std::floor(y / tileH));
-                uint32_t h = hashCoords(tileX, tileY);
-                const auto& texPtr = (*gridVariants)[h % variantCount];
-                if (!texPtr) continue;
-                Engine::Vec2 screen = Engine::worldToScreen(Engine::Vec2{x, y}, camera,
+        // Use the smallest tile dimensions as the base grid size so larger textures (e.g. 48x48 dirt patches)
+        // can be drawn at their native size without forcing the whole floor grid to that size.
+        int baseW = 0;
+        int baseH = 0;
+        for (const auto& t : *gridVariants) {
+            if (!t) continue;
+            const int w = t->width();
+            const int h = t->height();
+            if (w <= 0 || h <= 0) continue;
+            if (baseW == 0 || w < baseW) baseW = w;
+            if (baseH == 0 || h < baseH) baseH = h;
+        }
+        if (baseW <= 0 || baseH <= 0) {
+            return;
+        }
+
+        struct OverlayVariant {
+            Engine::TexturePtr tex;
+            int spanX{1};
+            int spanY{1};
+        };
+
+        std::vector<Engine::TexturePtr> baseVariants;
+        std::vector<OverlayVariant> overlayVariants;
+        baseVariants.reserve(gridVariants->size());
+        overlayVariants.reserve(8);
+        for (const auto& t : *gridVariants) {
+            if (!t) continue;
+            if (t->width() == baseW && t->height() == baseH) {
+                baseVariants.push_back(t);
+            } else {
+                OverlayVariant ov{};
+                ov.tex = t;
+                ov.spanX = std::max(1, t->width() / baseW);
+                ov.spanY = std::max(1, t->height() / baseH);
+                overlayVariants.push_back(ov);
+            }
+        }
+        if (baseVariants.empty()) {
+            // If all variants are oversized, fall back to drawing them as if they were base tiles.
+            for (const auto& t : *gridVariants) {
+                if (t) baseVariants.push_back(t);
+            }
+        }
+
+        const int startTileX = static_cast<int>(std::floor(left / static_cast<float>(baseW))) - 2;
+        const int endTileX = static_cast<int>(std::ceil(right / static_cast<float>(baseW))) + 2;
+        const int startTileY = static_cast<int>(std::floor(top / static_cast<float>(baseH))) - 2;
+        const int endTileY = static_cast<int>(std::ceil(bottom / static_cast<float>(baseH))) + 2;
+
+        const float baseWf = static_cast<float>(baseW);
+        const float baseHf = static_cast<float>(baseH);
+        const float tileScreenW = baseWf * camera.zoom;
+        const float tileScreenH = baseHf * camera.zoom;
+
+        // Overlay placement is anchored to the base grid and occurs on a subset of anchor tiles to avoid
+        // repeating the same large texture on adjacent cells.
+        constexpr uint32_t kOverlayChance256 = 5;  // ~2% chance at anchor tiles (rarer to reduce clumping)
+
+        // Pass 1: base floor tiles.
+        for (int ty = startTileY; ty < endTileY; ++ty) {
+            for (int tx = startTileX; tx < endTileX; ++tx) {
+                const Engine::Vec2 world{tx * baseWf, ty * baseHf};
+                Engine::Vec2 screen = Engine::worldToScreen(world, camera,
                                                             static_cast<float>(viewportW),
                                                             static_cast<float>(viewportH));
                 screen.x = std::round(screen.x);
                 screen.y = std::round(screen.y);
-                Engine::Vec2 size{tileW * camera.zoom + 1.0f, tileH * camera.zoom + 1.0f};
-                device_.drawTexture(*texPtr, screen, size);
+
+                const uint32_t h = hashCoords(tx, ty);
+                const auto& baseTex = baseVariants[h % baseVariants.size()];
+                if (baseTex) {
+                    device_.drawTexture(*baseTex, screen, Engine::Vec2{tileScreenW + 1.0f, tileScreenH + 1.0f});
+                }
+            }
+        }
+
+        // Pass 2: larger overlay tiles (e.g. 48x48 dirt patch) at native size, drawn after the base so they aren't
+        // overwritten by subsequent base-cell draws.
+        if (!overlayVariants.empty()) {
+            for (int ty = startTileY; ty < endTileY; ++ty) {
+                for (int tx = startTileX; tx < endTileX; ++tx) {
+                    const uint32_t h = hashCoords(tx, ty);
+                    const OverlayVariant& ov = overlayVariants[(h >> 8) % overlayVariants.size()];
+                    if (!ov.tex) continue;
+                    if ((tx % ov.spanX) != 0 || (ty % ov.spanY) != 0) continue;
+                    const uint32_t ho = hashCoords(tx / ov.spanX, ty / ov.spanY) ^ 0xD17A4F29u;
+                    if ((ho & 0xFFu) >= kOverlayChance256) continue;
+
+                    const Engine::Vec2 world{tx * baseWf, ty * baseHf};
+                    Engine::Vec2 screen = Engine::worldToScreen(world, camera,
+                                                                static_cast<float>(viewportW),
+                                                                static_cast<float>(viewportH));
+                    screen.x = std::round(screen.x);
+                    screen.y = std::round(screen.y);
+                    const Engine::Vec2 size{static_cast<float>(ov.tex->width()) * camera.zoom + 1.0f,
+                                            static_cast<float>(ov.tex->height()) * camera.zoom + 1.0f};
+                    device_.drawTexture(*ov.tex, screen, size);
+                }
             }
         }
         return;

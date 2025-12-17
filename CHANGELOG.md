@@ -213,3 +213,44 @@
 * RPG combat: elemental `SpellEffect` now maps to RPG damage types so resistances/vulnerabilities can matter beyond Physical/Arcane/True.
 * RPG combat: added optional PRD-style anti-streak for crit/dodge/parry (`rpgCombat.rng.usePRD`).
 * Consumables: Buff effects can now apply data-driven stat contributions via `data/rpg/consumables.json` (`effects[].stats`).
+
+# v0.0.139
+* Added sporadic, seeded world scenery placed deterministically per match (`data/scenery.json`).
+    * Scenery uses partial collision so the player can walk behind tall sprites (trees/rocks/monuments) without clipping over the tops.
+
+# v0.0.140
+* Fog of war: world props, pickups, and enemies now correctly hide outside visible tiles.
+* Camera: Modern mode now keeps the camera locked to the hero to prevent accidentally “losing” the world off-screen.
+
+# v0.0.141
+* Fog of war: scenery (and other non-enemy world props) now remains visible in explored “fogged” tiles.
+
+# v0.0.142
+* Fog of war: explored (fogged) scenery now renders dimmed under a fog tint instead of full brightness.
+
+# v0.0.143
+* Fog of war: scenery/props are now shaded by the standard fog overlay (no separate tint pass).
+
+# v0.0.144
+* Fixed: zooming in no longer makes sprites disappear due to an early-exit in render culling.
+
+# v0.0.145
+* Scenery placement now supports full-map distribution (not just a center radius) via `data/scenery.json` (`spawn.radius: 0`).
+
+# v0.0.146
+* World: massively increased scenery density, heavily favoring trees.
+
+# v0.0.147
+* AI: enemies, bosses, and escort targets now collide with world scenery.
+
+# v0.0.148
+* Visual: added `DirtPatch.png` into the floor tile variant pool (rare vs base tiles).
+
+# v0.0.149
+* Visual: improved floor tile randomization to reduce visible streaks, and render larger floor variants (e.g. 48x48 dirt patches) at native size.
+
+# v0.0.150
+* Fixed: large floor overlays (like `DirtPatch.png`) now render correctly on top of the base floor tiles.
+
+# v0.0.151
+* Visual: made `DirtPatch.png` floor overlays slightly rarer to reduce clumping.

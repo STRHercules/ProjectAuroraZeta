@@ -1,0 +1,81 @@
+{
+  "spawn": {
+    "enabled": true,
+    "minCount": 180,
+    "maxCount": 1600,
+    "radius": 0.0,
+    "centerClearRadius": 220.0,
+    "edgeMargin": 90.0,
+    "minSpacing": 45.0,
+    "maxAttempts": 120000
+  },
+  "types": [
+    {
+      "id": "broken_tree",
+      "texture": "assets/Tilesheets/BrokenTree.png",
+      "size": [48, 32],
+      "weight": 12,
+      "colliders": [
+        { "rect": [16, 0, 32, 25] }
+      ]
+    },
+    {
+      "id": "large_rock",
+      "texture": "assets/Tilesheets/LargeRock.png",
+      "size": [32, 32],
+      "weight": 2,
+      "colliders": [
+        { "rect": [0, 16, 32, 32] }
+      ]
+    },
+    {
+      "id": "monument",
+      "texture": "assets/Tilesheets/Monument.png",
+      "size": [96, 128],
+      "weight": 1,
+      "colliders": [
+        { "rect": [0, 54, 20, 108] },
+        { "rect": [20, 70, 69, 123] },
+        { "rect": [69, 54, 95, 109] }
+      ]
+    },
+    {
+      "id": "large_bush",
+      "texture": "assets/Tilesheets/LargeBush.png",
+      "size": [32, 32],
+      "weight": 3,
+      "colliders": [
+        { "rect": [0, 16, 32, 32] }
+      ]
+    },
+    {
+      "id": "small_cliff",
+      "texture": "assets/Tilesheets/SmallCliff.png",
+      "size": [96, 65],
+      "weight": 1,
+      "colliders": [
+        { "rect": [21, 36, 74, 61] },
+        { "rect": [74, 19, 95, 46] },
+        { "rect": [0, 0, 21, 46] }
+      ]
+    },
+    {
+      "id": "tree",
+      "texture": "assets/Tilesheets/Tree.png",
+      "size": [80, 112],
+      "weight": 35,
+      "colliders": [
+        { "rect": [32, 80, 47, 106] }
+      ]
+    },
+    {
+      "id": "tall_bush",
+      "texture": "assets/Tilesheets/TallBush.png",
+      "size": [16, 32],
+      "weight": 8,
+      "colliders": [
+        { "rect": [0, 16, 16, 32] }
+      ]
+    }
+  ]
+}

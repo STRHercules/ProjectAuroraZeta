@@ -2,6 +2,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 #include <optional>
 #include <string>
 #include <vector>
@@ -176,6 +177,7 @@ private:
     void loadUnitDefinitions();
     void loadPickupTextures();
     void loadProjectileTextures();
+    void loadSceneryDefinitions();
     void loadRpgData();
     void updateRpgConsumables(double dt);
     void updateRpgTalentAllocation();
@@ -209,6 +211,11 @@ private:
     void despawnShopkeeper();
     void rebuildFogLayer();
     void updateFogVision();
+    void spawnScenery();
+    void resolveHeroWorldCollisions();
+    void resolveNpcWorldCollisions();
+    std::string resolveAssetPath(const std::string& path) const;
+    uint64_t generateMatchSeed();
     bool performRangedAutoFire(const Engine::TimeStep& step, const Engine::ActionState& actions,
                                Game::OffensiveType offenseType);
     bool performMeleeAttack(const Engine::TimeStep& step, const Engine::ActionState& actions);
@@ -259,6 +266,33 @@ private:
         std::string description;
         float enemyHpMul{1.0f};
         int startWave{1};
+    };
+
+    struct SceneryColliderPx {
+        int x0{0};
+        int y0{0};
+        int x1{0};
+        int y1{0};
+    };
+
+    struct SceneryDef {
+        std::string id;
+        std::string texturePath;
+        int weight{1};
+        Engine::Vec2 sizePx{0.0f, 0.0f};
+        Engine::Vec2 anchorPx{0.0f, 0.0f};  // local px (0,0)=top-left; used as placement "ground point"
+        std::vector<SceneryColliderPx> colliders;
+    };
+
+    struct ScenerySpawnConfig {
+        bool enabled{true};
+        int minCount{14};
+        int maxCount{22};
+        float radius{820.0f};
+        float centerClearRadius{220.0f};
+        float edgeMargin{90.0f};
+        float minSpacing{200.0f};
+        int maxAttempts{2400};
     };
     struct MiniUnitDef {
         std::string id;
@@ -393,6 +427,10 @@ private:
     std::string heroTexturePath_{};
     std::unique_ptr<Engine::BitmapTextRenderer> debugText_;
     std::mt19937 rng_{std::random_device{}()};
+    std::mt19937 worldRng_{std::random_device{}()};
+    uint64_t matchSeed_{0};
+    ScenerySpawnConfig scenerySpawn_{};
+    std::vector<SceneryDef> sceneryDefs_{};
     Engine::InputBindings bindings_{};
     Engine::ActionMapper actionMapper_{};
     Engine::AssetManifest manifest_{};

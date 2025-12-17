@@ -23,11 +23,16 @@ public:
               float fogOriginOffsetX = 0.0f, float fogOriginOffsetY = 0.0f,
               bool disableEnemyFogCulling = false);
 
-private:
-    void drawGrid(const Engine::Camera2D& camera, int viewportW, int viewportH, const Engine::Texture* gridTexture,
-                  const std::vector<Engine::TexturePtr>* gridVariants, const Engine::Gameplay::FogOfWarLayer* fog,
-                  int fogTileSize, float fogOriginOffsetX, float fogOriginOffsetY);
+    // Two-pass rendering for fog layering (grid -> fog overlay -> entities).
+    void drawGridPass(const Engine::Camera2D& camera, int viewportW, int viewportH, const Engine::Texture* gridTexture,
+                      const std::vector<Engine::TexturePtr>* gridVariants, const Engine::Gameplay::FogOfWarLayer* fog,
+                      int fogTileSize, float fogOriginOffsetX, float fogOriginOffsetY);
 
+    void drawEntitiesPass(const Engine::ECS::Registry& registry, const Engine::Camera2D& camera, int viewportW,
+                          int viewportH, const Engine::Gameplay::FogOfWarLayer* fog, int fogTileSize,
+                          float fogOriginOffsetX, float fogOriginOffsetY, bool disableEnemyFogCulling);
+
+private:
     Engine::RenderDevice& device_;
 };
 

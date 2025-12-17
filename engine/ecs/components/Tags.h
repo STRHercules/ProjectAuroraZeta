@@ -9,5 +9,6 @@ struct ProjectileTag {};
 struct PickupTag {};
 struct BossTag {};
 struct EliteTag {};
+struct SolidTag {};  // World collision (static obstacles, scenery, etc.)
 
 }  // namespace Engine::ECS

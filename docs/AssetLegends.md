@@ -490,3 +490,44 @@ Panels -
     `TopPatternBG_116x67.png`
     `TopPatternPanel_01_33x15.png`
     `TopPatternPanel_02_33x15.png`
+
+
+
+## Scenery
+`~/assets/Tilesheets/..`
+* `BrokenTree.png`
+    - 48x32
+    - 16,0 to 32,25 should have collision  
+
+* `LargeRock.png`
+    - 32x32
+    - Bottom 2 Rows should have collision
+    - Top 2 Rows should not have collision, and the player should go behind the asset in this area.
+
+* `Monument.png`
+    - 96x128
+    - 0,54 to 20,108 should have collision
+    - 20,70 to 69,123 should have collision
+    - 95,54 to 69,109 should have collision
+    - 0,54 to 96,0 should not have collision, and the player should go behind the asset in this area.
+
+* `LargeBush.png`
+    - 32x32
+    - Bottom 2 Rows should have collision
+    - Top 2 Rows should not have collision, and the player should go behind the asset in this area.
+
+* `SmallCliff.png`
+    - 96x65
+    - 21,36 to 74,61 should have collision
+    - 74,19 to 95,46 should have collision
+    - 21,46 to 0,0 should have collision
+
+* `Tree.png`
+    - 80x112
+    - 32,80 47,106 should have collision
+    - 0,79 to 79,0 should not have collision, and the player should go behind the asset in this area.
+
+* `TallBush.png`
+    - 16x32 
+    - Bottom Row should have collision
+    - Top Row should not have collision, and the player should go behind the asset in this area.

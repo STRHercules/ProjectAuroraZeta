@@ -55,6 +55,7 @@ public:
     bool isHost() const { return role_ == SessionRole::Host; }
     bool inLobby() const { return inLobby_; }
     bool inMatch() const { return inMatch_; }
+    uint64_t matchSeed() const { return matchSeed_; }
     const LobbyState& lobby() const { return lobby_; }
     const SessionConfig& config() const { return config_; }
 
@@ -68,7 +69,7 @@ private:
     void handleLobby(const Engine::Net::NetPacket& pkt, Engine::Net::NetReader& r);
     void handleChat(const Engine::Net::NetPacket& pkt, Engine::Net::NetReader& r);
     void handleSnapshot(const Engine::Net::NetPacket& pkt, Engine::Net::NetReader& r);
-    void handleStartMatch(const Engine::Net::NetPacket& pkt);
+    void handleStartMatch(const Engine::Net::NetPacket& pkt, Engine::Net::NetReader& r);
     void handleGoodbye(const Engine::Net::NetPacket& pkt, Engine::Net::NetReader& r);
     void handleHeroSelect(const Engine::Net::NetPacket& pkt, Engine::Net::NetReader& r);
 
@@ -94,6 +95,7 @@ private:
     // client retry
     double helloTimer_{0.0};
     HelloMsg pendingHello_{};
+    uint64_t matchSeed_{0};
 };
 
 }  // namespace Game::Net

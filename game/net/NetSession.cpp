@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <random>
 
 #include "../../engine/core/Logger.h"
 
@@ -24,9 +25,16 @@ NetSession::~NetSession() { stop(); }
 void NetSession::beginMatch() {
     inMatch_ = true;
     if (role_ == SessionRole::Host) {
+        if (matchSeed_ == 0) {
+            uint64_t hi = static_cast<uint64_t>(std::random_device{}());
+            uint64_t lo = static_cast<uint64_t>(std::random_device{}());
+            matchSeed_ = (hi << 32) ^ lo;
+        }
+        StartMatchMsg msg{};
+        msg.seed = matchSeed_;
         for (const auto& [id, peer] : peers_) {
             (void)id;
-            sendMessage(MessageType::StartMatch, peer.addr, [](Engine::Net::NetWriter&) {});
+            sendMessage(MessageType::StartMatch, peer.addr, [&](Engine::Net::NetWriter& w) { msg.serialize(w); });
         }
     } else if (role_ == SessionRole::Client) {
         if (snapshotProvider_) {
@@ -93,6 +101,7 @@ void NetSession::stop() {
     localId_ = 0;
     inLobby_ = false;
     inMatch_ = false;
+    matchSeed_ = 0;
     time_ = 0.0;
     snapshotTimer_ = 0.0;
     helloTimer_ = 0.0;
@@ -198,7 +207,7 @@ void NetSession::handlePacket(const Engine::Net::NetPacket& pkt) {
         case MessageType::LobbyState: handleLobby(pkt, reader); break;
         case MessageType::Chat: handleChat(pkt, reader); break;
         case MessageType::Snapshot: handleSnapshot(pkt, reader); break;
-        case MessageType::StartMatch: handleStartMatch(pkt); break;
+        case MessageType::StartMatch: handleStartMatch(pkt, reader); break;
         case MessageType::Goodbye: handleGoodbye(pkt, reader); break;
         case MessageType::HeroSelect: handleHeroSelect(pkt, reader); break;
         default: break;
@@ -294,8 +303,12 @@ void NetSession::handleSnapshot(const Engine::Net::NetPacket& pkt, Engine::Net::
     inMatch_ = true;
 }
 
-void NetSession::handleStartMatch(const Engine::Net::NetPacket& pkt) {
+void NetSession::handleStartMatch(const Engine::Net::NetPacket& pkt, Engine::Net::NetReader& r) {
     (void)pkt;
+    StartMatchMsg msg{};
+    if (msg.deserialize(r)) {
+        matchSeed_ = msg.seed;
+    }
     inMatch_ = true;
 }
 

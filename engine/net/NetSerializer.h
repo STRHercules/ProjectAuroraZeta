@@ -14,6 +14,7 @@ public:
     void writeU8(uint8_t v) { data_.push_back(v); }
     void writeU16(uint16_t v) { writeIntegral(v); }
     void writeU32(uint32_t v) { writeIntegral(v); }
+    void writeU64(uint64_t v) { writeIntegral(v); }
     void writeI32(int32_t v) { writeIntegral(static_cast<uint32_t>(v)); }
     void writeF32(float v) {
         static_assert(sizeof(float) == sizeof(uint32_t));
@@ -46,6 +47,7 @@ public:
     bool readU8(uint8_t& out) { return readIntegral(out); }
     bool readU16(uint16_t& out) { return readIntegral(out); }
     bool readU32(uint32_t& out) { return readIntegral(out); }
+    bool readU64(uint64_t& out) { return readIntegral(out); }
     bool readI32(int32_t& out) {
         uint32_t tmp{};
         if (!readIntegral(tmp)) return false;

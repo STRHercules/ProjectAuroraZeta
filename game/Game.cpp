@@ -459,7 +459,7 @@ bool GameRoot::onInitialize(Engine::Application& app) {
         manifest_.heroTexture = "assets/Sprites/Characters/Damage Dealer/Dps.png";
     }
     if (manifest_.gridTexture.empty() && manifest_.gridTextures.empty()) {
-        manifest_.gridTextures = {"assets/Tilesheets/floor1.png", "assets/Tilesheets/floor2.png"};
+        manifest_.gridTextures = {"assets/Tilesheets/floor1.png", "assets/Tilesheets/floor2.png", "assets/Tilesheets/DirtPatch.png"};
     }
 
     loadGridTextures();
@@ -467,6 +467,7 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     loadUnitDefinitions();
     loadPickupTextures();
     loadProjectileTextures();
+    loadSceneryDefinitions();
     loadRpgData();
     itemCatalog_ = defaultItemCatalog();
     goldCatalog_ = goldShopCatalog();
@@ -2034,6 +2035,8 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 [&](Engine::ECS::Entity, Engine::ECS::Velocity& vel, Engine::ECS::EnemyTag&) { vel.value = {0.0f, 0.0f}; });
         }
         movementSystem_->update(registry_, step);
+        resolveHeroWorldCollisions();
+        resolveNpcWorldCollisions();
     }
     if (hotzoneSystem_) {
         hotzoneSystem_->update(registry_, step, hero_);
@@ -2261,6 +2264,13 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
     if (movementMode_ == MovementMode::RTS) {
         cameraActions.camX = std::clamp(actions.camX + actions.moveX, -1.0f, 1.0f);
         cameraActions.camY = std::clamp(actions.camY + actions.moveY, -1.0f, 1.0f);
+    } else {
+        // In Modern mode the camera is expected to track the hero; avoid accidental "free camera" toggles that
+        // make the world appear to vanish when the camera drifts away from the player.
+        cameraActions.toggleFollow = false;
+        if (cameraSystem_ && !cameraSystem_->followEnabled()) {
+            cameraSystem_->resetFollow(true);
+        }
     }
 
     // Camera system.
@@ -3055,9 +3065,17 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             const std::vector<Engine::TexturePtr>* gridVariants =
                 gridTileTexturesWeighted_.empty() ? (gridTileTextures_.empty() ? nullptr : &gridTileTextures_)
                                                   : &gridTileTexturesWeighted_;
-            renderSystem_->draw(registry_, cameraShaken, viewportWidth_, viewportHeight_, gridPtr, gridVariants,
-                                fogLayer_.get(), fogTileSize_, fogOriginOffsetX_, fogOriginOffsetY_,
-                                /*disableEnemyFogCulling=*/multiplayerEnabled_);
+
+            // Two-pass render: draw the background/grid first, then entities, then fog overlay.
+            renderSystem_->drawGridPass(cameraShaken, viewportWidth_, viewportHeight_, gridPtr, gridVariants,
+                                        fogLayer_.get(), fogTileSize_, fogOriginOffsetX_, fogOriginOffsetY_);
+            renderSystem_->drawEntitiesPass(registry_, cameraShaken, viewportWidth_, viewportHeight_, fogLayer_.get(),
+                                            fogTileSize_, fogOriginOffsetX_, fogOriginOffsetY_,
+                                            /*disableEnemyFogCulling=*/multiplayerEnabled_);
+            if (fogLayer_ && fogTexture_ && sdlRenderer_) {
+                Engine::renderFog(sdlRenderer_, *fogLayer_, fogTileSize_, fogOriginOffsetX_, fogOriginOffsetY_,
+                                  cameraShaken, viewportWidth_, viewportHeight_, fogTexture_);
+            }
         }
 
         // Dash trail rendering (simple rectangles).
@@ -3101,11 +3119,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             render_->drawFilledRect(Engine::Vec2{screen.x - r, screen.y - 1.0f}, Engine::Vec2{r * 2.0f, 2.0f}, cross);
         }
 
-        // Fog overlay drawn after world elements, before UI.
-        if (fogLayer_ && fogTexture_ && sdlRenderer_) {
-            Engine::renderFog(sdlRenderer_, *fogLayer_, fogTileSize_, fogOriginOffsetX_, fogOriginOffsetY_,
-                              cameraShaken, viewportWidth_, viewportHeight_, fogTexture_);
-        }
+        // Fog overlay is rendered after entities so explored/fogged areas shade world props consistently.
 
         // Mini-map HUD overlay (top-right).
         if (miniMapEnabled_) {
@@ -4516,7 +4530,12 @@ Engine::TexturePtr GameRoot::loadTextureOptional(const std::string& path) {
 void GameRoot::rebuildFogLayer() {
     // Derive tile size from grid texture if available; fallback to 32 px.
     if (!gridTileTextures_.empty() && gridTileTextures_[0]) {
-        fogTileSize_ = std::max(1, gridTileTextures_[0]->width());
+        int minW = gridTileTextures_[0]->width();
+        for (const auto& t : gridTileTextures_) {
+            if (!t) continue;
+            minW = std::min(minW, t->width());
+        }
+        fogTileSize_ = std::max(1, minW);
     } else if (gridTexture_) {
         fogTileSize_ = std::max(1, gridTexture_->width());
     } else {
@@ -4551,6 +4570,192 @@ void GameRoot::rebuildFogLayer() {
             Engine::logWarn(std::string("Failed to create fog texture: ") + SDL_GetError());
         }
     }
+}
+
+void GameRoot::spawnScenery() {
+    if (!scenerySpawn_.enabled) return;
+    if (matchSeed_ == 0) return;
+    if (sceneryDefs_.empty()) return;
+    if (!textureManager_) return;
+
+    const uint32_t seedLo = static_cast<uint32_t>(matchSeed_ & 0xFFFFFFFFu);
+    const uint32_t seedHi = static_cast<uint32_t>((matchSeed_ >> 32) & 0xFFFFFFFFu);
+    // Salt the stream so scenery is stable even if other systems later use the same seed.
+    std::seed_seq seq{seedLo, seedHi, 0x53C3E11Au};
+    worldRng_.seed(seq);
+
+    const float halfW = static_cast<float>(fogWidthTiles_ * fogTileSize_) * 0.5f;
+    const float halfH = static_cast<float>(fogHeightTiles_ * fogTileSize_) * 0.5f;
+    const Engine::Vec2 boundsMin{-halfW + scenerySpawn_.edgeMargin, -halfH + scenerySpawn_.edgeMargin};
+    const Engine::Vec2 boundsMax{halfW - scenerySpawn_.edgeMargin, halfH - scenerySpawn_.edgeMargin};
+
+    int minCount = std::max(0, scenerySpawn_.minCount);
+    int maxCount = std::max(minCount, scenerySpawn_.maxCount);
+    const float radius = scenerySpawn_.radius;
+    const float centerClear = std::max(0.0f, scenerySpawn_.centerClearRadius);
+    const float minSpacing = std::max(0.0f, scenerySpawn_.minSpacing);
+    const float minSpacing2 = minSpacing * minSpacing;
+
+    std::vector<int> pool;
+    pool.reserve(sceneryDefs_.size() * 4);
+    for (std::size_t i = 0; i < sceneryDefs_.size(); ++i) {
+        int w = std::clamp(sceneryDefs_[i].weight, 0, 50);
+        for (int k = 0; k < w; ++k) pool.push_back(static_cast<int>(i));
+    }
+    if (pool.empty()) return;
+
+    std::uniform_int_distribution<int> countDist(minCount, maxCount);
+    std::uniform_int_distribution<int> pickType(0, static_cast<int>(pool.size()) - 1);
+    std::uniform_real_distribution<float> u01(0.0f, 1.0f);
+    std::uniform_real_distribution<float> ux(boundsMin.x, boundsMax.x);
+    std::uniform_real_distribution<float> uy(boundsMin.y, boundsMax.y);
+    const float twoPi = 6.2831853f;
+
+    const int target = countDist(worldRng_);
+    std::vector<Engine::Vec2> placed;
+    placed.reserve(static_cast<std::size_t>(target));
+
+    auto okSpacing = [&](const Engine::Vec2& p) {
+        for (const auto& q : placed) {
+            float dx = p.x - q.x;
+            float dy = p.y - q.y;
+            if (dx * dx + dy * dy < minSpacing2) return false;
+        }
+        return true;
+    };
+
+    for (int attempt = 0; attempt < scenerySpawn_.maxAttempts && static_cast<int>(placed.size()) < target; ++attempt) {
+        const int typeIndex = pool[static_cast<std::size_t>(pickType(worldRng_))];
+        const SceneryDef& def = sceneryDefs_[static_cast<std::size_t>(typeIndex)];
+
+        Engine::Vec2 anchorWorld{};
+        if (radius > 0.0f) {
+            // Disc distribution around origin (legacy/default).
+            const float a = u01(worldRng_) * twoPi;
+            const float r = std::sqrt(u01(worldRng_)) * radius;
+            anchorWorld = Engine::Vec2{std::cos(a) * r, std::sin(a) * r};
+            if (anchorWorld.x < boundsMin.x || anchorWorld.y < boundsMin.y || anchorWorld.x > boundsMax.x || anchorWorld.y > boundsMax.y) {
+                continue;
+            }
+        } else {
+            // Full-map distribution: uniform sampling within current world bounds.
+            anchorWorld = Engine::Vec2{ux(worldRng_), uy(worldRng_)};
+        }
+        if ((anchorWorld.x * anchorWorld.x + anchorWorld.y * anchorWorld.y) < (centerClear * centerClear)) continue;
+        if (!okSpacing(anchorWorld)) continue;
+
+        // Ensure we can actually load the texture before committing placement.
+        const std::string texPath = resolveAssetPath(def.texturePath);
+        Engine::TexturePtr tex = loadTextureOptional(texPath);
+        if (!tex) continue;
+
+        // Render entity (positioned by anchor, transformed to sprite center).
+        const Engine::Vec2 size = def.sizePx;
+        const Engine::Vec2 centerLocal{size.x * 0.5f, size.y * 0.5f};
+        const Engine::Vec2 centerWorld = anchorWorld + (centerLocal - def.anchorPx);
+        auto vis = registry_.create();
+        registry_.emplace<Engine::ECS::Transform>(vis, centerWorld);
+        registry_.emplace<Engine::ECS::Renderable>(vis, Engine::ECS::Renderable{size, Engine::Color{255, 255, 255, 255}, tex});
+
+        // Collider entities (allow multiple rects per scenery).
+        for (const auto& rc : def.colliders) {
+            const int x0 = std::min(rc.x0, rc.x1);
+            const int x1 = std::max(rc.x0, rc.x1);
+            const int y0 = std::min(rc.y0, rc.y1);
+            const int y1 = std::max(rc.y0, rc.y1);
+            const float w = static_cast<float>(x1 - x0);
+            const float h = static_cast<float>(y1 - y0);
+            if (w <= 0.5f || h <= 0.5f) continue;
+            const Engine::Vec2 rectCenterLocal{static_cast<float>(x0) + w * 0.5f, static_cast<float>(y0) + h * 0.5f};
+            const Engine::Vec2 rectCenterWorld = anchorWorld + (rectCenterLocal - def.anchorPx);
+            auto col = registry_.create();
+            registry_.emplace<Engine::ECS::Transform>(col, rectCenterWorld);
+            registry_.emplace<Engine::ECS::AABB>(col, Engine::ECS::AABB{Engine::Vec2{w * 0.5f, h * 0.5f}});
+            registry_.emplace<Engine::ECS::SolidTag>(col, Engine::ECS::SolidTag{});
+        }
+
+        placed.push_back(anchorWorld);
+    }
+}
+
+void GameRoot::resolveHeroWorldCollisions() {
+    if (hero_ == Engine::ECS::kInvalidEntity) return;
+    auto* heroTf = registry_.get<Engine::ECS::Transform>(hero_);
+    const auto* heroBox = registry_.get<Engine::ECS::AABB>(hero_);
+    if (!heroTf || !heroBox) return;
+
+    auto overlaps = [&](const Engine::ECS::Transform& ta, const Engine::ECS::AABB& aa,
+                        const Engine::ECS::Transform& tb, const Engine::ECS::AABB& ab) {
+        return std::abs(ta.position.x - tb.position.x) <= (aa.halfExtents.x + ab.halfExtents.x) &&
+               std::abs(ta.position.y - tb.position.y) <= (aa.halfExtents.y + ab.halfExtents.y);
+    };
+
+    auto resolve = [&](Engine::ECS::Entity ent, Engine::ECS::Transform& tf, const Engine::ECS::AABB& box) {
+        for (int pass = 0; pass < 4; ++pass) {
+            bool any = false;
+            registry_.view<Engine::ECS::Transform, Engine::ECS::AABB, Engine::ECS::SolidTag>(
+                [&](Engine::ECS::Entity e, const Engine::ECS::Transform& otf, const Engine::ECS::AABB& obox, Engine::ECS::SolidTag&) {
+                    if (e == ent) return;
+                    if (!overlaps(tf, box, otf, obox)) return;
+                    const float dx = tf.position.x - otf.position.x;
+                    const float dy = tf.position.y - otf.position.y;
+                    const float px = (box.halfExtents.x + obox.halfExtents.x) - std::abs(dx);
+                    const float py = (box.halfExtents.y + obox.halfExtents.y) - std::abs(dy);
+                    if (px <= 0.0f || py <= 0.0f) return;
+                    if (px < py) {
+                        tf.position.x += (dx >= 0.0f ? 1.0f : -1.0f) * (px + 0.01f);
+                    } else {
+                        tf.position.y += (dy >= 0.0f ? 1.0f : -1.0f) * (py + 0.01f);
+                    }
+                    any = true;
+                });
+            if (!any) break;
+        }
+    };
+
+    resolve(hero_, *heroTf, *heroBox);
+}
+
+void GameRoot::resolveNpcWorldCollisions() {
+    auto resolveOne = [&](Engine::ECS::Entity ent) {
+        if (ent == Engine::ECS::kInvalidEntity) return;
+        auto* tf = registry_.get<Engine::ECS::Transform>(ent);
+        const auto* box = registry_.get<Engine::ECS::AABB>(ent);
+        if (!tf || !box) return;
+
+        auto overlaps = [&](const Engine::ECS::Transform& ta, const Engine::ECS::AABB& aa,
+                            const Engine::ECS::Transform& tb, const Engine::ECS::AABB& ab) {
+            return std::abs(ta.position.x - tb.position.x) <= (aa.halfExtents.x + ab.halfExtents.x) &&
+                   std::abs(ta.position.y - tb.position.y) <= (aa.halfExtents.y + ab.halfExtents.y);
+        };
+
+        for (int pass = 0; pass < 3; ++pass) {
+            bool any = false;
+            registry_.view<Engine::ECS::Transform, Engine::ECS::AABB, Engine::ECS::SolidTag>(
+                [&](Engine::ECS::Entity e, const Engine::ECS::Transform& otf, const Engine::ECS::AABB& obox, Engine::ECS::SolidTag&) {
+                    if (e == ent) return;
+                    if (!overlaps(*tf, *box, otf, obox)) return;
+                    const float dx = tf->position.x - otf.position.x;
+                    const float dy = tf->position.y - otf.position.y;
+                    const float px = (box->halfExtents.x + obox.halfExtents.x) - std::abs(dx);
+                    const float py = (box->halfExtents.y + obox.halfExtents.y) - std::abs(dy);
+                    if (px <= 0.0f || py <= 0.0f) return;
+                    if (px < py) {
+                        tf->position.x += (dx >= 0.0f ? 1.0f : -1.0f) * (px + 0.01f);
+                    } else {
+                        tf->position.y += (dy >= 0.0f ? 1.0f : -1.0f) * (py + 0.01f);
+                    }
+                    any = true;
+                });
+            if (!any) break;
+        }
+    };
+
+    // Enemies + bosses.
+    registry_.view<Engine::ECS::EnemyTag>([&](Engine::ECS::Entity e, Engine::ECS::EnemyTag&) { resolveOne(e); });
+    registry_.view<Engine::ECS::BossTag>([&](Engine::ECS::Entity e, Engine::ECS::BossTag&) { resolveOne(e); });
+    // Escort targets should not walk through scenery.
+    registry_.view<Game::EscortTarget>([&](Engine::ECS::Entity e, Game::EscortTarget&) { resolveOne(e); });
 }
 
 void GameRoot::updateFogVision() {
@@ -4616,7 +4821,7 @@ void GameRoot::loadGridTextures() {
     gridTileTexturesWeighted_.clear();
     gridTexture_.reset();
     auto pushIfLoaded = [&](const std::string& path) {
-        auto tex = loadTextureOptional(path);
+        auto tex = loadTextureOptional(resolveAssetPath(path));
         if (tex) {
             gridTileTextures_.push_back(tex);
         } else {
@@ -4627,11 +4832,12 @@ void GameRoot::loadGridTextures() {
         pushIfLoaded(path);
     }
     if (gridTileTextures_.empty() && !manifest_.gridTexture.empty()) {
-        gridTexture_ = loadTextureOptional(manifest_.gridTexture);
+        gridTexture_ = loadTextureOptional(resolveAssetPath(manifest_.gridTexture));
     }
     if (gridTileTextures_.empty()) {
         pushIfLoaded("assets/Tilesheets/floor.png");
         pushIfLoaded("assets/Tilesheets/floor2.png");
+        pushIfLoaded("assets/Tilesheets/DirtPatch.png");
     }
     if (gridTileTextures_.empty() && !gridTexture_) {
         gridTexture_ = loadTextureOptional("assets/Tilesheets/floor.png");
@@ -4649,10 +4855,17 @@ void GameRoot::loadGridTextures() {
     }
     // Build weighted variants to control distribution frequency.
     if (!gridTileTextures_.empty()) {
-        auto weightForIndex = [](std::size_t idx) {
+        const int baseW = gridTileTextures_.front() ? gridTileTextures_.front()->width() : 0;
+        const int baseH = gridTileTextures_.front() ? gridTileTextures_.front()->height() : 0;
+        auto weightForIndex = [&](std::size_t idx) {
+            // Treat non-standard tile sizes (e.g., 48x48 dirt patches) as rare overlays in the pool.
+            if (gridTileTextures_[idx] && (gridTileTextures_[idx]->width() != baseW || gridTileTextures_[idx]->height() != baseH)) {
+                return 2;
+            }
+            // Legacy weighting tuned for sprite-sheet floor variants.
             if (idx <= 4) return 40;                // 0001-0005 dominant (~85%)
             if (idx >= 5 && idx <= 12) return 4;    // 0006-0013 occasional
-            if (idx == 13) return 1;                // 0014 exceedingly rare (48x48)
+            if (idx == 13) return 1;                // 0014 exceedingly rare
             if (idx == 14 || idx == 15) return 2;   // 0015-0016 rare
             return 1;                               // 0017-0020 extremely rare
         };
@@ -4907,6 +5120,98 @@ void GameRoot::loadProjectileTextures() {
     if (wizardElementTex_) {
         wizardElementColumns_ = std::max(1, wizardElementTex_->width() / 8);
     }
+}
+
+std::string GameRoot::resolveAssetPath(const std::string& path) const {
+    if (path.empty()) return path;
+    std::filesystem::path p = path;
+    if (std::filesystem::exists(p)) return p.string();
+    // Back-compat: some kits shipped `PurpleBush.png` instead of `LargeBush.png`.
+    if (p.filename() == "LargeBush.png") {
+        std::filesystem::path alt = p.parent_path() / "PurpleBush.png";
+        if (std::filesystem::exists(alt)) return alt.string();
+    }
+    if (const char* home = std::getenv("HOME")) {
+        std::filesystem::path homePath = std::filesystem::path(home) / path;
+        if (std::filesystem::exists(homePath)) return homePath.string();
+        if (p.filename() == "LargeBush.png") {
+            std::filesystem::path alt = homePath.parent_path() / "PurpleBush.png";
+            if (std::filesystem::exists(alt)) return alt.string();
+        }
+    }
+    return path;
+}
+
+void GameRoot::loadSceneryDefinitions() {
+    sceneryDefs_.clear();
+    scenerySpawn_ = {};
+
+    std::ifstream f("data/scenery.json");
+    if (!f.is_open()) {
+        Engine::logWarn("Scenery config missing (data/scenery.json); world scenery disabled.");
+        scenerySpawn_.enabled = false;
+        return;
+    }
+    nlohmann::json j;
+    f >> j;
+
+    if (j.contains("spawn") && j["spawn"].is_object()) {
+        const auto& s = j["spawn"];
+        scenerySpawn_.enabled = s.value("enabled", scenerySpawn_.enabled);
+        scenerySpawn_.minCount = s.value("minCount", scenerySpawn_.minCount);
+        scenerySpawn_.maxCount = s.value("maxCount", scenerySpawn_.maxCount);
+        scenerySpawn_.radius = s.value("radius", scenerySpawn_.radius);
+        scenerySpawn_.centerClearRadius = s.value("centerClearRadius", scenerySpawn_.centerClearRadius);
+        scenerySpawn_.edgeMargin = s.value("edgeMargin", scenerySpawn_.edgeMargin);
+        scenerySpawn_.minSpacing = s.value("minSpacing", scenerySpawn_.minSpacing);
+        scenerySpawn_.maxAttempts = s.value("maxAttempts", scenerySpawn_.maxAttempts);
+    }
+
+    if (j.contains("types") && j["types"].is_array()) {
+        for (const auto& t : j["types"]) {
+            if (!t.is_object()) continue;
+            SceneryDef def{};
+            def.id = t.value("id", std::string{});
+            def.texturePath = t.value("texture", std::string{});
+            def.weight = std::max(0, t.value("weight", 1));
+            if (t.contains("size") && t["size"].is_array() && t["size"].size() >= 2) {
+                def.sizePx.x = t["size"][0].get<float>();
+                def.sizePx.y = t["size"][1].get<float>();
+            }
+            // Default to bottom-center anchoring (sits on the ground).
+            def.anchorPx = Engine::Vec2{def.sizePx.x * 0.5f, def.sizePx.y};
+            if (t.contains("anchor") && t["anchor"].is_array() && t["anchor"].size() >= 2) {
+                def.anchorPx.x = t["anchor"][0].get<float>();
+                def.anchorPx.y = t["anchor"][1].get<float>();
+            }
+            if (t.contains("colliders") && t["colliders"].is_array()) {
+                for (const auto& c : t["colliders"]) {
+                    if (!c.is_object()) continue;
+                    if (!c.contains("rect") || !c["rect"].is_array() || c["rect"].size() < 4) continue;
+                    SceneryColliderPx r{};
+                    r.x0 = c["rect"][0].get<int>();
+                    r.y0 = c["rect"][1].get<int>();
+                    r.x1 = c["rect"][2].get<int>();
+                    r.y1 = c["rect"][3].get<int>();
+                    def.colliders.push_back(r);
+                }
+            }
+            if (def.id.empty() || def.texturePath.empty() || def.sizePx.x <= 0.0f || def.sizePx.y <= 0.0f) continue;
+            sceneryDefs_.push_back(std::move(def));
+        }
+    }
+
+    if (sceneryDefs_.empty()) {
+        Engine::logWarn("Scenery config loaded but contains no valid types; world scenery disabled.");
+        scenerySpawn_.enabled = false;
+    }
+}
+
+uint64_t GameRoot::generateMatchSeed() {
+    uint64_t hi = static_cast<uint64_t>(std::random_device{}());
+    uint64_t lo = static_cast<uint64_t>(std::random_device{}());
+    uint64_t t = static_cast<uint64_t>(std::chrono::steady_clock::now().time_since_epoch().count());
+    return (hi << 32) ^ lo ^ t;
 }
 
 void GameRoot::loadRpgData() {
@@ -5945,6 +6250,11 @@ void GameRoot::startNewGame() {
     itemShopOpen_ = false;
     abilityShopOpen_ = false;
     currentMatchId_ = generateMatchId();
+    if (multiplayerEnabled_ && netSession_ && netSession_->matchSeed() != 0) {
+        matchSeed_ = netSession_->matchSeed();
+    } else {
+        matchSeed_ = generateMatchSeed();
+    }
     runStarted_ = true;
     resetRun();
 }
@@ -6618,7 +6928,7 @@ void GameRoot::renderMenu() {
     drawTextUnified(title, Engine::Vec2{centerX - titleW * 0.5f, titleY}, titleScale, Engine::Color{190, 235, 255, 245});
 
     // Build info (bottom-right).
-    const std::string buildStr = "Pre-Alpha | Build v0.0.138";
+    const std::string buildStr = "Pre-Alpha | Build v0.0.151";
     const float buildScale = std::clamp(0.95f * s, 0.72f, 0.95f);
     const Engine::Vec2 buildSz = measureTextUnified(buildStr, buildScale);
     drawTextUnified(buildStr, Engine::Vec2{vw - margin - buildSz.x, vh - margin - buildSz.y}, buildScale,
@@ -10462,6 +10772,9 @@ void GameRoot::resetRun() {
     buildingJustSelected_ = false;
 
     rebuildFogLayer();
+    if (runStarted_) {
+        spawnScenery();
+    }
 
     if (waveSystem_) {
         waveSystem_ = std::make_unique<WaveSystem>(rng_, waveSettingsBase_);

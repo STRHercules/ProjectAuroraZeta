@@ -175,4 +175,11 @@ struct SnapshotMsg {
     }
 };
 
+struct StartMatchMsg {
+    uint64_t seed{0};
+
+    void serialize(Engine::Net::NetWriter& w) const { w.writeU64(seed); }
+    bool deserialize(Engine::Net::NetReader& r) { return r.readU64(seed); }
+};
+
 }  // namespace Game::Net
