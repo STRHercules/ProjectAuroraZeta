@@ -7,8 +7,8 @@
 namespace Engine {
 
 struct WindowConfig {
-    int width{1280};
-    int height{720};
+    int width{1920};
+    int height{1080};
     std::string title{"Project Aurora Zeta"};
     bool vsync{true};
 };

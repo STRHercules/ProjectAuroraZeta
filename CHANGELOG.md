@@ -163,3 +163,37 @@
 * Character screen: added two hotbar slots (R/F) for consumables; drag an item onto a slot and press the hotkey to consume it.
 * Character screen: Equipment panel height now accounts for the Bag slot row (no clipping/overlap).
 * Input: `R`/`F` are now reserved for hotbar use (Reload moved to `F1`).
+
+# v0.0.128
+* Character screen layout tweaks:
+    * Raised the Inventory panel header and Run panel text for better alignment.
+    * Increased the Character/Inventory window height so Details text is less likely to clip.
+
+# v0.0.129
+* Game now launches with the window maximized by default.
+
+# v0.0.130
+* Fixed: game window now reliably starts maximized (explicit maximize request).
+
+# v0.0.131
+* Main menu layout updated for 1080p:
+    * Title is now top-centered, build info moved to the bottom-right.
+    * Menu buttons are centered with improved hover/selection styling.
+    * “A Major Bonghit Production” is now bottom-centered.
+
+# v0.0.132
+* Character select screen modernized:
+    * New 1080p-centered layout with improved panels, hover highlighting, and readability.
+    * Animated hero preview moved into a dedicated center card.
+
+# v0.0.133
+* Character select: preview sprite is now much larger and centered within the preview card.
+
+# v0.0.134
+* Character select: increased UI font scaling for improved readability.
+
+# v0.0.135
+* In-match HUD modernized:
+    * Health/Shields/Energy/Dash moved to a cleaner top-left resource panel.
+    * Added a compact status card for intermission/event/hotzone messages (less screen clutter).
+    * Refreshed the inventory/held-item badge styling for consistency.

@@ -27,13 +27,16 @@ bool SDLWindow::initialize(const WindowConfig& config) {
         return false;
     }
 
-    Uint32 windowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
+    Uint32 windowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED;
     window_ = SDL_CreateWindow(config.title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                config.width, config.height, windowFlags);
     if (!window_) {
         logError(std::string("SDL_CreateWindow failed: ") + SDL_GetError());
         return false;
     }
+    // Some window managers ignore the MAXIMIZED create flag; request it explicitly as well.
+    SDL_MaximizeWindow(window_);
+    SDL_RaiseWindow(window_);
 
     const auto rendererFlags = config.vsync ? SDL_RENDERER_PRESENTVSYNC : 0;
     renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED | rendererFlags);

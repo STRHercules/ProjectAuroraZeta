@@ -520,3 +520,126 @@
 - Manual test:
   - Open the Character screen, drag a potion/food into Hotbar `R`, another into `F`.
   - Close the Character screen and press `R` / `F`; confirm the item is consumed and removed from inventory.
+
+## 2025-12-17 — Character screen layout polish
+
+**Prompt / Task**
+- Raise the Inventory header slightly.
+- Raise the Run section text slightly.
+- Increase the overall Character/Inventory window height so the Details panel has more room.
+
+**What Changed**
+- Adjusted panel title offset for the Inventory panel and bumped the Run panel text baseline upward.
+- Increased the Character/Inventory window max height from `760` to `820` (still clamped by viewport).
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-17).
+- Manual test: open the Character screen and verify Inventory/Run text alignment and that Details text no longer clips as often.
+
+## 2025-12-17 — Launch maximized window
+
+**Prompt / Task**
+- Make sure the game always launches with the window maximized.
+
+**What Changed**
+- SDL window is created with `SDL_WINDOW_MAXIMIZED` so it starts maximized.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-17).
+- Manual test: launch the game and confirm the window starts maximized.
+
+## 2025-12-17 — Ensure window starts maximized (WM-safe)
+
+**Prompt / Task**
+- Game still launched small; ensure it starts maximized reliably.
+
+**What Changed**
+- Added an explicit `SDL_MaximizeWindow` + `SDL_RaiseWindow` call after window creation to cover window managers that ignore `SDL_WINDOW_MAXIMIZED`.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-17).
+- Manual test: launch the game and confirm the window starts maximized.
+
+## 2025-12-17 — Main menu 1080p layout + visual refresh
+
+**Prompt / Task**
+- After switching the default resolution to 1080p, center the main menu for a 1920x1080 layout:
+  - Keep the Title at the top
+  - Move Build info to bottom-right
+  - Center all menu buttons
+  - Keep “A Major Bonghit Production” centered at the bottom
+- Modernize the main menu visuals (hover highlighting, cleaner layout).
+
+**What Changed**
+- Reworked main menu layout to use a 1920x1080 reference scale and center the button stack in the viewport.
+- Moved build text to the bottom-right and the production credit to bottom-center.
+- Added a subtle backdrop + a button stack container with hover/focus styling.
+- Updated menu hover hitboxes to match the new button layout.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-17).
+- Manual test: launch the game, verify menu elements are positioned as requested at 1920x1080 and hover highlights track the buttons.
+
+## 2025-12-17 — Character select screen modernization
+
+**Prompt / Task**
+- Give the “Select Character & Difficulty” screen a complete modernization makeover.
+- Keep info readable, selection natural, and retain animated sprite previews.
+
+**What Changed**
+- Rebuilt the Character Select layout around a 1920x1080 reference scale:
+  - Left/Right scrollable lists for Champions and Difficulty with modern selection styling.
+  - Center card that hosts the animated hero preview plus readable hero/difficulty details.
+  - Bottom action bar with larger Start/Back buttons and updated control hints.
+- Updated mouse hitboxes for list selection and Start/Back to match the new layout.
+- Kept the preview “manual tweak point” offsets (now relative to the center preview card).
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-17).
+- Manual test:
+  - Open Solo → Character Select; scroll and click champions/difficulties.
+  - Verify the animated preview plays and Start/Back buttons are clickable and keyboard focus works.
+
+## 2025-12-17 — Character select preview scale + centering
+
+**Prompt / Task**
+- Increase the sprite preview animation scale by ~200% and re-center it on its panel.
+
+**What Changed**
+- Doubled the requested preview scale target and added a safety clamp so the sprite stays centered and fully visible in the preview box.
+- Reset the preview offset constants to `0` so the default is centered; manual tweak point remains in code.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-17).
+- Manual test: open Character Select and confirm the animated sprite is larger and centered within the preview card.
+
+## 2025-12-17 — Character select readability (font scale)
+
+**Prompt / Task**
+- Increase the overall scale of the font on the Select Character & Difficulty screen.
+
+**What Changed**
+- Boosted Character Select text scaling and row heights so list entries and details are easier to read.
+- Updated list click hitboxes to match the new row heights.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-17).
+- Manual test: open Character Select and verify the list items and details text are larger and still fit cleanly.
+
+## 2025-12-17 — In-match HUD modernization pass
+
+**Prompt / Task**
+- Modernize the main in-game interface/HUD once a match starts, keeping it readable and unobtrusive.
+
+**What Changed**
+- Rebuilt the resource HUD into a top-left stacked panel (Health/Shields/Energy/Dash) with consistent modern styling.
+- Consolidated intermission + status text (events/hotzones/warnings) into a compact status card beneath the resource panel.
+- Gated the always-on FPS/dev HUD line behind `combatDebugOverlay` so it doesn’t clutter normal play.
+- Updated the held-item/inventory badge visuals (icon + truncation + consistent container styling).
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-17).
+- Manual test:
+  - Start a run, verify resource bars render top-left and update smoothly.
+  - Trigger intermission / hotzone / event and confirm the status card shows the messages.
+  - Hover/cycle held inventory items and confirm the badge shows the icon and truncates long names.

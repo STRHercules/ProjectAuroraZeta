@@ -124,6 +124,39 @@ struct HUDRect {
     float h{0.0f};
 };
 
+struct IngameHudLayout {
+    float s{1.0f};
+    float margin{18.0f};
+    float resourceX{18.0f};
+    float resourceY{18.0f};
+    float resourceW{360.0f};
+    float resourceH{160.0f};
+    float statusX{18.0f};
+    float statusY{190.0f};
+    float statusW{360.0f};
+};
+
+inline IngameHudLayout ingameHudLayout(int viewportW, int viewportH) {
+    constexpr float refW = 1920.0f;
+    constexpr float refH = 1080.0f;
+    IngameHudLayout l{};
+    l.s = std::clamp(std::min(static_cast<float>(viewportW) / refW, static_cast<float>(viewportH) / refH), 0.75f, 1.35f);
+    l.margin = 18.0f * l.s;
+    l.resourceX = l.margin;
+    l.resourceY = l.margin;
+    l.resourceW = 360.0f * l.s;
+    // Resource panel height matches drawResourceCluster layout (4 stacked rows).
+    const float pad = 12.0f * l.s;
+    const float header = 20.0f * l.s;
+    const float barH = 22.0f * l.s;
+    const float gap = 8.0f * l.s;
+    l.resourceH = pad * 2.0f + header + 4.0f * barH + 3.0f * gap;
+    l.statusX = l.resourceX;
+    l.statusY = l.resourceY + l.resourceH + 12.0f * l.s;
+    l.statusW = l.resourceW;
+    return l;
+}
+
 inline HUDRect abilityHudRect(int abilityCount, int viewportW, int viewportH) {
     const float margin = 16.0f;
     const float iconBox = 52.0f;  // background box around a scaled 16x16 icon
@@ -2970,28 +3003,34 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             }
         }
     if (hasTTF()) {
-        std::ostringstream dbg;
-        dbg << "FPS ~" << std::fixed << std::setprecision(1) << fpsSmooth_;
-        dbg << " | Cam " << (cameraSystem_ && cameraSystem_->followEnabled() ? "Follow" : "Free");
-        dbg << " | Zoom " << std::setprecision(2) << camera_.zoom;
-            if (const auto* heroHealth = registry_.get<Engine::ECS::Health>(hero_)) {
-                float maxPool = heroHealth->maxHealth + heroHealth->maxShields;
-                float currPool = heroHealth->currentHealth + heroHealth->currentShields;
-                //dbg << " | HP " << std::setprecision(0) << currPool << "/" << maxPool;
-            }
+        const auto hud = ingameHudLayout(viewportWidth_, viewportHeight_);
+        std::vector<std::pair<std::string, Engine::Color>> hudLines;
+        auto pushHud = [&](const std::string& txt, Engine::Color col) {
+            if (!txt.empty()) hudLines.emplace_back(txt, col);
+        };
+
+        // Debug HUD (only when combat debug overlay is enabled; keep gameplay unobscured by default).
+        if (combatDebugOverlay_) {
+            std::ostringstream dbg;
+            dbg << "FPS ~" << std::fixed << std::setprecision(1) << fpsSmooth_;
+            dbg << " | Cam " << (cameraSystem_ && cameraSystem_->followEnabled() ? "Follow" : "Free");
+            dbg << " | Zoom " << std::setprecision(2) << camera_.zoom;
             dbg << " | Round " << round_ << " | Wave " << wave_ << " | Kills " << kills_;
-            //dbg << " | Copper " << copper_ << " | Gold " << gold_;
             dbg << " | Enemies " << enemiesAlive_;
-            dbg << " | WaveClear +" << waveClearBonus_;
             dbg << " | Lv " << level_ << " (" << xp_ << "/" << xpToNext_ << ")";
-            //dbg << " | Dash cd " << std::fixed << std::setprecision(1) << dashCooldownTimer_;
-            drawTextTTF(dbg.str(), Engine::Vec2{10.0f, 10.0f}, 1.0f, Engine::Color{255, 255, 255, 200});
-            if (!inCombat_ && waveWarmup_ > 0.0) {
-                std::ostringstream warm;
-                warm << "Wave " << (wave_ + 1) << " in " << std::fixed << std::setprecision(1)
-                     << std::max(0.0, waveWarmup_) << "s";
-                drawTextTTF(warm.str(), Engine::Vec2{10.0f, 28.0f}, 1.0f, Engine::Color{255, 220, 120, 220});
-            }
+            const float ds = std::clamp(0.86f * hud.s, 0.78f, 0.98f);
+            const Engine::Vec2 dsz = measureTextUnified(dbg.str(), ds);
+            drawTextTTF(dbg.str(),
+                        Engine::Vec2{static_cast<float>(viewportWidth_) - hud.margin - dsz.x, hud.margin},
+                        ds, Engine::Color{220, 235, 250, 180});
+        }
+
+        if (!inCombat_ && waveWarmup_ > 0.0) {
+            std::ostringstream warm;
+            warm << "Wave " << (wave_ + 1) << " in " << std::fixed << std::setprecision(1)
+                 << std::max(0.0, waveWarmup_) << "s";
+            pushHud(warm.str(), Engine::Color{255, 220, 120, 220});
+        }
             if (waveBannerTimer_ > 0.0) {
                 waveBannerTimer_ -= step.deltaSeconds;
                 std::ostringstream banner;
@@ -3049,33 +3088,32 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                                  static_cast<float>(viewportHeight_) * 0.24f};
                 drawTextTTF(eb.str(), pos, scale, Engine::Color{200, 240, 255, 235});
             }
-            if (eventBannerTimer_ > 0.0 && !eventBannerText_.empty()) {
-                eventBannerTimer_ -= step.deltaSeconds;
-                Engine::Vec2 pos{10.0f, 190.0f};
-                drawTextTTF(eventBannerText_, pos, 1.0f, Engine::Color{200, 240, 255, 230});
-            }
-            // Intermission overlay when we are in grace time.
+        if (eventBannerTimer_ > 0.0 && !eventBannerText_.empty()) {
+            eventBannerTimer_ -= step.deltaSeconds;
+            pushHud(eventBannerText_, Engine::Color{200, 240, 255, 230});
+        }
+        // Intermission overlay when we are in grace time.
         if (!inCombat_) {
             double intermissionLeft = waveWarmup_;
             std::ostringstream inter;
             inter << "Intermission: next round in " << std::fixed << std::setprecision(1) << intermissionLeft
-                  << "s | Copper: " << copper_ << " | Gold: " << gold_;
-            Engine::Color c{140, 220, 255, 220};
-        drawTextTTF(inter.str(), Engine::Vec2{10.0f, 46.0f}, 1.0f, c);
-                if (abilityShopOpen_) {
-                    drawTextTTF("Ability Shop OPEN (B closes)", Engine::Vec2{10.0f, 64.0f}, 1.0f,
-                                Engine::Color{180, 255, 180, 220});
-                } else {
-                    std::string shopPrompt = "Press B to open Ability Shop";
-                    drawTextTTF(shopPrompt, Engine::Vec2{10.0f, 64.0f}, 1.0f, Engine::Color{150, 220, 255, 200});
-                }
+                  << "s";
+            pushHud(inter.str(), Engine::Color{140, 220, 255, 220});
+            std::ostringstream wallet;
+            wallet << "Copper " << copper_ << " • Gold " << gold_;
+            pushHud(wallet.str(), Engine::Color{200, 230, 255, 210});
+            if (abilityShopOpen_) {
+                pushHud("Ability Shop OPEN (B closes)", Engine::Color{180, 255, 180, 220});
+            } else {
+                pushHud("Press B to open Ability Shop", Engine::Color{150, 220, 255, 200});
             }
-            // Wave clear prompt when banner active (even if not intermission).
-            if (clearBannerTimer_ > 0.0 && waveWarmup_ <= waveInterval_) {
-                std::ostringstream note;
-                note << "Wave clear bonus +" << waveClearBonus_;
-                drawTextUnified(note.str(), Engine::Vec2{10.0f, 82.0f}, 0.9f, Engine::Color{180, 240, 180, 200});
-            }
+        }
+        // Wave clear prompt when banner active (even if not intermission).
+        if (clearBannerTimer_ > 0.0 && waveWarmup_ <= waveInterval_) {
+            std::ostringstream note;
+            note << "Wave clear bonus +" << waveClearBonus_;
+            pushHud(note.str(), Engine::Color{180, 240, 180, 200});
+        }
             drawResourceCluster();
             // Mini-unit selection HUD (drawn after resource bars so it sits above them).
             if (!selectedMiniUnits_.empty()) {
@@ -3120,16 +3158,19 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             }
             // Inventory badge anchored above ability bar.
             {
-                const float badgeW = 280.0f;
-                const float badgeH = 50.0f;
-                const float margin = 16.0f;
+                const float s = ingameHudLayout(viewportWidth_, viewportHeight_).s;
+                const float badgeW = 320.0f * s;
+                const float badgeH = 62.0f * s;
+                const float margin = 16.0f * s;
                 HUDRect abilityRect = abilityHudRect(static_cast<int>(abilities_.size()), viewportWidth_, viewportHeight_);
                 // Right-align with the ability bar and place just above it.
                 float x = abilityRect.x + abilityRect.w - badgeW;
                 if (x < margin) x = margin;  // clamp to screen
                 float y = abilityRect.y - badgeH - margin;
-                render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{badgeW, badgeH},
-                                        Engine::Color{18, 24, 34, 215});
+                render_->drawFilledRect(Engine::Vec2{x, y + 3.0f * s}, Engine::Vec2{badgeW, badgeH}, Engine::Color{0, 0, 0, 80});
+                render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{badgeW, badgeH}, Engine::Color{12, 16, 24, 220});
+                render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{badgeW, 2.0f}, Engine::Color{45, 70, 95, 190});
+                render_->drawFilledRect(Engine::Vec2{x, y + badgeH - 2.0f}, Engine::Vec2{badgeW, 2.0f}, Engine::Color{45, 70, 95, 190});
                 auto rarityCol = [](ItemRarity r) {
                     switch (r) {
                         case ItemRarity::Common: return Engine::Color{235, 240, 245, 235};
@@ -3140,77 +3181,83 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     }
                     return Engine::Color{235, 240, 245, 235};
                 };
+                const float icon = 34.0f * s;
+                render_->drawFilledRect(Engine::Vec2{x + 10.0f * s, y + 10.0f * s}, Engine::Vec2{icon, icon}, Engine::Color{18, 26, 40, 230});
                 if (inventory_.empty()) {
                     inventorySelected_ = -1;
-                    drawTextUnified("Inventory empty (Tab to cycle)", Engine::Vec2{x + 10.0f, y + 4.0f}, 0.9f,
-                                    Engine::Color{200, 220, 240, 220});
+                    drawTextUnified("Inventory empty", Engine::Vec2{x + 10.0f * s + icon + 10.0f * s, y + 10.0f * s},
+                                    0.98f * s, Engine::Color{200, 220, 240, 220});
+                    drawTextUnified("Tab to cycle", Engine::Vec2{x + 10.0f * s + icon + 10.0f * s, y + 30.0f * s},
+                                    0.86f * s, Engine::Color{170, 195, 220, 210});
                 } else {
                     clampInventorySelection();
                     const auto& held = inventory_[inventorySelected_];
                     bool usable = held.def.kind == ItemKind::Support;
+                    drawItemIcon(held.def, Engine::Vec2{x + 10.0f * s, y + 10.0f * s}, icon);
                     std::ostringstream heldText;
                     heldText << "Holding: " << held.def.name;
-                    drawTextUnified(heldText.str(), Engine::Vec2{x + 10.0f, y + 2.0f}, 1.0f, rarityCol(held.def.rarity));
+                    drawTextUnified(ellipsizeTextUnified(heldText.str(), badgeW - (icon + 36.0f * s), 0.96f * s),
+                                    Engine::Vec2{x + 10.0f * s + icon + 10.0f * s, y + 8.0f * s},
+                                    0.96f * s, rarityCol(held.def.rarity));
                     std::ostringstream hint;
                     hint << "Tab to cycle   Q to " << (usable ? "use" : "use support item");
-                    drawTextUnified(hint.str(), Engine::Vec2{x + 10.0f, y + 18.0f}, 0.85f,
-                                    Engine::Color{180, 200, 220, 210});
+                    drawTextUnified(hint.str(), Engine::Vec2{x + 10.0f * s + icon + 10.0f * s, y + 30.0f * s},
+                                    0.84f * s, Engine::Color{180, 200, 220, 210});
                 }
                 // Wallet badge next to inventory.
                 std::ostringstream wallet;
                 wallet << "Copper " << copper_ << " | Gold " << gold_;
-                drawTextUnified(wallet.str(), Engine::Vec2{x + 10.0f, y + badgeH - 20.0f}, 0.85f,
-                                Engine::Color{200, 230, 255, 210});
+                drawTextUnified(wallet.str(), Engine::Vec2{x + badgeW - 170.0f * s, y + badgeH - 18.0f * s},
+                                0.84f * s, Engine::Color{200, 230, 255, 210});
             }
-            // Active event HUD.
-            registry_.view<Game::EventActive>([&](Engine::ECS::Entity evEnt, const Game::EventActive& ev) {
-                float t = std::max(0.0f, ev.timer);
-                std::ostringstream evMsg;
-                if (ev.type == Game::EventType::Escort) {
-                    float distLeft = 0.0f;
-                    if (auto* escortObj = registry_.get<Game::EscortObjective>(evEnt)) {
-                        if (auto* escortTf = registry_.get<Engine::ECS::Transform>(escortObj->escort)) {
-                            Engine::Vec2 delta{escortObj->destination.x - escortTf->position.x,
-                                               escortObj->destination.y - escortTf->position.y};
-                            distLeft = std::sqrt(std::max(0.0f, delta.x * delta.x + delta.y * delta.y));
-                        }
-                    }
-                    evMsg << "Event: Escort - " << std::fixed << std::setprecision(0) << distLeft << "u | "
-                          << std::setprecision(1) << t << "s";
-                } else if (ev.type == Game::EventType::Bounty) {
-                    evMsg << "Event: Bounty Hunt - " << ev.requiredKills << " hunters left | "
-                          << std::fixed << std::setprecision(1) << t << "s";
-                } else {
-                    evMsg << "Event: Assassinate Spawners - " << ev.requiredKills << " spires left | "
-                          << std::fixed << std::setprecision(1) << t << "s";
-                }
-                drawTextUnified(evMsg.str(), Engine::Vec2{10.0f, 154.0f}, 0.9f, Engine::Color{200, 240, 255, 220});
-            });
-            if (hotzoneSystem_) {
-                const auto* zone = hotzoneSystem_->activeZone();
-                if (zone) {
-                    std::string label = "XP Surge";
-                    if (hotzoneSystem_->activeBonus() == HotzoneSystem::Bonus::DangerPay) label = "Danger-Pay";
-                    if (hotzoneSystem_->activeBonus() == HotzoneSystem::Bonus::WarpFlux) label = "Warp Flux";
-                    float t = hotzoneSystem_->timeRemaining();
-                    std::ostringstream hz;
-                    hz << "Hotzone: " << label << " (" << std::fixed << std::setprecision(0) << std::max(0.0f, t)
-                       << "s) " << (hotzoneSystem_->heroInsideActive() ? "[IN]" : "[OUT]");
-                    drawTextUnified(hz.str(), Engine::Vec2{10.0f, 136.0f}, 0.9f, Engine::Color{200, 220, 255, 210});
-                    if (hotzoneSystem_->warningActive()) {
-                        std::ostringstream hw;
-                        hw << "Zone shift in " << std::fixed << std::setprecision(1) << std::max(0.0f, t) << "s";
-                        drawTextUnified(hw.str(), Engine::Vec2{10.0f, 118.0f}, 0.9f, Engine::Color{255, 200, 160, 220});
+        // Active event / status lines.
+        registry_.view<Game::EventActive>([&](Engine::ECS::Entity evEnt, const Game::EventActive& ev) {
+            float t = std::max(0.0f, ev.timer);
+            std::ostringstream evMsg;
+            if (ev.type == Game::EventType::Escort) {
+                float distLeft = 0.0f;
+                if (auto* escortObj = registry_.get<Game::EscortObjective>(evEnt)) {
+                    if (auto* escortTf = registry_.get<Engine::ECS::Transform>(escortObj->escort)) {
+                        Engine::Vec2 delta{escortObj->destination.x - escortTf->position.x,
+                                           escortObj->destination.y - escortTf->position.y};
+                        distLeft = std::sqrt(std::max(0.0f, delta.x * delta.x + delta.y * delta.y));
                     }
                 }
+                evMsg << "Event: Escort • " << std::fixed << std::setprecision(0) << distLeft << "u • "
+                      << std::setprecision(1) << t << "s";
+            } else if (ev.type == Game::EventType::Bounty) {
+                evMsg << "Event: Bounty • " << ev.requiredKills << " targets • "
+                      << std::fixed << std::setprecision(1) << t << "s";
+            } else {
+                evMsg << "Event: Spire Hunt • " << ev.requiredKills << " spires • "
+                      << std::fixed << std::setprecision(1) << t << "s";
             }
-            // Pause overlay handled separately.
-            // Enemies remaining warning.
-            if (enemiesAlive_ > 0 && enemiesAlive_ <= enemyLowThreshold_) {
-                std::ostringstream warn;
-                warn << enemiesAlive_ << " enemies remain";
-                drawTextUnified(warn.str(), Engine::Vec2{10.0f, 100.0f}, 0.9f, Engine::Color{255, 220, 140, 220});
+            pushHud(evMsg.str(), Engine::Color{200, 240, 255, 220});
+        });
+        if (hotzoneSystem_) {
+            const auto* zone = hotzoneSystem_->activeZone();
+            if (zone) {
+                std::string label = "XP Surge";
+                if (hotzoneSystem_->activeBonus() == HotzoneSystem::Bonus::DangerPay) label = "Danger-Pay";
+                if (hotzoneSystem_->activeBonus() == HotzoneSystem::Bonus::WarpFlux) label = "Warp Flux";
+                float t = hotzoneSystem_->timeRemaining();
+                std::ostringstream hz;
+                hz << "Hotzone: " << label << " • " << std::fixed << std::setprecision(0) << std::max(0.0f, t)
+                   << "s • " << (hotzoneSystem_->heroInsideActive() ? "IN" : "OUT");
+                pushHud(hz.str(), Engine::Color{200, 220, 255, 210});
+                if (hotzoneSystem_->warningActive()) {
+                    std::ostringstream hw;
+                    hw << "Zone shift in " << std::fixed << std::setprecision(1) << std::max(0.0f, t) << "s";
+                    pushHud(hw.str(), Engine::Color{255, 200, 160, 220});
+                }
             }
+        }
+        // Enemies remaining warning.
+        if (enemiesAlive_ > 0 && enemiesAlive_ <= enemyLowThreshold_) {
+            std::ostringstream warn;
+            warn << enemiesAlive_ << " enemies remain";
+            pushHud(warn.str(), Engine::Color{255, 220, 140, 220});
+        }
             // Shopkeeper prompt during intermission.
             if (!inCombat_ && shopkeeper_ != Engine::ECS::kInvalidEntity && !itemShopOpen_) {
                 if (const auto* shopTf = registry_.get<Engine::ECS::Transform>(shopkeeper_)) {
@@ -3221,30 +3268,28 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                                     Engine::Color{200, 255, 200, 230});
                 }
             }
-            // Event status (fallback if multiple).
-            registry_.view<Game::EventActive>([&](Engine::ECS::Entity e, const Game::EventActive& ev) {
-                std::ostringstream msg;
-                if (ev.type == Game::EventType::Escort) {
-                    float distLeft = 0.0f;
-                    if (auto* escortObj = registry_.get<Game::EscortObjective>(e)) {
-                        if (auto* escortTf = registry_.get<Engine::ECS::Transform>(escortObj->escort)) {
-                            Engine::Vec2 delta{escortObj->destination.x - escortTf->position.x,
-                                               escortObj->destination.y - escortTf->position.y};
-                            distLeft = std::sqrt(std::max(0.0f, delta.x * delta.x + delta.y * delta.y));
-                        }
-                    }
-                    msg << "Event: Escort | " << std::fixed << std::setprecision(0) << distLeft << "u | "
-                        << std::setprecision(1) << ev.timer << "s left";
-                } else if (ev.type == Game::EventType::Bounty) {
-                    msg << "Event: Bounty | " << ev.requiredKills << " targets | "
-                        << std::fixed << std::setprecision(1) << ev.timer << "s left";
-                } else {
-                    msg << "Event: Spire Hunt | " << ev.requiredKills << " spires | "
-                        << std::fixed << std::setprecision(1) << ev.timer << "s left";
-                }
-                drawTextUnified(msg.str(), Engine::Vec2{10.0f, 172.0f}, 0.9f,
-                                Engine::Color{200, 240, 255, 200});
-            });
+        // Draw a compact status card under the resource panel.
+        if (!hudLines.empty()) {
+            const float s = hud.s;
+            const float pad = 12.0f * s;
+            const float lineH = 20.0f * s;
+            const float x = hud.statusX;
+            const float y = hud.statusY;
+            const float w = hud.statusW;
+            const float h = pad * 2.0f + static_cast<float>(hudLines.size()) * lineH;
+            render_->drawFilledRect(Engine::Vec2{x, y + 4.0f * s}, Engine::Vec2{w, h}, Engine::Color{0, 0, 0, 85});
+            render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{w, h}, Engine::Color{12, 16, 24, 215});
+            render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{w, 2.0f}, Engine::Color{45, 70, 95, 190});
+            render_->drawFilledRect(Engine::Vec2{x, y + h - 2.0f}, Engine::Vec2{w, 2.0f}, Engine::Color{45, 70, 95, 190});
+
+            const float ts = std::clamp(0.90f * s, 0.82f, 1.05f);
+            float ly = y + pad;
+            for (const auto& [txtRaw, col] : hudLines) {
+                const std::string txt = ellipsizeTextUnified(txtRaw, w - pad * 2.0f, ts);
+                drawTextUnified(txt, Engine::Vec2{x + pad, ly}, ts, col);
+                ly += lineH;
+            }
+        }
         // Floating damage numbers.
         if (showDamageNumbers_) {
             registry_.view<Engine::ECS::Transform, Game::DamageNumber>(
@@ -5723,7 +5768,9 @@ void GameRoot::updateMenuInput(const Engine::ActionState& actions, const Engine:
     auto inside = [](int mx, int my, float x, float y, float w, float h) {
         return mx >= x && mx <= x + w && my >= y && my <= y + h;
     };
-    const float centerX = static_cast<float>(viewportWidth_) * 0.5f;
+    const float vw = static_cast<float>(viewportWidth_);
+    const float vh = static_cast<float>(viewportHeight_);
+    const float centerX = vw * 0.5f;
     const float topY = 140.0f;
     int mx = input.mouseX();
     int my = input.mouseY();
@@ -5738,10 +5785,23 @@ void GameRoot::updateMenuInput(const Engine::ActionState& actions, const Engine:
     if (inMenu_) {
         if (menuPage_ == MenuPage::Main) {
             const int itemCount = 7;
+            // Main menu layout is designed around a 1920x1080 reference and scaled to the current viewport.
+            const float refW = 1920.0f;
+            const float refH = 1080.0f;
+            const float s = std::min(vw / refW, vh / refH);
+            const float btnW = 420.0f * s;
+            const float btnH = 54.0f * s;
+            const float gap = 14.0f * s;
+            const float titleY = 72.0f * s;
+            const float titleArea = titleY + 140.0f * s;
+            const float footerArea = 90.0f * s;
+            const float totalH = itemCount * btnH + (itemCount - 1) * gap;
+            const float availableH = std::max(0.0f, vh - titleArea - footerArea);
+            const float startY = titleArea + (availableH - totalH) * 0.5f;
+            const float x = centerX - btnW * 0.5f;
             for (int i = 0; i < itemCount; ++i) {
-                float y = topY + 80.0f + i * 38.0f;
-                float x = centerX - 120.0f;
-                if (inside(mx, my, x, y, 240.0f, 30.0f)) {
+                float y = startY + i * (btnH + gap);
+                if (inside(mx, my, x, y, btnW, btnH)) {
                     menuSelection_ = i;
                 }
             }
@@ -5897,29 +5957,45 @@ void GameRoot::updateMenuInput(const Engine::ActionState& actions, const Engine:
             } else if (menuSelection_ == 2 || menuSelection_ == 3) {
                 // Up/down do nothing for Start/Back
             }
-            // Mouse click to select entries (hover should not auto-select)
-            const float panelW = 260.0f;
-            const float panelH = 220.0f;
-            const float gap = 30.0f;
-            const float listStartY = topY + 80.0f;
-            float leftX = centerX - panelW - gap * 0.5f;
-            float rightX = centerX + gap * 0.5f;
-            const float entryH = 26.0f;
-            auto handleListClick = [&, panelH, entryH, listStartY, panelW](auto& list, float x, float& scrollVal, int& selected, int selIndex) {
-                int maxVisible = std::max(1, static_cast<int>((panelH - 44.0f) / entryH));
-                float maxScroll = std::max(0.0f, static_cast<float>(list.size() - maxVisible));
+            // Mouse click to select entries (hover sets focus; click selects).
+            const float refW = 1920.0f;
+            const float refH = 1080.0f;
+            const float s = std::min(vw / refW, vh / refH);
+            const float textBoost = 1.18f;
+            const float margin = 28.0f * s;
+            const float footerH = 120.0f * s;
+            const float titleYRef = 72.0f * s;
+            const float contentTop = titleYRef + 144.0f * s;
+            const float contentBottom = vh - footerH;
+            const float contentH = std::max(120.0f, contentBottom - contentTop);
+
+            const float listW = 440.0f * s;
+            const float leftX = margin;
+            const float rightX = vw - margin - listW;
+            const float panelY = contentTop;
+            const float panelH = contentH;
+            const float headerH = 52.0f * s * textBoost;
+            const float pad = 16.0f * s * textBoost;
+            const float entryH = 40.0f * s * textBoost;
+
+            auto handleListClick = [&](auto& list, float x, float y, float w, float h, float& scrollVal, int& selected, int selIndex) {
+                const float innerX = x + pad;
+                const float innerY = y + headerH;
+                const float innerW = w - pad * 2.0f;
+                const float innerH = h - headerH - pad;
+                const float barW = 10.0f * s;
+
+                const int maxVisible = std::max(1, static_cast<int>(std::floor(innerH / entryH)));
+                const float maxScroll = std::max(0.0f, static_cast<float>(list.size()) - static_cast<float>(maxVisible));
                 scrollVal = std::clamp(scrollVal, 0.0f, maxScroll);
-                int start = std::clamp(static_cast<int>(std::round(scrollVal)), 0,
-                                       static_cast<int>(list.size() > 0 ? list.size() - 1 : 0));
-                if (static_cast<int>(list.size()) > maxVisible) {
-                    start = std::clamp(start, 0, static_cast<int>(list.size()) - maxVisible);
-                } else {
-                    start = 0;
-                }
-                int end = std::min(static_cast<int>(list.size()), start + maxVisible);
+                const int start = (list.size() > static_cast<std::size_t>(maxVisible))
+                                      ? std::clamp(static_cast<int>(std::round(scrollVal)), 0, static_cast<int>(list.size()) - maxVisible)
+                                      : 0;
+                const int end = std::min(static_cast<int>(list.size()), start + maxVisible);
+
                 for (int i = start; i < end; ++i) {
-                    float y = listStartY + 32.0f + static_cast<float>(i - start) * entryH;
-                    bool hovered = inside(mx, my, x + 8.0f, y, panelW - 16.0f, entryH - 4.0f);
+                    float rowY = innerY + static_cast<float>(i - start) * entryH;
+                    bool hovered = inside(mx, my, innerX, rowY, innerW - barW, entryH);
                     if (hovered) {
                         menuSelection_ = selIndex;
                         if (clickEdge) {
@@ -5934,19 +6010,24 @@ void GameRoot::updateMenuInput(const Engine::ActionState& actions, const Engine:
                     }
                 }
             };
+
             if (!archetypes_.empty()) {
-                handleListClick(archetypes_, leftX, archetypeScroll_, selectedArchetype_, 0);
+                handleListClick(archetypes_, leftX, panelY, listW, panelH, archetypeScroll_, selectedArchetype_, 0);
             }
             if (!difficulties_.empty()) {
-                handleListClick(difficulties_, rightX, difficultyScroll_, selectedDifficulty_, 1);
+                handleListClick(difficulties_, rightX, panelY, listW, panelH, difficultyScroll_, selectedDifficulty_, 1);
             }
-            float summaryY = listStartY + 220.0f + 18.0f;
-            float actionY = summaryY + 98.0f;
-            if (inside(mx, my, centerX - 220.0f, actionY, 200.0f, 32.0f)) {
+
+            const float btnW = 240.0f * s;
+            const float btnH = 56.0f * s;
+            const float btnGap = 18.0f * s;
+            const float btnY = vh - footerH + 28.0f * s;
+            const float startX = centerX - (btnW * 2.0f + btnGap) * 0.5f;
+            if (inside(mx, my, startX, btnY, btnW, btnH)) {
                 menuSelection_ = 2;
                 if (clickEdge) { startNewGame(); return; }
             }
-            if (inside(mx, my, centerX + 20.0f, actionY, 200.0f, 32.0f)) {
+            if (inside(mx, my, startX + btnW + btnGap, btnY, btnW, btnH)) {
                 menuSelection_ = 3;
                 if (clickEdge) {
                     menuPage_ = MenuPage::Main;
@@ -6235,44 +6316,109 @@ void GameRoot::renderMenu() {
     if (!render_) return;
     render_->clear({10, 12, 16, 255});
 
-    const float centerX = static_cast<float>(viewportWidth_) * 0.5f;
+    const float vw = static_cast<float>(viewportWidth_);
+    const float vh = static_cast<float>(viewportHeight_);
+    const float centerX = vw * 0.5f;
     const float topY = 140.0f;
     int mx = lastMouseX_;
     int my = lastMouseY_;
     auto inside = [](int mx, int my, float x, float y, float w, float h) {
         return mx >= x && mx <= x + w && my >= y && my <= y + h;
     };
-    drawTextUnified("PROJECT AURORA ZETA", Engine::Vec2{centerX - 140.0f, topY}, 1.7f, Engine::Color{180, 230, 255, 240});
-    drawTextUnified("Pre-Alpha | Build v0.0.127",
-                    Engine::Vec2{centerX, topY + 28.0f},
-                    0.85f, Engine::Color{150, 200, 230, 220});
 
-    auto drawButton = [&](const std::string& label, int index) {
-        float y = topY + 80.0f + index * 38.0f;
-        Engine::Vec2 pos{centerX - 120.0f, y};
-        Engine::Vec2 size{240.0f, 30.0f};
-        bool focused = (menuPage_ == MenuPage::Main && menuSelection_ == index);
-        uint8_t base = focused ? 90 : 60;
-        Engine::Color bg{static_cast<uint8_t>(base), static_cast<uint8_t>(base + 40), static_cast<uint8_t>(base + 70), 220};
-        render_->drawFilledRect(pos, size, bg);
-        Engine::Color textCol = focused ? Engine::Color{220, 255, 255, 255} : Engine::Color{200, 220, 240, 230};
-        drawTextUnified(label, Engine::Vec2{pos.x + 16.0f, pos.y + 6.0f}, 1.0f, textCol);
+    // Main menu layout is designed around a 1920x1080 reference and scaled to the current viewport.
+    const float refW = 1920.0f;
+    const float refH = 1080.0f;
+    const float s = std::min(vw / refW, vh / refH);
+    const float margin = 26.0f * s;
+    const float titleY = 72.0f * s;
+
+    // Subtle modern backdrop (simple banded gradient + center glow).
+    render_->drawFilledRect(Engine::Vec2{0.0f, 0.0f}, Engine::Vec2{vw, vh * 0.45f}, Engine::Color{18, 26, 40, 120});
+    render_->drawFilledRect(Engine::Vec2{0.0f, vh * 0.55f}, Engine::Vec2{vw, vh * 0.45f}, Engine::Color{6, 8, 12, 160});
+    const float glowW = 860.0f * s;
+    const float glowH = 520.0f * s;
+    render_->drawFilledRect(Engine::Vec2{centerX - glowW * 0.5f, vh * 0.52f - glowH * 0.5f},
+                            Engine::Vec2{glowW, glowH}, Engine::Color{28, 40, 62, 60});
+
+    // Title (top, centered).
+    const std::string title = "PROJECT AURORA ZETA";
+    const float titleScale = std::clamp(2.15f * s, 1.35f, 2.35f);
+    const float titleW = measureTextUnified(title, titleScale).x;
+    drawTextUnified(title, Engine::Vec2{centerX - titleW * 0.5f, titleY}, titleScale, Engine::Color{190, 235, 255, 245});
+
+    // Build info (bottom-right).
+    const std::string buildStr = "Pre-Alpha | Build v0.0.135";
+    const float buildScale = std::clamp(0.95f * s, 0.72f, 0.95f);
+    const Engine::Vec2 buildSz = measureTextUnified(buildStr, buildScale);
+    drawTextUnified(buildStr, Engine::Vec2{vw - margin - buildSz.x, vh - margin - buildSz.y}, buildScale,
+                    Engine::Color{145, 195, 230, 200});
+
+    auto drawMainMenuButton = [&](const std::string& label, int index, float x, float y, float w, float h) {
+        const bool focused = (menuPage_ == MenuPage::Main && menuSelection_ == index);
+        const bool hovered = inside(mx, my, x, y, w, h);
+        const float pulse = 0.55f + 0.45f * std::sin(static_cast<float>(menuPulse_) * 2.0f);
+        const uint8_t base = static_cast<uint8_t>(focused ? (70 + 18 * pulse) : (hovered ? 62 : 48));
+        Engine::Color bg{static_cast<uint8_t>(base), static_cast<uint8_t>(base + 20), static_cast<uint8_t>(base + 34), 230};
+        // Shadow + body.
+        render_->drawFilledRect(Engine::Vec2{x, y + 2.0f * s}, Engine::Vec2{w, h}, Engine::Color{0, 0, 0, 75});
+        render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{w, h}, bg);
+        // Top/bottom lines.
+        Engine::Color edge = focused ? Engine::Color{140, 220, 255, 235} : Engine::Color{45, 70, 95, 190};
+        render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{w, 2.0f}, edge);
+        render_->drawFilledRect(Engine::Vec2{x, y + h - 2.0f}, Engine::Vec2{w, 2.0f}, edge);
+        // Left accent bar.
+        Engine::Color accent = focused ? Engine::Color{120, 200, 255, 235} : (hovered ? Engine::Color{90, 150, 220, 200}
+                                                                                      : Engine::Color{40, 60, 90, 160});
+        render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{6.0f * s, h}, accent);
+
+        Engine::Color textCol = focused ? Engine::Color{225, 255, 255, 250} : Engine::Color{200, 225, 245, 235};
+        const float textScale = std::clamp(1.05f * s, 0.9f, 1.12f);
+        const float textY = y + (h - measureTextUnified(label, textScale).y) * 0.5f + 1.0f * s;
+        drawTextUnified(label, Engine::Vec2{x + 22.0f * s, textY}, textScale, textCol);
     };
 
     if (menuPage_ == MenuPage::Main) {
-        drawButton("New Game (Solo)", 0);
-        drawButton("Host", 1);
-        drawButton("Join", 2);
-        drawButton("Upgrades", 3);
-        drawButton("Stats", 4);
-        drawButton("Options", 5);
-        drawButton("Exit", 6);
+        const int itemCount = 7;
+        const float btnW = 420.0f * s;
+        const float btnH = 54.0f * s;
+        const float gap = 14.0f * s;
+        const float titleArea = titleY + 140.0f * s;
+        const float footerArea = 90.0f * s;
+        const float totalH = itemCount * btnH + (itemCount - 1) * gap;
+        const float availableH = std::max(0.0f, vh - titleArea - footerArea);
+        const float startY = titleArea + (availableH - totalH) * 0.5f;
+        const float btnX = centerX - btnW * 0.5f;
+
+        // Button stack container.
+        const float panelPadX = 34.0f * s;
+        const float panelPadY = 34.0f * s;
+        const float panelW = btnW + panelPadX * 2.0f;
+        const float panelH = totalH + panelPadY * 2.0f;
+        const float panelX = centerX - panelW * 0.5f;
+        const float panelY = startY - panelPadY;
+        render_->drawFilledRect(Engine::Vec2{panelX, panelY + 4.0f * s}, Engine::Vec2{panelW, panelH}, Engine::Color{0, 0, 0, 85});
+        render_->drawFilledRect(Engine::Vec2{panelX, panelY}, Engine::Vec2{panelW, panelH}, Engine::Color{14, 18, 26, 215});
+        render_->drawFilledRect(Engine::Vec2{panelX, panelY}, Engine::Vec2{panelW, 2.0f}, Engine::Color{45, 70, 95, 190});
+        render_->drawFilledRect(Engine::Vec2{panelX, panelY + panelH - 2.0f}, Engine::Vec2{panelW, 2.0f}, Engine::Color{45, 70, 95, 190});
+
+        // Buttons (centered).
+        drawMainMenuButton("New Game (Solo)", 0, btnX, startY + 0 * (btnH + gap), btnW, btnH);
+        drawMainMenuButton("Host",            1, btnX, startY + 1 * (btnH + gap), btnW, btnH);
+        drawMainMenuButton("Join",            2, btnX, startY + 2 * (btnH + gap), btnW, btnH);
+        drawMainMenuButton("Upgrades",        3, btnX, startY + 3 * (btnH + gap), btnW, btnH);
+        drawMainMenuButton("Stats",           4, btnX, startY + 4 * (btnH + gap), btnW, btnH);
+        drawMainMenuButton("Options",         5, btnX, startY + 5 * (btnH + gap), btnW, btnH);
+        drawMainMenuButton("Exit",            6, btnX, startY + 6 * (btnH + gap), btnW, btnH);
+
+        // Footer (bottom center).
         float pulse = 0.6f + 0.4f * std::sin(static_cast<float>(menuPulse_) * 2.0f);
-        Engine::Color hint{static_cast<uint8_t>(180 + 40 * pulse), 220, 255, 220};
-        // Position the credit text well beneath the Exit button row.
-        float creditsY = topY + 80.0f + 6 * 38.0f + 48.0f;
-        drawTextUnified("          A Major Bonghit Production", Engine::Vec2{centerX - 185.0f, creditsY},
-                        0.9f, hint);
+        Engine::Color hint{static_cast<uint8_t>(175 + 45 * pulse), 220, 255, 220};
+        const std::string credit = "A Major Bonghit Production";
+        const float creditScale = std::clamp(0.98f * s, 0.78f, 0.98f);
+        const float creditW = measureTextUnified(credit, creditScale).x;
+        const float creditsY = vh - margin - 34.0f * s;
+        drawTextUnified(credit, Engine::Vec2{centerX - creditW * 0.5f, creditsY}, creditScale, hint);
     } else if (menuPage_ == MenuPage::Stats) {
         Engine::Color c{200, 230, 255, 240};
         drawTextUnified("Stats", Engine::Vec2{centerX - 40.0f, topY + 60.0f}, 1.2f, c);
@@ -6418,227 +6564,369 @@ void GameRoot::renderMenu() {
         Engine::Color hint{180, 210, 240, 220};
         drawTextUnified("Esc / Mouse1 to return", Engine::Vec2{centerX - 150.0f, topY + 200.0f}, 0.9f, hint);
     } else if (menuPage_ == MenuPage::CharacterSelect) {
-        Engine::Color titleCol{200, 230, 255, 240};
-        drawTextUnified("Select Character & Difficulty", Engine::Vec2{centerX - 180.0f, topY + 40.0f}, 1.25f,
-                        titleCol);
-        const float panelW = 260.0f;
-        const float panelH = 220.0f;
-        const float gap = 30.0f;
-        const float listStartY = topY + 80.0f;
+        const float refW = 1920.0f;
+        const float refH = 1080.0f;
+        const float s = std::min(vw / refW, vh / refH);
+        const float textBoost = 1.18f;
+        const float margin = 28.0f * s;
+        const float gap = 22.0f * s;
+
+        // Page title (under the main game title).
+        {
+            const std::string pageTitle = "Select Character & Difficulty";
+            const float st = std::clamp(1.25f * s * textBoost, 1.15f, 1.50f);
+            const float tw = measureTextUnified(pageTitle, st).x;
+            drawTextUnified(pageTitle, Engine::Vec2{centerX - tw * 0.5f, titleY + 84.0f * s}, st,
+                            Engine::Color{200, 230, 255, 240});
+            const std::string sub = "Click to select • Scroll lists • Enter to start • Esc to go back";
+            const float ss = std::clamp(0.88f * s * textBoost, 0.82f, 1.12f);
+            const float sw = measureTextUnified(sub, ss).x;
+            drawTextUnified(sub, Engine::Vec2{centerX - sw * 0.5f, titleY + 114.0f * s}, ss,
+                            Engine::Color{150, 190, 215, 210});
+        }
+
+        const float footerH = 120.0f * s;
+        const float contentTop = titleY + 144.0f * s;
+        const float contentBottom = vh - footerH;
+        const float contentH = std::max(120.0f, contentBottom - contentTop);
+
+        const float listW = 440.0f * s;
+        const float leftX = margin;
+        const float rightX = vw - margin - listW;
+        const float panelY = contentTop;
+        const float panelH = contentH;
+        const float centerX0 = leftX + listW + gap;
+        const float centerW = std::max(320.0f * s, rightX - gap - centerX0);
+
+        const float headerH = 52.0f * s * textBoost;
+        const float pad = 16.0f * s * textBoost;
+        const float entryH = 40.0f * s * textBoost;
+
         int mx = lastMouseX_;
         int my = lastMouseY_;
         int scrollDelta = scrollDeltaFrame_;
         bool mouseDown = SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(SDL_BUTTON_LEFT);
-        auto drawList = [&](auto& list, int selected, bool focused, float x, const std::string& title, float& scrollVal) {
-            Engine::Color panel{28, 42, 60, 220};
-            render_->drawFilledRect(Engine::Vec2{x, listStartY}, Engine::Vec2{panelW, panelH}, panel);
-            drawTextUnified(title, Engine::Vec2{x + 12.0f, listStartY + 8.0f}, 1.05f,
-                            Engine::Color{200, 230, 255, 240});
-            const float entryH = 26.0f;
-            // compute sliding window so list stays within panel
-            int maxVisible = static_cast<int>((panelH - 44.0f) / entryH);
-            maxVisible = std::max(1, maxVisible);
-            int start = 0;
-            float maxScroll = std::max(0.0f, static_cast<float>(list.size() - maxVisible));
-            bool hover = mx >= x && mx <= x + panelW && my >= listStartY && my <= listStartY + panelH;
-            if (hover && scrollDelta != 0) {
-                scrollVal = std::clamp(scrollVal - static_cast<float>(scrollDelta) * 0.5f, 0.0f, maxScroll);
+
+        auto drawCard = [&](float x, float y, float w, float h) {
+            render_->drawFilledRect(Engine::Vec2{x, y + 4.0f * s}, Engine::Vec2{w, h}, Engine::Color{0, 0, 0, 85});
+            render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{w, h}, Engine::Color{12, 16, 24, 220});
+            render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{w, 2.0f}, Engine::Color{45, 70, 95, 190});
+            render_->drawFilledRect(Engine::Vec2{x, y + h - 2.0f}, Engine::Vec2{w, 2.0f}, Engine::Color{45, 70, 95, 190});
+        };
+
+        auto wrapByWidth = [&](const std::string& text, float maxWidth, float scale) {
+            std::vector<std::string> lines;
+            std::istringstream iss(text);
+            std::string word;
+            std::string current;
+            while (iss >> word) {
+                std::string next = current.empty() ? word : (current + " " + word);
+                if (measureTextUnified(next, scale).x <= maxWidth || current.empty()) {
+                    current = std::move(next);
+                } else {
+                    lines.push_back(current);
+                    current = word;
+                }
             }
-            // scrollbar drag/click
-            float barWidth = 10.0f;
-            float trackX = x + panelW - barWidth - 6.0f;
-            float trackTop = listStartY + 30.0f;
-            float trackH = panelH - 42.0f;
-            if (hover && mouseDown && list.size() > static_cast<std::size_t>(maxVisible)) {
-                if (mx >= trackX && mx <= trackX + barWidth) {
-                    float t = (static_cast<float>(my) - trackTop) / std::max(1.0f, trackH);
+            if (!current.empty()) lines.push_back(current);
+            return lines;
+        };
+
+        auto drawScrollableList = [&](auto& list, int selected, bool focused, float x, float y, float w, float h,
+                                      const std::string& title, float& scrollVal) {
+            drawCard(x, y, w, h);
+            const float titleScale = std::clamp(1.05f * s * textBoost, 0.98f, 1.28f);
+            drawTextUnified(title, Engine::Vec2{x + pad, y + 14.0f * s}, titleScale, Engine::Color{210, 235, 255, 240});
+
+            const float innerX = x + pad;
+            const float innerY = y + headerH;
+            const float innerW = w - pad * 2.0f;
+            const float innerH = h - headerH - pad;
+
+            const float listAreaX = innerX;
+            const float listAreaY = innerY;
+            const float listAreaW = innerW;
+            const float listAreaH = innerH;
+
+            const bool hoverPanel = (mx >= static_cast<int>(x) && mx <= static_cast<int>(x + w) &&
+                                     my >= static_cast<int>(y) && my <= static_cast<int>(y + h));
+
+            const int maxVisible = std::max(1, static_cast<int>(std::floor(listAreaH / entryH)));
+            const float maxScroll = std::max(0.0f, static_cast<float>(list.size()) - static_cast<float>(maxVisible));
+            if (hoverPanel && scrollDelta != 0) {
+                scrollVal = std::clamp(scrollVal - static_cast<float>(scrollDelta) * 0.65f, 0.0f, maxScroll);
+            }
+
+            float barW = 10.0f * s;
+            float trackX = listAreaX + listAreaW - barW;
+            float trackY = listAreaY;
+            float trackH = listAreaH;
+            if (hoverPanel && mouseDown && list.size() > static_cast<std::size_t>(maxVisible)) {
+                if (mx >= static_cast<int>(trackX) && mx <= static_cast<int>(trackX + barW)) {
+                    float t = (static_cast<float>(my) - trackY) / std::max(1.0f, trackH);
                     t = std::clamp(t, 0.0f, 1.0f);
                     scrollVal = t * maxScroll;
                 }
             }
-            if (static_cast<int>(list.size()) > maxVisible) {
-                start = std::clamp(static_cast<int>(std::round(scrollVal)), 0,
-                                   static_cast<int>(list.size()) - maxVisible);
-            }
-            int end = std::min(static_cast<int>(list.size()), start + maxVisible);
+
+            const int start = (list.size() > static_cast<std::size_t>(maxVisible))
+                                  ? std::clamp(static_cast<int>(std::round(scrollVal)), 0, static_cast<int>(list.size()) - maxVisible)
+                                  : 0;
+            const int end = std::min(static_cast<int>(list.size()), start + maxVisible);
+
+            // entries
             for (int i = start; i < end; ++i) {
-                float y = listStartY + 32.0f + static_cast<float>(i - start) * entryH;
-                Engine::Color bg{40, 60, 80, static_cast<uint8_t>(focused && static_cast<int>(i) == selected ? 230 : 160)};
-                if (static_cast<int>(i) == selected) {
-                    bg = Engine::Color{static_cast<uint8_t>(bg.r + 20), static_cast<uint8_t>(bg.g + 40),
-                                       static_cast<uint8_t>(bg.b + 60), 230};
-                }
-                render_->drawFilledRect(Engine::Vec2{x + 8.0f, y}, Engine::Vec2{panelW - 16.0f, entryH - 4.0f}, bg);
-                Engine::Color txt = (static_cast<int>(i) == selected)
-                                        ? Engine::Color{220, 255, 255, 255}
-                                        : Engine::Color{200, 220, 240, 230};
-                drawTextUnified(list[i].name, Engine::Vec2{x + 14.0f, y + 4.0f}, 0.95f, txt);
+                float rowY = listAreaY + static_cast<float>(i - start) * entryH;
+                const bool hov = (mx >= static_cast<int>(listAreaX) && mx <= static_cast<int>(listAreaX + listAreaW) &&
+                                  my >= static_cast<int>(rowY) && my <= static_cast<int>(rowY + entryH));
+                const bool sel = (i == selected);
+
+                Engine::Color bg = sel ? Engine::Color{28, 44, 66, 235} : (hov ? Engine::Color{20, 30, 46, 230}
+                                                                            : Engine::Color{14, 18, 26, 210});
+                render_->drawFilledRect(Engine::Vec2{listAreaX, rowY}, Engine::Vec2{listAreaW, entryH - 2.0f * s}, bg);
+
+                Engine::Color accent = sel ? Engine::Color{120, 200, 255, 235} : (hov ? Engine::Color{80, 140, 210, 200}
+                                                                                      : Engine::Color{35, 55, 80, 160});
+                render_->drawFilledRect(Engine::Vec2{listAreaX, rowY}, Engine::Vec2{5.0f * s, entryH - 2.0f * s}, accent);
+
+                Engine::Color textCol = sel ? Engine::Color{235, 255, 255, 250} : Engine::Color{200, 225, 245, 235};
+                const float textScale = std::clamp(0.98f * s * textBoost, 0.90f, 1.18f);
+                const float maxNameW = listAreaW - 24.0f * s - barW;
+                const std::string name = ellipsizeTextUnified(list[i].name, maxNameW, textScale);
+                const float textY = rowY + (entryH - measureTextUnified(name, textScale).y) * 0.5f + 1.0f * s;
+                drawTextUnified(name, Engine::Vec2{listAreaX + 14.0f * s, textY}, textScale, textCol);
             }
+
             // scrollbar visuals
             if (list.size() > static_cast<std::size_t>(maxVisible)) {
-                float thumbH = std::max(18.0f, trackH * (static_cast<float>(maxVisible) / static_cast<float>(list.size())));
-                float ratio = (maxScroll > 0.0f) ? (scrollVal / maxScroll) : 0.0f;
-                float thumbY = trackTop + (trackH - thumbH) * ratio;
-                render_->drawFilledRect(Engine::Vec2{trackX, trackTop}, Engine::Vec2{barWidth, trackH},
-                                        Engine::Color{18, 28, 40, 180});
-                render_->drawFilledRect(Engine::Vec2{trackX, thumbY}, Engine::Vec2{barWidth, thumbH},
-                                        Engine::Color{90, 140, 210, 220});
+                render_->drawFilledRect(Engine::Vec2{trackX, trackY}, Engine::Vec2{barW, trackH}, Engine::Color{10, 14, 22, 170});
+                const float thumbH = std::max(22.0f * s, trackH * (static_cast<float>(maxVisible) / static_cast<float>(list.size())));
+                const float ratio = (maxScroll > 0.0f) ? (scrollVal / maxScroll) : 0.0f;
+                const float thumbY = trackY + (trackH - thumbH) * ratio;
+                render_->drawFilledRect(Engine::Vec2{trackX, thumbY}, Engine::Vec2{barW, thumbH}, Engine::Color{90, 140, 210, 220});
+            }
+
+            // focused glow
+            if (focused) {
+                render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{w, 2.0f}, Engine::Color{120, 200, 255, 210});
+                render_->drawFilledRect(Engine::Vec2{x, y + h - 2.0f}, Engine::Vec2{w, 2.0f}, Engine::Color{120, 200, 255, 210});
             }
         };
-        float leftX = centerX - panelW - gap * 0.5f;
-        float rightX = centerX + gap * 0.5f;
+
+        // Left/right selector lists.
         if (!archetypes_.empty()) {
-            drawList(archetypes_, selectedArchetype_, menuSelection_ == 0, leftX, "Champions", archetypeScroll_);
+            drawScrollableList(archetypes_, selectedArchetype_, menuSelection_ == 0, leftX, panelY, listW, panelH,
+                               "Champions", archetypeScroll_);
+        } else {
+            drawCard(leftX, panelY, listW, panelH);
         }
         if (!difficulties_.empty()) {
-            drawList(difficulties_, selectedDifficulty_, menuSelection_ == 1, rightX, "Difficulty", difficultyScroll_);
+            drawScrollableList(difficulties_, selectedDifficulty_, menuSelection_ == 1, rightX, panelY, listW, panelH,
+                               "Difficulty", difficultyScroll_);
+        } else {
+            drawCard(rightX, panelY, listW, panelH);
         }
-        // Summary card + biography
-        Engine::Color cardCol{24, 34, 48, 220};
-        float summaryY = listStartY + panelH + 18.0f;
-        float summaryH = 170.0f;
-        render_->drawFilledRect(Engine::Vec2{centerX - 260.0f, summaryY}, Engine::Vec2{520.0f, summaryH}, cardCol);
-        // Render selected archetype idle preview (animated) to the right of the archetype list
-        if (!archetypes_.empty() && textureManager_) {
-            const auto& a = archetypes_[std::clamp(selectedArchetype_, 0, static_cast<int>(archetypes_.size() - 1))];
-            auto files = heroSpriteFilesFor(a);
-            std::filesystem::path base = std::filesystem::path("assets") / "Sprites" / "Characters" / files.folder;
-            Engine::TexturePtr move = loadTextureOptional((base / files.movementFile).string());
-            if (move) {
-                const int movementColumns = 4;
-                const int movementRows = (move->height() % 31 == 0) ? 31 : std::max(1, move->height() / (move->height() / std::max(1, move->width() / movementColumns)));
-                int moveFrameW = std::max(1, move->width() / movementColumns);
-                int moveFrameH = std::max(1, move->height() / movementRows);
-                int frames = std::max(1, move->width() / moveFrameW);
-                float frameDur = 0.12f;
-                int row = 2;  // idle front (0-based)
-                int frame = static_cast<int>(menuPulse_ / frameDur) % frames;
-                Engine::IntRect src{frame * moveFrameW, row * moveFrameH, moveFrameW, moveFrameH};
-                float scale = 2.0f;
-                float visW = static_cast<float>(moveFrameW) * scale;
-                float visH = static_cast<float>(moveFrameH) * scale;
-                float baselineY = listStartY + panelH - 8.0f;
-                // Character Select live preview placement (manual tweak point):
-                // Adjust these offsets to move the animated hero preview around on the Select Character & Difficulty screen.
-                constexpr float kPreviewOffsetX = 50.0f;   // +right
-                constexpr float kPreviewOffsetY = 80.0f;  // +down
-                float px = leftX + panelW + 134.0f + kPreviewOffsetX;
-                float py = baselineY - visH + 100.0f + kPreviewOffsetY;
-                if (a.id == "tank" || a.id == "special") {
-                    px -= 10.0f;
-                    py += 10.0f;
-                }
-                render_->drawTextureRegion(*move, Engine::Vec2{px, py}, Engine::Vec2{visW, visH}, src);
-            }
-        }
+
+        // Center: animated preview + details.
+        drawCard(centerX0, panelY, centerW, panelH);
+        const float previewH = panelH * 0.52f;
+        render_->drawFilledRect(Engine::Vec2{centerX0 + 2.0f, panelY + 2.0f}, Engine::Vec2{centerW - 4.0f, previewH - 4.0f},
+                                Engine::Color{18, 26, 40, 170});
+
         if (!archetypes_.empty()) {
             const auto& a = archetypes_[std::clamp(selectedArchetype_, 0, static_cast<int>(archetypes_.size() - 1))];
-            std::ostringstream stats;
-            stats << "HP x" << std::fixed << std::setprecision(2) << a.hpMul
-                  << " | Speed x" << a.speedMul << " | Damage x" << a.damageMul;
-            auto wrapLines = [](const std::string& text, std::size_t maxChars) {
-                std::vector<std::string> lines;
-                std::string remaining = text;
-                while (remaining.size() > maxChars) {
-                    std::size_t cut = remaining.rfind(' ', maxChars);
-                    if (cut == std::string::npos) cut = maxChars;
-                    lines.push_back(remaining.substr(0, cut));
-                    remaining.erase(0, cut + (cut < remaining.size() ? 1 : 0));
+
+            // Render selected archetype idle preview (animated) inside the center card.
+            if (textureManager_) {
+                auto files = heroSpriteFilesFor(a);
+                std::filesystem::path base = std::filesystem::path("assets") / "Sprites" / "Characters" / files.folder;
+                Engine::TexturePtr move = loadTextureOptional((base / files.movementFile).string());
+                if (move) {
+                    const int movementColumns = 4;
+                    const int movementRows = (move->height() % 31 == 0) ? 31 : std::max(1, move->height() / (move->height() / std::max(1, move->width() / movementColumns)));
+                    int moveFrameW = std::max(1, move->width() / movementColumns);
+                    int moveFrameH = std::max(1, move->height() / movementRows);
+                    int frames = std::max(1, move->width() / moveFrameW);
+                    float frameDur = 0.12f;
+                    int row = 2;  // idle front (0-based)
+                    int frame = static_cast<int>(menuPulse_ / frameDur) % frames;
+                    Engine::IntRect src{frame * moveFrameW, row * moveFrameH, moveFrameW, moveFrameH};
+
+                    // Increase preview size by ~200% and keep it centered within the preview box (with a safety clamp).
+                    const float desiredScale = 2.35f * s * 2.0f;
+                    const float safePad = 18.0f * s;
+                    const float maxScaleX = (centerW - safePad * 2.0f) / std::max(1.0f, static_cast<float>(moveFrameW));
+                    const float maxScaleY = (previewH - safePad * 2.0f) / std::max(1.0f, static_cast<float>(moveFrameH));
+                    float scale = std::min(desiredScale, std::min(maxScaleX, maxScaleY));
+                    float visW = static_cast<float>(moveFrameW) * scale;
+                    float visH = static_cast<float>(moveFrameH) * scale;
+
+                    // Character Select live preview placement (manual tweak point):
+                    // Adjust these offsets to move the animated hero preview around in the center preview card.
+                    constexpr float kPreviewOffsetX = 0.0f;  // +right
+                    constexpr float kPreviewOffsetY = 0.0f;  // +down
+                    float px = centerX0 + centerW * 0.5f - visW * 0.5f + kPreviewOffsetX * s;
+                    float py = panelY + previewH * 0.5f - visH * 0.5f + kPreviewOffsetY * s;
+                    if (a.id == "tank" || a.id == "special") {
+                        px -= 10.0f * s;
+                        py += 10.0f * s;
+                    }
+                    render_->drawTextureRegion(*move, Engine::Vec2{px, py}, Engine::Vec2{visW, visH}, src);
                 }
-                if (!remaining.empty()) lines.push_back(remaining);
-                return lines;
-            };
-
-            const float leftTextX = centerX - 248.0f;
-            float leftY = summaryY + 10.0f;
-            // Keep the left column wrapped so it never collides with the attributes column.
-            const std::size_t leftColumnWrapChars = 54;
-
-            // Wrap the archetype header so it never collides with the attribute column.
-            auto headerLines = wrapLines(a.name + ": " + a.description, leftColumnWrapChars);
-            for (std::size_t i = 0; i < headerLines.size() && i < 2; ++i) {
-                drawTextUnified(headerLines[i], Engine::Vec2{leftTextX, leftY}, 0.95f,
-                                Engine::Color{210, 235, 255, 235});
-                leftY += 16.0f;
-            }
-            drawTextUnified(stats.str(), Engine::Vec2{leftTextX, leftY}, 0.9f, Engine::Color{180, 220, 240, 230});
-            leftY += 20.0f;
-
-            // Biography (cap to 2 lines to keep space for difficulty + tags).
-            auto bioLines = wrapLines(a.biography, leftColumnWrapChars);
-            for (std::size_t i = 0; i < bioLines.size() && i < 2; ++i) {
-                drawTextUnified(bioLines[i], Engine::Vec2{leftTextX, leftY}, 0.88f,
-                                Engine::Color{190, 215, 240, 225});
-                leftY += 16.0f;
             }
 
-            // Attributes column (shifted right so left text can't intrude).
-            float attrX = centerX + 150.0f;
-            float attrY = summaryY + 12.0f;
-            auto attrLine = [&](const std::string& label, int val, float y) {
-                drawTextUnified(label, Engine::Vec2{attrX, y}, 0.9f, Engine::Color{190, 215, 235, 230});
-                drawTextUnified(std::to_string(val), Engine::Vec2{attrX + 70.0f, y}, 0.9f,
-                                Engine::Color{220, 240, 255, 240});
-            };
-            attrLine("STR", a.rpgAttributes.STR, attrY); attrY += 16.0f;
-            attrLine("DEX", a.rpgAttributes.DEX, attrY); attrY += 16.0f;
-            attrLine("INT", a.rpgAttributes.INT, attrY); attrY += 16.0f;
-            attrLine("END", a.rpgAttributes.END, attrY); attrY += 16.0f;
-            attrLine("LCK", a.rpgAttributes.LCK, attrY);
+            // Details section.
+            const float detailsX = centerX0 + pad;
+            float detailsY = panelY + previewH + 12.0f * s;
+            const float detailsW = centerW - pad * 2.0f;
 
-            // Difficulty description within the summary card (below bio, wrapped).
+            const float nameScale = std::clamp(1.25f * s * textBoost, 1.15f, 1.55f);
+            const std::string name = a.name;
+            drawTextUnified(name, Engine::Vec2{detailsX, detailsY}, nameScale, Engine::Color{225, 250, 255, 245});
+
+            // Difficulty badge (right side).
+            std::string diffName{};
+            std::string diffDesc{};
             if (!difficulties_.empty()) {
-                const auto& d =
-                    difficulties_[std::clamp(selectedDifficulty_, 0, static_cast<int>(difficulties_.size() - 1))];
-                auto diffLines = wrapLines(d.name + ": " + d.description, leftColumnWrapChars);
-                for (std::size_t i = 0; i < diffLines.size() && i < 2; ++i) {
-                    drawTextUnified(diffLines[i], Engine::Vec2{leftTextX, leftY}, 0.88f,
-                                    Engine::Color{200, 220, 255, 220});
-                    leftY += 16.0f;
-                }
+                const auto& d = difficulties_[std::clamp(selectedDifficulty_, 0, static_cast<int>(difficulties_.size() - 1))];
+                diffName = d.name;
+                diffDesc = d.description;
+            }
+            if (!diffName.empty()) {
+                const float badgeScale = std::clamp(0.88f * s * textBoost, 0.82f, 1.10f);
+                const float badgePadX = 10.0f * s;
+                const float badgePadY = 6.0f * s;
+                const Engine::Vec2 bsz = measureTextUnified(diffName, badgeScale);
+                const float bw = bsz.x + badgePadX * 2.0f;
+                const float bh = bsz.y + badgePadY * 2.0f;
+                const float bx = detailsX + detailsW - bw;
+                const float by = detailsY - 2.0f * s;
+                render_->drawFilledRect(Engine::Vec2{bx, by}, Engine::Vec2{bw, bh}, Engine::Color{20, 30, 46, 235});
+                render_->drawFilledRect(Engine::Vec2{bx, by}, Engine::Vec2{bw, 2.0f}, Engine::Color{120, 200, 255, 210});
+                drawTextUnified(diffName, Engine::Vec2{bx + badgePadX, by + badgePadY}, badgeScale, Engine::Color{200, 230, 255, 235});
             }
 
-            // Specialties / perks
-            float tagY = std::max(summaryY + 100.0f, leftY + 6.0f);
-            if (!a.specialties.empty()) {
-                std::ostringstream spec;
-                spec << "Specialties: ";
-                for (std::size_t i = 0; i < a.specialties.size(); ++i) {
-                    spec << a.specialties[i];
-                    if (i + 1 < a.specialties.size()) spec << ", ";
-                }
-                auto specLines = wrapLines(spec.str(), leftColumnWrapChars);
-                for (std::size_t i = 0; i < specLines.size() && i < 2; ++i) {
-                    drawTextUnified(specLines[i], Engine::Vec2{leftTextX, tagY}, 0.88f,
-                                    Engine::Color{200, 230, 255, 220});
-                    tagY += 16.0f;
-                }
+            detailsY += 28.0f * s;
+            {
+                std::ostringstream stats;
+                stats << "HP x" << std::fixed << std::setprecision(2) << a.hpMul
+                      << "  •  Speed x" << a.speedMul << "  •  Damage x" << a.damageMul;
+                drawTextUnified(stats.str(), Engine::Vec2{detailsX, detailsY}, std::clamp(0.92f * s * textBoost, 0.86f, 1.15f),
+                                Engine::Color{175, 215, 240, 230});
+                detailsY += 22.0f * s;
             }
+
+            // Two-column: bio + difficulty on the left; attributes on the right.
+            const float colGap = 18.0f * s;
+            const float rightColW = 170.0f * s;
+            const float leftColW = std::max(160.0f * s, detailsW - rightColW - colGap);
+            const float leftColX = detailsX;
+            const float rightColX = detailsX + leftColW + colGap;
+
+            const float bodyScale = std::clamp(0.88f * s * textBoost, 0.82f, 1.10f);
+            auto drawParagraph = [&](const std::string& text, Engine::Color col, float maxW, int maxLines) {
+                auto lines = wrapByWidth(text, maxW, bodyScale);
+                int drawn = 0;
+                for (const auto& ln : lines) {
+                    if (drawn >= maxLines) break;
+                    drawTextUnified(ln, Engine::Vec2{leftColX, detailsY}, bodyScale, col);
+                    detailsY += 20.0f * s;
+                    ++drawn;
+                }
+                if (drawn > 0) detailsY += 6.0f * s;
+            };
+
+            // Description + bio
+            if (!a.description.empty()) {
+                drawParagraph(a.description, Engine::Color{200, 230, 255, 225}, leftColW, 2);
+            }
+            if (!a.biography.empty()) {
+                drawParagraph(a.biography, Engine::Color{185, 210, 235, 220}, leftColW, 2);
+            }
+            // Difficulty description
+            if (!diffDesc.empty()) {
+                drawParagraph(diffDesc, Engine::Color{200, 220, 255, 215}, leftColW, 2);
+            }
+            // Specialties / perks as compact chips
+            float chipY = detailsY;
+                auto drawChips = [&](const std::vector<std::string>& chips, Engine::Color chipCol, const std::string& label) {
+                    if (chips.empty()) return;
+                    drawTextUnified(label, Engine::Vec2{leftColX, chipY}, bodyScale, Engine::Color{165, 195, 220, 210});
+                    float cx = leftColX + measureTextUnified(label, bodyScale).x + 10.0f * s;
+                    float cy = chipY - 3.0f * s;
+                    float chipH = 22.0f * s;
+                    for (const auto& chip : chips) {
+                        const float cs = std::clamp(0.84f * s * textBoost, 0.78f, 1.02f);
+                        Engine::Vec2 ts = measureTextUnified(chip, cs);
+                        float cw = ts.x + 14.0f * s;
+                    if (cx + cw > leftColX + leftColW) {
+                        cx = leftColX;
+                        cy += chipH + 8.0f * s;
+                    }
+                    render_->drawFilledRect(Engine::Vec2{cx, cy}, Engine::Vec2{cw, chipH}, Engine::Color{18, 26, 40, 210});
+                    render_->drawFilledRect(Engine::Vec2{cx, cy}, Engine::Vec2{cw, 2.0f}, chipCol);
+                    drawTextUnified(chip, Engine::Vec2{cx + 7.0f * s, cy + 4.0f * s}, cs, Engine::Color{210, 235, 255, 235});
+                    cx += cw + 8.0f * s;
+                }
+                chipY = cy + chipH + 10.0f * s;
+            };
+            drawChips(a.specialties, Engine::Color{120, 200, 255, 210}, "Specialties");
             if (!a.perks.empty()) {
-                auto perkLines = wrapLines("Perks: " + a.perks.front(), leftColumnWrapChars);
-                for (std::size_t i = 0; i < perkLines.size() && i < 2; ++i) {
-                    drawTextUnified(perkLines[i], Engine::Vec2{leftTextX, tagY}, 0.86f,
-                                    Engine::Color{180, 225, 210, 220});
-                    tagY += 16.0f;
-                }
+                std::vector<std::string> perkOne{a.perks.front()};
+                drawChips(perkOne, Engine::Color{140, 230, 180, 210}, "Perk");
             }
+
+            // Attributes box (right)
+            float ax = rightColX;
+            float ay = panelY + previewH + 22.0f * s;
+            render_->drawFilledRect(Engine::Vec2{ax, ay}, Engine::Vec2{rightColW, 142.0f * s}, Engine::Color{10, 14, 22, 170});
+            render_->drawFilledRect(Engine::Vec2{ax, ay}, Engine::Vec2{rightColW, 2.0f}, Engine::Color{45, 70, 95, 190});
+            drawTextUnified("Attributes", Engine::Vec2{ax + 10.0f * s, ay + 10.0f * s}, std::clamp(0.92f * s * textBoost, 0.86f, 1.15f),
+                            Engine::Color{180, 210, 235, 225});
+            ay += 36.0f * s;
+            auto attrLine = [&](const std::string& label, int val) {
+                drawTextUnified(label, Engine::Vec2{ax + 12.0f * s, ay}, bodyScale, Engine::Color{170, 195, 220, 220});
+                drawTextUnified(std::to_string(val), Engine::Vec2{ax + rightColW - 38.0f * s, ay}, bodyScale,
+                                Engine::Color{220, 240, 255, 240});
+                ay += 18.0f * s;
+            };
+            attrLine("STR", a.rpgAttributes.STR);
+            attrLine("DEX", a.rpgAttributes.DEX);
+            attrLine("INT", a.rpgAttributes.INT);
+            attrLine("END", a.rpgAttributes.END);
+            attrLine("LCK", a.rpgAttributes.LCK);
         }
-        // Action buttons
+
+        // Bottom action bar.
+        const float btnW = 240.0f * s;
+        const float btnH = 56.0f * s;
+        const float btnGap = 18.0f * s;
+        const float btnY = vh - footerH + 28.0f * s;
         auto drawAction = [&](const std::string& label, int index, float x) {
-            Engine::Vec2 pos{x, summaryY + summaryH + 12.0f};
-            Engine::Vec2 size{200.0f, 32.0f};
-            bool focused = menuSelection_ == index;
-            Engine::Color bg{static_cast<uint8_t>(focused ? 90 : 60), static_cast<uint8_t>(focused ? 150 : 110),
-                             static_cast<uint8_t>(focused ? 200 : 160), 230};
-            render_->drawFilledRect(pos, size, bg);
-            drawTextUnified(label, Engine::Vec2{pos.x + 14.0f, pos.y + 6.0f}, 0.98f,
-                            Engine::Color{220, 255, 255, 255});
+            const bool focused = (menuSelection_ == index);
+            const bool hovered = inside(mx, my, x, btnY, btnW, btnH);
+            Engine::Color bg = focused ? Engine::Color{32, 52, 76, 235} : (hovered ? Engine::Color{26, 40, 60, 230}
+                                                                                 : Engine::Color{16, 22, 32, 220});
+            render_->drawFilledRect(Engine::Vec2{x, btnY + 3.0f * s}, Engine::Vec2{btnW, btnH}, Engine::Color{0, 0, 0, 80});
+            render_->drawFilledRect(Engine::Vec2{x, btnY}, Engine::Vec2{btnW, btnH}, bg);
+            Engine::Color edge = focused ? Engine::Color{120, 200, 255, 230} : Engine::Color{45, 70, 95, 190};
+            render_->drawFilledRect(Engine::Vec2{x, btnY}, Engine::Vec2{btnW, 2.0f}, edge);
+            render_->drawFilledRect(Engine::Vec2{x, btnY + btnH - 2.0f}, Engine::Vec2{btnW, 2.0f}, edge);
+            const float ts = std::clamp(1.02f * s, 0.92f, 1.02f);
+            const float tw = measureTextUnified(label, ts).x;
+            const float th = measureTextUnified(label, ts).y;
+            drawTextUnified(label, Engine::Vec2{x + (btnW - tw) * 0.5f, btnY + (btnH - th) * 0.5f + 2.0f * s}, ts,
+                            Engine::Color{220, 245, 255, 245});
         };
-        drawAction("Start Run", 2, centerX - 220.0f);
-        drawAction("Back", 3, centerX + 20.0f);
-        Engine::Color hint{180, 210, 240, 220};
-        drawTextUnified("Left/Right to switch panels | Up/Down to change selection | Enter/Click to confirm",
-                        Engine::Vec2{centerX - 260.0f, summaryY + summaryH + 56.0f}, 0.85f, hint);
+        const float startX = centerX - (btnW * 2.0f + btnGap) * 0.5f;
+        drawAction("Start Run", 2, startX);
+        drawAction("Back", 3, startX + btnW + btnGap);
+
+        Engine::Color hint{150, 190, 215, 210};
+        const std::string hintStr = "A/D switch focus • W/S change selection • Enter start • Esc back";
+        const float hs = std::clamp(0.86f * s * textBoost, 0.80f, 1.08f);
+        const float hw = measureTextUnified(hintStr, hs).x;
+        drawTextUnified(hintStr, Engine::Vec2{centerX - hw * 0.5f, vh - 26.0f * s}, hs, hint);
     } else if (menuPage_ == MenuPage::HostConfig) {
         Engine::Color c{200, 230, 255, 240};
         drawTextUnified("Host Multiplayer", Engine::Vec2{centerX - 120.0f, topY + 50.0f}, 1.25f, c);
@@ -8401,53 +8689,62 @@ void GameRoot::drawResourceCluster() {
     uiEnergyFill_ = smooth(uiEnergyFill_, energyRatio);
     uiDashFill_ = smooth(uiDashFill_, dashRatio);
 
-    float baseBarW = 180.0f;
-    float baseBarH = 22.0f;
-    const float barScale = 3.0f;
-    auto texW = [&](const Engine::TexturePtr& t, float fallback) { return t ? static_cast<float>(t->width()) : fallback; };
-    auto texH = [&](const Engine::TexturePtr& t, float fallback) { return t ? static_cast<float>(t->height()) : fallback; };
-    baseBarW = std::max({texW(hpBarTex_, baseBarW), texW(shieldBarTex_, baseBarW), texW(energyBarTex_, baseBarW), texW(dashBarTex_, baseBarW)});
-    baseBarH = std::max({texH(hpBarTex_, baseBarH), texH(shieldBarTex_, baseBarH), texH(energyBarTex_, baseBarH), texH(dashBarTex_, baseBarH)});
-    const float barW = baseBarW * barScale;
-    const float barH = baseBarH * barScale;
-    const float gap = 6.0f * barScale;  // tighter spacing
-    const float startX = 16.0f;  // left aligned
-    const float y = static_cast<float>(viewportHeight_) - (barH + 20.0f);
+    // Modern HUD layout (1080p reference-scaled), anchored top-left to avoid obscuring gameplay.
+    const auto hud = ingameHudLayout(viewportWidth_, viewportHeight_);
+    const float s = hud.s;
+    const float pad = 12.0f * s;
+    const float headerH = 20.0f * s;
+    const float barW = hud.resourceW - pad * 2.0f;
+    const float barH = 22.0f * s;
+    const float gap = 8.0f * s;
 
-    auto centeredTextPosY = [&](float baseY) { return baseY + (barH - 12.0f) * 0.5f; };
+    const float x0 = hud.resourceX;
+    const float y0 = hud.resourceY;
 
-    // HUD bar label offsets (manual tweak point):
-    // If Health/Shields/Energy text looks off-center, adjust these.
-    constexpr float kHpBarTextOffsetX = 0.0f;
-    constexpr float kShieldBarTextOffsetX = 0.0f;
-    constexpr float kEnergyBarTextOffsetX = 10.0f;
+    // Container (shadow + body + subtle top/bottom lines).
+    render_->drawFilledRect(Engine::Vec2{x0, y0 + 4.0f * s}, Engine::Vec2{hud.resourceW, hud.resourceH}, Engine::Color{0, 0, 0, 85});
+    render_->drawFilledRect(Engine::Vec2{x0, y0}, Engine::Vec2{hud.resourceW, hud.resourceH}, Engine::Color{12, 16, 24, 220});
+    render_->drawFilledRect(Engine::Vec2{x0, y0}, Engine::Vec2{hud.resourceW, 2.0f}, Engine::Color{45, 70, 95, 190});
+    render_->drawFilledRect(Engine::Vec2{x0, y0 + hud.resourceH - 2.0f}, Engine::Vec2{hud.resourceW, 2.0f}, Engine::Color{45, 70, 95, 190});
 
-    auto drawBar = [&](int index, float fill, const Engine::Color& fallbackCol, const std::string& label,
-                       const std::string& value, const Engine::TexturePtr& tex, float textOffsetX = 0.0f) {
-        float x = startX + static_cast<float>(index) * (barW + gap);
-        // No background; filled portion grows left -> right from the bar start.
-        if (tex && fill > 0.0f) {
-            int srcW = static_cast<int>(std::round(static_cast<float>(tex->width()) * fill));
-            if (srcW > 0) {
-                Engine::IntRect src{0, 0, srcW, tex->height()};
-                float texWidthScaled = static_cast<float>(srcW) * barScale;
-                float texHeightScaled = static_cast<float>(tex->height()) * barScale;
-                float texX = x;
-                float texY = y + (barH - texHeightScaled) * 0.5f;
-                render_->drawTextureRegion(*tex, Engine::Vec2{texX, texY},
-                                           Engine::Vec2{texWidthScaled, texHeightScaled},
-                                           src);
-            }
-        } else {
-            float w = barW * fill;
-            render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{w, barH}, fallbackCol);
+    // Title row (hero name + wave/level).
+    {
+        std::ostringstream t;
+        t << activeArchetype_.name << " • Wave " << wave_ << " • Lv " << level_;
+        drawTextUnified(t.str(), Engine::Vec2{x0 + pad, y0 + 6.0f * s}, std::clamp(0.92f * s, 0.82f, 1.05f),
+                        Engine::Color{190, 225, 255, 230});
+    }
+
+    auto drawStackedBar = [&](int idx,
+                              float fill,
+                              Engine::Color fillCol,
+                              Engine::Color accent,
+                              const std::string& label,
+                              const std::string& value) {
+        const float bx = x0 + pad;
+        const float by = y0 + headerH + pad + static_cast<float>(idx) * (barH + gap);
+
+        // Background track.
+        render_->drawFilledRect(Engine::Vec2{bx, by}, Engine::Vec2{barW, barH}, Engine::Color{8, 12, 18, 180});
+        render_->drawFilledRect(Engine::Vec2{bx, by}, Engine::Vec2{barW, 2.0f}, Engine::Color{30, 40, 58, 170});
+        render_->drawFilledRect(Engine::Vec2{bx, by + barH - 2.0f}, Engine::Vec2{barW, 2.0f}, Engine::Color{30, 40, 58, 170});
+
+        // Left accent strip.
+        render_->drawFilledRect(Engine::Vec2{bx, by}, Engine::Vec2{6.0f * s, barH}, accent);
+
+        // Fill.
+        const float fw = std::clamp(fill, 0.0f, 1.0f) * barW;
+        if (fw > 0.0f) {
+            render_->drawFilledRect(Engine::Vec2{bx, by}, Engine::Vec2{fw, barH}, fillCol);
+            render_->drawFilledRect(Engine::Vec2{bx, by + barH - 3.0f}, Engine::Vec2{fw, 3.0f}, Engine::Color{255, 255, 255, 25});
         }
-        float ty = centeredTextPosY(y) - 4.0f;  // raise text a bit within the bar
-        // Center text inside bar.
-        std::string combined = label + " " + value;
-        float textW = measureTextUnified(combined, 0.95f).x;
-        float textX = x + barW * 0.5f - textW * 0.5f + textOffsetX;
-        drawTextUnified(combined, Engine::Vec2{textX, ty}, 0.95f, Engine::Color{235, 245, 255, 235});
+
+        // Text: label left, value right (centered vertically).
+        const float ts = std::clamp(0.90f * s, 0.82f, 1.05f);
+        const float ty = by + (barH - measureTextUnified(label, ts).y) * 0.5f + 1.0f * s;
+        drawTextUnified(label, Engine::Vec2{bx + 12.0f * s, ty}, ts, Engine::Color{220, 240, 255, 235});
+        const Engine::Vec2 vSz = measureTextUnified(value, ts);
+        drawTextUnified(value, Engine::Vec2{bx + barW - 10.0f * s - vSz.x, ty}, ts, Engine::Color{235, 245, 255, 235});
     };
 
     std::ostringstream hpText;
@@ -8463,10 +8760,15 @@ void GameRoot::drawResourceCluster() {
         dashText << std::fixed << std::setprecision(1) << dashCooldownTimer_ << "s";
     }
 
-    drawBar(0, uiHpFill_, Engine::Color{204, 92, 92, 235}, "Health", hpText.str(), hpBarTex_, kHpBarTextOffsetX);
-    drawBar(1, uiShieldFill_, Engine::Color{108, 166, 255, 235}, "Shield", shieldText.str(), shieldBarTex_, kShieldBarTextOffsetX);
-    drawBar(2, uiEnergyFill_, Engine::Color{120, 200, 255, 235}, "Energy", energyText.str(), energyBarTex_, kEnergyBarTextOffsetX);
-    drawBar(3, uiDashFill_, Engine::Color{110, 160, 120, 230}, "Dash", dashText.str(), dashBarTex_);
+    // Slight warning tint when low health.
+    const bool lowHp = (maxHp > 0.0f && (curHp / maxHp) < 0.25f);
+    Engine::Color hpFill = lowHp ? Engine::Color{230, 90, 90, 235} : Engine::Color{200, 80, 80, 235};
+    Engine::Color hpAcc = lowHp ? Engine::Color{255, 140, 140, 235} : Engine::Color{200, 120, 120, 220};
+
+    drawStackedBar(0, uiHpFill_, hpFill, hpAcc, "Health", hpText.str());
+    drawStackedBar(1, uiShieldFill_, Engine::Color{80, 150, 255, 235}, Engine::Color{120, 200, 255, 220}, "Shield", shieldText.str());
+    drawStackedBar(2, uiEnergyFill_, Engine::Color{90, 200, 255, 235}, Engine::Color{120, 220, 255, 210}, "Energy", energyText.str());
+    drawStackedBar(3, uiDashFill_, Engine::Color{110, 170, 130, 230}, Engine::Color{140, 220, 170, 210}, "Dash", dashText.str());
 }
 
 void GameRoot::drawAbilityHud(const Engine::InputState& input) {
@@ -8654,7 +8956,7 @@ void GameRoot::drawCharacterScreen(const Engine::InputState& input) {
     // Slightly larger overall window so tall stat/detail sections don't clip on 720p-ish viewports.
     const float margin = 16.0f;
     float panelW = std::min(1120.0f, static_cast<float>(viewportWidth_) - margin * 2.0f);
-    float panelH = std::min(760.0f, static_cast<float>(viewportHeight_) - margin * 2.0f);
+    float panelH = std::min(820.0f, static_cast<float>(viewportHeight_) - margin * 2.0f);
     float px = static_cast<float>(viewportWidth_) * 0.5f - panelW * 0.5f;
     float py = static_cast<float>(viewportHeight_) * 0.5f - panelH * 0.5f;
     // Background + subtle inner border.
@@ -8691,10 +8993,10 @@ void GameRoot::drawCharacterScreen(const Engine::InputState& input) {
         return n;
     };
 
-    auto drawPanel = [&](float x, float y, float w, float h, const std::string& title) {
+    auto drawPanel = [&](float x, float y, float w, float h, const std::string& title, float titleYOffset = 10.0f) {
         render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{w, h}, Engine::Color{10, 14, 22, 210});
         render_->drawFilledRect(Engine::Vec2{x + 1.0f, y + 1.0f}, Engine::Vec2{w - 2.0f, h - 2.0f}, Engine::Color{14, 18, 26, 215});
-        drawTextUnified(title, Engine::Vec2{x + 12.0f, y + 10.0f}, 1.0f * uiScale, Engine::Color{210, 235, 255, 240});
+        drawTextUnified(title, Engine::Vec2{x + 12.0f, y + titleYOffset}, 1.0f * uiScale, Engine::Color{210, 235, 255, 240});
     };
 
     drawTextUnified("Character", Engine::Vec2{px + 18.0f, py + 14.0f}, 1.2f * uiScale, Engine::Color{220, 245, 255, 245});
@@ -8871,7 +9173,7 @@ void GameRoot::drawCharacterScreen(const Engine::InputState& input) {
     }
 
     // ----- Middle: Inventory grid -----
-    drawPanel(col2X, contentY, col2W, contentH, "Inventory");
+    drawPanel(col2X, contentY, col2W, contentH, "Inventory", 0.0f);
     drawTextUnified("Capacity: " + std::to_string(inventory_.size()) + "/" + std::to_string(inventoryCapacity_),
                     Engine::Vec2{col2X + col2W - 190.0f, contentY + 12.0f}, 0.80f * uiScale,
                     Engine::Color{160, 190, 215, 210});
@@ -9099,7 +9401,7 @@ void GameRoot::drawCharacterScreen(const Engine::InputState& input) {
     float detailsH = contentH - (runH + abilH + cardGap * 2.0f);
 
     drawPanel(col3X, contentY, col3W, runH, "Run");
-    float ry = contentY + 38.0f;
+    float ry = contentY + 32.0f;
     auto runLine = [&](const std::string& k, const std::string& v) {
         drawTextUnified(k, Engine::Vec2{col3X + 12.0f, ry}, 0.84f * uiScale, Engine::Color{185, 205, 225, 220});
         drawTextUnified(v, Engine::Vec2{col3X + col3W - 100.0f, ry}, 0.84f * uiScale, Engine::Color{220, 240, 255, 230});

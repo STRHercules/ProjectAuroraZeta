@@ -83,3 +83,30 @@
 ## 2025-12-17 — Suggestions after Hotbar R/F
 - Add a small cooldown overlay + stack count on hotbar slots so it’s obvious when the item is unusable/on cooldown.
 - Allow hotbar to target a consumable *stack* (by inventory slot id + quantity) rather than a single instance id.
+
+## 2025-12-17 — Suggestions after Character screen layout polish
+- Add a scroll region for the Details panel so it can display arbitrarily long affix lists without relying on window height.
+
+## 2025-12-17 — Suggestions after launch maximized window
+- Add a `data/settings.json` option for `startMaximized` / `windowMode` and persist last window state/size per platform.
+
+## 2025-12-17 — Suggestions after WM-safe maximize
+- Consider offering a “Borderless Fullscreen” option (`SDL_WINDOW_FULLSCREEN_DESKTOP`) for tiling WMs where maximize semantics differ.
+
+## 2025-12-17 — Suggestions after main menu refresh
+- Add optional menu music + ambient SFX and a small “Press Enter” / controller hint row.
+- Persist last selected menu item and add smooth transition animations between menu pages.
+
+## 2025-12-17 — Suggestions after character select refresh
+- Add small difficulty “modifiers” chips (e.g., enemy HP, damage, drop rate) if/when those values become data-exposed.
+- Add a subtle vignette/particles pass for the preview card (cheap eye-candy) and a “random hero” button.
+
+## 2025-12-17 — Suggestions after preview recenter
+- Consider per-hero preview offset/scale data in `data/menu_presets.json` so large sprites can be framed without code changes.
+
+## 2025-12-17 — Suggestions after Character Select font bump
+- Add an in-game UI scale slider (and persist it) so players can tune readability without code changes.
+
+## 2025-12-17 — Suggestions after in-match HUD refresh
+- Convert the status card into a small priority-based “toast” system (fade out older messages; keep only critical warnings pinned).
+- Add an option to switch between “Compact” and “Classic” HUD layouts for players who prefer the old bottom bars.
