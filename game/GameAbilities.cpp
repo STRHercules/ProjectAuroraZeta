@@ -447,7 +447,15 @@ void GameRoot::executeAbility(int index) {
         Engine::Vec2 dir{std::cos(ang), std::sin(ang)};
         Engine::Gameplay::DamageEvent dmg{};
         dmg.type = Engine::Gameplay::DamageType::Spell;
+        dmg.rpgDamageType = static_cast<int>(Engine::Gameplay::RPG::DamageType::Fire);
         dmg.baseDamage = projectileDamage_ * 1.8f * slot.powerScale * zoneDmgMul;
+        // Fireball: applies Cauterize (regen block) with a saving-throw style check (TEN) and CC DR handled by the resolver.
+        dmg.rpgOnHitStatuses.push_back(
+            Engine::Gameplay::DamageEvent::RpgOnHitStatus{
+                static_cast<int>(Engine::Status::EStatusId::Cauterize),
+                0.55f,
+                4.5f,
+                false});
         auto proj = spawnProjectile(dir, projectileSpeed_ * 0.9f, dmg, 1.3f);
         if (registry_.has<Game::SpellEffect>(proj)) registry_.remove<Game::SpellEffect>(proj);
         registry_.emplace<Game::SpellEffect>(proj, Game::SpellEffect{Game::ElementType::Fire, 3});
@@ -493,7 +501,16 @@ void GameRoot::executeAbility(int index) {
                 if (dy > halfWidth) return;
                 Engine::Gameplay::DamageEvent dmg{};
                 dmg.type = Engine::Gameplay::DamageType::Spell;
+                dmg.rpgDamageType = static_cast<int>(Engine::Gameplay::RPG::DamageType::Shock);
                 dmg.baseDamage = dmgBase;
+                // L-Bolt: apply Stasis as a CC through the RPG pipeline (TEN + CC DR).
+                float stunDur = 0.6f + 0.2f * wizardStage();
+                dmg.rpgOnHitStatuses.push_back(
+                    Engine::Gameplay::DamageEvent::RpgOnHitStatus{
+                        static_cast<int>(Engine::Status::EStatusId::Stasis),
+                        1.0f,
+                        stunDur,
+                        true});
                 Engine::Gameplay::BuffState buff{};
                 if (auto* st = registry_.get<Engine::ECS::Status>(e)) {
                     if (st->container.isStasis()) return;
@@ -504,14 +521,6 @@ void GameRoot::executeAbility(int index) {
                 }
                 (void)Game::RpgDamage::apply(registry_, hero_, e, hp, dmg, buff, useRpgCombat_, rpgResolverConfig_, rng_,
                                              "wizard_lbolt", [this](const std::string& line) { pushCombatDebugLine(line); });
-                // Apply stun
-                float stunDur = 0.6f + 0.2f * wizardStage();
-                if (auto* se = registry_.get<Game::StatusEffects>(e)) {
-                    se->stunTimer = std::max(se->stunTimer, stunDur);
-                } else {
-                    registry_.emplace<Game::StatusEffects>(e, Game::StatusEffects{});
-                    if (auto* se2 = registry_.get<Game::StatusEffects>(e)) se2->stunTimer = stunDur;
-                }
             });
         setCooldown(std::max(6.0f, slot.cooldownMax));
     } else if (slot.type == "wizard_ldome") {

@@ -5,10 +5,15 @@
 #include <sstream>
 
 #include "../../engine/ecs/components/RPGStats.h"
+#include "../status/ZetaStatusFactory.h"
 
 namespace Game::RpgDamage {
 
 namespace {
+
+constexpr bool isValidRpgDamageTypeInt(int v) {
+    return v >= 0 && v < static_cast<int>(Engine::Gameplay::RPG::DamageType::Count);
+}
 
 Engine::Gameplay::RPG::DamageType toRpgDamage(Engine::Gameplay::DamageType t) {
     switch (t) {
@@ -30,6 +35,16 @@ Engine::Gameplay::RPG::DerivedStats computeDerivedFromHealth(const Engine::ECS::
     return out;
 }
 
+Game::ZetaStatusFactory& statusFactory() {
+    static Game::ZetaStatusFactory factory{};
+    static bool loaded = false;
+    if (!loaded) {
+        (void)factory.load("data/statuses.json");
+        loaded = true;
+    }
+    return factory;
+}
+
 void refreshRpgDerivedIfNeeded(Engine::ECS::Registry& registry, Engine::ECS::Entity ent) {
     auto* rpg = registry.get<Engine::ECS::RPGStats>(ent);
     if (!rpg) return;
@@ -47,6 +62,12 @@ void refreshRpgDerivedIfNeeded(Engine::ECS::Registry& registry, Engine::ECS::Ent
     input.contributions = {rpg->modifiers};
     rpg->derived = Engine::Gameplay::RPG::aggregateDerivedStats(input);
     rpg->dirty = false;
+}
+
+Engine::ECS::RPGCombatState* ensureCombatState(Engine::ECS::Registry& registry, Engine::ECS::Entity ent) {
+    if (ent == Engine::ECS::kInvalidEntity) return nullptr;
+    if (auto* st = registry.get<Engine::ECS::RPGCombatState>(ent)) return st;
+    return &registry.emplace<Engine::ECS::RPGCombatState>(ent, Engine::ECS::RPGCombatState{});
 }
 
 }  // namespace
@@ -111,12 +132,27 @@ float apply(Engine::ECS::Registry& registry,
     Engine::Gameplay::RPG::AttackDef attack{};
     attack.baseDamage = 0.0f;
     attack.scaling = isSpell ? Engine::Gameplay::RPG::Scaling::SpellPower : Engine::Gameplay::RPG::Scaling::AttackPower;
-    attack.type = toRpgDamage(dmg.type);
+    if (isValidRpgDamageTypeInt(dmg.rpgDamageType)) {
+        attack.type = static_cast<Engine::Gameplay::RPG::DamageType>(dmg.rpgDamageType);
+    } else {
+        attack.type = toRpgDamage(dmg.type);
+    }
     attack.rollMin = 0.85f;
     attack.rollMax = 1.15f;
     attack.baseHitChance = 1.0f;
     attack.baseGlanceChance = 0.0f;
     attack.shapedRoll = true;
+
+    // Carry RPG on-hit status intents from DamageEvent into the resolver.
+    for (const auto& s : dmg.rpgOnHitStatuses) {
+        if (s.id < 0) continue;
+        Engine::Gameplay::RPG::StatusRef ref{};
+        ref.id = s.id;
+        ref.baseChance = s.baseChance;
+        ref.baseDuration = s.baseDuration;
+        ref.isCrowdControl = s.isCrowdControl;
+        attack.onHitStatuses.push_back(ref);
+    }
 
     // Re-interpret DamageEvent.baseDamage as the baseline "power" for the hit, then apply RPG power as a ratio.
     if (isSpell) {
@@ -127,12 +163,35 @@ float apply(Engine::ECS::Registry& registry,
         atk.stats.spellPower = 0.0f;
     }
 
-    auto outcome = Engine::Gameplay::RPG::ResolveHit(atk, def, attack, rng, rpgCfg);
+    Engine::ECS::RPGCombatState* atkState = ensureCombatState(registry, attacker);
+    Engine::ECS::RPGCombatState* defState = ensureCombatState(registry, defender);
+    auto outcome = Engine::Gameplay::RPG::ResolveHit(atk, def, attack, rng, rpgCfg,
+                                                     defState ? &defState->ccFatigue : nullptr,
+                                                     atkState ? &atkState->prd : nullptr,
+                                                     defState ? &defState->prd : nullptr);
     const float shieldDmg = std::min(defenderHp.currentShields, outcome.shieldDamage * buff.damageTakenMultiplier);
     const float healthDmg = std::min(defenderHp.currentHealth, outcome.healthDamage * buff.damageTakenMultiplier);
     defenderHp.currentShields = std::max(0.0f, defenderHp.currentShields - shieldDmg);
     defenderHp.currentHealth = std::max(0.0f, defenderHp.currentHealth - healthDmg);
     if (defenderHp.currentHealth <= 0.0f) defenderHp.currentHealth = 0.0f;
+
+    // Apply RPG resolver statuses into the engine status system.
+    if (defender != Engine::ECS::kInvalidEntity && !outcome.statuses.empty()) {
+        if (!registry.has<Engine::ECS::Status>(defender)) {
+            registry.emplace<Engine::ECS::Status>(defender, Engine::ECS::Status{});
+        }
+        if (auto* st = registry.get<Engine::ECS::Status>(defender)) {
+            for (const auto& s : outcome.statuses) {
+                if (!s.applied) continue;
+                if (s.id < 0) continue;
+                auto id = static_cast<Engine::Status::EStatusId>(s.id);
+                Engine::Status::StatusSpec spec = statusFactory().make(id);
+                spec.duration = std::max(0.0f, s.finalDuration);
+                if (spec.duration <= 0.0001f) continue;
+                (void)st->container.apply(spec, attacker);
+            }
+        }
+    }
 
     if (debugSink) {
         std::ostringstream line;
@@ -150,4 +209,3 @@ float apply(Engine::ECS::Registry& registry,
 }
 
 }  // namespace Game::RpgDamage
-

@@ -5,7 +5,8 @@
     { "id": "cleanse_tonic", "name": "Cleanse Tonic", "cooldownGroup": "potion", "cooldown": 18.0,
       "effects": [ { "category": 1, "resource": 0, "magnitude": 0.0, "duration": 0.0, "damageType": 0, "cleanse": [1,2,3] } ] },
     { "id": "haste_food", "name": "Trail Rations", "cooldownGroup": "food", "cooldown": 30.0,
-      "effects": [ { "category": 2, "resource": 0, "magnitude": 0.08, "duration": 20.0, "damageType": 0 } ] },
+      "effects": [ { "category": 2, "resource": 0, "magnitude": 0.0, "duration": 20.0, "damageType": 0,
+        "stats": { "mult": { "moveSpeed": 0.08, "attackSpeed": 0.06 } } } ] },
     { "id": "shock_bomb", "name": "Shock Bomb", "cooldownGroup": "bomb", "cooldown": 16.0,
       "effects": [ { "category": 3, "resource": 0, "magnitude": 40.0, "duration": 0.0, "damageType": 3 } ] },
 

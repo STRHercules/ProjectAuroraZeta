@@ -51,6 +51,18 @@ struct DamageEvent {
     float baseDamage = 0.0f;
     DamageType type = DamageType::Normal;
 
+    // Optional RPG metadata for the modular RPG resolver.
+    // - rpgDamageType: -1 means "derive from DamageType" (Normal->Physical, Spell->Arcane, True->True).
+    // - rpgOnHitStatuses: ids are cast-compatible with Engine::Status::EStatusId.
+    struct RpgOnHitStatus {
+        int id{-1};
+        float baseChance{0.0f};    // 0..1
+        float baseDuration{0.0f};  // seconds
+        bool isCrowdControl{false};
+    };
+    int rpgDamageType{-1};
+    std::vector<RpgOnHitStatus> rpgOnHitStatuses{};
+
     // Bonus damage against specific tags
     // e.g. { Tag::Armored -> +10.0f }
     std::unordered_map<Tag, float> bonusVsTag;
@@ -111,11 +123,9 @@ inline void applyDamage(UnitStats& target, const DamageEvent& dmg) {
         const float actualShieldDamage = std::min(shieldDamage, target.currentShields);
         target.currentShields -= actualShieldDamage;
 
-        // Reduce remaining damage by what we actually dealt to shields
-        damage -= actualShieldDamage;
-        if (damage < 0.0f) {
-            damage = 0.0f;
-        }
+        // Overflow is computed from the mitigated shield damage, so shield armor properly reduces
+        // how much damage carries over into health.
+        damage = shieldDamage - actualShieldDamage;
     }
 
     // --- Step 2: Apply leftover damage to health ---
@@ -216,8 +226,9 @@ inline void applyDamage(UnitStats& target, const DamageEvent& dmg, const BuffSta
         }
         const float actualShieldDamage = std::min(shieldDamage, target.currentShields);
         target.currentShields -= actualShieldDamage;
-        damage -= actualShieldDamage;
-        if (damage < 0.0f) damage = 0.0f;
+        // Overflow is computed from the mitigated shield damage, so shield armor properly reduces
+        // how much damage carries over into health.
+        damage = shieldDamage - actualShieldDamage;
     }
     // Health
     if (damage > 0.0f && target.currentHealth > 0.0f) {

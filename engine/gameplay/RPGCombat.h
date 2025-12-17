@@ -50,6 +50,14 @@ struct RNGConfig {
     bool usePRD{false};
 };
 
+// Simple bad-luck protection state for chance rolls (crit/dodge/parry).
+// When enabled, we use an accumulator method: acc += p; success if roll < acc; on success acc -= 1.
+struct PRDState {
+    float critAcc{0.0f};
+    float dodgeAcc{0.0f};
+    float parryAcc{0.0f};
+};
+
 struct ResolverConfig {
     float armorConstant{110.0f};       // K in ARM/(ARM+K)
     float dodgeCap{0.70f};
@@ -99,7 +107,8 @@ HitOutcome ResolveHit(const CombatantState& attacker,
                       const AttackDef& attack,
                       std::mt19937& rng,
                       const ResolverConfig& cfg,
-                      CCFatigueState* ccState = nullptr);
+                      CCFatigueState* ccState = nullptr,
+                      PRDState* attackerPrd = nullptr,
+                      PRDState* defenderPrd = nullptr);
 
 }  // namespace Engine::Gameplay::RPG
-

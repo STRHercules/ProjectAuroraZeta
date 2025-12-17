@@ -117,3 +117,7 @@
 
 ## 2025-12-17 — Suggestions after main menu starfield
 - Add an Options toggle for starfield density/speed (and a “Reduce Motion” accessibility flag).
+
+## 2025-12-17 — Suggestions after RPG status integration + PRD shaping
+- Replace the remaining ad-hoc `Game::StatusEffects` timers (stun/burn/slow) with engine `StatusContainer` specs so all CC/DoT/buffs share one pipeline (including cleanse + Unstoppable).
+- Split RNG streams (`combat`, `loot`, `world`) and add an explicit “seeded run” debug mode so combat repros aren’t perturbed by unrelated randomness.

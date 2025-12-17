@@ -206,3 +206,10 @@
 
 # v0.0.137
 * Main menu: replaced the static backdrop with an animated starfield screensaver background.
+
+# v0.0.138
+* RPG combat: on-hit statuses can now be driven from attack metadata and applied into the engine status system (TEN saving throw + CC DR).
+    * Wizard Lightning Bolt and Lightning Dome now use the RPG status pipeline for Stasis.
+* RPG combat: elemental `SpellEffect` now maps to RPG damage types so resistances/vulnerabilities can matter beyond Physical/Arcane/True.
+* RPG combat: added optional PRD-style anti-streak for crit/dodge/parry (`rpgCombat.rng.usePRD`).
+* Consumables: Buff effects can now apply data-driven stat contributions via `data/rpg/consumables.json` (`effects[].stats`).

@@ -151,6 +151,7 @@ void EnemyAISystem::update(Engine::ECS::Registry& registry, Engine::ECS::Entity 
                 if (se->burnTimer > 0.0f && se->burnDps > 0.0f) {
                     Engine::Gameplay::DamageEvent burn{};
                     burn.type = Engine::Gameplay::DamageType::Spell;
+                    burn.rpgDamageType = static_cast<int>(Engine::Gameplay::RPG::DamageType::Fire);
                     burn.baseDamage = se->burnDps * dt;
                     if (useRpg && rpgRng) {
                         (void)Game::RpgDamage::apply(registry, hero, e, hp, burn, {}, useRpg, rpgCfg, *rpgRng, "dot_burn", debugSink);
@@ -163,6 +164,7 @@ void EnemyAISystem::update(Engine::ECS::Registry& registry, Engine::ECS::Entity 
                 if (se->earthTimer > 0.0f && se->earthDps > 0.0f) {
                     Engine::Gameplay::DamageEvent thorn{};
                     thorn.type = Engine::Gameplay::DamageType::Spell;
+                    thorn.rpgDamageType = static_cast<int>(Engine::Gameplay::RPG::DamageType::Poison);
                     thorn.baseDamage = se->earthDps * dt;
                     if (useRpg && rpgRng) {
                         (void)Game::RpgDamage::apply(registry, hero, e, hp, thorn, {}, useRpg, rpgCfg, *rpgRng, "dot_earth", debugSink);

@@ -3,6 +3,12 @@
   "useRpgCombat": true,
   "useRpgLoot": true,
   "combatDebugOverlay": false,
+  "rpgCombat": {
+    "rng": {
+      "shaped": true,
+      "usePRD": true
+    }
+  },
   "enemy": {
     "hp": 40.0,
     "shields": 20.0,

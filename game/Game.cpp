@@ -38,6 +38,7 @@
 #include "../engine/ecs/components/Health.h"
 #include "../engine/ecs/components/Projectile.h"
 #include "../engine/ecs/components/RPGStats.h"
+#include "../engine/ecs/components/RPGCombatState.h"
 #include "../engine/ecs/components/Tags.h"
 #include "../engine/gameplay/Combat.h"
 #include "../engine/input/InputState.h"
@@ -558,6 +559,11 @@ bool GameRoot::onInitialize(Engine::Application& app) {
                 rpgCfg.critCap = rc.value("critCap", rpgCfg.critCap);
                 rpgCfg.resistMin = rc.value("resistMin", rpgCfg.resistMin);
                 rpgCfg.resistMax = rc.value("resistMax", rpgCfg.resistMax);
+                if (rc.contains("rng") && rc["rng"].is_object()) {
+                    const auto& rr = rc["rng"];
+                    rpgCfg.rng.shaped = rr.value("shaped", rpgCfg.rng.shaped);
+                    rpgCfg.rng.usePRD = rr.value("usePRD", rpgCfg.rng.usePRD);
+                }
             }
             if (j.contains("enemy")) {
                 waveSettings.enemyHp = j["enemy"].value("hp", waveSettings.enemyHp);
@@ -1787,8 +1793,41 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                                         rpgConsumableOverTime_.push_back(
                                             ActiveConsumableOverTime{eff.resource, std::max(0.0f, eff.magnitude), eff.duration});
                                     } else if (eff.category == Game::RPG::ConsumableCategory::Buff && eff.duration > 0.0f) {
+                                        auto hasStatsPayload = [&](const Engine::Gameplay::RPG::StatContribution& sc) {
+                                            if (sc.flat.attackPower != 0.0f || sc.flat.spellPower != 0.0f || sc.flat.attackSpeed != 0.0f ||
+                                                sc.flat.moveSpeed != 0.0f || sc.flat.accuracy != 0.0f || sc.flat.critChance != 0.0f ||
+                                                sc.flat.critMult != 0.0f || sc.flat.armorPen != 0.0f || sc.flat.evasion != 0.0f ||
+                                                sc.flat.armor != 0.0f || sc.flat.tenacity != 0.0f || sc.flat.shieldMax != 0.0f ||
+                                                sc.flat.shieldRegen != 0.0f || sc.flat.healthMax != 0.0f || sc.flat.healthRegen != 0.0f ||
+                                                sc.flat.cooldownReduction != 0.0f || sc.flat.resourceRegen != 0.0f || sc.flat.goldGainMult != 0.0f ||
+                                                sc.flat.rarityScore != 0.0f) {
+                                                return true;
+                                            }
+                                            for (float v : sc.flat.resists.values) {
+                                                if (v != 0.0f) return true;
+                                            }
+                                            if (sc.mult.attackPower != 0.0f || sc.mult.spellPower != 0.0f || sc.mult.attackSpeed != 0.0f ||
+                                                sc.mult.moveSpeed != 0.0f || sc.mult.accuracy != 0.0f || sc.mult.critChance != 0.0f ||
+                                                sc.mult.critMult != 0.0f || sc.mult.armorPen != 0.0f || sc.mult.evasion != 0.0f ||
+                                                sc.mult.armor != 0.0f || sc.mult.tenacity != 0.0f || sc.mult.shieldMax != 0.0f ||
+                                                sc.mult.shieldRegen != 0.0f || sc.mult.healthMax != 0.0f || sc.mult.healthRegen != 0.0f ||
+                                                sc.mult.cooldownReduction != 0.0f || sc.mult.resourceRegen != 0.0f || sc.mult.goldGainMult != 0.0f ||
+                                                sc.mult.rarityScore != 0.0f) {
+                                                return true;
+                                            }
+                                            for (float v : sc.mult.resists.values) {
+                                                if (v != 0.0f) return true;
+                                            }
+                                            return false;
+                                        };
+
                                         Engine::Gameplay::RPG::StatContribution c{};
-                                        c.mult.moveSpeed = eff.magnitude;
+                                        if (hasStatsPayload(eff.stats)) {
+                                            c = eff.stats;
+                                        } else {
+                                            // Back-compat: interpret magnitude as a move speed multiplier.
+                                            c.mult.moveSpeed = eff.magnitude;
+                                        }
                                         rpgActiveBuffs_.push_back(ActiveRpgBuff{c, eff.duration});
                                     }
                                 }
@@ -2082,7 +2121,15 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         float dmg = projectileDamage_ * (0.35f + 0.1f * stage) * (hotzoneSystem_ ? hotzoneSystem_->damageMultiplier() : 1.0f);
         Engine::Gameplay::DamageEvent dome{};
         dome.type = Engine::Gameplay::DamageType::Spell;
+        dome.rpgDamageType = static_cast<int>(Engine::Gameplay::RPG::DamageType::Shock);
         dome.baseDamage = dmg * static_cast<float>(step.deltaSeconds);
+        // Lightning dome can briefly lock targets in place; CC DR + TEN handled by RPG resolver.
+        dome.rpgOnHitStatuses.push_back(
+            Engine::Gameplay::DamageEvent::RpgOnHitStatus{
+                static_cast<int>(Engine::Status::EStatusId::Stasis),
+                0.35f,
+                0.25f,
+                true});
         Engine::Vec2 heroPos{0.0f, 0.0f};
         if (const auto* tf = registry_.get<Engine::ECS::Transform>(hero_)) heroPos = tf->position;
         float r2 = radius * radius;
@@ -2103,12 +2150,6 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     }
                     (void)Game::RpgDamage::apply(registry_, hero_, e, hp, dome, domeBuff, useRpgCombat_, rpgResolverConfig_, rng_,
                                                  "aura_dome", [this](const std::string& line) { pushCombatDebugLine(line); });
-                    if (auto* se = registry_.get<Game::StatusEffects>(e)) {
-                        se->stunTimer = std::max(se->stunTimer, 0.2f);
-                    } else {
-                        registry_.emplace<Game::StatusEffects>(e, Game::StatusEffects{});
-                        if (auto* se2 = registry_.get<Game::StatusEffects>(e)) se2->stunTimer = 0.2f;
-                    }
                 }
             });
         if (lightningDomeTimer_ < 0.0f) lightningDomeTimer_ = 0.0f;
@@ -2121,8 +2162,16 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             float r2 = radius * radius;
             Engine::Gameplay::DamageEvent dmg{};
             dmg.type = Engine::Gameplay::DamageType::Spell;
+            dmg.rpgDamageType = static_cast<int>(Engine::Gameplay::RPG::DamageType::Fire);
             float zoneDmgMul = hotzoneSystem_ ? hotzoneSystem_->damageMultiplier() : 1.0f;
             dmg.baseDamage = projectileDamage_ * 0.25f * zoneDmgMul * static_cast<float>(step.deltaSeconds);
+            // Flame wall applies Cauterize (regen block) on contact.
+            dmg.rpgOnHitStatuses.push_back(
+                Engine::Gameplay::DamageEvent::RpgOnHitStatus{
+                    static_cast<int>(Engine::Status::EStatusId::Cauterize),
+                    0.25f,
+                    2.5f,
+                    false});
             registry_.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::EnemyTag>(
                 [&](Engine::ECS::Entity e, Engine::ECS::Transform& tf, Engine::ECS::Health& hp, Engine::ECS::EnemyTag&) {
                     if (!hp.alive()) return;
@@ -2853,6 +2902,16 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             const float dt = static_cast<float>(step.deltaSeconds);
             registry_.view<Engine::ECS::Status>(
                 [dt](Engine::ECS::Entity, Engine::ECS::Status& st) { st.container.update(dt); });
+            registry_.view<Engine::ECS::RPGCombatState>(
+                [dt](Engine::ECS::Entity, Engine::ECS::RPGCombatState& cs) {
+                    if (cs.ccFatigue.remaining > 0.0f) {
+                        cs.ccFatigue.remaining -= dt;
+                        if (cs.ccFatigue.remaining <= 0.0f) {
+                            cs.ccFatigue.remaining = 0.0f;
+                            cs.ccFatigue.level = 0;
+                        }
+                    }
+                });
             registry_.view<Engine::ECS::Health>([&](Engine::ECS::Entity e, Engine::ECS::Health& hp) {
                 const auto* st = registry_.get<Engine::ECS::Status>(e);
                 if (st && st->container.blocksRegen()) return;
@@ -6559,7 +6618,7 @@ void GameRoot::renderMenu() {
     drawTextUnified(title, Engine::Vec2{centerX - titleW * 0.5f, titleY}, titleScale, Engine::Color{190, 235, 255, 245});
 
     // Build info (bottom-right).
-    const std::string buildStr = "Pre-Alpha | Build v0.0.137";
+    const std::string buildStr = "Pre-Alpha | Build v0.0.138";
     const float buildScale = std::clamp(0.95f * s, 0.72f, 0.95f);
     const Engine::Vec2 buildSz = measureTextUnified(buildStr, buildScale);
     drawTextUnified(buildStr, Engine::Vec2{vw - margin - buildSz.x, vh - margin - buildSz.y}, buildScale,

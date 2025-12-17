@@ -32,6 +32,20 @@ float singleRoll(std::mt19937& rng) {
     return dist(rng);
 }
 
+bool rollChance(std::mt19937& rng, bool shaped, float p, bool usePrd, float* accumulator) {
+    p = clamp01(p);
+    if (!usePrd || accumulator == nullptr) {
+        return rollUnit(rng, shaped) < p;
+    }
+    *accumulator = std::max(0.0f, *accumulator) + p;
+    const float r = rollUnit(rng, shaped);
+    if (r < *accumulator) {
+        *accumulator = std::max(0.0f, *accumulator - 1.0f);
+        return true;
+    }
+    return false;
+}
+
 }  // namespace
 
 float rollUnit(std::mt19937& rng, bool shaped) {
@@ -43,7 +57,9 @@ HitOutcome ResolveHit(const CombatantState& attacker,
                       const AttackDef& attack,
                       std::mt19937& rng,
                       const ResolverConfig& cfg,
-                      CCFatigueState* ccState) {
+                      CCFatigueState* ccState,
+                      PRDState* attackerPrd,
+                      PRDState* defenderPrd) {
     HitOutcome out{};
     std::ostringstream dbg;
     dbg.setf(std::ios::fixed);
@@ -66,13 +82,13 @@ HitOutcome ResolveHit(const CombatantState& attacker,
 
     // --- Defensive reaction: Dodge/Parry ---
     float dodgeChance = std::clamp(attack.baseDodgeChance + defender.stats.evasion * 0.01f, 0.0f, cfg.dodgeCap);
-    if (rollUnit(rng, cfg.rng.shaped) < dodgeChance) {
+    if (rollChance(rng, cfg.rng.shaped, dodgeChance, cfg.rng.usePRD, defenderPrd ? &defenderPrd->dodgeAcc : nullptr)) {
         out.dodged = true;
         out.debug = "DODGE (" + std::to_string(dodgeChance) + ")";
         return out;
     }
     float parryChance = std::clamp(attack.baseParryChance + defender.stats.tenacity * 0.005f, 0.0f, 0.6f);
-    if (rollUnit(rng, cfg.rng.shaped) < parryChance) {
+    if (rollChance(rng, cfg.rng.shaped, parryChance, cfg.rng.usePRD, defenderPrd ? &defenderPrd->parryAcc : nullptr)) {
         out.parried = true;
         out.debug = "PARRY (" + std::to_string(parryChance) + ")";
         return out;
@@ -80,7 +96,7 @@ HitOutcome ResolveHit(const CombatantState& attacker,
 
     // --- Crit ---
     float critChance = std::clamp(attacker.stats.critChance, 0.0f, cfg.critCap);
-    out.crit = rollUnit(rng, cfg.rng.shaped) < critChance;
+    out.crit = rollChance(rng, cfg.rng.shaped, critChance, cfg.rng.usePRD, attackerPrd ? &attackerPrd->critAcc : nullptr);
 
     // --- Damage roll band ---
     float roll = attack.rollMin + (attack.rollMax - attack.rollMin) * rollUnit(rng, attack.shapedRoll && cfg.rng.shaped);
@@ -121,13 +137,14 @@ HitOutcome ResolveHit(const CombatantState& attacker,
         float durMul = 1.0f - defender.stats.tenacity * 0.01f;
         durMul = std::clamp(durMul, 0.25f, 1.0f);
         if (st.isCrowdControl && ccState) {
+            if (ccState->remaining <= 0.0f) {
+                ccState->remaining = 0.0f;
+                ccState->level = 0;
+            }
             // Simple DR: 0 -> full, 1 -> 70%, 2 -> 50%, 3 -> immune
             const float drTable[4] = {1.0f, 0.7f, 0.5f, 0.0f};
             int level = std::clamp(ccState->level, 0, 3);
             durMul *= drTable[level];
-            if (ccState->remaining <= 0.0f) {
-                ccState->level = 0;
-            }
             if (durMul <= 0.0f) {
                 res.applied = false;
                 res.finalDuration = 0.0f;
@@ -156,4 +173,3 @@ HitOutcome ResolveHit(const CombatantState& attacker,
 }
 
 }  // namespace Engine::Gameplay::RPG
-

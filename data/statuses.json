@@ -55,7 +55,7 @@
     "refreshOnReapply": true,
     "dispellable": true,
     "isDebuff": true,
-    "tags": ["Immunity", "MovementLock", "CastingLock"]
+    "tags": ["CrowdControl", "Immunity", "MovementLock", "CastingLock"]
   },
   "cloaking": {
     "id": "Cloaking",

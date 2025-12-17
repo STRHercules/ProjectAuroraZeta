@@ -212,14 +212,14 @@ std::unordered_map<std::string, ArchetypeBio> loadArchetypeBios(const std::strin
 std::vector<ConsumableDef> defaultConsumables() {
     std::vector<ConsumableDef> defs;
     defs.push_back({"healing_potion", "Healing Draught", "potion", 12.0f,
-                    {{ConsumableCategory::Heal, ConsumableResource::Health, 0.35f, 0.0f, Engine::Gameplay::RPG::DamageType::Physical, {}}}});
+                    {{ConsumableCategory::Heal, ConsumableResource::Health, 0.35f, 0.0f, Engine::Gameplay::RPG::DamageType::Physical, {}, {}}}});
     defs.push_back({"cleanse_tonic", "Cleanse Tonic", "potion", 18.0f,
                     {{ConsumableCategory::Cleanse, ConsumableResource::Health, 0.0f, 0.0f, Engine::Gameplay::RPG::DamageType::Physical,
-                      {1, 2, 3}}}});
+                      {}, {1, 2, 3}}}});
     defs.push_back({"haste_food", "Trail Rations", "food", 30.0f,
-                    {{ConsumableCategory::Buff, ConsumableResource::Health, 0.08f, 20.0f, Engine::Gameplay::RPG::DamageType::Physical, {}}}});
+                    {{ConsumableCategory::Buff, ConsumableResource::Health, 0.08f, 20.0f, Engine::Gameplay::RPG::DamageType::Physical, {}, {}}}});
     defs.push_back({"shock_bomb", "Shock Bomb", "bomb", 16.0f,
-                    {{ConsumableCategory::Bomb, ConsumableResource::Health, 40.0f, 0.0f, Engine::Gameplay::RPG::DamageType::Shock, {}}}});
+                    {{ConsumableCategory::Bomb, ConsumableResource::Health, 40.0f, 0.0f, Engine::Gameplay::RPG::DamageType::Shock, {}, {}}}});
     return defs;
 }
 

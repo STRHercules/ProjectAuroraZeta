@@ -553,6 +553,13 @@ Codex should implement the game in a sequence of small, verifiable milestones.
 - Added a paper-doll equipment container and Character screen click-to-equip flow; only equipped items contribute to live RPG stat aggregation.
 - Loot templates include icon metadata (`iconSheet/iconRow/iconCol`); `scripts/gen_rpg_loot.py` regenerates the table deterministically.
 
+### New in v0.0.138 – RPG Status + Elemental Damage
+
+- RPG resolver on-hit statuses can now be fed from gameplay `DamageEvent` metadata and applied into the engine `StatusContainer` (TEN saving throw + CC DR).
+- Elemental `SpellEffect` now maps into RPG damage types so resistances/vulnerabilities can matter beyond Physical/Arcane/True.
+- RNG shaping supports optional PRD-style anti-streak for crit/dodge/parry via `data/gameplay.json` (`rpgCombat.rng.usePRD`).
+- Consumable Buff effects can carry data-driven stat contributions via `data/rpg/consumables.json` (`effects[].stats`).
+
 ---
 
 ## 12. Coding Norms (Instructions for Codex)

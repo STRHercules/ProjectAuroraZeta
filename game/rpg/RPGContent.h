@@ -105,6 +105,9 @@ struct ConsumableEffect {
     float magnitude{0.0f};
     float duration{0.0f};
     Engine::Gameplay::RPG::DamageType damageType{Engine::Gameplay::RPG::DamageType::Physical};
+    // Optional stat contribution payload (primarily used for Buff effects).
+    // If present, prefer this over interpreting `magnitude` as a hardcoded move-speed buff.
+    Engine::Gameplay::RPG::StatContribution stats{};
     std::vector<int> cleanseIds;  // status ids to remove when category == Cleanse
 };
 

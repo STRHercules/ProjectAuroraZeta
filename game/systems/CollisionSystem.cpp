@@ -34,6 +34,19 @@ bool aabbOverlap(const Engine::ECS::Transform& ta, const Engine::ECS::AABB& aa, 
     return std::abs(ta.position.x - tb.position.x) <= (aa.halfExtents.x + ab.halfExtents.x) &&
            std::abs(ta.position.y - tb.position.y) <= (aa.halfExtents.y + ab.halfExtents.y);
 }
+
+int elementToRpgDamageType(Game::ElementType e) {
+    using DT = Engine::Gameplay::RPG::DamageType;
+    switch (e) {
+        case Game::ElementType::Fire: return static_cast<int>(DT::Fire);
+        case Game::ElementType::Ice: return static_cast<int>(DT::Frost);
+        case Game::ElementType::Lightning: return static_cast<int>(DT::Shock);
+        case Game::ElementType::Earth: return static_cast<int>(DT::Poison);
+        case Game::ElementType::Dark: return static_cast<int>(DT::Arcane);
+        case Game::ElementType::Wind: return static_cast<int>(DT::Physical);
+        default: return -1;
+    }
+}
 }  // namespace
 
 namespace Game {
@@ -53,6 +66,11 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                         const float preHealth = health.currentHealth;
                         const float preShields = health.currentShields;
 
+                        Engine::Gameplay::DamageEvent hit = proj.damage;
+                        if (const auto* eff = registry.get<Game::SpellEffect>(projEnt)) {
+                            hit.rpgDamageType = elementToRpgDamageType(eff->element);
+                        }
+
                         Engine::Gameplay::BuffState buff{};
                         if (auto* armorBuff = registry.get<Game::ArmorBuff>(targetEnt)) {
                             buff = armorBuff->state;
@@ -67,7 +85,7 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                         }
                         if (!stasis) {
                             Engine::ECS::Entity attacker = (proj.owner != Engine::ECS::kInvalidEntity) ? proj.owner : hero_;
-                            (void)Game::RpgDamage::apply(registry, attacker, targetEnt, health, proj.damage, buff,
+                            (void)Game::RpgDamage::apply(registry, attacker, targetEnt, health, hit, buff,
                                                          useRpgCombat_, rpgConfig_, rng_, "proj", debugSink_);
                         }
 
@@ -156,6 +174,9 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                                     if (d2 <= radius2) {
                                         Engine::Gameplay::DamageEvent splash = proj.damage;
                                         splash.baseDamage *= aoe->damageMultiplier;
+                                        if (const auto* eff = registry.get<Game::SpellEffect>(projEnt)) {
+                                            splash.rpgDamageType = elementToRpgDamageType(eff->element);
+                                        }
                                         Engine::Gameplay::BuffState splashBuff{};
                                         if (auto* st2 = registry.get<Engine::ECS::Status>(e2)) {
                                             if (st2->container.isStasis()) return;

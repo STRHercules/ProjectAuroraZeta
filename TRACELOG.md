@@ -671,3 +671,36 @@
 **Build / Test**
 - Build: `cmake --build build -j 8` (Linux, 2025-12-17).
 - Manual test: launch the game and verify the main menu shows a black starfield background while buttons/text remain unchanged.
+
+## 2025-12-17 — RPG status integration + PRD shaping (v0.0.138)
+
+**Prompt / Task**
+- Implement missing RPG pieces:
+  - Wire RPG resolver `onHitStatuses` into the existing engine status system.
+  - Expand RPG consumable buffs beyond move-speed-only.
+  - Activate elemental RPG damage types beyond Physical/Arcane/True.
+  - Implement PRD-style anti-streak toggles (crit/dodge/parry).
+
+**What Changed**
+- RPG combat hits can now carry on-hit status intents via `Engine::Gameplay::DamageEvent` and apply results into `Engine::ECS::Status` (`StatusContainer`) with TEN saving throws + CC DR.
+- `SpellEffect` element types now map into RPG damage types during projectile impact so resistances can matter for Fire/Frost/Shock/Poison/Arcane.
+- RPG consumable Buff effects can be data-driven via `effects[].stats` contributions (with back-compat for `magnitude` move-speed buffs).
+- Added PRD-style anti-streak option for crit/dodge/parry via `data/gameplay.json` (`rpgCombat.rng.usePRD`).
+
+**Steps Taken**
+- Extended `DamageEvent` with optional RPG damage type + on-hit statuses.
+- Added per-entity `RPGCombatState` to persist CC fatigue + PRD accumulators.
+- Updated RPG resolver to use PRD accumulator rolls when enabled.
+- Updated Wizard attacks/auras to set RPG elemental damage types and route Stasis through the status pipeline.
+- Updated docs/config/changelog and bumped in-game build string.
+
+**Rationale / Tradeoffs**
+- Kept RPG status IDs as int-cast `EStatusId` to avoid introducing a second status registry; `ZetaStatusFactory` remains the source of status specs.
+- PRD uses a simple accumulator method for determinism + simplicity; can be replaced with another PRD curve later if needed.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-17).
+- Tests: `./build/rpg_tests`, `./build/combat_tests`, `./build/upgrades_tests`
+- Manual test:
+  - Start a run as Wizard and cast Lightning Bolt at a pack; confirm enemies receive Stasis and CC DR prevents perma-lock.
+  - Turn on `combatDebugOverlay` and verify debug lines show crit/dodge/parry and mitigation fields updating.

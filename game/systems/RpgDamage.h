@@ -8,6 +8,8 @@
 
 #include "../../engine/ecs/Registry.h"
 #include "../../engine/ecs/components/Health.h"
+#include "../../engine/ecs/components/Status.h"
+#include "../../engine/ecs/components/RPGCombatState.h"
 #include "../../engine/gameplay/Combat.h"
 #include "../../engine/gameplay/RPGCombat.h"
 
@@ -30,4 +32,3 @@ float apply(Engine::ECS::Registry& registry,
             const DebugSink& debugSink = {});
 
 }  // namespace Game::RpgDamage
-

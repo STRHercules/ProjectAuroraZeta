@@ -161,6 +161,9 @@ std::vector<ConsumableDef> loadConsumables(const std::string& path) {
                 eff.magnitude = e.value("magnitude", 0.0f);
                 eff.duration = e.value("duration", 0.0f);
                 eff.damageType = static_cast<Engine::Gameplay::RPG::DamageType>(e.value("damageType", 0));
+                if (e.contains("stats") && e["stats"].is_object()) {
+                    eff.stats = parseContribution(e["stats"]);
+                }
                 if (e.contains("cleanse") && e["cleanse"].is_array()) {
                     for (const auto& id : e["cleanse"]) eff.cleanseIds.push_back(id.get<int>());
                 }
