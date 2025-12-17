@@ -716,6 +716,9 @@ private:
     std::vector<ItemDefinition> shopInventory_;
     std::vector<ItemDefinition> shopPool_;
     double shopNoFundsTimer_{0.0};
+    int itemShopSelected_{0};
+    float shopSellScroll_{0.0f};
+    int abilityShopSelected_{0};
     bool dashPrev_{false};
     std::unique_ptr<Game::MovementSystem> movementSystem_;
     std::unique_ptr<Game::CameraSystem> cameraSystem_;

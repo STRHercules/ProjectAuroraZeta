@@ -197,3 +197,9 @@
     * Health/Shields/Energy/Dash moved to a cleaner top-left resource panel.
     * Added a compact status card for intermission/event/hotzone messages (less screen clutter).
     * Refreshed the inventory/held-item badge styling for consistency.
+
+# v0.0.136
+* Shops modernized:
+    * Traveling Shop updated to a modal layout with Offers, Details, and Inventory Sell panels.
+    * Ability Shop updated to a list + details layout with an explicit “Buy Upgrade” button.
+    * Added hover/selection highlighting and long-text truncation for cleaner readability.

@@ -110,3 +110,7 @@
 ## 2025-12-17 — Suggestions after in-match HUD refresh
 - Convert the status card into a small priority-based “toast” system (fade out older messages; keep only critical warnings pinned).
 - Add an option to switch between “Compact” and “Classic” HUD layouts for players who prefer the old bottom bars.
+
+## 2025-12-17 — Suggestions after shop UI modernization
+- Add a small “Hold Shift to buy 5” or “Buy & Equip” affordance (where applicable) to reduce click count.
+- Promote shop selection to keyboard/controller navigation (Up/Down + Enter) for accessibility.

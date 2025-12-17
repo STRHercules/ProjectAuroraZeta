@@ -643,3 +643,19 @@
   - Start a run, verify resource bars render top-left and update smoothly.
   - Trigger intermission / hotzone / event and confirm the status card shows the messages.
   - Hover/cycle held inventory items and confirm the badge shows the icon and truncates long names.
+
+## 2025-12-17 — Ability + Traveling Shop UI modernization
+
+**Prompt / Task**
+- Modernization overhaul of the Ability Shop and Traveling Shop GUIs (clean, modern, readable; keep UX tidy).
+
+**What Changed**
+- Rebuilt the Traveling Shop UI into a modern modal with Offers, Details (with explicit Buy CTA), and Inventory Sell (scrollable) panels.
+- Rebuilt the Ability Shop UI into a modern modal with an upgrade list, details panel, and explicit “Buy Upgrade” CTA.
+- Added consistent hover/selection styling and aligned hitboxes with the new layout.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-17).
+- Manual test:
+  - Interact with the shopkeeper to open Traveling Shop; hover/select offers and buy from the Buy button; sell items via the inventory list (scroll wheel works).
+  - Press `B` to open Ability Shop; hover/select upgrades and buy from the Buy button; verify maxed/insufficient copper states render correctly.

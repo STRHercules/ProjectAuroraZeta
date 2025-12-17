@@ -13,6 +13,7 @@
 #include <optional>
 #include <array>
 #include <cmath>
+#include <cstring>
 #include <unordered_set>
 #ifdef _WIN32
 #    ifndef NOMINMAX
@@ -123,6 +124,141 @@ struct HUDRect {
     float w{0.0f};
     float h{0.0f};
 };
+
+struct ItemShopLayout {
+    float s{1.0f};
+    float margin{22.0f};
+    float panelX{0.0f};
+    float panelY{0.0f};
+    float panelW{0.0f};
+    float panelH{0.0f};
+    float headerH{0.0f};
+
+    float offersX{0.0f};
+    float offersY{0.0f};
+    float offersW{0.0f};
+    float offersH{0.0f};
+    float cardW{0.0f};
+    float cardH{0.0f};
+    float cardGap{0.0f};
+
+    float detailsX{0.0f};
+    float detailsY{0.0f};
+    float detailsW{0.0f};
+    float detailsH{0.0f};
+    float buyX{0.0f};
+    float buyY{0.0f};
+    float buyW{0.0f};
+    float buyH{0.0f};
+
+    float invX{0.0f};
+    float invY{0.0f};
+    float invW{0.0f};
+    float invH{0.0f};
+    float invRowH{0.0f};
+};
+
+inline ItemShopLayout itemShopLayout(int viewportW, int viewportH) {
+    constexpr float refW = 1920.0f;
+    constexpr float refH = 1080.0f;
+    ItemShopLayout l{};
+    l.s = std::clamp(std::min(static_cast<float>(viewportW) / refW, static_cast<float>(viewportH) / refH), 0.75f, 1.25f);
+    l.margin = 24.0f * l.s;
+
+    l.panelW = 1240.0f * l.s;
+    l.panelH = 620.0f * l.s;
+    l.panelX = static_cast<float>(viewportW) * 0.5f - l.panelW * 0.5f;
+    l.panelY = static_cast<float>(viewportH) * 0.55f - l.panelH * 0.5f;
+    l.headerH = 64.0f * l.s;
+
+    const float pad = 18.0f * l.s;
+    const float gap = 18.0f * l.s;
+    l.offersW = 520.0f * l.s;
+    l.invW = 260.0f * l.s;
+    l.detailsW = l.panelW - (pad * 2.0f + l.offersW + l.invW + gap * 2.0f);
+    l.detailsW = std::max(300.0f * l.s, l.detailsW);
+
+    l.offersX = l.panelX + pad;
+    l.offersY = l.panelY + l.headerH;
+    l.offersH = l.panelH - l.headerH - pad;
+
+    l.detailsX = l.offersX + l.offersW + gap;
+    l.detailsY = l.offersY;
+    l.detailsH = l.offersH;
+
+    l.invX = l.detailsX + l.detailsW + gap;
+    l.invY = l.offersY;
+    l.invH = l.offersH;
+
+    l.cardGap = 14.0f * l.s;
+    l.cardW = (l.offersW - l.cardGap) * 0.5f;
+    l.cardH = 170.0f * l.s;
+
+    l.buyW = l.detailsW - pad * 2.0f;
+    l.buyH = 54.0f * l.s;
+    l.buyX = l.detailsX + pad;
+    l.buyY = l.detailsY + l.detailsH - pad - l.buyH;
+
+    l.invRowH = 34.0f * l.s;
+    return l;
+}
+
+struct AbilityShopLayout {
+    float s{1.0f};
+    float panelX{0.0f};
+    float panelY{0.0f};
+    float panelW{0.0f};
+    float panelH{0.0f};
+    float headerH{0.0f};
+    float pad{0.0f};
+    float gap{0.0f};
+
+    float listX{0.0f};
+    float listY{0.0f};
+    float listW{0.0f};
+    float listH{0.0f};
+    float rowH{0.0f};
+
+    float detailsX{0.0f};
+    float detailsY{0.0f};
+    float detailsW{0.0f};
+    float detailsH{0.0f};
+    float buyX{0.0f};
+    float buyY{0.0f};
+    float buyW{0.0f};
+    float buyH{0.0f};
+};
+
+inline AbilityShopLayout abilityShopLayout(int viewportW, int viewportH) {
+    constexpr float refW = 1920.0f;
+    constexpr float refH = 1080.0f;
+    AbilityShopLayout l{};
+    l.s = std::clamp(std::min(static_cast<float>(viewportW) / refW, static_cast<float>(viewportH) / refH), 0.75f, 1.25f);
+    l.panelW = 1120.0f * l.s;
+    l.panelH = 640.0f * l.s;
+    l.panelX = static_cast<float>(viewportW) * 0.5f - l.panelW * 0.5f;
+    l.panelY = static_cast<float>(viewportH) * 0.55f - l.panelH * 0.5f;
+    l.headerH = 68.0f * l.s;
+    l.pad = 18.0f * l.s;
+    l.gap = 18.0f * l.s;
+
+    l.listW = 420.0f * l.s;
+    l.listX = l.panelX + l.pad;
+    l.listY = l.panelY + l.headerH;
+    l.listH = l.panelH - l.headerH - l.pad;
+    l.rowH = 64.0f * l.s;
+
+    l.detailsX = l.listX + l.listW + l.gap;
+    l.detailsY = l.listY;
+    l.detailsW = l.panelW - (l.pad * 2.0f + l.listW + l.gap);
+    l.detailsH = l.listH;
+
+    l.buyW = l.detailsW - l.pad * 2.0f;
+    l.buyH = 56.0f * l.s;
+    l.buyX = l.detailsX + l.pad;
+    l.buyY = l.detailsY + l.detailsH - l.pad - l.buyH;
+    return l;
+}
 
 struct IngameHudLayout {
     float s{1.0f};
@@ -793,11 +929,14 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
 
         const bool restartPressed = actions.restart && !restartPrev_;
         restartPrev_ = actions.restart;
-        const bool shopToggleEdge = actions.toggleShop && !shopTogglePrev_;
-        shopTogglePrev_ = actions.toggleShop;
-    if (shopToggleEdge && !inMenu_) {
-        abilityShopOpen_ = !abilityShopOpen_;
-    }
+	    const bool shopToggleEdge = actions.toggleShop && !shopTogglePrev_;
+	    shopTogglePrev_ = actions.toggleShop;
+	    if (shopToggleEdge && !inMenu_) {
+	        abilityShopOpen_ = !abilityShopOpen_;
+	        if (abilityShopOpen_) {
+	            abilityShopSelected_ = 0;
+	        }
+	    }
     const bool pausePressed = actions.pause && !pauseTogglePrev_;
     pauseTogglePrev_ = actions.pause;
     bool characterEdge = actions.characterScreen && !characterScreenPrev_;
@@ -1381,168 +1520,207 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 };
                 auto cards = buildCards();
 
-                // Track hovered card to update selection.
-                const float cardW = 200.0f;
-                const float cardH = 110.0f;
-                const float gap = 14.0f;
-                float cx = static_cast<float>(viewportWidth_) * 0.5f;
-                float cy = static_cast<float>(viewportHeight_) * 0.55f;
-                float startX = cx - (cardW * 3.0f + gap * 2.0f) * 0.5f;
-                float startY = cy - 320.0f * 0.5f + 60.0f;
+                const auto lay = abilityShopLayout(viewportWidth_, viewportHeight_);
+                const float rowGap = 10.0f * lay.s;
                 int mx = input.mouseX();
                 int my = input.mouseY();
-                int hoveredCard = -1;
+
+                // Hover selects.
+                int hoveredRow = -1;
+                const float rowsStartY = lay.listY + lay.pad + 42.0f * lay.s;
+                const float rowsX = lay.listX + lay.pad;
+                const float rowsW = lay.listW - lay.pad * 2.0f;
                 for (int i = 0; i < static_cast<int>(cards.size()); ++i) {
-                    float x = startX + (i % 3) * (cardW + gap);
-                    float y = startY + (i / 3) * (cardH + 12.0f);
-                    if (mx >= x && mx <= x + cardW && my >= y && my <= y + cardH) {
-                        hoveredCard = i;
-                        // Refresh inventory after a capped item purchase so prices/caps update.
-                        refreshShopInventory();
+                    float y = rowsStartY + static_cast<float>(i) * (lay.rowH + rowGap);
+                    if (mx >= rowsX && mx <= rowsX + rowsW && my >= y && my <= y + lay.rowH) {
+                        hoveredRow = i;
                         break;
                     }
                 }
+                if (hoveredRow >= 0) {
+                    abilityShopSelected_ = hoveredRow;
+                }
+                abilityShopSelected_ = std::clamp(abilityShopSelected_, 0, static_cast<int>(cards.size()) - 1);
+
+                // Click buy.
                 bool leftEdge = leftClick && !shopLeftPrev_;
-                if (leftEdge && hoveredCard >= 0) {
-                    if (!cards[hoveredCard].buy()) {
-                        shopNoFundsTimer_ = 0.6;
+                if (leftEdge) {
+                    if (mx >= lay.buyX && mx <= lay.buyX + lay.buyW && my >= lay.buyY && my <= lay.buyY + lay.buyH) {
+                        if (!cards[abilityShopSelected_].buy()) {
+                            shopNoFundsTimer_ = 0.6;
+                        }
                     }
                 }
             }
 
-            // Item shop UI card purchases and selling.
-            bool uiClickEdge = leftClick && !shopUIClickPrev_;
-            if (uiClickEdge && shopSystem_ && itemShopOpen_) {
+            // Item shop UI interactions: select offers, buy, and sell inventory.
+            if (itemShopOpen_) {
+                const auto lay = itemShopLayout(viewportWidth_, viewportHeight_);
                 int mx = input.mouseX();
                 int my = input.mouseY();
-                const float panelW = 760.0f;
-                const float panelH = 240.0f;
-                const float invW = 200.0f;
-                const float popGap = 24.0f;
-                const float totalW = panelW + popGap + invW;
-                const float cardW = 160.0f;
-                const float cardH = 130.0f;
-                const float gap = 14.0f;
-                float cx = static_cast<float>(viewportWidth_) * 0.5f;
-                float cy = static_cast<float>(viewportHeight_) * 0.6f;
-                float topLeftX = cx - totalW * 0.5f;
-                float topLeftY = cy - panelH * 0.5f;
-                float startX = topLeftX + 18.0f;
-                float y = topLeftY + 42.0f;
-                // Purchases
-                for (std::size_t i = 0; i < shopInventory_.size(); ++i) {
-                    float x = startX + static_cast<float>(i) * (cardW + gap);
-                    if (mx >= x && mx <= x + cardW && my >= y && my <= y + cardH) {
-                        const ItemDefinition& item = shopInventory_[i];
-                        int dynCost = item.rpgTemplateId.empty()
-                                          ? effectiveShopCost(item.effect, item.cost, shopDamagePctPurchases_, shopAttackSpeedPctPurchases_,
-                                                              shopVitalsPctPurchases_, shopCooldownPurchases_, shopRangeVisionPurchases_,
-                                                              shopChargePurchases_, shopSpeedBootsPurchases_, shopVitalAusterityPurchases_)
-                                          : item.cost;
-                        if (dynCost < 0) {
-                            continue;  // capped; ignore click
-                        }
-                        if (gold_ < dynCost) {
-                            shopNoFundsTimer_ = 0.6;
-                            break;
-                        }
-                        if (!item.rpgTemplateId.empty()) {
-                            // RPG equipment purchase: add to inventory (no stat effect is applied until equipped).
-                            if (!addItemToInventory(item)) {
-                                shopNoFundsTimer_ = 0.6;
-                                break;
-                            }
-                            gold_ -= dynCost;
-                            refreshShopInventory();
-                            break;
-                        }
 
-                        gold_ -= dynCost;
-                        switch (item.effect) {
-                            case ItemEffect::Damage:
-                                projectileDamage_ += item.value;
-                                break;
-                            case ItemEffect::Health:
-                                heroMaxHp_ += item.value;
-                                if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
-                                    hp->maxHealth = heroMaxHp_;
-                                    hp->currentHealth = std::min(hp->currentHealth + item.value, hp->maxHealth);
-                                    heroUpgrades_.groundArmorLevel += 1;
-                                    Engine::Gameplay::applyUpgradesToUnit(*hp, heroBaseStatsScaled_, heroUpgrades_, false);
-                                }
-                                break;
-                            case ItemEffect::Speed:
-                                heroMoveSpeed_ += item.value;
-                                break;
-                            case ItemEffect::Heal:
-                                if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
-                                    hp->currentHealth = std::min(hp->maxHealth, hp->currentHealth + item.value * hp->maxHealth);
-                                }
-                                break;
-                            case ItemEffect::DamagePercent:
-                                projectileDamage_ *= (1.0f + item.value);
-                                shopDamagePctPurchases_ += 1;
-                                break;
-                            case ItemEffect::RangeVision:
-                                autoFireRangeBonus_ += item.value * abilityRangePerLevel_;
-                                projectileLifetime_ += (item.value * abilityRangePerLevel_) / std::max(1.0f, projectileSpeed_);
-                                heroVisionRadiusTiles_ += item.value;
-                                shopRangeVisionPurchases_ += 1;
-                                break;
-                            case ItemEffect::AttackSpeedPercent:
-                                attackSpeedMul_ *= (1.0f + item.value);
-                                fireInterval_ = fireIntervalBase_ / std::max(0.1f, attackSpeedMul_);
-                                shopAttackSpeedPctPurchases_ += 1;
-                                break;
-                            case ItemEffect::MoveSpeedFlat:
-                                heroMoveSpeed_ += item.value;
-                                shopSpeedBootsPurchases_ += 1;
-                                break;
-                            case ItemEffect::BonusVitalsPercent: {
-                                float mul = 1.0f + item.value;
-                                heroMaxHp_ *= mul;
-                                heroShield_ *= mul;
-                                energyMax_ *= mul;
-                                if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
-                                    hp->maxHealth = heroMaxHp_;
-                                    hp->currentHealth = heroMaxHp_;
-                                    hp->maxShields = heroShield_;
-                                    hp->currentShields = heroShield_;
-                                }
-                                energy_ = energyMax_;
-                                shopVitalsPctPurchases_ += 1;
-                                break;
-                            }
-                            case ItemEffect::CooldownFaster:
-                                abilityCooldownMul_ = std::max(0.1f, abilityCooldownMul_ * (1.0f - item.value));
-                                shopCooldownPurchases_ += 1;
-                                break;
-                            case ItemEffect::AbilityCharges:
-                                abilityChargesBonus_ += static_cast<int>(item.value);
-                                shopChargePurchases_ += 1;
-                                break;
-                            case ItemEffect::VitalCostReduction:
-                                abilityVitalCostMul_ = std::max(0.1f, abilityVitalCostMul_ * (1.0f - item.value));
-                                for (auto& slot : abilities_) {
-                                    slot.energyCost *= abilityVitalCostMul_;
-                                }
-                                shopVitalAusterityPurchases_ += 1;
-                                break;
-                            default:
-                                break;
-                        }
+                auto insideF = [&](float x, float y, float w, float h) {
+                    return mx >= static_cast<int>(x) && mx <= static_cast<int>(x + w) &&
+                           my >= static_cast<int>(y) && my <= static_cast<int>(y + h);
+                };
+
+                const float innerPad = 18.0f * lay.s;
+                const float offersStartX = lay.offersX;
+                const float offersStartY = lay.offersY + 34.0f * lay.s;
+
+                int hoveredOffer = -1;
+                for (int i = 0; i < static_cast<int>(shopInventory_.size()); ++i) {
+                    int c = i % 2;
+                    int r = i / 2;
+                    float x = offersStartX + static_cast<float>(c) * (lay.cardW + lay.cardGap);
+                    float y = offersStartY + static_cast<float>(r) * (lay.cardH + lay.cardGap);
+                    if (insideF(x, y, lay.cardW, lay.cardH)) {
+                        hoveredOffer = i;
                         break;
                     }
                 }
-                // Selling inventory rows
-                float invX = topLeftX + panelW + popGap;
-                float invY = y;
-                const float rowH = 28.0f;
-                for (std::size_t i = 0; i < inventory_.size(); ++i) {
-                    float ry = invY + static_cast<float>(i) * (rowH + 4.0f);
-                    if (mx >= invX && mx <= invX + invW && my >= ry && my <= ry + rowH) {
-                        sellItemFromInventory(i, gold_);
-                        break;
+                if (hoveredOffer >= 0) {
+                    itemShopSelected_ = hoveredOffer;
+                }
+                if (!shopInventory_.empty()) {
+                    itemShopSelected_ = std::clamp(itemShopSelected_, 0, static_cast<int>(shopInventory_.size()) - 1);
+                } else {
+                    itemShopSelected_ = 0;
+                }
+
+                // Inventory sell scroll (mouse wheel while hovering list).
+                const float invHeader = 50.0f * lay.s;
+                const float invListX = lay.invX + innerPad;
+                const float invListY = lay.invY + invHeader;
+                const float invListW = lay.invW - innerPad * 2.0f;
+                const float invListH = lay.invH - invHeader - innerPad;
+                const bool invHover = insideF(invListX, invListY, invListW, invListH);
+                const int visibleRows = std::max(1, static_cast<int>(std::floor(invListH / lay.invRowH)));
+                const int maxScrollRows = std::max(0, static_cast<int>(inventory_.size()) - visibleRows);
+                if (invHover && scrollDeltaFrame_ != 0) {
+                    shopSellScroll_ = std::clamp(shopSellScroll_ - static_cast<float>(scrollDeltaFrame_) * 1.0f, 0.0f,
+                                                 static_cast<float>(maxScrollRows));
+                }
+                const int scrollRow = std::clamp(static_cast<int>(std::round(shopSellScroll_)), 0, maxScrollRows);
+
+                auto dynCostFor = [&](const ItemDefinition& item) -> int {
+                    return item.rpgTemplateId.empty()
+                               ? effectiveShopCost(item.effect, item.cost, shopDamagePctPurchases_, shopAttackSpeedPctPurchases_,
+                                                   shopVitalsPctPurchases_, shopCooldownPurchases_, shopRangeVisionPurchases_,
+                                                   shopChargePurchases_, shopSpeedBootsPurchases_, shopVitalAusterityPurchases_)
+                               : item.cost;
+                };
+
+                auto tryBuyOffer = [&](std::size_t i) {
+                    if (i >= shopInventory_.size()) return;
+                    const ItemDefinition& item = shopInventory_[i];
+                    int dynCost = dynCostFor(item);
+                    if (dynCost < 0) return;  // capped
+                    if (gold_ < dynCost) {
+                        shopNoFundsTimer_ = 0.6;
+                        return;
+                    }
+                    if (!item.rpgTemplateId.empty()) {
+                        if (!addItemToInventory(item)) {
+                            shopNoFundsTimer_ = 0.6;
+                            return;
+                        }
+                        gold_ -= dynCost;
+                        refreshShopInventory();
+                        return;
+                    }
+                    gold_ -= dynCost;
+                    switch (item.effect) {
+                        case ItemEffect::Damage:
+                            projectileDamage_ += item.value;
+                            break;
+                        case ItemEffect::Health:
+                            heroMaxHp_ += item.value;
+                            if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
+                                hp->maxHealth = heroMaxHp_;
+                                hp->currentHealth = std::min(hp->currentHealth + item.value, hp->maxHealth);
+                                heroUpgrades_.groundArmorLevel += 1;
+                                Engine::Gameplay::applyUpgradesToUnit(*hp, heroBaseStatsScaled_, heroUpgrades_, false);
+                            }
+                            break;
+                        case ItemEffect::Speed:
+                            heroMoveSpeed_ += item.value;
+                            break;
+                        case ItemEffect::Heal:
+                            if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
+                                hp->currentHealth = std::min(hp->maxHealth, hp->currentHealth + item.value * hp->maxHealth);
+                            }
+                            break;
+                        case ItemEffect::DamagePercent:
+                            projectileDamage_ *= (1.0f + item.value);
+                            shopDamagePctPurchases_ += 1;
+                            break;
+                        case ItemEffect::RangeVision:
+                            autoFireRangeBonus_ += item.value * abilityRangePerLevel_;
+                            projectileLifetime_ += (item.value * abilityRangePerLevel_) / std::max(1.0f, projectileSpeed_);
+                            heroVisionRadiusTiles_ += item.value;
+                            shopRangeVisionPurchases_ += 1;
+                            break;
+                        case ItemEffect::AttackSpeedPercent:
+                            attackSpeedMul_ *= (1.0f + item.value);
+                            fireInterval_ = fireIntervalBase_ / std::max(0.1f, attackSpeedMul_);
+                            shopAttackSpeedPctPurchases_ += 1;
+                            break;
+                        case ItemEffect::MoveSpeedFlat:
+                            heroMoveSpeed_ += item.value;
+                            shopSpeedBootsPurchases_ += 1;
+                            break;
+                        case ItemEffect::BonusVitalsPercent: {
+                            float mul = 1.0f + item.value;
+                            heroMaxHp_ *= mul;
+                            heroShield_ *= mul;
+                            energyMax_ *= mul;
+                            if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
+                                hp->maxHealth = heroMaxHp_;
+                                hp->currentHealth = heroMaxHp_;
+                                hp->maxShields = heroShield_;
+                                hp->currentShields = heroShield_;
+                            }
+                            energy_ = energyMax_;
+                            shopVitalsPctPurchases_ += 1;
+                            break;
+                        }
+                        case ItemEffect::CooldownFaster:
+                            abilityCooldownMul_ = std::max(0.1f, abilityCooldownMul_ * (1.0f - item.value));
+                            shopCooldownPurchases_ += 1;
+                            break;
+                        case ItemEffect::AbilityCharges:
+                            abilityChargesBonus_ += static_cast<int>(item.value);
+                            shopChargePurchases_ += 1;
+                            break;
+                        case ItemEffect::VitalCostReduction:
+                            abilityVitalCostMul_ = std::max(0.1f, abilityVitalCostMul_ * (1.0f - item.value));
+                            for (auto& slot : abilities_) {
+                                slot.energyCost *= abilityVitalCostMul_;
+                            }
+                            shopVitalAusterityPurchases_ += 1;
+                            break;
+                        default:
+                            break;
+                    }
+                };
+
+                bool uiClickEdge = leftClick && !shopUIClickPrev_;
+                if (uiClickEdge && shopSystem_) {
+                    // Buying.
+                    if (insideF(lay.buyX, lay.buyY, lay.buyW, lay.buyH)) {
+                        tryBuyOffer(static_cast<std::size_t>(itemShopSelected_));
+                    }
+
+                    // Selling.
+                    for (int r = 0; r < visibleRows; ++r) {
+                        const int idx = scrollRow + r;
+                        if (idx < 0 || idx >= static_cast<int>(inventory_.size())) break;
+                        float ry = invListY + static_cast<float>(r) * lay.invRowH;
+                        if (insideF(invListX, ry, invListW, lay.invRowH)) {
+                            sellItemFromInventory(static_cast<std::size_t>(idx), gold_);
+                            break;
+                        }
                     }
                 }
             }
@@ -1566,6 +1744,8 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                         refreshPauseState();
                     } else {
                         itemShopOpen_ = true;
+                        itemShopSelected_ = 0;
+                        shopSellScroll_ = 0.0f;
                         refreshPauseState();
                     }
                 }
@@ -6348,7 +6528,7 @@ void GameRoot::renderMenu() {
     drawTextUnified(title, Engine::Vec2{centerX - titleW * 0.5f, titleY}, titleScale, Engine::Color{190, 235, 255, 245});
 
     // Build info (bottom-right).
-    const std::string buildStr = "Pre-Alpha | Build v0.0.135";
+    const std::string buildStr = "Pre-Alpha | Build v0.0.136";
     const float buildScale = std::clamp(0.95f * s, 0.72f, 0.95f);
     const Engine::Vec2 buildSz = measureTextUnified(buildStr, buildScale);
     drawTextUnified(buildStr, Engine::Vec2{vw - margin - buildSz.x, vh - margin - buildSz.y}, buildScale,
@@ -8339,110 +8519,18 @@ void GameRoot::refreshShopInventory() {
 
 void GameRoot::drawItemShopOverlay() {
     if (!render_ || !itemShopOpen_) return;
-    const float panelW = 760.0f;
-    const float panelH = 240.0f;
-    const float invW = 200.0f;
-    const float popGap = 24.0f;
-    const float totalW = panelW + popGap + invW;
-    const float cx = static_cast<float>(viewportWidth_) * 0.5f;
-    const float cy = static_cast<float>(viewportHeight_) * 0.6f;
-    Engine::Vec2 topLeft{cx - totalW * 0.5f, cy - panelH * 0.5f};
-    render_->drawFilledRect(topLeft, Engine::Vec2{panelW, panelH}, Engine::Color{16, 20, 30, 230});
-    drawTextUnified("Traveling Shop (Gold, E to close)", Engine::Vec2{topLeft.x + 18.0f, topLeft.y + 12.0f}, 1.0f,
-                    Engine::Color{200, 255, 200, 240});
-    const float cardW = 160.0f;
-    const float cardH = 130.0f;
-    const float gap = 14.0f;
-    float startX = topLeft.x + 18.0f;
-    float y = topLeft.y + 42.0f;
-    for (std::size_t i = 0; i < shopInventory_.size(); ++i) {
-        float x = startX + static_cast<float>(i) * (cardW + gap);
-        render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{cardW, cardH}, Engine::Color{32, 46, 66, 220});
-        const auto& item = shopInventory_[i];
-        std::string title = item.rpgTemplateId.empty() ? shopLabelForEffect(item.effect) : item.name;
-        std::ostringstream desc;
-        if (!item.rpgTemplateId.empty()) {
-            desc << item.desc;
-        } else {
-            switch (item.effect) {
-                case ItemEffect::Damage: desc << "+" << static_cast<int>(item.value) << " damage"; break;
-                case ItemEffect::Health: desc << "+" << static_cast<int>(item.value) << " HP"; break;
-                case ItemEffect::Speed: desc << "+" << static_cast<int>(item.value * 100) << "% speed"; break;
-                case ItemEffect::Heal: desc << "Heal " << static_cast<int>(item.value * 100) << "% HP"; break;
-                case ItemEffect::FreezeTime: desc << "Freeze " << item.value << "s"; break;
-                case ItemEffect::Turret: desc << "Turret " << static_cast<int>(item.value) << "s"; break;
-                case ItemEffect::AttackSpeed: desc << "+" << static_cast<int>(item.value * 100) << "% atk speed"; break;
-                case ItemEffect::Lifesteal: desc << static_cast<int>(item.value * 100) << "% lifesteal"; break;
-                case ItemEffect::Chain: desc << "Chains +" << static_cast<int>(item.value); break;
-                case ItemEffect::DamagePercent: desc << "+50% all damage"; break;
-                case ItemEffect::RangeVision: desc << "+3 range and +3 vision"; break;
-                case ItemEffect::AttackSpeedPercent: desc << "+50% attack speed"; break;
-                case ItemEffect::MoveSpeedFlat: desc << "+1 move speed"; break;
-                case ItemEffect::BonusVitalsPercent: desc << "+25% HP/Shields/Energy"; break;
-                case ItemEffect::CooldownFaster: desc << "Abilities cooldown 25% faster"; break;
-                case ItemEffect::AbilityCharges: desc << "Abilities with charges +1 max"; break;
-                case ItemEffect::VitalCostReduction: desc << "-25% vital ability costs"; break;
-            }
-        }
-        drawTextUnified(title, Engine::Vec2{x + 12.0f, y + 10.0f}, 1.0f, Engine::Color{220, 240, 255, 240});
-        drawTextUnified(desc.str(), Engine::Vec2{x + 12.0f, y + 34.0f}, 0.95f, Engine::Color{200, 220, 240, 230});
-        if (!item.rpgTemplateId.empty()) {
-            drawItemIcon(item, Engine::Vec2{x + cardW - 30.0f, y + 10.0f}, 18.0f);
-            float ay = y + 52.0f;
-            for (std::size_t a = 0; a < item.affixes.size() && a < 2; ++a) {
-                drawTextUnified("• " + item.affixes[a], Engine::Vec2{x + 12.0f, ay}, 0.78f,
-                                Engine::Color{185, 220, 255, 220});
-                ay += 14.0f;
-            }
-        }
-        std::ostringstream cost;
-        int dynCost = item.rpgTemplateId.empty()
-                          ? effectiveShopCost(item.effect, item.cost, shopDamagePctPurchases_, shopAttackSpeedPctPurchases_,
-                                              shopVitalsPctPurchases_, shopCooldownPurchases_, shopRangeVisionPurchases_,
-                                              shopChargePurchases_, shopSpeedBootsPurchases_, shopVitalAusterityPurchases_)
-                          : item.cost;
-        cost << (dynCost < 0 ? 0 : dynCost) << "g";
-        bool affordable = dynCost >= 0 && gold_ >= dynCost;
-        Engine::Color costCol = affordable ? Engine::Color{180, 255, 200, 240}
-                                           : Engine::Color{220, 160, 160, 220};
-        drawTextUnified(cost.str(), Engine::Vec2{x + 12.0f, y + 62.0f}, 0.9f, costCol);
-        Engine::Color hintCol{170, 200, 230, 200};
-        if (!affordable && shopNoFundsTimer_ > 0.0) {
-            float pulse = 0.6f + 0.4f * std::sin(static_cast<float>(shopNoFundsTimer_) * 18.0f);
-            hintCol = Engine::Color{static_cast<uint8_t>(220), static_cast<uint8_t>(140 * pulse),
-                                    static_cast<uint8_t>(140 * pulse), 230};
-        }
-        drawTextUnified("Click to buy", Engine::Vec2{x + 12.0f, y + 96.0f}, 0.85f, hintCol);
-    }
-    std::ostringstream wallet;
-    wallet << "Gold: " << gold_;
-    drawTextUnified(wallet.str(), Engine::Vec2{topLeft.x + panelW - 170.0f, topLeft.y + 12.0f}, 0.95f,
-                    Engine::Color{200, 255, 200, 240});
+    const auto lay = itemShopLayout(viewportWidth_, viewportHeight_);
+    const float s = lay.s;
+    const float pad = 18.0f * s;
+    const float innerPad = 18.0f * s;
+    int mx = lastMouseX_;
+    int my = lastMouseY_;
 
-    // Support item quick-use hint.
-    for (const auto& inst : inventory_) {
-        if (inst.def.kind == ItemKind::Support) {
-            std::ostringstream hint;
-            hint << "Press Q to use: " << inst.def.name;
-            drawTextUnified(hint.str(), Engine::Vec2{topLeft.x + 18.0f, topLeft.y + panelH - 26.0f}, 0.9f,
-                            Engine::Color{200, 230, 255, 220});
-            break;
-        }
-    }
+    auto insideF = [&](float x, float y, float w, float h) {
+        return mx >= static_cast<int>(x) && mx <= static_cast<int>(x + w) &&
+               my >= static_cast<int>(y) && my <= static_cast<int>(y + h);
+    };
 
-    // Inventory panel (sell)
-    float invX = topLeft.x + panelW + popGap;
-    float invY = topLeft.y + 42.0f;
-    render_->drawFilledRect(Engine::Vec2{invX - 6.0f, invY - 10.0f}, Engine::Vec2{invW + 12.0f, panelH - 60.0f},
-                            Engine::Color{24, 32, 46, 210});
-    drawTextUnified("Inventory (click to sell)", Engine::Vec2{invX, invY - 20.0f}, 0.9f,
-                    Engine::Color{200, 230, 255, 220});
-    const float rowH = 28.0f;
-    for (std::size_t i = 0; i < inventory_.size(); ++i) {
-        float ry = invY + static_cast<float>(i) * (rowH + 4.0f);
-        Engine::Color bg{34, 46, 66, 220};
-        if (i % 2 == 1) bg = Engine::Color{38, 52, 74, 220};
-        render_->drawFilledRect(Engine::Vec2{invX, ry}, Engine::Vec2{invW, rowH}, bg);
     auto rarityCol = [](ItemRarity r) {
         switch (r) {
             case ItemRarity::Common: return Engine::Color{235, 240, 245, 235};
@@ -8453,13 +8541,240 @@ void GameRoot::drawItemShopOverlay() {
         }
         return Engine::Color{235, 240, 245, 235};
     };
-        drawTextUnified(inventory_[i].def.name, Engine::Vec2{invX + 8.0f, ry + 4.0f}, 0.9f,
-                        rarityCol(inventory_[i].def.rarity));
-        int refund = std::max(1, inventory_[i].def.cost / 2);
+
+    auto stripRaritySuffixLocal = [](const std::string& n) -> std::string {
+        static constexpr const char* kSufs[] = {" [Common]", " [Uncommon]", " [Rare]", " [Epic]", " [Legendary]"};
+        for (const char* suf : kSufs) {
+            const std::size_t len = std::strlen(suf);
+            if (n.size() >= len && n.compare(n.size() - len, len, suf) == 0) {
+                return n.substr(0, n.size() - len);
+            }
+        }
+        return n;
+    };
+
+    auto dynCostFor = [&](const ItemDefinition& item) -> int {
+        return item.rpgTemplateId.empty()
+                   ? effectiveShopCost(item.effect, item.cost, shopDamagePctPurchases_, shopAttackSpeedPctPurchases_,
+                                       shopVitalsPctPurchases_, shopCooldownPurchases_, shopRangeVisionPurchases_,
+                                       shopChargePurchases_, shopSpeedBootsPurchases_, shopVitalAusterityPurchases_)
+                   : item.cost;
+    };
+
+    auto legacyDesc = [&](const ItemDefinition& item) -> std::string {
+        std::ostringstream desc;
+        switch (item.effect) {
+            case ItemEffect::Damage: desc << "+" << static_cast<int>(item.value) << " damage"; break;
+            case ItemEffect::Health: desc << "+" << static_cast<int>(item.value) << " HP"; break;
+            case ItemEffect::Speed: desc << "+" << static_cast<int>(item.value * 100) << "% speed"; break;
+            case ItemEffect::Heal: desc << "Heal " << static_cast<int>(item.value * 100) << "% HP"; break;
+            case ItemEffect::FreezeTime: desc << "Freeze " << item.value << "s"; break;
+            case ItemEffect::Turret: desc << "Turret " << static_cast<int>(item.value) << "s"; break;
+            case ItemEffect::AttackSpeed: desc << "+" << static_cast<int>(item.value * 100) << "% atk speed"; break;
+            case ItemEffect::Lifesteal: desc << static_cast<int>(item.value * 100) << "% lifesteal"; break;
+            case ItemEffect::Chain: desc << "Chains +" << static_cast<int>(item.value); break;
+            case ItemEffect::DamagePercent: desc << "+50% all damage"; break;
+            case ItemEffect::RangeVision: desc << "+3 range and +3 vision"; break;
+            case ItemEffect::AttackSpeedPercent: desc << "+50% attack speed"; break;
+            case ItemEffect::MoveSpeedFlat: desc << "+1 move speed"; break;
+            case ItemEffect::BonusVitalsPercent: desc << "+25% HP/Shields/Energy"; break;
+            case ItemEffect::CooldownFaster: desc << "Abilities cooldown 25% faster"; break;
+            case ItemEffect::AbilityCharges: desc << "Abilities with charges +1 max"; break;
+            case ItemEffect::VitalCostReduction: desc << "-25% vital ability costs"; break;
+        }
+        return desc.str();
+    };
+
+    // Scrim + container.
+    render_->drawFilledRect(Engine::Vec2{0.0f, 0.0f}, Engine::Vec2{static_cast<float>(viewportWidth_), static_cast<float>(viewportHeight_)},
+                            Engine::Color{6, 8, 12, 170});
+    render_->drawFilledRect(Engine::Vec2{lay.panelX, lay.panelY + 6.0f * s}, Engine::Vec2{lay.panelW, lay.panelH}, Engine::Color{0, 0, 0, 95});
+    render_->drawFilledRect(Engine::Vec2{lay.panelX, lay.panelY}, Engine::Vec2{lay.panelW, lay.panelH}, Engine::Color{12, 16, 24, 235});
+    render_->drawFilledRect(Engine::Vec2{lay.panelX, lay.panelY}, Engine::Vec2{lay.panelW, 2.0f}, Engine::Color{45, 70, 95, 190});
+    render_->drawFilledRect(Engine::Vec2{lay.panelX, lay.panelY + lay.panelH - 2.0f}, Engine::Vec2{lay.panelW, 2.0f}, Engine::Color{45, 70, 95, 190});
+
+    // Header.
+    drawTextUnified("Traveling Shop", Engine::Vec2{lay.panelX + pad, lay.panelY + 18.0f * s}, std::clamp(1.15f * s, 0.95f, 1.25f),
+                    Engine::Color{200, 255, 200, 240});
+    drawTextUnified("Gold • E to close", Engine::Vec2{lay.panelX + pad, lay.panelY + 42.0f * s}, std::clamp(0.88f * s, 0.78f, 0.98f),
+                    Engine::Color{160, 200, 230, 210});
+    std::ostringstream wallet;
+    wallet << "Gold " << gold_;
+    const float ws = std::clamp(0.98f * s, 0.86f, 1.08f);
+    const Engine::Vec2 wSz = measureTextUnified(wallet.str(), ws);
+    drawTextUnified(wallet.str(), Engine::Vec2{lay.panelX + lay.panelW - pad - wSz.x, lay.panelY + 22.0f * s}, ws,
+                    Engine::Color{200, 255, 200, 240});
+
+    // Offers.
+    drawTextUnified("Offers", Engine::Vec2{lay.offersX, lay.offersY + 10.0f * s}, std::clamp(0.95f * s, 0.82f, 1.05f),
+                    Engine::Color{200, 230, 255, 220});
+    const float offersStartX = lay.offersX;
+    const float offersStartY = lay.offersY + 34.0f * s;
+    int hoveredOffer = -1;
+    for (int i = 0; i < static_cast<int>(shopInventory_.size()); ++i) {
+        int c = i % 2;
+        int r = i / 2;
+        float x = offersStartX + static_cast<float>(c) * (lay.cardW + lay.cardGap);
+        float y = offersStartY + static_cast<float>(r) * (lay.cardH + lay.cardGap);
+        bool hov = insideF(x, y, lay.cardW, lay.cardH);
+        if (hov) hoveredOffer = i;
+        bool selected = (i == itemShopSelected_);
+        const auto& item = shopInventory_[static_cast<std::size_t>(i)];
+
+        Engine::Color bg = selected ? Engine::Color{22, 34, 52, 235} : (hov ? Engine::Color{18, 26, 40, 232}
+                                                                            : Engine::Color{14, 18, 26, 220});
+        render_->drawFilledRect(Engine::Vec2{x, y + 3.0f * s}, Engine::Vec2{lay.cardW, lay.cardH}, Engine::Color{0, 0, 0, 70});
+        render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{lay.cardW, lay.cardH}, bg);
+        Engine::Color edge = item.rpgTemplateId.empty() ? Engine::Color{90, 140, 210, 190} : rarityCol(item.rarity);
+        if (selected) edge.a = 240;
+        render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{lay.cardW, 2.0f}, edge);
+        render_->drawFilledRect(Engine::Vec2{x, y + lay.cardH - 2.0f}, Engine::Vec2{lay.cardW, 2.0f}, edge);
+
+        const float icon = 34.0f * s;
+        render_->drawFilledRect(Engine::Vec2{x + innerPad, y + innerPad}, Engine::Vec2{icon, icon}, Engine::Color{18, 26, 40, 230});
+        if (!item.rpgTemplateId.empty()) {
+            drawItemIcon(item, Engine::Vec2{x + innerPad, y + innerPad}, icon);
+        } else {
+            drawTextUnified("★", Engine::Vec2{x + innerPad + 10.0f * s, y + innerPad + 6.0f * s}, 1.15f * s,
+                            Engine::Color{200, 230, 255, 220});
+        }
+
+        const float nameScale = std::clamp(0.94f * s, 0.84f, 1.04f);
+        const float descScale = std::clamp(0.82f * s, 0.76f, 0.92f);
+        const float textX = x + innerPad + icon + 12.0f * s;
+        const float maxNameW = lay.cardW - (textX - x) - innerPad;
+        const std::string title = item.rpgTemplateId.empty() ? shopLabelForEffect(item.effect) : stripRaritySuffixLocal(item.name);
+        drawTextUnified(ellipsizeTextUnified(title, maxNameW, nameScale), Engine::Vec2{textX, y + innerPad - 1.0f * s}, nameScale,
+                        Engine::Color{220, 240, 255, 240});
+        const std::string desc = item.rpgTemplateId.empty() ? legacyDesc(item) : item.desc;
+        drawTextUnified(ellipsizeTextUnified(desc, maxNameW, descScale), Engine::Vec2{textX, y + innerPad + 18.0f * s}, descScale,
+                        Engine::Color{180, 205, 230, 220});
+
+        int dynCost = dynCostFor(item);
+        const bool affordable = dynCost >= 0 && gold_ >= dynCost;
+        std::ostringstream cost;
+        if (dynCost < 0) cost << "CAPPED";
+        else cost << dynCost << "g";
+        Engine::Color costCol = affordable ? Engine::Color{180, 255, 200, 235} : Engine::Color{220, 160, 160, 220};
+        drawTextUnified(cost.str(), Engine::Vec2{x + innerPad, y + lay.cardH - 28.0f * s}, std::clamp(0.88f * s, 0.78f, 0.98f), costCol);
+    }
+    if (hoveredOffer >= 0) itemShopSelected_ = hoveredOffer;
+
+    // Details.
+    render_->drawFilledRect(Engine::Vec2{lay.detailsX, lay.detailsY + 3.0f * s}, Engine::Vec2{lay.detailsW, lay.detailsH}, Engine::Color{0, 0, 0, 75});
+    render_->drawFilledRect(Engine::Vec2{lay.detailsX, lay.detailsY}, Engine::Vec2{lay.detailsW, lay.detailsH}, Engine::Color{14, 18, 26, 220});
+    render_->drawFilledRect(Engine::Vec2{lay.detailsX, lay.detailsY}, Engine::Vec2{lay.detailsW, 2.0f}, Engine::Color{45, 70, 95, 190});
+    render_->drawFilledRect(Engine::Vec2{lay.detailsX, lay.detailsY + lay.detailsH - 2.0f}, Engine::Vec2{lay.detailsW, 2.0f}, Engine::Color{45, 70, 95, 190});
+
+    if (!shopInventory_.empty()) {
+        itemShopSelected_ = std::clamp(itemShopSelected_, 0, static_cast<int>(shopInventory_.size()) - 1);
+        const auto& item = shopInventory_[static_cast<std::size_t>(itemShopSelected_)];
+        const std::string title = item.rpgTemplateId.empty() ? shopLabelForEffect(item.effect) : stripRaritySuffixLocal(item.name);
+        const float titleScale = std::clamp(1.12f * s, 0.95f, 1.25f);
+        drawTextUnified(title, Engine::Vec2{lay.detailsX + pad, lay.detailsY + pad}, titleScale,
+                        item.rpgTemplateId.empty() ? Engine::Color{220, 240, 255, 240} : rarityCol(item.rarity));
+
+        const float icon = 58.0f * s;
+        render_->drawFilledRect(Engine::Vec2{lay.detailsX + pad, lay.detailsY + pad + 38.0f * s}, Engine::Vec2{icon, icon}, Engine::Color{18, 26, 40, 230});
+        if (!item.rpgTemplateId.empty()) drawItemIcon(item, Engine::Vec2{lay.detailsX + pad, lay.detailsY + pad + 38.0f * s}, icon);
+
+        float infoX = lay.detailsX + pad + icon + 14.0f * s;
+        float infoY = lay.detailsY + pad + 42.0f * s;
+        const float infoW = lay.detailsW - (infoX - lay.detailsX) - pad;
+        const float bodyScale = std::clamp(0.90f * s, 0.82f, 1.05f);
+        const std::string desc = item.rpgTemplateId.empty() ? legacyDesc(item) : item.desc;
+        drawTextUnified(ellipsizeTextUnified(desc, infoW, bodyScale), Engine::Vec2{infoX, infoY}, bodyScale,
+                        Engine::Color{190, 210, 235, 230});
+        infoY += 26.0f * s;
+        if (!item.rpgTemplateId.empty()) {
+            for (std::size_t a = 0; a < item.affixes.size() && a < 6; ++a) {
+                drawTextUnified("• " + item.affixes[a], Engine::Vec2{infoX, infoY}, std::clamp(0.84f * s, 0.76f, 0.98f),
+                                Engine::Color{185, 220, 255, 220});
+                infoY += 20.0f * s;
+            }
+        }
+
+        int dynCost = dynCostFor(item);
+        const bool affordable = dynCost >= 0 && gold_ >= dynCost;
+        std::ostringstream cost;
+        if (dynCost < 0) cost << "Capped";
+        else cost << dynCost << "g";
+        drawTextUnified("Price", Engine::Vec2{lay.detailsX + pad, lay.buyY - 34.0f * s}, std::clamp(0.88f * s, 0.78f, 0.98f),
+                        Engine::Color{160, 190, 215, 210});
+        drawTextUnified(cost.str(), Engine::Vec2{lay.detailsX + pad + 58.0f * s, lay.buyY - 34.0f * s}, std::clamp(0.92f * s, 0.82f, 1.08f),
+                        affordable ? Engine::Color{180, 255, 200, 235} : Engine::Color{220, 160, 160, 220});
+
+        // Buy button (visual only).
+        const bool hovBuy = insideF(lay.buyX, lay.buyY, lay.buyW, lay.buyH);
+        Engine::Color btnBg = affordable ? Engine::Color{30, 70, 52, 235} : Engine::Color{60, 45, 45, 225};
+        if (dynCost < 0) btnBg = Engine::Color{50, 50, 58, 220};
+        if (hovBuy) {
+            btnBg = Engine::Color{static_cast<uint8_t>(std::min(255, btnBg.r + 12)),
+                                  static_cast<uint8_t>(std::min(255, btnBg.g + 12)),
+                                  static_cast<uint8_t>(std::min(255, btnBg.b + 12)),
+                                  btnBg.a};
+        }
+        render_->drawFilledRect(Engine::Vec2{lay.buyX, lay.buyY + 3.0f * s}, Engine::Vec2{lay.buyW, lay.buyH}, Engine::Color{0, 0, 0, 80});
+        render_->drawFilledRect(Engine::Vec2{lay.buyX, lay.buyY}, Engine::Vec2{lay.buyW, lay.buyH}, btnBg);
+        render_->drawFilledRect(Engine::Vec2{lay.buyX, lay.buyY}, Engine::Vec2{lay.buyW, 2.0f},
+                                affordable ? Engine::Color{120, 220, 170, 230} : Engine::Color{120, 120, 140, 210});
+        std::string btnLabel = (dynCost < 0) ? "Capped" : (affordable ? "Buy" : "Need Gold");
+        const float bs = std::clamp(1.0f * s, 0.90f, 1.12f);
+        Engine::Vec2 bsz = measureTextUnified(btnLabel, bs);
+        drawTextUnified(btnLabel, Engine::Vec2{lay.buyX + (lay.buyW - bsz.x) * 0.5f, lay.buyY + (lay.buyH - bsz.y) * 0.5f + 1.0f * s},
+                        bs, Engine::Color{220, 245, 255, 245});
+        if (!affordable && shopNoFundsTimer_ > 0.0) {
+            drawTextUnified("Not enough gold", Engine::Vec2{lay.buyX + pad, lay.buyY - 18.0f * s}, std::clamp(0.86f * s, 0.78f, 0.95f),
+                            Engine::Color{255, 170, 170, 220});
+        }
+    }
+
+    // Inventory panel (sell).
+    render_->drawFilledRect(Engine::Vec2{lay.invX, lay.invY + 3.0f * s}, Engine::Vec2{lay.invW, lay.invH}, Engine::Color{0, 0, 0, 75});
+    render_->drawFilledRect(Engine::Vec2{lay.invX, lay.invY}, Engine::Vec2{lay.invW, lay.invH}, Engine::Color{14, 18, 26, 220});
+    render_->drawFilledRect(Engine::Vec2{lay.invX, lay.invY}, Engine::Vec2{lay.invW, 2.0f}, Engine::Color{45, 70, 95, 190});
+    drawTextUnified("Inventory", Engine::Vec2{lay.invX + pad, lay.invY + 14.0f * s}, std::clamp(0.95f * s, 0.82f, 1.05f),
+                    Engine::Color{200, 230, 255, 220});
+    drawTextUnified("Click to sell (50%)", Engine::Vec2{lay.invX + pad, lay.invY + 34.0f * s}, std::clamp(0.82f * s, 0.76f, 0.92f),
+                    Engine::Color{160, 190, 215, 210});
+
+    const float invHeader = 50.0f * s;
+    const float listX = lay.invX + innerPad;
+    const float listY = lay.invY + invHeader;
+    const float listW = lay.invW - innerPad * 2.0f;
+    const float listH = lay.invH - invHeader - innerPad;
+    const int visibleRows = std::max(1, static_cast<int>(std::floor(listH / lay.invRowH)));
+    const int maxScrollRows = std::max(0, static_cast<int>(inventory_.size()) - visibleRows);
+    const int scrollRow = std::clamp(static_cast<int>(std::round(shopSellScroll_)), 0, maxScrollRows);
+    for (int r = 0; r < visibleRows; ++r) {
+        const int idx = scrollRow + r;
+        if (idx < 0 || idx >= static_cast<int>(inventory_.size())) break;
+        float y = listY + static_cast<float>(r) * lay.invRowH;
+        bool hov = insideF(listX, y, listW, lay.invRowH);
+        Engine::Color bg = hov ? Engine::Color{18, 26, 40, 232} : Engine::Color{12, 16, 24, 210};
+        render_->drawFilledRect(Engine::Vec2{listX, y}, Engine::Vec2{listW, lay.invRowH - 2.0f * s}, bg);
+        render_->drawFilledRect(Engine::Vec2{listX, y}, Engine::Vec2{4.0f * s, lay.invRowH - 2.0f * s}, Engine::Color{45, 70, 95, 180});
+
+        const auto& inst = inventory_[static_cast<std::size_t>(idx)];
+        const float ts = std::clamp(0.86f * s, 0.78f, 0.98f);
+        const float maxName = listW - 72.0f * s;
+        drawTextUnified(ellipsizeTextUnified(stripRaritySuffixLocal(inst.def.name), maxName, ts),
+                        Engine::Vec2{listX + 12.0f * s, y + 8.0f * s}, ts, rarityCol(inst.def.rarity));
+        int refund = std::max(1, inst.def.cost / 2);
         std::ostringstream sell;
         sell << refund << "g";
-        drawTextUnified(sell.str(), Engine::Vec2{invX + invW - 52.0f, ry + 4.0f}, 0.85f,
+        Engine::Vec2 ss = measureTextUnified(sell.str(), ts);
+        drawTextUnified(sell.str(), Engine::Vec2{listX + listW - 10.0f * s - ss.x, y + 8.0f * s}, ts,
                         Engine::Color{200, 255, 200, 220});
+    }
+    if (maxScrollRows > 0) {
+        const float barW = 10.0f * s;
+        const float trackX = lay.invX + lay.invW - barW - 10.0f * s;
+        render_->drawFilledRect(Engine::Vec2{trackX, listY}, Engine::Vec2{barW, listH}, Engine::Color{10, 14, 22, 170});
+        const float thumbH = std::max(24.0f * s, listH * (static_cast<float>(visibleRows) / static_cast<float>(inventory_.size())));
+        const float ratio = static_cast<float>(scrollRow) / static_cast<float>(maxScrollRows);
+        const float thumbY = listY + (listH - thumbH) * ratio;
+        render_->drawFilledRect(Engine::Vec2{trackX, thumbY}, Engine::Vec2{barW, thumbH}, Engine::Color{90, 140, 210, 220});
     }
 }
 
@@ -8506,129 +8821,175 @@ void GameRoot::drawBuildMenuOverlay(int mouseX, int mouseY, bool leftClickEdge) 
 
 void GameRoot::drawAbilityShopOverlay() {
     if (!render_ || !abilityShopOpen_) return;
-    const float panelW = 720.0f;
-    const float panelH = 320.0f;
-    const float cx = static_cast<float>(viewportWidth_) * 0.5f;
-    const float cy = static_cast<float>(viewportHeight_) * 0.55f;
-    Engine::Vec2 topLeft{cx - panelW * 0.5f, cy - panelH * 0.5f};
-    render_->drawFilledRect(topLeft, Engine::Vec2{panelW, panelH}, Engine::Color{20, 24, 34, 230});
-    drawTextUnified("Ability Shop (Copper) - B toggles", Engine::Vec2{topLeft.x + 18.0f, topLeft.y + 12.0f}, 1.0f,
-                    Engine::Color{200, 255, 200, 240});
-    drawTextUnified("Hover a card, then click to buy", Engine::Vec2{topLeft.x + 18.0f, topLeft.y + 32.0f},
-                    0.9f, Engine::Color{180, 220, 200, 220});
+    const auto lay = abilityShopLayout(viewportWidth_, viewportHeight_);
+    const float s = lay.s;
+    const float pad = lay.pad;
+    int mx = lastMouseX_;
+    int my = lastMouseY_;
+
+    auto insideF = [&](float x, float y, float w, float h) {
+        return mx >= static_cast<int>(x) && mx <= static_cast<int>(x + w) &&
+               my >= static_cast<int>(y) && my <= static_cast<int>(y + h);
+    };
 
     auto costForLevel = [&](int level) {
         return static_cast<int>(std::round(static_cast<float>(abilityShopBaseCost_) *
                                            std::pow(abilityShopCostGrowth_, static_cast<float>(level))));
     };
 
-    struct UpgradeCard {
+    struct UpgradeRow {
         std::string title;
         std::string desc;
         int level{0};
         int maxLevel{999};
         int cost{0};
-        std::function<bool()> buy;
     };
 
-    std::array<UpgradeCard, 6> cards;
-    cards[0] = {"Weapon Damage", "+1 damage per level", abilityDamageLevel_, 999, costForLevel(abilityDamageLevel_), [&]() {
-        int cost = costForLevel(abilityDamageLevel_);
-        if (copper_ < cost) return false;
-        copper_ -= cost;
-        abilityDamageLevel_ += 1;
-        projectileDamage_ += abilityDamagePerLevel_;
-        return true;
-    }};
-    cards[1] = {"Attack Speed", "+5% rate per level", abilityAttackSpeedLevel_, 999, costForLevel(abilityAttackSpeedLevel_), [&]() {
-        int cost = costForLevel(abilityAttackSpeedLevel_);
-        if (copper_ < cost) return false;
-        copper_ -= cost;
-        abilityAttackSpeedLevel_ += 1;
-        attackSpeedMul_ *= (1.0f + abilityAttackSpeedPerLevel_);
-        fireInterval_ = fireIntervalBase_ / std::max(0.1f, attackSpeedMul_);
-        return true;
-    }};
-    cards[2] = {"Weapon Range", "+1 range (max +5)", abilityRangeLevel_, abilityRangeMaxBonus_,
-                costForLevel(abilityRangeLevel_), [&]() {
-        if (abilityRangeLevel_ >= abilityRangeMaxBonus_) return false;
-        int cost = costForLevel(abilityRangeLevel_);
-        if (copper_ < cost) return false;
-        copper_ -= cost;
-        abilityRangeLevel_ += 1;
-        autoFireRangeBonus_ += abilityRangePerLevel_;
-        projectileLifetime_ += abilityRangePerLevel_ / std::max(1.0f, projectileSpeed_);
-        return true;
-    }};
-    cards[3] = {"Sight Range", "+1 vision (max +5)", abilityVisionLevel_, abilityVisionMaxBonus_,
-                costForLevel(abilityVisionLevel_), [&]() {
-        if (abilityVisionLevel_ >= abilityVisionMaxBonus_) return false;
-        int cost = costForLevel(abilityVisionLevel_);
-        if (copper_ < cost) return false;
-        copper_ -= cost;
-        abilityVisionLevel_ += 1;
-        heroVisionRadiusTiles_ = heroVisionRadiusBaseTiles_ + abilityVisionLevel_ * abilityVisionPerLevel_;
-        return true;
-    }};
-    cards[4] = {"Max Health", "+5 HP per level", abilityHealthLevel_, 999, costForLevel(abilityHealthLevel_), [&]() {
-        int cost = costForLevel(abilityHealthLevel_);
-        if (copper_ < cost) return false;
-        copper_ -= cost;
-        abilityHealthLevel_ += 1;
-        heroMaxHp_ += abilityHealthPerLevel_;
-        if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
-            hp->maxHealth = heroMaxHp_;
-            hp->currentHealth = std::min(hp->maxHealth, hp->currentHealth + abilityHealthPerLevel_);
-            heroUpgrades_.groundArmorLevel += 1;
-            Engine::Gameplay::applyUpgradesToUnit(*hp, heroBaseStatsScaled_, heroUpgrades_, false);
-        }
-        return true;
-    }};
-    cards[5] = {"Armor", "+1 armor per level", abilityArmorLevel_, 999, costForLevel(abilityArmorLevel_), [&]() {
-        int cost = costForLevel(abilityArmorLevel_);
-        if (copper_ < cost) return false;
-        copper_ -= cost;
-        abilityArmorLevel_ += 1;
-        heroHealthArmor_ += abilityArmorPerLevel_;
-        if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
-            hp->healthArmor = heroHealthArmor_;
-            Engine::Gameplay::applyUpgradesToUnit(*hp, heroBaseStatsScaled_, heroUpgrades_, false);
-        }
-        return true;
-    }};
+    std::array<UpgradeRow, 6> rows{};
+    rows[0] = {"Weapon Damage", "Increase base damage.", abilityDamageLevel_, 999, costForLevel(abilityDamageLevel_)};
+    rows[1] = {"Attack Speed", "Fire faster.", abilityAttackSpeedLevel_, 999, costForLevel(abilityAttackSpeedLevel_)};
+    rows[2] = {"Weapon Range", "Increase auto-fire range.", abilityRangeLevel_, abilityRangeMaxBonus_, costForLevel(abilityRangeLevel_)};
+    rows[3] = {"Sight Range", "Increase vision radius.", abilityVisionLevel_, abilityVisionMaxBonus_, costForLevel(abilityVisionLevel_)};
+    rows[4] = {"Max Health", "Increase maximum HP.", abilityHealthLevel_, 999, costForLevel(abilityHealthLevel_)};
+    rows[5] = {"Armor", "Reduce incoming damage.", abilityArmorLevel_, 999, costForLevel(abilityArmorLevel_)};
 
-    const float cardW = 200.0f;
-    const float cardH = 110.0f;
-    const float gap = 14.0f;
-    float startX = cx - (cardW * 3.0f + gap * 2.0f) * 0.5f;
-    float y = topLeft.y + 60.0f;
-    int mx = lastMouseX_;
-    int my = lastMouseY_;
-    for (int i = 0; i < static_cast<int>(cards.size()); ++i) {
-        float x = startX + (i % 3) * (cardW + gap);
-        float yRow = y + (i / 3) * (cardH + 12.0f);
-        bool hovered = mx >= x && mx <= x + cardW && my >= yRow && my <= yRow + cardH;
-        Engine::Color bg = hovered ? Engine::Color{46, 70, 96, 230}
-                                   : Engine::Color{34, 46, 66, 220};
-        render_->drawFilledRect(Engine::Vec2{x, yRow}, Engine::Vec2{cardW, cardH}, bg);
-        drawTextUnified(cards[i].title, Engine::Vec2{x + 12.0f, yRow + 10.0f}, 1.0f, Engine::Color{220, 240, 255, 240});
-        drawTextUnified(cards[i].desc, Engine::Vec2{x + 12.0f, yRow + 32.0f}, 0.9f, Engine::Color{200, 220, 240, 230});
-        std::ostringstream lvl;
-        lvl << "Lv " << cards[i].level << "/" << (cards[i].maxLevel >= 900 ? "∞" : std::to_string(cards[i].maxLevel));
-        drawTextUnified(lvl.str(), Engine::Vec2{x + 12.0f, yRow + 52.0f}, 0.9f, Engine::Color{200, 230, 220, 220});
-        std::ostringstream cost;
-        cost << cards[i].cost << "c";
-        bool affordable = copper_ >= cards[i].cost && cards[i].level < cards[i].maxLevel;
-        Engine::Color costCol = affordable ? Engine::Color{180, 255, 200, 240}
-                                           : Engine::Color{220, 160, 160, 220};
-        drawTextUnified(cost.str(), Engine::Vec2{x + 12.0f, yRow + 70.0f}, 0.9f, costCol);
-        drawTextUnified("Click to buy", Engine::Vec2{x + 12.0f, yRow + 86.0f}, 0.85f, Engine::Color{170, 200, 230, 200});
+    if (!rows.empty()) {
+        abilityShopSelected_ = std::clamp(abilityShopSelected_, 0, static_cast<int>(rows.size()) - 1);
+    } else {
+        abilityShopSelected_ = 0;
     }
 
-    std::ostringstream wallet;
-    wallet << "Copper: " << copper_;
-    drawTextUnified(wallet.str(), Engine::Vec2{topLeft.x + panelW - 200.0f, topLeft.y + 12.0f}, 0.95f,
+    // Scrim + container.
+    render_->drawFilledRect(Engine::Vec2{0.0f, 0.0f}, Engine::Vec2{static_cast<float>(viewportWidth_), static_cast<float>(viewportHeight_)},
+                            Engine::Color{6, 8, 12, 170});
+    render_->drawFilledRect(Engine::Vec2{lay.panelX, lay.panelY + 6.0f * s}, Engine::Vec2{lay.panelW, lay.panelH}, Engine::Color{0, 0, 0, 95});
+    render_->drawFilledRect(Engine::Vec2{lay.panelX, lay.panelY}, Engine::Vec2{lay.panelW, lay.panelH}, Engine::Color{12, 16, 24, 235});
+    render_->drawFilledRect(Engine::Vec2{lay.panelX, lay.panelY}, Engine::Vec2{lay.panelW, 2.0f}, Engine::Color{45, 70, 95, 190});
+    render_->drawFilledRect(Engine::Vec2{lay.panelX, lay.panelY + lay.panelH - 2.0f}, Engine::Vec2{lay.panelW, 2.0f}, Engine::Color{45, 70, 95, 190});
+
+    // Header.
+    drawTextUnified("Ability Shop", Engine::Vec2{lay.panelX + pad, lay.panelY + 18.0f * s}, std::clamp(1.15f * s, 0.95f, 1.25f),
                     Engine::Color{200, 255, 200, 240});
+    drawTextUnified("Copper • B to close", Engine::Vec2{lay.panelX + pad, lay.panelY + 42.0f * s}, std::clamp(0.88f * s, 0.78f, 0.98f),
+                    Engine::Color{160, 200, 230, 210});
+    std::ostringstream wallet;
+    wallet << "Copper " << copper_;
+    const float ws = std::clamp(0.98f * s, 0.86f, 1.08f);
+    const Engine::Vec2 wSz = measureTextUnified(wallet.str(), ws);
+    drawTextUnified(wallet.str(), Engine::Vec2{lay.panelX + lay.panelW - pad - wSz.x, lay.panelY + 22.0f * s}, ws,
+                    Engine::Color{200, 255, 200, 240});
+
+    // List section.
+    render_->drawFilledRect(Engine::Vec2{lay.listX, lay.listY + 3.0f * s}, Engine::Vec2{lay.listW, lay.listH}, Engine::Color{0, 0, 0, 65});
+    render_->drawFilledRect(Engine::Vec2{lay.listX, lay.listY}, Engine::Vec2{lay.listW, lay.listH}, Engine::Color{14, 18, 26, 220});
+    render_->drawFilledRect(Engine::Vec2{lay.listX, lay.listY}, Engine::Vec2{lay.listW, 2.0f}, Engine::Color{45, 70, 95, 190});
+    drawTextUnified("Upgrades", Engine::Vec2{lay.listX + pad, lay.listY + 14.0f * s}, std::clamp(0.95f * s, 0.82f, 1.05f),
+                    Engine::Color{200, 230, 255, 220});
+    drawTextUnified("Hover to preview • Buy on right", Engine::Vec2{lay.listX + pad, lay.listY + 34.0f * s}, std::clamp(0.82f * s, 0.76f, 0.92f),
+                    Engine::Color{160, 190, 215, 210});
+
+    const float rowGap = 10.0f * s;
+    const float rowsStartY = lay.listY + pad + 42.0f * s;
+    const float maxNameW = lay.listW - pad * 2.0f - 90.0f * s;
+    const float titleScale = std::clamp(0.96f * s, 0.86f, 1.08f);
+    const float descScale = std::clamp(0.82f * s, 0.74f, 0.95f);
+    for (int i = 0; i < static_cast<int>(rows.size()); ++i) {
+        float y = rowsStartY + static_cast<float>(i) * (lay.rowH + rowGap);
+        bool hov = insideF(lay.listX + pad, y, lay.listW - pad * 2.0f, lay.rowH);
+        bool sel = (i == abilityShopSelected_);
+        const auto& r = rows[static_cast<std::size_t>(i)];
+
+        Engine::Color bg = sel ? Engine::Color{22, 34, 52, 235} : (hov ? Engine::Color{18, 26, 40, 232}
+                                                                       : Engine::Color{12, 16, 24, 210});
+        render_->drawFilledRect(Engine::Vec2{lay.listX + pad, y + 3.0f * s}, Engine::Vec2{lay.listW - pad * 2.0f, lay.rowH}, Engine::Color{0, 0, 0, 65});
+        render_->drawFilledRect(Engine::Vec2{lay.listX + pad, y}, Engine::Vec2{lay.listW - pad * 2.0f, lay.rowH}, bg);
+        render_->drawFilledRect(Engine::Vec2{lay.listX + pad, y}, Engine::Vec2{4.0f * s, lay.rowH},
+                                Engine::Color{45, 70, 95, static_cast<uint8_t>(sel ? 235 : 180)});
+
+        drawTextUnified(ellipsizeTextUnified(r.title, maxNameW, titleScale),
+                        Engine::Vec2{lay.listX + pad + 12.0f * s, y + 10.0f * s}, titleScale, Engine::Color{220, 240, 255, 240});
+        drawTextUnified(ellipsizeTextUnified(r.desc, maxNameW, descScale),
+                        Engine::Vec2{lay.listX + pad + 12.0f * s, y + 32.0f * s}, descScale, Engine::Color{180, 210, 235, 220});
+
+        bool maxed = (r.level >= r.maxLevel);
+        std::ostringstream right;
+        if (maxed) {
+            right << "Max";
+        } else {
+            right << "Lv " << r.level;
+        }
+        Engine::Vec2 rs = measureTextUnified(right.str(), descScale);
+        drawTextUnified(right.str(), Engine::Vec2{lay.listX + lay.listW - pad - 10.0f * s - rs.x, y + 10.0f * s}, descScale,
+                        maxed ? Engine::Color{170, 200, 230, 200} : Engine::Color{200, 230, 220, 220});
+
+        std::ostringstream cost;
+        cost << r.cost << "c";
+        const bool affordable = (copper_ >= r.cost) && !maxed;
+        Engine::Color costCol = maxed ? Engine::Color{170, 200, 230, 190}
+                                      : (affordable ? Engine::Color{180, 255, 200, 235} : Engine::Color{220, 160, 160, 220});
+        Engine::Vec2 cs = measureTextUnified(cost.str(), titleScale);
+        drawTextUnified(cost.str(), Engine::Vec2{lay.listX + lay.listW - pad - 10.0f * s - cs.x, y + 32.0f * s}, titleScale, costCol);
+    }
+
+    // Details panel.
+    render_->drawFilledRect(Engine::Vec2{lay.detailsX, lay.detailsY + 3.0f * s}, Engine::Vec2{lay.detailsW, lay.detailsH}, Engine::Color{0, 0, 0, 65});
+    render_->drawFilledRect(Engine::Vec2{lay.detailsX, lay.detailsY}, Engine::Vec2{lay.detailsW, lay.detailsH}, Engine::Color{14, 18, 26, 220});
+    render_->drawFilledRect(Engine::Vec2{lay.detailsX, lay.detailsY}, Engine::Vec2{lay.detailsW, 2.0f}, Engine::Color{45, 70, 95, 190});
+
+    const auto& sel = rows[static_cast<std::size_t>(abilityShopSelected_)];
+    bool selMaxed = sel.level >= sel.maxLevel;
+    const bool affordable = (copper_ >= sel.cost) && !selMaxed;
+
+    drawTextUnified("Details", Engine::Vec2{lay.detailsX + pad, lay.detailsY + 14.0f * s}, std::clamp(0.95f * s, 0.82f, 1.05f),
+                    Engine::Color{200, 230, 255, 220});
+    drawTextUnified(sel.title, Engine::Vec2{lay.detailsX + pad, lay.detailsY + 44.0f * s}, std::clamp(1.12f * s, 0.95f, 1.25f),
+                    Engine::Color{220, 245, 255, 240});
+
+    float infoY = lay.detailsY + 84.0f * s;
+    const float bodyScale = std::clamp(0.92f * s, 0.82f, 1.05f);
+    const float infoW = lay.detailsW - pad * 2.0f;
+    drawTextUnified(ellipsizeTextUnified(sel.desc, infoW, bodyScale), Engine::Vec2{lay.detailsX + pad, infoY}, bodyScale,
+                    Engine::Color{190, 210, 235, 230});
+    infoY += 28.0f * s;
+
+    std::ostringstream lv;
+    lv << "Level " << sel.level;
+    if (sel.maxLevel < 900) lv << " / " << sel.maxLevel;
+    drawTextUnified(lv.str(), Engine::Vec2{lay.detailsX + pad, infoY}, std::clamp(0.90f * s, 0.78f, 1.0f),
+                    Engine::Color{180, 220, 255, 220});
+    infoY += 22.0f * s;
+
+    std::ostringstream c;
+    c << (selMaxed ? "Maxed" : (std::to_string(sel.cost) + "c"));
+    drawTextUnified("Cost", Engine::Vec2{lay.detailsX + pad, infoY}, std::clamp(0.88f * s, 0.78f, 0.98f),
+                    Engine::Color{160, 190, 215, 210});
+    drawTextUnified(c.str(), Engine::Vec2{lay.detailsX + pad + 62.0f * s, infoY}, std::clamp(0.92f * s, 0.82f, 1.08f),
+                    selMaxed ? Engine::Color{170, 200, 230, 200}
+                             : (affordable ? Engine::Color{180, 255, 200, 235} : Engine::Color{220, 160, 160, 220}));
+
+    // Buy button (visual only; click handled in update).
+    const bool hovBuy = insideF(lay.buyX, lay.buyY, lay.buyW, lay.buyH);
+    Engine::Color btnBg = affordable ? Engine::Color{30, 70, 52, 235} : Engine::Color{60, 45, 45, 225};
+    if (selMaxed) btnBg = Engine::Color{50, 50, 58, 220};
+    if (hovBuy) {
+        btnBg = Engine::Color{static_cast<uint8_t>(std::min(255, btnBg.r + 12)),
+                              static_cast<uint8_t>(std::min(255, btnBg.g + 12)),
+                              static_cast<uint8_t>(std::min(255, btnBg.b + 12)),
+                              btnBg.a};
+    }
+    render_->drawFilledRect(Engine::Vec2{lay.buyX, lay.buyY + 3.0f * s}, Engine::Vec2{lay.buyW, lay.buyH}, Engine::Color{0, 0, 0, 80});
+    render_->drawFilledRect(Engine::Vec2{lay.buyX, lay.buyY}, Engine::Vec2{lay.buyW, lay.buyH}, btnBg);
+    render_->drawFilledRect(Engine::Vec2{lay.buyX, lay.buyY}, Engine::Vec2{lay.buyW, 2.0f},
+                            affordable ? Engine::Color{120, 220, 170, 230} : Engine::Color{120, 120, 140, 210});
+    std::string btnLabel = selMaxed ? "Maxed" : (affordable ? "Buy Upgrade" : "Need Copper");
+    const float bs = std::clamp(1.0f * s, 0.90f, 1.12f);
+    Engine::Vec2 bsz = measureTextUnified(btnLabel, bs);
+    drawTextUnified(btnLabel, Engine::Vec2{lay.buyX + (lay.buyW - bsz.x) * 0.5f, lay.buyY + (lay.buyH - bsz.y) * 0.5f + 1.0f * s},
+                    bs, Engine::Color{220, 245, 255, 245});
+    if (!affordable && !selMaxed && shopNoFundsTimer_ > 0.0) {
+        drawTextUnified("Not enough copper", Engine::Vec2{lay.buyX + pad, lay.buyY - 18.0f * s}, std::clamp(0.86f * s, 0.78f, 0.95f),
+                        Engine::Color{255, 170, 170, 220});
+    }
 }
 
 void GameRoot::drawPauseOverlay() {
