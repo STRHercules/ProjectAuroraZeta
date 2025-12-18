@@ -998,3 +998,78 @@
   - Main Menu -> Options: adjust Music/SFX and restart the game; verify values persist.
   - Toggle Background Audio off, alt-tab away; verify music/SFX mute until focus returns.
   - Main Menu -> Upgrades: scroll list, select entries, buy with confirm/cancel, and verify vault gold updates.
+
+## 2025-12-18 — Expanded lifetime stats + redesigned Stats screen (v0.0.156)
+
+**Prompt / Task**
+- Implement a thorough expansion of the Stats screen: enemies killed, bosses killed, pickups collected, copper/gold picked up, escorts transported, assassins thwarted, and other relevant stats.
+- Redesign the Stats screen to be modern and aesthetically pleasing.
+
+**What Changed**
+- Added new lifetime profile counters for:
+  - Bosses killed, bounty targets killed.
+  - Pickups collected, items/powerups/revives collected, revives used.
+  - Copper/gold picked up (pickup-only).
+  - Escort successes, spawner-hunt completions, bounty-event completions, spawner spires destroyed ("Assassins thwarted").
+  - Time played (seconds across completed runs).
+- Rebuilt the Stats screen into a scrollable dashboard with section headers, responsive columns, and a Back button.
+- Extended the profile save schema (backward-compatible) to persist the new stats.
+
+**Steps Taken**
+- Consulted `TASK.md` (current content is RPG combat/loot systems; not directly related to this UI/stat request).
+- Added per-run counters and rolled them into lifetime totals when a run ends (defeat), matching the existing `totalRuns`/`totalKills` behavior.
+- Updated save load/store to include the new stats fields under a `stats` object while still accepting legacy top-level keys.
+
+**Rationale / Tradeoffs**
+- Stats are recorded for completed runs only (on defeat), consistent with the existing lifetime runs/kills logic (abandoned runs from the pause menu do not count).
+- "Assassins thwarted" is tracked as destroyed spawner spires from the Spire Hunt event; the event completion count is also shown separately.
+
+**Build / Test**
+- Build: `cmake --build build -j` (Linux, 2025-12-18).
+- Manual test:
+  - Main Menu -> Stats: scroll the dashboard; verify layout scales and Back/Esc return correctly.
+  - Play a run until defeat; return to Main Menu -> Stats and verify counters increased (kills, bosses, pickups, events, playtime).
+
+## 2025-12-18 — Fix Win64 build audio packaging (v0.0.157)
+
+**Prompt / Task**
+- "I am not able to hear any sounds or music when using the windows build"
+
+**What Changed**
+- Win64 cross-build now includes `SDL2_mixer` in the CMake prefix search path so the engine builds with audio enabled.
+- Win64 packaging now bundles `SDL2_mixer` and its runtime DLL dependencies into `dist/windows/zeta-win64.zip`, and stages the EXE as `Project Aurora Zeta.exe` (even if the build output name is `zeta.exe`) so `start.bat` works reliably.
+- README updated to treat `SDL2_mixer` as required for music + SFX on Win64.
+
+**Steps Taken**
+- Consulted `TASK.md` (current content is RPG combat/loot systems; not directly related to this build/distribution issue).
+- Traced the Win64 pipeline (`scripts/build-win.sh` + `scripts/package-win.sh`) and confirmed it only referenced SDL2/SDL2_image/SDL2_ttf.
+- Added the `SDL2_mixer-2.8.0` MinGW package path to the build and package scripts.
+
+**Rationale / Tradeoffs**
+- The game’s audio layer is intentionally compile-time optional (`ZETA_HAS_SDL_MIXER`), but the Win64 distributable should ship with audio enabled by default.
+
+**Build / Test**
+- Build: `cmake --build build -j"$(nproc)"` (Linux, 2025-12-18).
+- Manual test (Win64):
+  - From Linux: run `./scripts/build-win.sh && ./scripts/package-win.sh`.
+  - On Windows: unzip `dist/windows/zeta-win64.zip`, run `start.bat`, and verify main-menu music + in-game SFX are audible.
+
+## 2025-12-18 — Enforce audio-enabled CI builds
+
+**Prompt / Task**
+- "Let's make sure these steps are present in my GitHub Actions CI so the windows, mac and linux builds all ship with working audio."
+
+**What Changed**
+- CI now installs `SDL2_mixer` on Linux/macOS/Windows and configures with `-DZETA_REQUIRE_AUDIO=ON` so builds fail fast if audio would be compiled out.
+- CI adds simple linkage/runtime packaging checks (Windows: `SDL2_mixer.dll` present; Linux/macOS: built binary links against SDL2_mixer).
+
+**Steps Taken**
+- Added a `ZETA_REQUIRE_AUDIO` CMake option and a configure-time fatal error when `SDL2_mixer` is missing and the option is enabled.
+- Updated `.github/workflows/cross-platform-build.yml` to install mixer packages on each OS and run the verification steps.
+
+**Rationale / Tradeoffs**
+- This guarantees we don’t accidentally publish “silent” artifacts again while keeping local/dev builds flexible (`ZETA_REQUIRE_AUDIO` defaults OFF).
+
+**Build / Test**
+- Build: `cmake -S . -B build -DZETA_REQUIRE_AUDIO=ON && cmake --build build -j"$(nproc)"` (Linux, 2025-12-18).
+- Tests: `./build/rpg_tests && ./build/combat_tests && ./build/upgrades_tests` (Linux, 2025-12-18).

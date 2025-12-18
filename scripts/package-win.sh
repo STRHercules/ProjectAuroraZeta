@@ -16,17 +16,25 @@ rm -rf "$STAGE_DIR"
 mkdir -p "$STAGE_DIR"
 
 # Prefer single-config MinGW output; fall back to multi-config layout if present.
-EXE_PATH="$BUILD_DIR/$EXE_NAME"
-if [[ ! -f "$EXE_PATH" && -f "$BUILD_DIR/Release/$EXE_NAME" ]]; then
-  EXE_PATH="$BUILD_DIR/Release/$EXE_NAME"
-fi
+# Also accept legacy output name `zeta.exe` and rename it into the staged `EXE_NAME`.
+EXE_PATH=""
+for candidate in "$EXE_NAME" "zeta.exe"; do
+  if [[ -f "$BUILD_DIR/$candidate" ]]; then
+    EXE_PATH="$BUILD_DIR/$candidate"
+    break
+  fi
+  if [[ -f "$BUILD_DIR/Release/$candidate" ]]; then
+    EXE_PATH="$BUILD_DIR/Release/$candidate"
+    break
+  fi
+done
 
 if [[ ! -f "$EXE_PATH" ]]; then
-  echo "$EXE_NAME not found in $BUILD_DIR. Build first with scripts/build-win.sh" >&2
+  echo "Executable not found in $BUILD_DIR (tried '$EXE_NAME' and 'zeta.exe'). Build first with scripts/build-win.sh" >&2
   exit 1
 fi
 
-cp "$EXE_PATH" "$STAGE_DIR/"
+cp "$EXE_PATH" "$STAGE_DIR/$EXE_NAME"
 
 for dir in assets data; do
   cp -r "$ROOT_DIR/$dir" "$STAGE_DIR/"
@@ -36,7 +44,8 @@ done
 mkdir -p "$STAGE_DIR/saves"
 
 # Pull in all DLLs from the SDL runtime zips (covers image/font dependencies).
-for pkg in SDL2-2.30.9 SDL2_image-2.8.2 SDL2_ttf-2.22.0; do
+# SDL2_mixer is required for in-game music and sound effects.
+for pkg in SDL2-2.30.9 SDL2_image-2.8.2 SDL2_ttf-2.22.0 SDL2_mixer-2.8.0; do
   BIN_DIR="$WIN_SDL_ROOT/$pkg/x86_64-w64-mingw32/bin"
   if [[ -d "$BIN_DIR" ]]; then
     cp "$BIN_DIR"/*.dll "$STAGE_DIR/" 2>/dev/null || true

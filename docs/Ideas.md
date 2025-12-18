@@ -1,6 +1,32 @@
+# Enemies
+* Define Enemy types
+    - Define AI
+    - Define Abilities
+    - Define Stat Spread
+* Add Enemies
+    - Slimes
+    - Fire Skulls
+
+# Gear
+* Better Define Gear
+    - Types
+    - Rarity
+    - Bonuses
+* Fix Potions/Gems having affixes
+* Limit bonuses per quality tier
+* Add Unique Drops
+    - Weapons, Gear, Consumables
+        - Unique Armor
+        - Unique Weapons
+        - Unique Trinkets
+        - Unique Foods/Potions (Elixers, Feasts)
+* Decrease overall drop rate of gear
+
 # Mod Support
 * Expose as much as possible to make it as easy as possible to mod
     * Develop mod tools?
+
+# 'Main Menu' option on the Esc Screen should come with a Confirmation window.
 
 # Threat/Aggro and Party Synergy (Optional / Co-op Ready)
 * If you ever do co-op, add:
@@ -66,12 +92,3 @@
     * 10,000 Gold picked up
     * 100 Escorts safely transported
     * 1,000 Assassins thwarted
-
-# Thorough ^^^^ expansion of Stat Screen
-* X Enemies Killed
-* X Bosses Killed
-* X Pickups picked up
-* X Copper picked up
-* X Gold picked up
-* X Escorts safely transported
-* X Assassins thwarted

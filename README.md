@@ -222,7 +222,7 @@ wget https://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-devel-2.22.0-mingw
 # Grab SDL2_image
 wget https://www.libsdl.org/projects/SDL_image/release/SDL2_image-devel-2.8.2-mingw.zip
 
-# Grab SDL2_mixer (optional, enables background music)
+# Grab SDL2_mixer (required for music + SFX)
 wget https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-devel-2.8.0-mingw.zip
 
 # Extract the .zips

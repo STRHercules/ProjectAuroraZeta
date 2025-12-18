@@ -88,6 +88,10 @@ else()
     target_link_libraries(engine PUBLIC SDL2::SDL2 SDL2_ttf::SDL2_ttf nlohmann_json::nlohmann_json)
 endif()
 
+if (ZETA_REQUIRE_AUDIO AND NOT SDL2_mixer_FOUND)
+    message(FATAL_ERROR "ZETA_REQUIRE_AUDIO=ON but SDL2_mixer was not found. Install SDL2_mixer (dev) and reconfigure.")
+endif()
+
 if (SDL2_mixer_FOUND)
     target_link_libraries(engine PUBLIC SDL2_mixer::SDL2_mixer)
     target_compile_definitions(engine PUBLIC ZETA_HAS_SDL_MIXER=1)

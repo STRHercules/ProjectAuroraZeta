@@ -10,10 +10,24 @@
 namespace Game {
 
 struct SaveData {
-    int version{4};
+    int version{5};
     int totalRuns{0};
     int bestWave{0};
-    int totalKills{0};
+    int totalKills{0};  // Lifetime enemy kills (includes bosses).
+    int64_t totalBossesKilled{0};
+    int64_t totalBountyTargetsKilled{0};
+    int64_t totalPickupsCollected{0};
+    int64_t totalItemsCollected{0};
+    int64_t totalPowerupsCollected{0};
+    int64_t totalRevivesCollected{0};
+    int64_t totalRevivesUsed{0};
+    int64_t totalCopperPickedUp{0};
+    int64_t totalGoldPickedUp{0};
+    int64_t totalEscortsTransported{0};
+    int64_t totalAssassinsThwarted{0};  // Assassin spires destroyed.
+    int64_t totalBountyEventsCompleted{0};
+    int64_t totalSpawnerEventsCompleted{0};
+    int64_t totalSecondsPlayed{0};
     int movementMode{0};  // 0 = Modern, 1 = RTS
     int64_t vaultGold{0};
     std::string lastDepositedMatchId{};

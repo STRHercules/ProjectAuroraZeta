@@ -71,7 +71,29 @@ std::vector<uint8_t> SaveManager::serialize(const SaveData& data) const {
     j["totalRuns"] = data.totalRuns;
     j["bestWave"] = data.bestWave;
     j["totalKills"] = data.totalKills;
+    // Prefer reading these from `stats` (below), but keep legacy top-level keys for backward compatibility.
     j["movementMode"] = data.movementMode;
+
+    nlohmann::json stats;
+    stats["totalRuns"] = data.totalRuns;
+    stats["bestWave"] = data.bestWave;
+    stats["totalKills"] = data.totalKills;
+    stats["bossesKilled"] = data.totalBossesKilled;
+    stats["bountyTargetsKilled"] = data.totalBountyTargetsKilled;
+    stats["pickupsCollected"] = data.totalPickupsCollected;
+    stats["itemsCollected"] = data.totalItemsCollected;
+    stats["powerupsCollected"] = data.totalPowerupsCollected;
+    stats["revivesCollected"] = data.totalRevivesCollected;
+    stats["revivesUsed"] = data.totalRevivesUsed;
+    stats["copperPickedUp"] = data.totalCopperPickedUp;
+    stats["goldPickedUp"] = data.totalGoldPickedUp;
+    stats["escortsTransported"] = data.totalEscortsTransported;
+    stats["assassinsThwarted"] = data.totalAssassinsThwarted;
+    stats["bountyEventsCompleted"] = data.totalBountyEventsCompleted;
+    stats["spawnerEventsCompleted"] = data.totalSpawnerEventsCompleted;
+    stats["secondsPlayed"] = data.totalSecondsPlayed;
+    j["stats"] = stats;
+
     nlohmann::json vault;
     vault["gold"] = data.vaultGold;
     vault["lastMatchId"] = data.lastDepositedMatchId;
@@ -107,9 +129,39 @@ bool SaveManager::deserialize(const std::vector<uint8_t>& bytes, SaveData& outDa
         std::string s(bytes.begin(), bytes.end());
         auto j = nlohmann::json::parse(s);
         outData.version = j.value("version", 1);
-        outData.totalRuns = j.value("totalRuns", 0);
-        outData.bestWave = j.value("bestWave", 0);
-        outData.totalKills = j.value("totalKills", 0);
+
+        // Lifetime stats: prefer `stats`, but accept legacy top-level keys.
+        const nlohmann::json* stats = nullptr;
+        if (j.contains("stats") && j["stats"].is_object()) {
+            stats = &j["stats"];
+        }
+        const auto readI64 = [&](const char* key, int64_t fallback) -> int64_t {
+            if (stats && stats->contains(key)) return (*stats).value(key, fallback);
+            return j.value(key, fallback);
+        };
+        const auto readI32 = [&](const char* key, int fallback) -> int {
+            if (stats && stats->contains(key)) return (*stats).value(key, fallback);
+            return j.value(key, fallback);
+        };
+
+        outData.totalRuns = readI32("totalRuns", 0);
+        outData.bestWave = readI32("bestWave", 0);
+        outData.totalKills = readI32("totalKills", 0);
+        outData.totalBossesKilled = readI64("bossesKilled", 0);
+        outData.totalBountyTargetsKilled = readI64("bountyTargetsKilled", 0);
+        outData.totalPickupsCollected = readI64("pickupsCollected", 0);
+        outData.totalItemsCollected = readI64("itemsCollected", 0);
+        outData.totalPowerupsCollected = readI64("powerupsCollected", 0);
+        outData.totalRevivesCollected = readI64("revivesCollected", 0);
+        outData.totalRevivesUsed = readI64("revivesUsed", 0);
+        outData.totalCopperPickedUp = readI64("copperPickedUp", 0);
+        outData.totalGoldPickedUp = readI64("goldPickedUp", 0);
+        outData.totalEscortsTransported = readI64("escortsTransported", 0);
+        outData.totalAssassinsThwarted = readI64("assassinsThwarted", 0);
+        outData.totalBountyEventsCompleted = readI64("bountyEventsCompleted", 0);
+        outData.totalSpawnerEventsCompleted = readI64("spawnerEventsCompleted", 0);
+        outData.totalSecondsPlayed = readI64("secondsPlayed", 0);
+
         outData.movementMode = j.value("movementMode", 0);
         if (j.contains("vault")) {
             auto v = j["vault"];

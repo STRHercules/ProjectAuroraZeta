@@ -1381,6 +1381,9 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
     }
 
     // Timers.
+    if (!paused_ && !defeatDelayActive_ && !defeated_ && runStarted_) {
+        runSeconds_ += step.deltaSeconds;
+    }
         if (shopNoFundsTimer_ > 0.0) {
             shopNoFundsTimer_ -= step.deltaSeconds;
             if (shopNoFundsTimer_ < 0.0) shopNoFundsTimer_ = 0.0;
@@ -2735,6 +2738,12 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 });
             for (const auto& death : newDeaths) {
                 kills_ += 1;
+                if (death.boss) {
+                    bossKills_ += 1;
+                }
+                if (death.bounty) {
+                    bountyTargetsKilled_ += 1;
+                }
                 copper_ += static_cast<int>(std::round(copperPerKill_ * copperMul));
                 xp_ += static_cast<int>(std::round(xpPerKill_ * xpMul));
                 if (death.boss) {
@@ -2928,6 +2937,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 [&](Engine::ECS::Entity e, Engine::ECS::Health& hp, Game::Spawner& sp) {
                     if (!hp.alive()) {
                         deadSpawners.push_back(e);
+                        spawnerSpiresDestroyed_ += 1;
                         if (eventSystem_) {
                             eventSystem_->notifyTargetKilled(registry_, sp.eventId);
                         }
@@ -3144,6 +3154,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 // Do not auto-collect while down.
             } else {
             auto onCollect = [&](const Pickup& p) {
+                pickupsCollected_ += 1;
                 // Trigger pickup animation for coins/powerups.
                 if (registry_.has<Game::HeroSpriteSheets>(hero_) &&
                     (p.kind == Pickup::Kind::Copper || p.kind == Pickup::Kind::Gold || p.kind == Pickup::Kind::Powerup)) {
@@ -3161,17 +3172,21 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 switch (p.kind) {
                     case Pickup::Kind::Copper:
                         copper_ += p.amount;
+                        copperPickedUp_ += static_cast<int64_t>(p.amount);
                         playPickup(/*isHeal=*/false);
                         break;
                     case Pickup::Kind::Gold:
                         gold_ += p.amount;
+                        goldPickedUp_ += static_cast<int64_t>(p.amount);
                         playPickup(/*isHeal=*/false);
                         break;
                     case Pickup::Kind::Powerup:
+                        powerupsCollected_ += 1;
                         applyPowerupPickup(p.powerup);
                         playPickup(/*isHeal=*/p.powerup == Pickup::Powerup::Heal);
                         break;
                     case Pickup::Kind::Item: {
+                        itemsCollected_ += 1;
                         if (!addItemToInventory(p.item)) {
                             copper_ += std::max(1, p.item.cost / 2);
                         }
@@ -3180,6 +3195,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     }
                     case Pickup::Kind::Revive:
                         reviveCharges_ += 1;
+                        revivesCollected_ += 1;
                         playPickup(/*isHeal=*/false);
                         break;
                 }
@@ -3264,6 +3280,11 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             eb << evLabel << " Success";
             if (evLabel == "Escort Duty") {
                 eb << " +" << salvageReward_ << "g";
+                escortsTransported_ += 1;
+            } else if (evLabel == "Assassinate Spawners") {
+                spawnerEventsCompleted_ += 1;
+            } else if (evLabel == "Bounty Hunt") {
+                bountyEventsCompleted_ += 1;
             }
             eventBannerText_ = eb.str();
             eventBannerTimer_ = 1.5;
@@ -4537,6 +4558,20 @@ void GameRoot::handleHeroDeath(const Engine::TimeStep& step) {
         if (runStarted_) {
             totalRuns_ += 1;
             totalKillsAccum_ += kills_;
+            totalBossesKilled_ += bossKills_;
+            totalBountyTargetsKilled_ += bountyTargetsKilled_;
+            totalPickupsCollected_ += pickupsCollected_;
+            totalItemsCollected_ += itemsCollected_;
+            totalPowerupsCollected_ += powerupsCollected_;
+            totalRevivesCollected_ += revivesCollected_;
+            totalRevivesUsed_ += revivesUsed_;
+            totalCopperPickedUp_ += copperPickedUp_;
+            totalGoldPickedUp_ += goldPickedUp_;
+            totalEscortsTransported_ += escortsTransported_;
+            totalAssassinsThwarted_ += spawnerSpiresDestroyed_;
+            totalBountyEventsCompleted_ += bountyEventsCompleted_;
+            totalSpawnerEventsCompleted_ += spawnerEventsCompleted_;
+            totalSecondsPlayed_ += static_cast<int64_t>(std::llround(runSeconds_));
             int naturalWave = std::max(0, wave_ - std::max(0, startWaveBase_ - 1));
             bestWave_ = std::max(bestWave_, naturalWave);
             depositRunGoldOnce("match_end_defeat");
@@ -4550,6 +4585,7 @@ void GameRoot::handleHeroDeath(const Engine::TimeStep& step) {
 
     if (reviveCharges_ > 0) {
         reviveCharges_ -= 1;
+        revivesUsed_ += 1;
         hp->currentHealth = std::max(1.0f, hp->maxHealth * 0.75f);
         hp->currentShields = hp->maxShields;
         hp->regenDelay = 0.0f;
@@ -4747,10 +4783,24 @@ void GameRoot::loadProgress() {
     SaveData data{};
     if (mgr.load(data)) {
         saveData_ = data;
-        saveData_.version = 4;
+        saveData_.version = 5;
         totalRuns_ = data.totalRuns;
         bestWave_ = data.bestWave;
         totalKillsAccum_ = data.totalKills;
+        totalBossesKilled_ = data.totalBossesKilled;
+        totalBountyTargetsKilled_ = data.totalBountyTargetsKilled;
+        totalPickupsCollected_ = data.totalPickupsCollected;
+        totalItemsCollected_ = data.totalItemsCollected;
+        totalPowerupsCollected_ = data.totalPowerupsCollected;
+        totalRevivesCollected_ = data.totalRevivesCollected;
+        totalRevivesUsed_ = data.totalRevivesUsed;
+        totalCopperPickedUp_ = data.totalCopperPickedUp;
+        totalGoldPickedUp_ = data.totalGoldPickedUp;
+        totalEscortsTransported_ = data.totalEscortsTransported;
+        totalAssassinsThwarted_ = data.totalAssassinsThwarted;
+        totalBountyEventsCompleted_ = data.totalBountyEventsCompleted;
+        totalSpawnerEventsCompleted_ = data.totalSpawnerEventsCompleted;
+        totalSecondsPlayed_ = data.totalSecondsPlayed;
         movementMode_ = (data.movementMode == 1) ? MovementMode::RTS : MovementMode::Modern;
         vaultGold_ = data.vaultGold;
         lastDepositedMatchId_ = data.lastDepositedMatchId;
@@ -4768,10 +4818,24 @@ void GameRoot::loadProgress() {
 }
 
 void GameRoot::saveProgress() {
-    saveData_.version = 4;
+    saveData_.version = 5;
     saveData_.totalRuns = totalRuns_;
     saveData_.bestWave = bestWave_;
     saveData_.totalKills = totalKillsAccum_;
+    saveData_.totalBossesKilled = totalBossesKilled_;
+    saveData_.totalBountyTargetsKilled = totalBountyTargetsKilled_;
+    saveData_.totalPickupsCollected = totalPickupsCollected_;
+    saveData_.totalItemsCollected = totalItemsCollected_;
+    saveData_.totalPowerupsCollected = totalPowerupsCollected_;
+    saveData_.totalRevivesCollected = totalRevivesCollected_;
+    saveData_.totalRevivesUsed = totalRevivesUsed_;
+    saveData_.totalCopperPickedUp = totalCopperPickedUp_;
+    saveData_.totalGoldPickedUp = totalGoldPickedUp_;
+    saveData_.totalEscortsTransported = totalEscortsTransported_;
+    saveData_.totalAssassinsThwarted = totalAssassinsThwarted_;
+    saveData_.totalBountyEventsCompleted = totalBountyEventsCompleted_;
+    saveData_.totalSpawnerEventsCompleted = totalSpawnerEventsCompleted_;
+    saveData_.totalSecondsPlayed = totalSecondsPlayed_;
     saveData_.movementMode = (movementMode_ == MovementMode::RTS) ? 1 : 0;
     saveData_.vaultGold = vaultGold_;
     saveData_.lastDepositedMatchId = lastDepositedMatchId_;
@@ -6709,16 +6773,43 @@ void GameRoot::updateMenuInput(const Engine::ActionState& actions, const Engine:
                 return;
             }
         } else if (menuPage_ == MenuPage::Stats) {
-            const int itemCount = 1;  // Back
-            advanceSelection(itemCount);
+            // Scrollable, click-through stats page: only the Back button (or Esc) exits.
+            const float refW = 1920.0f;
+            const float refH = 1080.0f;
+            const float s = std::min(vw / refW, vh / refH);
+            const float margin = 28.0f * s;
+            const float footerH = 120.0f * s;
+            const float titleY = 72.0f * s;
+            const float contentTop = titleY + 144.0f * s;
+            const float panelX = margin;
+            const float panelY = contentTop;
+            const float panelW = std::max(1.0f, vw - margin * 2.0f);
+            const float panelH = std::max(1.0f, (vh - footerH) - contentTop);
+            const float pad = 18.0f * s;
+
+            const float btnH = 44.0f * s;
+            const float btnW = 180.0f * s;
+            const float btnX = panelX + pad;
+            const float btnY = panelY + panelH - pad - btnH;
+
+            // Scroll wheel when hovering the panel.
+            const bool hoverPanel = inside(mx, my, panelX, panelY, panelW, panelH);
+            if (hoverPanel && scrollDeltaFrame_ != 0) {
+                statsScroll_ = std::max(0.0f, statsScroll_ - static_cast<float>(scrollDeltaFrame_) * 52.0f * s);
+            }
+
             if (confirmEdge || pauseEdge) {
                 menuPage_ = MenuPage::Main;
                 menuSelection_ = 0;
+                statsScroll_ = 0.0f;
+                return;
             }
-            // click anywhere to go back
-            if (clickEdge) {
+            if (clickEdge && inside(mx, my, btnX, btnY, btnW, btnH)) {
                 menuPage_ = MenuPage::Main;
                 menuSelection_ = 0;
+                statsScroll_ = 0.0f;
+                playUiClose();
+                return;
             }
         } else if (menuPage_ == MenuPage::Upgrades) {
             const auto& defs = Meta::upgradeDefinitions();
@@ -7486,7 +7577,7 @@ void GameRoot::renderMenu() {
     drawTextUnified(title, Engine::Vec2{centerX - titleW * 0.5f, titleY}, titleScale, Engine::Color{190, 235, 255, 245});
 
     // Build info (bottom-right).
-    const std::string buildStr = "Pre-Alpha | Build v0.0.155";
+    const std::string buildStr = "Pre-Alpha | Build v0.0.157";
     const float buildScale = std::clamp(0.95f * s, 0.72f, 0.95f);
     const Engine::Vec2 buildSz = measureTextUnified(buildStr, buildScale);
     drawTextUnified(buildStr, Engine::Vec2{vw - margin - buildSz.x, vh - margin - buildSz.y}, buildScale,
@@ -7558,19 +7649,226 @@ void GameRoot::renderMenu() {
         const float creditsY = vh - margin - 34.0f * s;
         drawTextUnified(credit, Engine::Vec2{centerX - creditW * 0.5f, creditsY}, creditScale, hint);
     } else if (menuPage_ == MenuPage::Stats) {
-        Engine::Color c{200, 230, 255, 240};
-        drawTextUnified("Stats", Engine::Vec2{centerX - 40.0f, topY + 60.0f}, 1.2f, c);
-        std::ostringstream ss;
-        ss << "Total Runs: " << totalRuns_;
-        drawTextUnified(ss.str(), Engine::Vec2{centerX - 120.0f, topY + 100.0f}, 1.0f, c);
-        ss.str(""); ss.clear();
-        ss << "Best Wave: " << bestWave_;
-        drawTextUnified(ss.str(), Engine::Vec2{centerX - 120.0f, topY + 128.0f}, 1.0f, c);
-        ss.str(""); ss.clear();
-        ss << "Total Kills: " << totalKillsAccum_;
-        drawTextUnified(ss.str(), Engine::Vec2{centerX - 120.0f, topY + 156.0f}, 1.0f, c);
-        drawTextUnified("Esc / Mouse1 to return", Engine::Vec2{centerX - 120.0f, topY + 204.0f}, 0.9f,
-                        Engine::Color{180, 210, 240, 220});
+        const float refW = 1920.0f;
+        const float refH = 1080.0f;
+        const float s = std::min(vw / refW, vh / refH);
+        const float textBoost = 1.12f;
+        const float margin = 28.0f * s;
+        const float gap = 16.0f * s;
+        const float footerH = 120.0f * s;
+        const float titleYRef = 72.0f * s;
+
+        // Page title (under the main game title).
+        {
+            const std::string pageTitle = "Stats";
+            const float st = std::clamp(1.35f * s * textBoost, 1.15f, 1.60f);
+            const float tw = measureTextUnified(pageTitle, st).x;
+            drawTextUnified(pageTitle, Engine::Vec2{centerX - tw * 0.5f, titleYRef + 84.0f * s}, st,
+                            Engine::Color{200, 230, 255, 240});
+            const std::string sub = "Lifetime totals across completed runs • Esc to go back";
+            const float ss = std::clamp(0.88f * s * textBoost, 0.82f, 1.10f);
+            const float sw = measureTextUnified(sub, ss).x;
+            drawTextUnified(sub, Engine::Vec2{centerX - sw * 0.5f, titleYRef + 114.0f * s}, ss,
+                            Engine::Color{150, 190, 215, 210});
+        }
+
+        const float contentTop = titleYRef + 144.0f * s;
+        const float contentBottom = vh - footerH;
+        const float panelH = std::max(160.0f * s, contentBottom - contentTop);
+        const float panelY = contentTop;
+        const float panelX = margin;
+        const float panelW = std::max(1.0f, vw - margin * 2.0f);
+
+        auto drawCard = [&](float x, float y, float w, float h) {
+            render_->drawFilledRect(Engine::Vec2{x, y + 4.0f * s}, Engine::Vec2{w, h}, Engine::Color{0, 0, 0, 85});
+            render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{w, h}, Engine::Color{12, 16, 24, 220});
+            render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{w, 2.0f}, Engine::Color{45, 70, 95, 190});
+            render_->drawFilledRect(Engine::Vec2{x, y + h - 2.0f}, Engine::Vec2{w, 2.0f}, Engine::Color{45, 70, 95, 190});
+        };
+
+        auto formatInt = [](int64_t v) -> std::string {
+            const bool neg = v < 0;
+            uint64_t n = neg ? static_cast<uint64_t>(-v) : static_cast<uint64_t>(v);
+            std::string s = std::to_string(n);
+            std::string out;
+            out.reserve(s.size() + s.size() / 3);
+            for (std::size_t i = 0; i < s.size(); ++i) {
+                const std::size_t left = s.size() - i;
+                out.push_back(s[i]);
+                if (left > 1 && (left - 1) % 3 == 0) out.push_back(',');
+            }
+            if (neg) out.insert(out.begin(), '-');
+            return out;
+        };
+
+        auto formatDuration = [&](int64_t seconds) -> std::string {
+            if (seconds <= 0) return "0m";
+            int64_t h = seconds / 3600;
+            int64_t m = (seconds % 3600) / 60;
+            int64_t s = seconds % 60;
+            std::ostringstream os;
+            if (h > 0) os << h << "h ";
+            if (h > 0 || m > 0) os << m << "m ";
+            os << s << "s";
+            return os.str();
+        };
+
+        struct Entry {
+            std::string label;
+            std::string value;
+            Engine::Color accent;
+            bool header{false};
+        };
+
+        std::vector<Entry> entries;
+        entries.reserve(32);
+
+        const int64_t totalKills = static_cast<int64_t>(totalKillsAccum_);
+        const int64_t totalRunsSafe = std::max<int64_t>(1, static_cast<int64_t>(totalRuns_));
+        const int64_t avgKillsPerRun = totalKills / totalRunsSafe;
+
+        entries.push_back(Entry{"Overview", "", Engine::Color{120, 200, 255, 235}, true});
+        entries.push_back(Entry{"Total Runs", formatInt(totalRuns_), Engine::Color{120, 200, 255, 235}, false});
+        entries.push_back(Entry{"Best Wave", formatInt(bestWave_), Engine::Color{140, 220, 170, 230}, false});
+        entries.push_back(Entry{"Time Played", formatDuration(totalSecondsPlayed_), Engine::Color{170, 200, 255, 230}, false});
+        entries.push_back(Entry{"Vault Gold", formatInt(vaultGold_), Engine::Color{240, 210, 120, 240}, false});
+        entries.push_back(Entry{"Avg Kills / Run", formatInt(avgKillsPerRun), Engine::Color{170, 200, 255, 230}, false});
+
+        entries.push_back(Entry{"Combat", "", Engine::Color{200, 120, 120, 220}, true});
+        entries.push_back(Entry{"Enemies Killed", formatInt(totalKills), Engine::Color{200, 120, 120, 220}, false});
+        entries.push_back(Entry{"Bosses Killed", formatInt(totalBossesKilled_), Engine::Color{255, 160, 110, 235}, false});
+        entries.push_back(Entry{"Bounty Targets Killed", formatInt(totalBountyTargetsKilled_), Engine::Color{255, 200, 120, 235}, false});
+        entries.push_back(Entry{"Revives Used", formatInt(totalRevivesUsed_), Engine::Color{180, 150, 255, 230}, false});
+
+        entries.push_back(Entry{"Pickups & Loot", "", Engine::Color{255, 200, 90, 235}, true});
+        entries.push_back(Entry{"Pickups Collected", formatInt(totalPickupsCollected_), Engine::Color{255, 200, 90, 235}, false});
+        entries.push_back(Entry{"Copper Picked Up", formatInt(totalCopperPickedUp_), Engine::Color{255, 200, 90, 235}, false});
+        entries.push_back(Entry{"Gold Picked Up", formatInt(totalGoldPickedUp_), Engine::Color{255, 215, 150, 235}, false});
+        entries.push_back(Entry{"Items Collected", formatInt(totalItemsCollected_), Engine::Color{135, 190, 255, 235}, false});
+        entries.push_back(Entry{"Powerups Collected", formatInt(totalPowerupsCollected_), Engine::Color{150, 220, 255, 235}, false});
+        entries.push_back(Entry{"Revives Collected", formatInt(totalRevivesCollected_), Engine::Color{180, 255, 200, 235}, false});
+
+        entries.push_back(Entry{"Events", "", Engine::Color{120, 220, 255, 230}, true});
+        entries.push_back(Entry{"Escorts Safely Transported", formatInt(totalEscortsTransported_), Engine::Color{140, 220, 170, 230}, false});
+        entries.push_back(Entry{"Assassins Thwarted", formatInt(totalAssassinsThwarted_), Engine::Color{255, 110, 170, 235}, false});
+        entries.push_back(Entry{"Bounties Completed", formatInt(totalBountyEventsCompleted_), Engine::Color{255, 215, 150, 235}, false});
+        entries.push_back(Entry{"Assassination Events Completed", formatInt(totalSpawnerEventsCompleted_), Engine::Color{255, 110, 170, 235}, false});
+
+        // Panel + scroll viewport.
+        drawCard(panelX, panelY, panelW, panelH);
+        const float pad = 18.0f * s * textBoost;
+        const float btnH = 44.0f * s;
+        const float btnW = 180.0f * s;
+        const float btnX = panelX + pad;
+        const float btnY = panelY + panelH - pad - btnH;
+
+        const float innerX = panelX + pad;
+        const float innerY = panelY + pad;
+        const float innerW = panelW - pad * 2.0f;
+        const float innerBottom = btnY - 14.0f * s;
+        const float viewH = std::max(1.0f, innerBottom - innerY);
+
+        const int cols = (innerW >= 1180.0f * s) ? 3 : ((innerW >= 760.0f * s) ? 2 : 1);
+        const float tileGap = gap;
+        const float tileW = (innerW - tileGap * static_cast<float>(cols - 1)) / static_cast<float>(cols);
+        const float tileH = 86.0f * s;
+        const float headerH = 28.0f * s;
+
+        // Layout pass: compute total content height (including gaps) for clamping scroll.
+        float cursorY = 0.0f;
+        int col = 0;
+        for (const auto& e : entries) {
+            if (e.header) {
+                if (col != 0) {
+                    cursorY += tileH + tileGap;
+                    col = 0;
+                }
+                cursorY += headerH + 10.0f * s;
+            } else {
+                col++;
+                if (col >= cols) {
+                    cursorY += tileH + tileGap;
+                    col = 0;
+                }
+            }
+        }
+        if (col != 0) cursorY += tileH + tileGap;
+
+        const float contentH = std::max(0.0f, cursorY);
+        const float maxScroll = std::max(0.0f, contentH - viewH);
+        statsScroll_ = std::clamp(statsScroll_, 0.0f, maxScroll);
+
+        // Draw pass: headers + tiles with scroll offset.
+        float y = innerY - statsScroll_;
+        col = 0;
+        for (const auto& e : entries) {
+            if (e.header) {
+                if (col != 0) {
+                    y += tileH + tileGap;
+                    col = 0;
+                }
+                if (y + headerH >= innerY - 10.0f * s && y <= innerY + viewH + 10.0f * s) {
+                    const float hs = std::clamp(0.98f * s * textBoost, 0.88f, 1.15f);
+                    drawTextUnified(e.label, Engine::Vec2{innerX, y}, hs, Engine::Color{210, 235, 255, 240});
+                    render_->drawFilledRect(Engine::Vec2{innerX, y + headerH - 2.0f}, Engine::Vec2{innerW, 2.0f},
+                                            Engine::Color{40, 60, 90, 170});
+                }
+                y += headerH + 10.0f * s;
+                continue;
+            }
+
+            const float x = innerX + static_cast<float>(col) * (tileW + tileGap);
+            if (y + tileH >= innerY - 10.0f * s && y <= innerY + viewH + 10.0f * s) {
+                // Tile body.
+                render_->drawFilledRect(Engine::Vec2{x, y + 3.0f * s}, Engine::Vec2{tileW, tileH}, Engine::Color{0, 0, 0, 65});
+                render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{tileW, tileH}, Engine::Color{14, 18, 26, 220});
+                render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{5.0f * s, tileH}, e.accent);
+                render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{tileW, 2.0f}, Engine::Color{45, 70, 95, 170});
+
+                const float labelScale = std::clamp(0.82f * s * textBoost, 0.74f, 1.00f);
+                const float valueScale = std::clamp(1.25f * s * textBoost, 1.00f, 1.55f);
+                drawTextUnified(e.label, Engine::Vec2{x + 14.0f * s, y + 12.0f * s}, labelScale, Engine::Color{180, 210, 235, 230});
+                Engine::Vec2 vsz = measureTextUnified(e.value, valueScale);
+                drawTextUnified(e.value, Engine::Vec2{x + tileW - 14.0f * s - vsz.x, y + 42.0f * s}, valueScale,
+                                Engine::Color{230, 245, 255, 245});
+            }
+
+            col++;
+            if (col >= cols) {
+                col = 0;
+                y += tileH + tileGap;
+            }
+        }
+
+        // Scrollbar.
+        if (maxScroll > 0.0f) {
+            const float barW = 10.0f * s;
+            const float trackX = panelX + panelW - pad * 0.6f - barW;
+            const float trackY = innerY;
+            const float trackH = viewH;
+            render_->drawFilledRect(Engine::Vec2{trackX, trackY}, Engine::Vec2{barW, trackH}, Engine::Color{10, 14, 20, 200});
+            float thumbH = std::max(24.0f * s, (viewH / std::max(1.0f, contentH)) * trackH);
+            float t = (maxScroll > 0.0f) ? (statsScroll_ / maxScroll) : 0.0f;
+            float thumbY = trackY + (trackH - thumbH) * std::clamp(t, 0.0f, 1.0f);
+            render_->drawFilledRect(Engine::Vec2{trackX, thumbY}, Engine::Vec2{barW, thumbH}, Engine::Color{55, 90, 125, 220});
+        }
+
+        // Back button.
+        {
+            int mx = lastMouseX_;
+            int my = lastMouseY_;
+            const bool hov = mx >= static_cast<int>(btnX) && mx <= static_cast<int>(btnX + btnW) &&
+                             my >= static_cast<int>(btnY) && my <= static_cast<int>(btnY + btnH);
+            Engine::Color bg = hov ? Engine::Color{28, 44, 66, 235} : Engine::Color{20, 30, 46, 230};
+            render_->drawFilledRect(Engine::Vec2{btnX, btnY + 3.0f * s}, Engine::Vec2{btnW, btnH}, Engine::Color{0, 0, 0, 70});
+            render_->drawFilledRect(Engine::Vec2{btnX, btnY}, Engine::Vec2{btnW, btnH}, bg);
+            render_->drawFilledRect(Engine::Vec2{btnX, btnY}, Engine::Vec2{btnW, 2.0f}, Engine::Color{45, 70, 95, 190});
+            const std::string label = "Back";
+            const float bs = std::clamp(1.0f * s * textBoost, 0.90f, 1.15f);
+            Engine::Vec2 bsz = measureTextUnified(label, bs);
+            drawTextUnified(label, Engine::Vec2{btnX + (btnW - bsz.x) * 0.5f, btnY + (btnH - bsz.y) * 0.5f + 1.0f * s},
+                            bs, Engine::Color{220, 245, 255, 245});
+        }
     } else if (menuPage_ == MenuPage::Upgrades) {
         const float refW = 1920.0f;
         const float refH = 1080.0f;
@@ -11531,6 +11829,20 @@ void GameRoot::resetRun() {
     remoteStates_.clear();
     remoteTargets_.clear();
     kills_ = 0;
+    bossKills_ = 0;
+    bountyTargetsKilled_ = 0;
+    spawnerSpiresDestroyed_ = 0;
+    escortsTransported_ = 0;
+    spawnerEventsCompleted_ = 0;
+    bountyEventsCompleted_ = 0;
+    pickupsCollected_ = 0;
+    itemsCollected_ = 0;
+    powerupsCollected_ = 0;
+    revivesCollected_ = 0;
+    revivesUsed_ = 0;
+    copperPickedUp_ = 0;
+    goldPickedUp_ = 0;
+    runSeconds_ = 0.0;
     copper_ = 0;
     gold_ = 0;
     miniUnitSupplyUsed_ = 0;

@@ -13,6 +13,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(ZETA_ENABLE_WARNINGS "Enable compiler warnings" ON)
+option(ZETA_REQUIRE_AUDIO "Fail configure if SDL2_mixer is missing (ensures audio-enabled builds)" OFF)
 
 add_subdirectory(engine)
 add_subdirectory(game)

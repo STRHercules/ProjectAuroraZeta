@@ -146,3 +146,14 @@
 
 ## 2025-12-18 — Suggestions after Options persistence + Upgrades UI revamp
 - Add a dedicated “Accessibility” section in Options (UI scale, reduce motion, colorblind palettes) and persist it alongside audio settings.
+
+## 2025-12-18 — Suggestions after expanded Stats screen
+- Add a “Last Run” sub-panel (store a snapshot of run stats on defeat) so the Stats screen can show both lifetime totals and the most recent run at a glance.
+- Add a “Reset Stats” button with a confirm modal (and optionally export/copy-to-clipboard for sharing).
+
+## 2025-12-18 — Suggestions after Win64 audio packaging fix
+- Add an in-game banner/toast when audio is disabled at build time (`ZETA_HAS_SDL_MIXER=0`) so players immediately understand why music/SFX are silent.
+- Add a packaging sanity check in `scripts/package-win.sh` that warns (or fails in CI) if `SDL2_mixer.dll` is missing from the staged folder.
+
+## 2025-12-18 — Suggestions after CI audio enforcement
+- Add a small `--selftest-audio` CLI mode that initializes the mixer backend and exits with a clear error message if initialization fails (usable in CI without launching a window).

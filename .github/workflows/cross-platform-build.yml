@@ -23,13 +23,13 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake pkg-config libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev
+          sudo apt-get install -y cmake pkg-config libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev libsdl2-mixer-dev
 
       - name: Install dependencies (macOS)
         if: matrix.os == 'macos-latest'
         run: |
           brew update
-          brew install cmake pkg-config sdl2 sdl2_image sdl2_ttf
+          brew install cmake pkg-config sdl2 sdl2_image sdl2_ttf sdl2_mixer
 
       - name: Install dependencies (Windows via vcpkg)
         if: matrix.os == 'windows-latest'
@@ -41,7 +41,7 @@ jobs:
           }
           & "$env:VCPKG_ROOT\bootstrap-vcpkg.bat" -disableMetrics
           $triplet = "x64-windows"
-          & "$env:VCPKG_ROOT\vcpkg.exe" install sdl2 sdl2-image sdl2-ttf --triplet $triplet
+          & "$env:VCPKG_ROOT\vcpkg.exe" install sdl2 sdl2-image sdl2-ttf sdl2-mixer --triplet $triplet
           "VCPKG_ROOT=$env:VCPKG_ROOT" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Configure (CMake on Windows)
@@ -50,6 +50,7 @@ jobs:
         run: |
           cmake -S . -B build `
             -DCMAKE_BUILD_TYPE=Release `
+            -DZETA_REQUIRE_AUDIO=ON `
             -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" `
             -DVCPKG_TARGET_TRIPLET=x64-windows `
             -A x64
@@ -58,7 +59,7 @@ jobs:
         if: matrix.os != 'windows-latest'
         shell: bash
         run: |
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DZETA_REQUIRE_AUDIO=ON
 
       - name: Build (Windows)
         if: matrix.os == 'windows-latest'
@@ -69,6 +70,30 @@ jobs:
         if: matrix.os != 'windows-latest'
         shell: bash
         run: cmake --build build --config Release --parallel
+
+      - name: Verify audio linkage (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash
+        run: |
+          set -euo pipefail
+          BIN_PATH=$(find build -maxdepth 3 -type f -name "Project Aurora Zeta" | head -n 1)
+          if [[ -z "$BIN_PATH" ]]; then
+            echo "Built binary not found" >&2
+            exit 1
+          fi
+          ldd "$BIN_PATH" | grep -i "sdl2_mixer" >/dev/null
+
+      - name: Verify audio linkage (macOS)
+        if: matrix.os == 'macos-latest'
+        shell: bash
+        run: |
+          set -euo pipefail
+          BIN_PATH=$(find build -maxdepth 3 -type f -name "Project Aurora Zeta" | head -n 1)
+          if [[ -z "$BIN_PATH" ]]; then
+            echo "Built binary not found" >&2
+            exit 1
+          fi
+          otool -L "$BIN_PATH" | grep -i "SDL2_mixer" >/dev/null
 
       - name: Package artifact (Linux/macOS)
         if: matrix.os != 'windows-latest'
@@ -103,6 +128,7 @@ jobs:
           # Copy required SDL runtime DLLs from vcpkg
           $dllSource = Join-Path $env:VCPKG_ROOT "installed/x64-windows/bin"
           Copy-Item "$dllSource/*.dll" $OutDir -Force
+          if (-not (Test-Path (Join-Path $OutDir "SDL2_mixer.dll"))) { throw "SDL2_mixer.dll missing from packaged artifact" }
 
           Copy-Item data $OutDir/data -Recurse
           Copy-Item assets $OutDir/assets -Recurse

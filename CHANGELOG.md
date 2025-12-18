@@ -269,3 +269,11 @@
 * Audio: Options now persists Music/SFX volume across restarts.
 * Audio: added a Background Audio toggle (mutes audio when the game is unfocused).
 * UI: Upgrades screen redesigned with a modern list + details layout and a cleaner purchase flow.
+
+# v0.0.156
+* UI: redesigned the Stats screen with a modern, scrollable dashboard layout.
+* Progression: added more lifetime profile stats (kills, bosses, pickups, currency, events, revives, playtime).
+* Save: extended the profile save format to persist the new stats.
+
+# v0.0.157
+* Audio: fixed the Win64 build pipeline so the packaged zip includes `SDL2_mixer` and its runtime DLL dependencies (music + SFX), and the launcher reliably starts the packaged EXE.
