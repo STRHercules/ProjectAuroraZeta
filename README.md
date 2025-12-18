@@ -167,6 +167,7 @@ Loaded from `data/input_bindings.json`; fully remappable via file override.
   - Feature flags: `useRpgCombat`, `useRpgLoot`, `combatDebugOverlay` (RPG resolver debug panel).
   - RPG combat RNG shaping: `rpgCombat.rng.shaped` (2-roll average), `rpgCombat.rng.usePRD` (anti-streak for crit/dodge/parry).
   - RPG drop/shop tuning: `drops.rpgEquipChanceNormal`, `drops.rpgEquipMiniBossCount`, `drops.rpgEquipBossCount`, `drops.rpgMiniBossGemChance`, `shop.rpgEquipChance`, `shop.rpgEquipCount`.
+- `data/enemies.json` — enemy archetype tuning (HP/shields/speed/damage multipliers, animation presets, and special behaviors like packs/revive/ranged attacks).
 - `data/rpg/loot.json` — RPG equipment templates, affixes, and icon coordinates for `assets/Sprites/Equipment/*.png`.
   - Regenerate via `python3 scripts/gen_rpg_loot.py`.
 - `data/abilities.json` (fallback `data/abilities_default.json`) — ability names, descriptions, cooldowns, costs, semantic types.

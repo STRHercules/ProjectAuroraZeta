@@ -16,9 +16,11 @@
 #include "RpgDamage.h"
 #include "../components/HitFlash.h"
 #include "../components/DamageNumber.h"
+#include "../components/DamageOverTime.h"
 #include "../components/Invulnerable.h"
 #include "../components/OffensiveType.h"
 #include "../components/EnemyAttackSwing.h"
+#include "../components/EnemyOnHit.h"
 #include "../components/StatusEffects.h"
 #include "../components/SpellEffect.h"
 #include "../components/AreaDamage.h"
@@ -28,6 +30,7 @@
 #include "../components/EscortPreMove.h"
 #include "../components/WeaponSfx.h"
 #include "../../engine/ecs/components/Status.h"
+#include "../status/ZetaStatusFactory.h"
 
 namespace {
 bool aabbOverlap(const Engine::ECS::Transform& ta, const Engine::ECS::AABB& aa, const Engine::ECS::Transform& tb,
@@ -48,6 +51,16 @@ int elementToRpgDamageType(Game::ElementType e) {
         default: return -1;
     }
 }
+
+Game::ZetaStatusFactory& statusFactory() {
+    static Game::ZetaStatusFactory factory{};
+    static bool loaded = false;
+    if (!loaded) {
+        (void)factory.load("data/statuses.json");
+        loaded = true;
+    }
+    return factory;
+}
 }  // namespace
 
 namespace Game {
@@ -59,6 +72,46 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
     registry.view<Engine::ECS::Transform, Engine::ECS::Projectile, Engine::ECS::AABB, Engine::ECS::ProjectileTag>(
         [&](Engine::ECS::Entity projEnt, Engine::ECS::Transform& projTf, Engine::ECS::Projectile& proj,
             Engine::ECS::AABB& projBox, Engine::ECS::ProjectileTag&) {
+            const bool hostileProjectile =
+                (proj.owner != Engine::ECS::kInvalidEntity) &&
+                (registry.has<Engine::ECS::EnemyTag>(proj.owner) || registry.has<Engine::ECS::BossTag>(proj.owner));
+
+            if (hostileProjectile) {
+                bool hitAny = false;
+                registry.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::AABB, Engine::ECS::HeroTag>(
+                    [&](Engine::ECS::Entity heroEnt,
+                        Engine::ECS::Transform& heroTf,
+                        Engine::ECS::Health& heroHp,
+                        Engine::ECS::AABB& heroBox,
+                        Engine::ECS::HeroTag&) {
+                        if (hitAny) return;
+                        if (!heroHp.alive()) return;
+                        if (!aabbOverlap(projTf, projBox, heroTf, heroBox)) return;
+                        if (auto* inv = registry.get<Game::Invulnerable>(heroEnt)) {
+                            if (inv->timer > 0.0f) return;
+                        }
+                        if (auto* stHero = registry.get<Engine::ECS::Status>(heroEnt)) {
+                            if (stHero->container.isStasis()) return;
+                        }
+
+                        Engine::Gameplay::BuffState buff{};
+                        if (auto* armorBuff = registry.get<Game::ArmorBuff>(heroEnt)) {
+                            buff = armorBuff->state;
+                        }
+                        if (auto* stHero = registry.get<Engine::ECS::Status>(heroEnt)) {
+                            float armorDelta = stHero->container.armorDeltaTotal();
+                            buff.healthArmorBonus += armorDelta;
+                            buff.shieldArmorBonus += armorDelta;
+                            buff.damageTakenMultiplier *= stHero->container.damageTakenMultiplier();
+                        }
+                        (void)Game::RpgDamage::apply(registry, proj.owner, heroEnt, heroHp, proj.damage, buff,
+                                                     useRpgCombat_, rpgConfig_, rng_, "enemy_projectile", debugSink_);
+                        deadProjectiles.push_back(projEnt);
+                        hitAny = true;
+                    });
+                return;
+            }
+
             registry.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::AABB, Engine::ECS::EnemyTag>(
                 [&](Engine::ECS::Entity targetEnt, Engine::ECS::Transform& tgtTf, Engine::ECS::Health& health,
                     Engine::ECS::AABB& tgtBox, Engine::ECS::EnemyTag&) {
@@ -337,7 +390,11 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                         const float preHealth = heroHp.currentHealth;
                         const float preShields = heroHp.currentShields;
                         Engine::Gameplay::DamageEvent contact{};
-                        contact.baseDamage = contactDamage_;
+                        float dmgMul = 1.0f;
+                        if (const auto* onHit = registry.get<Game::EnemyOnHit>(enemyEnt)) {
+                            dmgMul = std::max(0.0f, onHit->damageMultiplier);
+                        }
+                        contact.baseDamage = contactDamage_ * dmgMul;
                         Engine::Gameplay::BuffState buff{};
                         if (auto* armorBuff = registry.get<Game::ArmorBuff>(heroEnt)) {
                             buff = armorBuff->state;
@@ -353,6 +410,39 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                                                      useRpgCombat_, rpgConfig_, rng_, "contact_hero", debugSink_);
                         float dealt = (preHealth + preShields) - (heroHp.currentHealth + heroHp.currentShields);
                         if (dealt > 0.0f) {
+                            if (const auto* onHit = registry.get<Game::EnemyOnHit>(enemyEnt)) {
+                                std::uniform_real_distribution<float> roll01(0.0f, 1.0f);
+                                if (onHit->bleedChance > 0.0f && onHit->bleedDuration > 0.0f && onHit->bleedDpsMul > 0.0f &&
+                                    roll01(rng_) < onHit->bleedChance) {
+                                    if (!registry.has<Game::DamageOverTime>(heroEnt)) {
+                                        registry.emplace<Game::DamageOverTime>(heroEnt, Game::DamageOverTime{});
+                                    }
+                                    if (auto* dot = registry.get<Game::DamageOverTime>(heroEnt)) {
+                                        dot->bleedTimer = std::max(dot->bleedTimer, onHit->bleedDuration);
+                                        dot->bleedDps = std::max(dot->bleedDps, contactDamage_ * onHit->bleedDpsMul);
+                                    }
+                                }
+                                if (onHit->poisonChance > 0.0f && onHit->poisonDuration > 0.0f && onHit->poisonDpsMul > 0.0f &&
+                                    roll01(rng_) < onHit->poisonChance) {
+                                    if (!registry.has<Game::DamageOverTime>(heroEnt)) {
+                                        registry.emplace<Game::DamageOverTime>(heroEnt, Game::DamageOverTime{});
+                                    }
+                                    if (auto* dot = registry.get<Game::DamageOverTime>(heroEnt)) {
+                                        dot->poisonTimer = std::max(dot->poisonTimer, onHit->poisonDuration);
+                                        dot->poisonDps = std::max(dot->poisonDps, contactDamage_ * onHit->poisonDpsMul);
+                                    }
+                                }
+                                if (onHit->fearChance > 0.0f && onHit->fearDuration > 0.0f && roll01(rng_) < onHit->fearChance) {
+                                    if (!registry.has<Engine::ECS::Status>(heroEnt)) {
+                                        registry.emplace<Engine::ECS::Status>(heroEnt, Engine::ECS::Status{});
+                                    }
+                                    if (auto* st = registry.get<Engine::ECS::Status>(heroEnt)) {
+                                        auto spec = statusFactory().make(Engine::Status::EStatusId::Feared);
+                                        spec.duration = onHit->fearDuration;
+                                        (void)st->container.apply(spec, enemyEnt);
+                                    }
+                                }
+                            }
                             if (auto* flash = registry.get<Game::HitFlash>(heroEnt)) {
                                 flash->timer = 0.12f;
                             } else {
@@ -418,7 +508,11 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                         }
 
                         Engine::Gameplay::DamageEvent contact{};
-                        contact.baseDamage = contactDamage_;
+                        float dmgMul = 1.0f;
+                        if (const auto* onHit = registry.get<Game::EnemyOnHit>(enemyEnt)) {
+                            dmgMul = std::max(0.0f, onHit->damageMultiplier);
+                        }
+                        contact.baseDamage = contactDamage_ * dmgMul;
                         contact.type = Engine::Gameplay::DamageType::Normal;
                         Engine::Gameplay::BuffState buff{};
                         if (auto* armorBuff = registry.get<Game::ArmorBuff>(escortEnt)) {
@@ -467,7 +561,11 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                         }
 
                         Engine::Gameplay::DamageEvent contact{};
-                        contact.baseDamage = contactDamage_;
+                        float dmgMul = 1.0f;
+                        if (const auto* onHit = registry.get<Game::EnemyOnHit>(enemyEnt)) {
+                            dmgMul = std::max(0.0f, onHit->damageMultiplier);
+                        }
+                        contact.baseDamage = contactDamage_ * dmgMul;
                         contact.type = Engine::Gameplay::DamageType::Normal;
                         Engine::Gameplay::BuffState buff{};
                         if (auto* armorBuff = registry.get<Game::ArmorBuff>(miniEnt)) {
@@ -510,7 +608,11 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                         }
 
                         Engine::Gameplay::DamageEvent contact{};
-                        contact.baseDamage = contactDamage_;
+                        float dmgMul = 1.0f;
+                        if (const auto* onHit = registry.get<Game::EnemyOnHit>(enemyEnt)) {
+                            dmgMul = std::max(0.0f, onHit->damageMultiplier);
+                        }
+                        contact.baseDamage = contactDamage_ * dmgMul;
                         contact.type = Engine::Gameplay::DamageType::Normal;
                         Engine::Gameplay::BuffState buff{};
                         if (auto* armorBuff = registry.get<Game::ArmorBuff>(bEnt)) {

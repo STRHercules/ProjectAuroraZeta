@@ -42,6 +42,7 @@
 #include "systems/ProjectileSystem.h"
 #include "systems/CollisionSystem.h"
 #include "systems/EnemyAISystem.h"
+#include "systems/EnemySpecialSystem.h"
 #include "systems/WaveSystem.h"
 #include "systems/EnemySpriteStateSystem.h"
 #include "systems/HeroSpriteStateSystem.h"
@@ -442,6 +443,7 @@ private:
     SpriteSheetDesc projectileVisualPlayer_{};
     SpriteSheetDesc projectileVisualTurret_{};
     SpriteSheetDesc projectileVisualArrow_{};
+    SpriteSheetDesc enemyFireballVisual_{};
     Engine::TexturePtr projectileTexRed_;
     Engine::TexturePtr projectileTexTurret_;
     SDL_Cursor* customCursor_{nullptr};
@@ -856,6 +858,7 @@ private:
     std::unique_ptr<Game::CollisionSystem> collisionSystem_;
     std::unique_ptr<Game::MiniUnitSystem> miniUnitSystem_;
     std::unique_ptr<Game::EnemyAISystem> enemyAISystem_;
+    std::unique_ptr<Game::EnemySpecialSystem> enemySpecialSystem_;
     std::unique_ptr<Game::WaveSystem> waveSystem_;
     std::unique_ptr<Game::EnemySpriteStateSystem> enemySpriteStateSystem_;
     std::unique_ptr<Game::HeroSpriteStateSystem> heroSpriteStateSystem_;

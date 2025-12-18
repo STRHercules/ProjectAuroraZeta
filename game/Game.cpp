@@ -52,10 +52,17 @@
 #include "components/Pickup.h"
 #include "components/PickupBob.h"
 #include "components/BountyTag.h"
+#include "components/DamageOverTime.h"
 #include "components/EnemyAttributes.h"
+#include "components/EnemyDeathAnim.h"
+#include "components/EnemyOnHit.h"
+#include "components/EnemyRevive.h"
+#include "components/EnemyReviving.h"
+#include "components/EnemyType.h"
 #include "components/EventActive.h"
 #include "components/EventMarker.h"
 #include "components/EscortObjective.h"
+#include "components/FlameSkullBehavior.h"
 #include "components/Spawner.h"
 #include "components/Invulnerable.h"
 #include "components/Shopkeeper.h"
@@ -65,6 +72,7 @@
 #include "components/StatusEffects.h"
 #include "components/SpellEffect.h"
 #include "components/Ghost.h"
+#include "components/SlimeBehavior.h"
 #include "systems/BuffSystem.h"
 #include "meta/SaveManager.h"
 #include "meta/GlobalUpgrades.h"
@@ -377,6 +385,7 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     collisionSystem_ = std::make_unique<CollisionSystem>();
     miniUnitSystem_ = std::make_unique<MiniUnitSystem>();
     enemyAISystem_ = std::make_unique<EnemyAISystem>();
+    enemySpecialSystem_ = std::make_unique<EnemySpecialSystem>();
     enemySpriteStateSystem_ = std::make_unique<EnemySpriteStateSystem>();
     heroSpriteStateSystem_ = std::make_unique<HeroSpriteStateSystem>();
     animationSystem_ = std::make_unique<AnimationSystem>();
@@ -475,9 +484,20 @@ bool GameRoot::onInitialize(Engine::Application& app) {
 
     loadGridTextures();
     loadEnemyDefinitions();
+    if (enemySpriteStateSystem_) enemySpriteStateSystem_->setEnemyDefinitions(&enemyDefs_);
+    if (enemySpecialSystem_) enemySpecialSystem_->setEnemyDefinitions(&enemyDefs_);
     loadUnitDefinitions();
     loadPickupTextures();
     loadProjectileTextures();
+    if (enemySpecialSystem_) {
+        Game::SpriteSheetVisual vis{};
+        vis.texture = enemyFireballVisual_.texture;
+        vis.frameWidth = enemyFireballVisual_.frameWidth;
+        vis.frameHeight = enemyFireballVisual_.frameHeight;
+        vis.frameCount = enemyFireballVisual_.frameCount;
+        vis.frameDuration = enemyFireballVisual_.frameDuration;
+        enemySpecialSystem_->setFireballVisual(vis);
+    }
     if (collisionSystem_) {
         collisionSystem_->setFireExplosionTexture(fireExplosionTex_);
     }
@@ -2356,20 +2376,57 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 }
                 float sizeMul = def ? def->sizeMultiplier : 1.0f;
                 float hpMul = def ? def->hpMultiplier : 1.0f;
+                float shMul = def ? def->shieldMultiplier : 1.0f;
                 float spdMul = def ? def->speedMultiplier : 1.0f;
+                float dmgMul = def ? def->damageMultiplier : 1.0f;
                 float size = 18.0f * sizeMul;
+                Engine::TexturePtr tex = def ? def->texture : Engine::TexturePtr{};
+                if (def && !def->variantTextures.empty()) {
+                    std::uniform_int_distribution<std::size_t> pickTex(0, def->variantTextures.size() - 1);
+                    tex = def->variantTextures[pickTex(rng_)];
+                }
                 registry_.emplace<Engine::ECS::Renderable>(e,
                     Engine::ECS::Renderable{Engine::Vec2{size, size}, Engine::Color{200, 140, 255, 255},
-                                            def ? def->texture : Engine::TexturePtr{}});
+                                            tex});
                 registry_.emplace<Engine::ECS::AABB>(e, Engine::ECS::AABB{Engine::Vec2{size * 0.5f, size * 0.5f}});
                 float hp = waveSettingsBase_.enemyHp * 1.6f * hpMul;
-                registry_.emplace<Engine::ECS::Health>(e, Engine::ECS::Health{hp, hp});
+                float sh = waveSettingsBase_.enemyShields * shMul;
+                registry_.emplace<Engine::ECS::Health>(e, Engine::ECS::Health{hp, hp, sh, sh});
                 registry_.emplace<Engine::ECS::EnemyTag>(e, Engine::ECS::EnemyTag{});
                 registry_.emplace<Game::EnemyAttributes>(e, Game::EnemyAttributes{waveSettingsBase_.enemySpeed * 1.7f * spdMul});
+                if (def) {
+                    const int defIndex = static_cast<int>(def - enemyDefs_.data());
+                    registry_.emplace<Game::EnemyType>(e, Game::EnemyType{defIndex});
+                    registry_.emplace<Game::EnemyOnHit>(e, Game::EnemyOnHit{dmgMul,
+                                                                            def->onHitBleedChance, def->onHitBleedDuration, def->onHitBleedDpsMul,
+                                                                            def->onHitPoisonChance, def->onHitPoisonDuration, def->onHitPoisonDpsMul,
+                                                                            def->onHitFearChance, def->onHitFearDuration});
+                    if (def->reviveChance > 0.0f && def->reviveMaxCount > 0) {
+                        registry_.emplace<Game::EnemyRevive>(e, Game::EnemyRevive{def->reviveChance, def->reviveHealthFraction, def->reviveDelay, def->reviveMaxCount});
+                    }
+                    if (def->slimeMultiplyChance > 0.0f && def->slimeMultiplyInterval > 0.0f && def->slimeMultiplyMaxCount > 0) {
+                        registry_.emplace<Game::SlimeBehavior>(e, Game::SlimeBehavior{def->slimeMultiplyInterval,
+                                                                                     def->slimeMultiplyInterval,
+                                                                                     def->slimeMultiplyChance,
+                                                                                     def->slimeMultiplyMin,
+                                                                                     def->slimeMultiplyMax,
+                                                                                     def->slimeMultiplyMaxCount});
+                    }
+                    if (def->fireballEnabled) {
+                        registry_.emplace<Game::FlameSkullBehavior>(e, Game::FlameSkullBehavior{def->fireballCooldown,
+                                                                                                def->fireballCooldown,
+                                                                                                def->fireballMinRange,
+                                                                                                def->fireballMaxRange,
+                                                                                                def->fireballSpeed,
+                                                                                                def->fireballHitbox,
+                                                                                                def->fireballLifetime,
+                                                                                                def->fireballDamageMul});
+                    }
+                }
                 if (def && def->texture) {
                     registry_.emplace<Engine::ECS::SpriteAnimation>(e, Engine::ECS::SpriteAnimation{def->frameWidth,
                                                                                                    def->frameHeight,
-                                                                                                   4,
+                                                                                                   std::max(1, def->frameCount),
                                                                                                    def->frameDuration});
                 }
             }
@@ -2842,6 +2899,11 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             enemyAISystem_->update(registry_, hero_, step);
         }
     }
+    if (enemySpecialSystem_ && !defeated_ && !paused_ && (!multiplayerEnabled_ || (netSession_ && netSession_->isHost()))) {
+        if (freezeTimer_ <= 0.0) {
+            enemySpecialSystem_->update(registry_, step, contactDamage_, useRpgCombat_, rpgResolverConfig_);
+        }
+    }
 
     // Hero animation row selection (idle/walk/pickup/attack/knockdown).
     if (heroSpriteStateSystem_ && (!paused_ || defeated_)) {
@@ -2895,6 +2957,59 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                                 toDestroy.push_back(DeathInfo{e, tf.position});
                             }
                         } else {
+                            // Chance-based enemy revive (mummy/skelly): revive instead of counting as a death.
+                            if (auto* revive = registry_.get<Game::EnemyRevive>(e)) {
+                                if (revive->remaining > 0 && revive->chance > 0.0f && revive->healthFraction > 0.0f &&
+                                    !registry_.has<Game::EnemyReviving>(e)) {
+                                    std::uniform_real_distribution<float> roll01(0.0f, 1.0f);
+                                    if (roll01(rng_) < revive->chance) {
+                                        revive->remaining -= 1;
+                                        hp.currentHealth = std::max(1.0f, hp.maxHealth * revive->healthFraction);
+                                        hp.currentShields = 0.0f;
+                                        hp.timeSinceLastHit = 0.0f;
+                                        registry_.emplace<Game::EnemyReviving>(e, Game::EnemyReviving{std::max(0.05f, revive->delay)});
+                                        if (auto* vel = registry_.get<Engine::ECS::Velocity>(e)) {
+                                            vel->value = {0.0f, 0.0f};
+                                        }
+                                        // Force the death row while reviving so the "down" animation plays.
+                                        int row = 12;
+                                        if (const auto* type = registry_.get<Game::EnemyType>(e)) {
+                                            if (type->defIndex >= 0 && type->defIndex < static_cast<int>(enemyDefs_.size())) {
+                                                const auto& def = enemyDefs_[static_cast<std::size_t>(type->defIndex)];
+                                                const auto* look = registry_.get<Game::LookDirection>(e);
+                                                LookDir4 dir = look ? look->dir : LookDir4::Front;
+                                                int di = (dir == LookDir4::Right) ? 0 : (dir == LookDir4::Left) ? 1 : (dir == LookDir4::Front) ? 2 : 3;
+                                                if (def.deathMode == EnemyDeathAnimMode::DirectionalRows) {
+                                                    row = def.deathRows[static_cast<std::size_t>(di)];
+                                                } else if (!def.deathRandomRows.empty()) {
+                                                    row = def.deathRandomRows.front();
+                                                }
+                                            }
+                                        } else {
+                                            if (const auto* look = registry_.get<Game::LookDirection>(e)) {
+                                                row = (look->dir == LookDir4::Left) ? 13 : 12;
+                                            }
+                                        }
+                                        if (registry_.has<Game::EnemyDeathAnim>(e)) {
+                                            registry_.remove<Game::EnemyDeathAnim>(e);
+                                        }
+                                        registry_.emplace<Game::EnemyDeathAnim>(e, Game::EnemyDeathAnim{row});
+                                        if (auto* anim = registry_.get<Engine::ECS::SpriteAnimation>(e)) {
+                                            anim->row = row;
+                                            anim->currentFrame = 0;
+                                            anim->accumulator = 0.0f;
+                                            anim->loop = false;
+                                            anim->holdOnLastFrame = true;
+                                            anim->finished = false;
+                                        }
+                                        if (!isSpawnerEventEnemy) {
+                                            enemiesAlive_++;
+                                        }
+                                        return;
+                                    }
+                                }
+                            }
+
                             DeathInfo info{};
                             info.e = e;
                             info.pos = tf.position;
@@ -3084,13 +3199,84 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     float fd = anim->frameDuration > 0.0f ? anim->frameDuration : 0.01f;
                     despawnAfter = static_cast<float>(anim->frameCount) * fd;
                     int deathRow = 12;
+                    int dirIdx = 2;
                     if (const auto* look = registry_.get<Game::LookDirection>(death.e)) {
+                        switch (look->dir) {
+                            case Game::LookDir4::Right: dirIdx = 0; break;
+                            case Game::LookDir4::Left: dirIdx = 1; break;
+                            case Game::LookDir4::Front: dirIdx = 2; break;
+                            case Game::LookDir4::Back: dirIdx = 3; break;
+                        }
                         deathRow = (look->dir == Game::LookDir4::Left) ? 13 : 12;
                     }
+
+                    const EnemyDefinition* defPtr = nullptr;
+                    if (const auto* type = registry_.get<Game::EnemyType>(death.e)) {
+                        if (type->defIndex >= 0 && type->defIndex < static_cast<int>(enemyDefs_.size())) {
+                            defPtr = &enemyDefs_[static_cast<std::size_t>(type->defIndex)];
+                        }
+                    }
+
+                    bool slimeExplode = false;
+                    if (defPtr) {
+                        if (defPtr->deathMode == EnemyDeathAnimMode::DirectionalRows) {
+                            deathRow = defPtr->deathRows[static_cast<std::size_t>(dirIdx)];
+                        } else if (!defPtr->deathRandomRows.empty()) {
+                            // Slime chooses explode vs melt; other random rows pick uniformly.
+                            if (defPtr->slimeDeathExplodeRow >= 0 && defPtr->slimeDeathMeltRow >= 0 && defPtr->slimeDeathExplodeChance > 0.0f) {
+                                slimeExplode = roll01(rng_) < defPtr->slimeDeathExplodeChance;
+                                deathRow = slimeExplode ? defPtr->slimeDeathExplodeRow : defPtr->slimeDeathMeltRow;
+                            } else {
+                                std::uniform_int_distribution<std::size_t> pickRow(0, defPtr->deathRandomRows.size() - 1);
+                                deathRow = defPtr->deathRandomRows[pickRow(rng_)];
+                            }
+                        }
+                    }
+
+                    if (registry_.has<Game::EnemyDeathAnim>(death.e)) {
+                        registry_.remove<Game::EnemyDeathAnim>(death.e);
+                    }
+                    registry_.emplace<Game::EnemyDeathAnim>(death.e, Game::EnemyDeathAnim{deathRow});
+
                     anim->row = deathRow;
                     anim->currentFrame = 0;
                     anim->accumulator = 0.0f;
                     anim->allowFlipX = false;
+                    anim->loop = false;
+                    anim->holdOnLastFrame = true;
+                    anim->finished = false;
+
+                    // Slime explode: small radial damage on death.
+                    if (slimeExplode && defPtr && defPtr->slimeDeathExplodeRadius > 0.0f && defPtr->slimeDeathExplodeDamageMul > 0.0f) {
+                        const float radius = defPtr->slimeDeathExplodeRadius;
+                        const float r2 = radius * radius;
+                        const float dmgVal = std::max(0.0f, contactDamage_ * defPtr->slimeDeathExplodeDamageMul);
+                        Engine::Gameplay::DamageEvent boom{};
+                        boom.type = Engine::Gameplay::DamageType::Spell;
+                        boom.rpgDamageType = static_cast<int>(Engine::Gameplay::RPG::DamageType::Poison);
+                        boom.baseDamage = dmgVal;
+                        registry_.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::HeroTag>(
+                            [&](Engine::ECS::Entity heroEnt, Engine::ECS::Transform& htf, Engine::ECS::Health& hhp, Engine::ECS::HeroTag&) {
+                                if (!hhp.alive()) return;
+                                float dx = htf.position.x - death.pos.x;
+                                float dy = htf.position.y - death.pos.y;
+                                float d2 = dx * dx + dy * dy;
+                                if (d2 > r2) return;
+                                Engine::Gameplay::BuffState buff{};
+                                if (auto* armorBuff = registry_.get<Game::ArmorBuff>(heroEnt)) {
+                                    buff = armorBuff->state;
+                                }
+                                if (auto* stHero = registry_.get<Engine::ECS::Status>(heroEnt)) {
+                                    if (stHero->container.isStasis()) return;
+                                    float armorDelta = stHero->container.armorDeltaTotal();
+                                    buff.healthArmorBonus += armorDelta;
+                                    buff.shieldArmorBonus += armorDelta;
+                                    buff.damageTakenMultiplier *= stHero->container.damageTakenMultiplier();
+                                }
+                                (void)Game::RpgDamage::apply(registry_, death.e, heroEnt, hhp, boom, buff,
+                                                             useRpgCombat_, rpgResolverConfig_, rng_, "slime_explode");
+                            });
+                    }
                 }
                 if (auto* vel = registry_.get<Engine::ECS::Velocity>(death.e)) {
                     vel->value = {0.0f, 0.0f};
@@ -3399,6 +3585,74 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     hp.currentHealth = std::min(hp.maxHealth, hp.currentHealth + regenAuraHps_ * dt);
                 }
             });
+
+            // Simple DoT ticks (enemy on-hit bleed/poison).
+            std::vector<Engine::ECS::Entity> dotsToClear;
+            registry_.view<Game::DamageOverTime, Engine::ECS::Health>(
+                [&](Engine::ECS::Entity e, Game::DamageOverTime& dot, Engine::ECS::Health& hp) {
+                    if (!hp.alive()) return;
+                    if (auto* st = registry_.get<Engine::ECS::Status>(e)) {
+                        if (st->container.isStasis()) return;
+                    }
+
+                    auto applyDot = [&](float& timer, float& dps, Engine::Gameplay::DamageType type, int rpgType) {
+                        if (timer <= 0.0f || dps <= 0.0f) return;
+                        Engine::Gameplay::DamageEvent dmg{};
+                        dmg.type = type;
+                        dmg.rpgDamageType = rpgType;
+                        dmg.baseDamage = dps * dt;
+                        if (useRpgCombat_) {
+                            (void)Game::RpgDamage::apply(registry_, Engine::ECS::kInvalidEntity, e, hp, dmg, {}, true, rpgResolverConfig_, rng_);
+                        } else {
+                            Engine::Gameplay::applyDamage(hp, dmg, {});
+                        }
+                        timer -= dt;
+                        if (timer <= 0.0f) {
+                            timer = 0.0f;
+                            dps = 0.0f;
+                        }
+                    };
+
+                    applyDot(dot.bleedTimer, dot.bleedDps, Engine::Gameplay::DamageType::Normal,
+                             static_cast<int>(Engine::Gameplay::RPG::DamageType::Physical));
+                    applyDot(dot.poisonTimer, dot.poisonDps, Engine::Gameplay::DamageType::Spell,
+                             static_cast<int>(Engine::Gameplay::RPG::DamageType::Poison));
+
+                    if (dot.bleedTimer <= 0.0f && dot.poisonTimer <= 0.0f) {
+                        dotsToClear.push_back(e);
+                    }
+                });
+            for (auto e : dotsToClear) {
+                if (registry_.has<Game::DamageOverTime>(e)) {
+                    registry_.remove<Game::DamageOverTime>(e);
+                }
+            }
+
+            // Enemy revive downtime timer.
+            std::vector<Engine::ECS::Entity> revivesFinished;
+            registry_.view<Game::EnemyReviving>(
+                [&](Engine::ECS::Entity e, Game::EnemyReviving& rev) {
+                    rev.timer = std::max(0.0f, rev.timer - dt);
+                    if (auto* vel = registry_.get<Engine::ECS::Velocity>(e)) {
+                        vel->value = {0.0f, 0.0f};
+                    }
+                    if (rev.timer <= 0.0f) {
+                        revivesFinished.push_back(e);
+                    }
+                });
+            for (auto e : revivesFinished) {
+                if (registry_.has<Game::EnemyReviving>(e)) {
+                    registry_.remove<Game::EnemyReviving>(e);
+                }
+                if (auto* anim = registry_.get<Engine::ECS::SpriteAnimation>(e)) {
+                    anim->loop = true;
+                    anim->holdOnLastFrame = false;
+                    anim->finished = false;
+                }
+                if (registry_.has<Game::EnemyDeathAnim>(e)) {
+                    registry_.remove<Game::EnemyDeathAnim>(e);
+                }
+            }
             if (buffSystem_) {
                 buffSystem_->update(registry_, step);
             }
@@ -5494,6 +5748,183 @@ void GameRoot::loadEnemyDefinitions() {
         return;
     }
 
+    // Preferred: data-driven enemy tuning + animation presets.
+    {
+        std::ifstream f("data/enemies.json");
+        if (f.is_open()) {
+            try {
+                nlohmann::json j;
+                f >> j;
+                if (j.contains("enemies") && j["enemies"].is_array()) {
+                    auto tryLoad = [&](const std::string& rel) -> Engine::TexturePtr {
+                        fs::path p = rel;
+                        if (const char* home = std::getenv("HOME")) {
+                            fs::path hp = fs::path(home) / rel;
+                            if (fs::exists(hp)) p = hp;
+                        }
+                        if (fs::exists(p)) return loadTextureOptional(p.string());
+                        return {};
+                    };
+
+                    auto applyAnimPreset = [&](EnemyDefinition& def, const std::string& preset) {
+                        def.frameWidth = 16;
+                        def.frameHeight = 16;
+                        def.frameCount = 4;
+                        def.idleRows = {0, 1, 2, 3};
+                        def.moveRows = {4, 5, 6, 7};
+                        def.attackRows = {8, 9, 10, 11};
+                        def.deathMode = EnemyDeathAnimMode::DirectionalRows;
+                        def.deathRows = {12, 13, 12, 12};
+                        def.deathRandomRows.clear();
+
+                        if (preset == "standard14" || preset.empty()) {
+                            return;
+                        }
+                        if (preset == "slime8") {
+                            // Slime (64x128): idle row 0, move rows 1-4 by dir, attack row 5, death rows 6/7 random.
+                            def.idleRows = {0, 0, 0, 0};
+                            def.moveRows = {1, 2, 3, 4};
+                            def.attackRows = {5, 5, 5, 5};
+                            def.deathMode = EnemyDeathAnimMode::RandomRows;
+                            def.deathRandomRows = {6, 7};
+                            def.deathRows = {6, 6, 6, 6};
+                            return;
+                        }
+                        if (preset == "fireSkull10") {
+                            // Fire skull (64x160): move rows 0-3 by dir, attack rows 4-7, die rows 8 (right), 9 (left).
+                            def.idleRows = {0, 1, 2, 3};
+                            def.moveRows = {0, 1, 2, 3};
+                            def.attackRows = {4, 5, 6, 7};
+                            def.deathMode = EnemyDeathAnimMode::DirectionalRows;
+                            def.deathRows = {8, 9, 8, 8};
+                            def.deathRandomRows.clear();
+                            return;
+                        }
+                    };
+
+                    for (const auto& e : j["enemies"]) {
+                        if (!e.is_object()) continue;
+                        EnemyDefinition def{};
+                        def.id = e.value("id", std::string{});
+                        if (def.id.empty()) continue;
+
+                        def.sizeMultiplier = e.value("sizeMultiplier", def.sizeMultiplier);
+                        def.hpMultiplier = e.value("hpMultiplier", def.hpMultiplier);
+                        def.shieldMultiplier = e.value("shieldMultiplier", def.shieldMultiplier);
+                        def.speedMultiplier = e.value("speedMultiplier", def.speedMultiplier);
+                        def.damageMultiplier = e.value("damageMultiplier", def.damageMultiplier);
+
+                        def.healthRegenFracPerSecond = e.value("healthRegenFracPerSecond", def.healthRegenFracPerSecond);
+                        def.shieldRegenMultiplier = e.value("shieldRegenMultiplier", def.shieldRegenMultiplier);
+                        def.regenDelayMultiplier = e.value("regenDelayMultiplier", def.regenDelayMultiplier);
+
+                        def.spawnGroupMin = e.value("spawnGroupMin", def.spawnGroupMin);
+                        def.spawnGroupMax = e.value("spawnGroupMax", def.spawnGroupMax);
+
+                        def.onHitBleedChance = e.value("onHitBleedChance", def.onHitBleedChance);
+                        def.onHitBleedDuration = e.value("onHitBleedDuration", def.onHitBleedDuration);
+                        def.onHitBleedDpsMul = e.value("onHitBleedDpsMul", def.onHitBleedDpsMul);
+                        def.onHitPoisonChance = e.value("onHitPoisonChance", def.onHitPoisonChance);
+                        def.onHitPoisonDuration = e.value("onHitPoisonDuration", def.onHitPoisonDuration);
+                        def.onHitPoisonDpsMul = e.value("onHitPoisonDpsMul", def.onHitPoisonDpsMul);
+                        def.onHitFearChance = e.value("onHitFearChance", def.onHitFearChance);
+                        def.onHitFearDuration = e.value("onHitFearDuration", def.onHitFearDuration);
+
+                        def.reviveChance = e.value("reviveChance", def.reviveChance);
+                        def.reviveHealthFraction = e.value("reviveHealthFraction", def.reviveHealthFraction);
+                        def.reviveDelay = e.value("reviveDelay", def.reviveDelay);
+                        def.reviveMaxCount = e.value("reviveMaxCount", def.reviveMaxCount);
+
+                        def.slimeMultiplyChance = e.value("slimeMultiplyChance", def.slimeMultiplyChance);
+                        def.slimeMultiplyInterval = e.value("slimeMultiplyInterval", def.slimeMultiplyInterval);
+                        def.slimeMultiplyMin = e.value("slimeMultiplyMin", def.slimeMultiplyMin);
+                        def.slimeMultiplyMax = e.value("slimeMultiplyMax", def.slimeMultiplyMax);
+                        def.slimeMultiplyMaxCount = e.value("slimeMultiplyMaxCount", def.slimeMultiplyMaxCount);
+                        def.slimeDeathExplodeChance = e.value("slimeDeathExplodeChance", def.slimeDeathExplodeChance);
+                        def.slimeDeathExplodeRadius = e.value("slimeDeathExplodeRadius", def.slimeDeathExplodeRadius);
+                        def.slimeDeathExplodeDamageMul = e.value("slimeDeathExplodeDamageMul", def.slimeDeathExplodeDamageMul);
+                        def.slimeDeathExplodeRow = e.value("slimeDeathExplodeRow", def.slimeDeathExplodeRow);
+                        def.slimeDeathMeltRow = e.value("slimeDeathMeltRow", def.slimeDeathMeltRow);
+
+                        def.fireballEnabled = e.value("fireballEnabled", def.fireballEnabled);
+                        def.fireballMinRange = e.value("fireballMinRange", def.fireballMinRange);
+                        def.fireballMaxRange = e.value("fireballMaxRange", def.fireballMaxRange);
+                        def.fireballCooldown = e.value("fireballCooldown", def.fireballCooldown);
+                        def.fireballSpeed = e.value("fireballSpeed", def.fireballSpeed);
+                        def.fireballDamageMul = e.value("fireballDamageMul", def.fireballDamageMul);
+                        def.fireballHitbox = e.value("fireballHitbox", def.fireballHitbox);
+                        def.fireballLifetime = e.value("fireballLifetime", def.fireballLifetime);
+
+                        const std::string animPreset = e.value("animPreset", std::string("standard14"));
+                        applyAnimPreset(def, animPreset);
+                        def.frameDuration = e.value("frameDuration", def.frameDuration);
+
+                        // If slime specifies explicit explode/melt rows, treat that as the authoritative random death pool.
+                        if (def.slimeDeathExplodeRow >= 0 && def.slimeDeathMeltRow >= 0) {
+                            def.deathMode = EnemyDeathAnimMode::RandomRows;
+                            def.deathRandomRows = {def.slimeDeathExplodeRow, def.slimeDeathMeltRow};
+                            def.deathRows = {def.slimeDeathExplodeRow, def.slimeDeathExplodeRow, def.slimeDeathExplodeRow, def.slimeDeathExplodeRow};
+                        }
+
+                        const std::string texPath = e.value("texture", (root / (def.id + ".png")).string());
+                        def.texture = tryLoad(texPath);
+                        if (!def.texture) {
+                            Engine::logWarn("Failed to load enemy sprite: " + texPath);
+                        }
+
+                        // Slime: optional color variant pool. Prefer explicit lowercase assets if present.
+                        def.variantTextures.clear();
+                        if (def.texture) def.variantTextures.push_back(def.texture);
+                        if (def.id == "slime") {
+                            const std::array<std::string, 7> slimeVariants{
+                                "assets/Sprites/Enemies/slimeblack.png",
+                                "assets/Sprites/Enemies/slimeblue.png",
+                                "assets/Sprites/Enemies/slimeorange.png",
+                                "assets/Sprites/Enemies/slimepink.png",
+                                "assets/Sprites/Enemies/slimepurple.png",
+                                "assets/Sprites/Enemies/slimered.png",
+                                "assets/Sprites/Enemies/slimeteal.png",
+                            };
+                            const std::array<std::string, 7> slimeVariantsLegacy{
+                                "assets/Sprites/Enemies/SlimeBlack.png",
+                                "assets/Sprites/Enemies/SlimeBlue.png",
+                                "assets/Sprites/Enemies/SlimeOrange.png",
+                                "assets/Sprites/Enemies/SlimePink.png",
+                                "assets/Sprites/Enemies/SlimePurple.png",
+                                "assets/Sprites/Enemies/SlimeRed.png",
+                                "assets/Sprites/Enemies/SlimeTeal.png",
+                            };
+
+                            auto addVariant = [&](const std::string& p) {
+                                if (auto t = tryLoad(p)) {
+                                    for (const auto& existing : def.variantTextures) {
+                                        if (existing == t) return;
+                                    }
+                                    def.variantTextures.push_back(std::move(t));
+                                }
+                            };
+                            for (const auto& p : slimeVariants) addVariant(p);
+                            for (const auto& p : slimeVariantsLegacy) addVariant(p);
+                        }
+
+                        enemyDefs_.push_back(std::move(def));
+                    }
+
+                    if (enemyDefs_.empty()) {
+                        Engine::logWarn("data/enemies.json loaded but contains no valid enemies; falling back to spritesheet scan.");
+                        enemyDefs_.clear();
+                    } else {
+                        Engine::logInfo("Loaded " + std::to_string(enemyDefs_.size()) + " enemy archetypes from data/enemies.json");
+                        return;
+                    }
+                }
+            } catch (const std::exception& ex) {
+                Engine::logWarn(std::string("Failed to parse data/enemies.json; falling back to spritesheet scan: ") + ex.what());
+                enemyDefs_.clear();
+            }
+        }
+    }
+
     std::vector<fs::path> files;
     for (const auto& entry : fs::directory_iterator(root)) {
         if (!entry.is_regular_file()) continue;
@@ -5506,7 +5937,7 @@ void GameRoot::loadEnemyDefinitions() {
 
     // Optional external overrides for quick asset iteration.
     // Tries each name in: ~/assets/Sprites/Enemies/<name>.png then project assets/Sprites/Enemies/<name>.png.
-    const std::array<std::string, 6> overrideNames{"orc", "goblin", "mummy", "skelly", "wraith", "zombie"};
+    const std::array<std::string, 8> overrideNames{"orc", "goblin", "mummy", "skelly", "wraith", "zombie", "slime", "fire_skull"};
     std::vector<std::pair<std::string, Engine::TexturePtr>> overrideTextures;
     overrideTextures.reserve(overrideNames.size());
     {
@@ -5544,6 +5975,14 @@ void GameRoot::loadEnemyDefinitions() {
             def.texture = tex;
             def.frameWidth = 16;
             def.frameHeight = 16;
+            def.frameCount = 4;
+            def.shieldMultiplier = 1.0f;
+            def.damageMultiplier = 1.0f;
+            def.healthRegenFracPerSecond = 0.0f;
+            def.shieldRegenMultiplier = 1.0f;
+            def.regenDelayMultiplier = 1.0f;
+            def.spawnGroupMin = 1;
+            def.spawnGroupMax = 1;
 
             std::size_t h = std::hash<std::string>{}(def.id);
             def.sizeMultiplier = 0.9f + static_cast<float>((h >> 4) % 30) / 100.0f;     // 0.9 - 1.19
@@ -5564,6 +6003,16 @@ void GameRoot::loadEnemyDefinitions() {
         if (!def.texture) {
             Engine::logWarn("Failed to load enemy sprite: " + path.string());
         }
+        def.frameWidth = 16;
+        def.frameHeight = 16;
+        def.frameCount = 4;
+        def.shieldMultiplier = 1.0f;
+        def.damageMultiplier = 1.0f;
+        def.healthRegenFracPerSecond = 0.0f;
+        def.shieldRegenMultiplier = 1.0f;
+        def.regenDelayMultiplier = 1.0f;
+        def.spawnGroupMin = 1;
+        def.spawnGroupMax = 1;
 
         std::size_t h = std::hash<std::string>{}(def.id);
         def.sizeMultiplier = 0.9f + static_cast<float>((h >> 4) % 30) / 100.0f;     // 0.9 - 1.19
@@ -5672,6 +6121,7 @@ void GameRoot::loadProjectileTextures() {
     projectileVisualPlayer_ = {};
     projectileVisualTurret_ = {};
     projectileVisualArrow_ = {};
+    enemyFireballVisual_ = {};
     projectileTexRed_.reset();
     projectileTexTurret_.reset();
 
@@ -5704,6 +6154,7 @@ void GameRoot::loadProjectileTextures() {
     if (!projectileVisualArrow_.texture) {
         projectileVisualArrow_ = projectileVisualPlayer_;
     }
+    enemyFireballVisual_ = loadSheet("assets/Sprites/Enemies/fire_skull_fireball.png", 12, 0.05f);
 
     projectileTexRed_ = projectileVisualPlayer_.texture;
     projectileTexTurret_ = projectileVisualTurret_.texture;
@@ -7785,7 +8236,7 @@ void GameRoot::renderMenu() {
     drawTextUnified(title, Engine::Vec2{centerX - titleW * 0.5f, titleY}, titleScale, Engine::Color{190, 235, 255, 245});
 
     // Build info (bottom-right).
-    const std::string buildStr = "Pre-Alpha | Build v0.0.163";
+    const std::string buildStr = "Pre-Alpha | Build v0.0.166";
     const float buildScale = std::clamp(0.95f * s, 0.72f, 0.95f);
     const Engine::Vec2 buildSz = measureTextUnified(buildStr, buildScale);
     drawTextUnified(buildStr, Engine::Vec2{vw - margin - buildSz.x, vh - margin - buildSz.y}, buildScale,

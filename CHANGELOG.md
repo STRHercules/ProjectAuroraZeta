@@ -305,3 +305,17 @@
 # v0.0.163
 * Visual: removed unintended tinting on player characters (sprites render with no color shading).
 * Visual: enemies now flash red (instead of yellow) when damaged.
+
+# v0.0.164
+* Enemies: added data-driven enemy tuning via `data/enemies.json` (HP/shields/speed/damage + per-enemy mechanics).
+    * Goblins now always spawn in small packs (2–4).
+    * Slimes can multiply, and randomly explode or melt on death (explosions deal small AoE damage).
+    * Flame Skulls can fire ranged fireballs at nearby players.
+* Enemies: updated classic monsters (Goblin/Mummy/Orc/Skelly/Wraith/Zombie) to match new role identities (regen, revive chance, fear/bleed/poison).
+
+# v0.0.165
+* Fixed: normal enemies are no longer marked as bounty targets (removes the “elite” marker + restores normal drop rates).
+* Slimes: now randomly use one of the color-variant sprite sheets (`slimeblack.png`, `slimeblue.png`, etc.) when spawning.
+
+# v0.0.166
+* Fixed: crash caused by removing components during ECS view iteration (revive/DoT updates are now deferred safely).

@@ -1,19 +1,23 @@
 # Powerups that boost abilities
 * Scroll could make lightning red
 
+# Intermission ending kicks player out of shops
+
 # Ellis Consecration no animations/effect
+
+# Need to manually assign abilities icons that make sense
+
+# 'Main Menu' option on the Esc Screen should come with a Confirmation window.
 
 # Gear should not go into the active inventory slot - only usable/consumable items should.
 * R / F hotkeys should be visible on the main screen GUI just like Q is 
+
+# Gems are wayyyyy too common
 
 # Redesign the UI
 - Host
 - Join
 - Lobby
-
-# Implement Abilities
-* Design Abilities for Each Champion
-    - What icon to use
 
 # Gear
 * Better Define Gear
@@ -36,8 +40,6 @@
 * Expose as much as possible to make it as easy as possible to mod
     * Develop mod tools?
 
-# 'Main Menu' option on the Esc Screen should come with a Confirmation window.
-
 # Threat/Aggro and Party Synergy (Optional / Co-op Ready)
 * If you ever do co-op, add:
     - **Threat** generation per action:
@@ -48,8 +50,6 @@
         - Tank builds threat + mitigation
         - Healer manages threat spikes
         - DPS balances burst vs survival
-
-# Intermission ending kicks player out of shops
 
 # Chat
 * Ability for players to chat in Multiplayer Lobby/Match

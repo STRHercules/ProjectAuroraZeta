@@ -178,3 +178,10 @@
 
 ## 2025-12-18 — Suggestions after sprite tint cleanup
 - Consider moving “team color”/selection colors into UI-only rendering (nameplates/markers) so gameplay sprites stay unshaded.
+
+## 2025-12-18 — Suggestions after enemy roster update
+- Add an `enemyWeights` field to `data/enemies.json` so waves can bias toward certain monsters per round/difficulty instead of uniform random selection.
+- Add a small on-screen icon/timer for bleed/poison (or fold them into the existing status container) so players can understand incoming damage sources.
+
+## 2025-12-18 — Suggestions after fixing bounty spam
+- Add a debug HUD toggle that prints per-enemy tags (Boss/Bounty/etc.) and def id to make spawn-tag regressions obvious.

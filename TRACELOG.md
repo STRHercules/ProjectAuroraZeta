@@ -1211,3 +1211,77 @@
 - Manual test:
   - Take damage as any hero and verify no persistent color tint.
   - Damage an enemy and verify the flash is red.
+
+## 2025-12-18 — Enemy roster update (v0.0.164)
+
+**Prompt / Task**
+- "I want to update monsters and add a couple new ones…" (Goblin/Mummy/Orc/Skelly/Wraith/Zombie updates + implement Slime + Flame Skull).
+
+**What Changed**
+- Added data-driven enemy tuning in `data/enemies.json` (stats, animation presets, and per-enemy mechanics).
+- Implemented Goblin pack spawns, Slime multiplication + explode/melt deaths, Flame Skull ranged fireballs, and on-hit bleed/poison/fear + revive chance for specific enemies.
+
+**Steps Taken**
+- Extended `game/EnemyDefinition.h` to carry gameplay tuning, animation row maps, and special behavior settings.
+- Updated spawners (`game/systems/WaveSystem.cpp`, `game/systems/EventSystem.cpp`, Warp Flux elite spawns) to attach per-enemy components.
+- Updated rendering/logic systems:
+  - `game/systems/EnemySpriteStateSystem.cpp` now uses per-enemy row maps (supports slime + flame skull sheets).
+  - `game/systems/CollisionSystem.cpp` now supports enemy-owned projectile hits on heroes and per-enemy contact damage + on-hit effects.
+  - Added `game/systems/EnemySpecialSystem.cpp` for slime multiply + flame skull fireballs.
+- Updated death handling in `game/Game.cpp` for revive downtime and slime explode/melt selection + AoE.
+
+**Rationale / Tradeoffs**
+- Kept tuning data-driven (qualitative roles mapped to multipliers/knobs in JSON) so balancing can iterate without recompiles.
+- Implemented bleed/poison as lightweight DoTs (not full engine-status IDs) to avoid expanding the core status schema mid-iteration.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-18).
+- Manual test:
+  - Start a run and verify Goblins frequently spawn in 2–4 packs.
+  - Stay in-range of a Flame Skull and verify it shoots animated fireballs that damage the player.
+- Kill Slimes repeatedly and verify they sometimes multiply and sometimes explode on death (small AoE).
+
+## 2025-12-18 — Fix bounty-tag spam + slime color variants (v0.0.165)
+
+**Prompt / Task**
+- "It seems everything that spawns is now elite, or a boss… Every single mob is dropping a ton of loot now."
+- "When a slime spawns, it will use one of these assets… or the standard slime.png."
+
+**What Changed**
+- Normal wave enemies no longer get `BountyTag`, so they don’t render the bounty marker and don’t drop bounty/boss-tier loot.
+- Slimes now randomly pick a texture from `slime.png` plus the provided color variants.
+
+**Steps Taken**
+- Removed `BountyTag` assignment from normal wave spawns in `game/systems/WaveSystem.cpp`.
+- Added `EnemyDefinition::variantTextures` and loaded slime variant textures during `data/enemies.json` parsing in `game/Game.cpp`.
+- Updated spawners to pick a per-spawn texture variant when available (slimes).
+
+**Rationale / Tradeoffs**
+- Keeps bounty markers reserved for actual bounty targets/events while preserving data-driven enemy definitions.
+- Variant texture pooling is per-enemy-definition to avoid duplicating multiple “slime color” archetypes in JSON.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-18).
+- Manual test:
+  - Start a run and verify normal enemies no longer have the bounty marker and drops return to expected levels.
+  - Watch Slime spawns and verify they randomize between the color variants.
+
+## 2025-12-18 — Fix crash from ECS view removals (v0.0.166)
+
+**Prompt / Task**
+- "Crashing now… stack shows `Registry::view<Game::EnemyReviving>`."
+
+**What Changed**
+- Deferred component removals for `DamageOverTime` and `EnemyReviving` so ECS view iteration can’t invalidate itself.
+
+**Steps Taken**
+- Updated `game/Game.cpp` to collect entities to clean up and remove components after the `registry_.view(...)` loops finish.
+
+**Rationale / Tradeoffs**
+- Keeps the ECS iteration safe without changing core registry internals.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-18).
+- Manual test:
+  - Fight reviving enemies (mummy/skelly) and confirm no crash when revive completes.
+  - Get poisoned/bleeding and confirm DoT expires without crashing.

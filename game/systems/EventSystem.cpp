@@ -23,8 +23,13 @@
 #include "../components/EnemyAttributes.h"
 #include "../components/BountyTag.h"
 #include "../components/Facing.h"
+#include "../components/EnemyOnHit.h"
+#include "../components/EnemyRevive.h"
+#include "../components/EnemyType.h"
+#include "../components/FlameSkullBehavior.h"
 #include "../components/LookDirection.h"
 #include "../components/EscortPreMove.h"
+#include "../components/SlimeBehavior.h"
 #include "../../engine/ecs/components/SpriteAnimation.h"
 #include "../EnemyDefinition.h"
 
@@ -203,25 +208,64 @@ void EventSystem::spawnBounty(Engine::ECS::Registry& registry, const Engine::Vec
         registry.emplace<Game::LookDirection>(e, Game::LookDirection{});
         const EnemyDefinition* def = pickEventEnemyDef(enemyDefs_);
         Engine::TexturePtr tex = def ? def->texture : Engine::TexturePtr{};
+        int defIndex = -1;
+        if (def && enemyDefs_ && !enemyDefs_->empty()) {
+            defIndex = static_cast<int>(def - enemyDefs_->data());
+        }
         registry.emplace<Engine::ECS::Renderable>(e,
             Engine::ECS::Renderable{Engine::Vec2{22.0f, 22.0f}, Engine::Color{255, 160, 110, 255}, tex});
         registry.emplace<Engine::ECS::AABB>(e, Engine::ECS::AABB{Engine::Vec2{11.0f, 11.0f}});
-        registry.emplace<Engine::ECS::Health>(e, Engine::ECS::Health{360.0f, 360.0f, 140.0f, 140.0f});
+        const float hpMax = 360.0f * (def ? def->hpMultiplier : 1.0f);
+        const float shMax = 140.0f * (def ? def->shieldMultiplier : 1.0f);
+        registry.emplace<Engine::ECS::Health>(e, Engine::ECS::Health{hpMax, hpMax, shMax, shMax});
         if (auto* hp = registry.get<Engine::ECS::Health>(e)) {
             hp->healthArmor = 2.0f;
             hp->shieldArmor = 1.5f;
             hp->regenDelay = 1.5f;
-            hp->shieldRegenRate = 8.0f;
+            hp->shieldRegenRate = 8.0f * (def ? def->shieldRegenMultiplier : 1.0f);
+            if (def && def->healthRegenFracPerSecond > 0.0f) {
+                hp->healthRegenRate = std::max(0.0f, hp->maxHealth * def->healthRegenFracPerSecond);
+            }
         }
         registry.emplace<Engine::ECS::EnemyTag>(e, Engine::ECS::EnemyTag{});
-        registry.emplace<Game::EnemyAttributes>(e, Game::EnemyAttributes{110.0f});
+        const float speed = 110.0f * (def ? def->speedMultiplier : 1.0f);
+        registry.emplace<Game::EnemyAttributes>(e, Game::EnemyAttributes{speed});
+        if (defIndex >= 0) registry.emplace<Game::EnemyType>(e, Game::EnemyType{defIndex});
+        if (def) {
+            registry.emplace<Game::EnemyOnHit>(e, Game::EnemyOnHit{def->damageMultiplier,
+                                                                  def->onHitBleedChance, def->onHitBleedDuration, def->onHitBleedDpsMul,
+                                                                  def->onHitPoisonChance, def->onHitPoisonDuration, def->onHitPoisonDpsMul,
+                                                                  def->onHitFearChance, def->onHitFearDuration});
+            if (def->reviveChance > 0.0f && def->reviveMaxCount > 0) {
+                registry.emplace<Game::EnemyRevive>(e, Game::EnemyRevive{def->reviveChance, def->reviveHealthFraction, def->reviveDelay, def->reviveMaxCount});
+            }
+            if (def->slimeMultiplyChance > 0.0f && def->slimeMultiplyInterval > 0.0f && def->slimeMultiplyMaxCount > 0) {
+                registry.emplace<Game::SlimeBehavior>(e, Game::SlimeBehavior{def->slimeMultiplyInterval,
+                                                                             def->slimeMultiplyInterval,
+                                                                             def->slimeMultiplyChance,
+                                                                             def->slimeMultiplyMin,
+                                                                             def->slimeMultiplyMax,
+                                                                             def->slimeMultiplyMaxCount});
+            }
+            if (def->fireballEnabled) {
+                registry.emplace<Game::FlameSkullBehavior>(e, Game::FlameSkullBehavior{def->fireballCooldown,
+                                                                                       def->fireballCooldown,
+                                                                                       def->fireballMinRange,
+                                                                                       def->fireballMaxRange,
+                                                                                       def->fireballSpeed,
+                                                                                       def->fireballHitbox,
+                                                                                       def->fireballLifetime,
+                                                                                       def->fireballDamageMul});
+            }
+        }
         registry.emplace<Game::BountyTag>(e, Game::BountyTag{});
         registry.emplace<Game::EventMarker>(e, Game::EventMarker{eventId});
         if (tex) {
             const int fw = def ? def->frameWidth : 16;
             const int fh = def ? def->frameHeight : 16;
             const float fd = def ? def->frameDuration : 0.14f;
-            registry.emplace<Engine::ECS::SpriteAnimation>(e, Engine::ECS::SpriteAnimation{fw, fh, 4, fd});
+            const int fc = def ? std::max(1, def->frameCount) : 4;
+            registry.emplace<Engine::ECS::SpriteAnimation>(e, Engine::ECS::SpriteAnimation{fw, fh, fc, fd});
         }
     }
     // Controller entity tracks timer and kill requirement.
@@ -496,18 +540,54 @@ void EventSystem::tickSpawners(Engine::ECS::Registry& registry, const Engine::Ti
             registry.emplace<Game::LookDirection>(m, Game::LookDirection{});
             const EnemyDefinition* def = pickEventEnemyDef(enemyDefs_);
             Engine::TexturePtr tex = def ? def->texture : Engine::TexturePtr{};
+            int defIndex = -1;
+            if (def && enemyDefs_ && !enemyDefs_->empty()) {
+                defIndex = static_cast<int>(def - enemyDefs_->data());
+            }
             registry.emplace<Engine::ECS::Renderable>(m,
                 Engine::ECS::Renderable{Engine::Vec2{16.0f, 16.0f}, Engine::Color{255, 150, 180, 255}, tex});
             registry.emplace<Engine::ECS::AABB>(m, Engine::ECS::AABB{Engine::Vec2{8.0f, 8.0f}});
-            registry.emplace<Engine::ECS::Health>(m, Engine::ECS::Health{70.0f, 70.0f});
+            const float hpMax = 70.0f * (def ? def->hpMultiplier : 1.0f);
+            const float shMax = 20.0f * (def ? def->shieldMultiplier : 1.0f);
+            registry.emplace<Engine::ECS::Health>(m, Engine::ECS::Health{hpMax, hpMax, shMax, shMax});
             registry.emplace<Engine::ECS::EnemyTag>(m, Engine::ECS::EnemyTag{});
-            registry.emplace<Game::EnemyAttributes>(m, Game::EnemyAttributes{140.0f});
+            const float speed = 140.0f * (def ? def->speedMultiplier : 1.0f);
+            registry.emplace<Game::EnemyAttributes>(m, Game::EnemyAttributes{speed});
+            if (defIndex >= 0) registry.emplace<Game::EnemyType>(m, Game::EnemyType{defIndex});
+            if (def) {
+                registry.emplace<Game::EnemyOnHit>(m, Game::EnemyOnHit{def->damageMultiplier,
+                                                                      def->onHitBleedChance, def->onHitBleedDuration, def->onHitBleedDpsMul,
+                                                                      def->onHitPoisonChance, def->onHitPoisonDuration, def->onHitPoisonDpsMul,
+                                                                      def->onHitFearChance, def->onHitFearDuration});
+                if (def->reviveChance > 0.0f && def->reviveMaxCount > 0) {
+                    registry.emplace<Game::EnemyRevive>(m, Game::EnemyRevive{def->reviveChance, def->reviveHealthFraction, def->reviveDelay, def->reviveMaxCount});
+                }
+                if (def->slimeMultiplyChance > 0.0f && def->slimeMultiplyInterval > 0.0f && def->slimeMultiplyMaxCount > 0) {
+                    registry.emplace<Game::SlimeBehavior>(m, Game::SlimeBehavior{def->slimeMultiplyInterval,
+                                                                                 def->slimeMultiplyInterval,
+                                                                                 def->slimeMultiplyChance,
+                                                                                 def->slimeMultiplyMin,
+                                                                                 def->slimeMultiplyMax,
+                                                                                 def->slimeMultiplyMaxCount});
+                }
+                if (def->fireballEnabled) {
+                    registry.emplace<Game::FlameSkullBehavior>(m, Game::FlameSkullBehavior{def->fireballCooldown,
+                                                                                           def->fireballCooldown,
+                                                                                           def->fireballMinRange,
+                                                                                           def->fireballMaxRange,
+                                                                                           def->fireballSpeed,
+                                                                                           def->fireballHitbox,
+                                                                                           def->fireballLifetime,
+                                                                                           def->fireballDamageMul});
+                }
+            }
             registry.emplace<Game::EventMarker>(m, Game::EventMarker{sp.eventId});
             if (tex) {
                 const int fw = def ? def->frameWidth : 16;
                 const int fh = def ? def->frameHeight : 16;
                 const float fd = def ? def->frameDuration : 0.14f;
-                registry.emplace<Engine::ECS::SpriteAnimation>(m, Engine::ECS::SpriteAnimation{fw, fh, 4, fd});
+                const int fc = def ? std::max(1, def->frameCount) : 4;
+                registry.emplace<Engine::ECS::SpriteAnimation>(m, Engine::ECS::SpriteAnimation{fw, fh, fc, fd});
             }
         }
     });
