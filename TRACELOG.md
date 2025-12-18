@@ -877,3 +877,124 @@
 
 **Build / Test**
 - Build: `cmake --build build -j 8` (Linux, 2025-12-17).
+
+## 2025-12-18 — Background music routing (v0.0.152)
+
+**Prompt / Task**
+- Add new music tracks (BossMusic/DeathScreen/GameMusic/MainMenu) and play them at the appropriate times.
+- Note: `TASK.md` is currently focused on RPG combat/loot systems; this change is an audio UX request.
+
+**What Changed**
+- Added an engine-level `Engine::Audio::MusicPlayer` wrapper (SDL2_mixer when available; safe no-audio fallback when not).
+- Game now switches music automatically:
+  - Main menu + submenus: `assets/Audio/Music/MainMenu.mp3`
+  - In-run gameplay: `assets/Audio/Music/GameMusic.mp3`
+  - Boss fights (any living `BossTag`): `assets/Audio/Music/BossMusic.mp3`
+  - Defeat screen: `assets/Audio/Music/DeathScreen.mp3`
+
+**Steps Taken**
+- Added an optional CMake dependency on `SDL2_mixer` and a small engine audio wrapper.
+- Hooked music selection into the main update loop so it reacts immediately to menu/defeat/boss state.
+
+**Rationale / Tradeoffs**
+- Kept audio engine-agnostic (`/engine/audio`) and only selected tracks in the game layer.
+- Made SDL2_mixer optional to avoid breaking builds on environments without the dependency (music disables cleanly).
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-18).
+- Manual test:
+  - Launch the game: verify menu music plays.
+  - Start a run: verify gameplay music plays.
+  - For quick boss testing: set `boss.wave` to `1` in `data/gameplay.json`, start a run, and verify boss music.
+  - Die and reach the defeat overlay: verify death screen music plays.
+
+## 2025-12-18 — Core SFX routing (v0.0.153)
+
+**Prompt / Task**
+- Wire new weapon/footstep/pickup/UI sound effects from `assets/Audio/Sounds/...` to the relevant moments.
+
+**What Changed**
+- Added engine SFX support via SDL2_mixer (`engine/audio/SfxPlayer.*`) sharing the same backend as music.
+- Hooked SFX events in game code:
+  - Sword swing/impact/blocked/parry SFX for melee attacks.
+  - Militia weapon swap SFX (sword sheath/unsheath, bow put-away/take-out).
+  - Militia bow attack + impact/blocked SFX for ranged autos.
+  - Dirt footsteps cycle while walking (no footsteps when idle).
+  - Pickup vs heal-consume SFX (heal pickup + healing consumables use `ConsumeHeal.wav`).
+  - Menu click/close SFX for menu navigation and closing overlays.
+- Spells SFX are intentionally left unused for now (per request).
+
+**Steps Taken**
+- Added a shared audio backend (`engine/audio/AudioBackend.*`) to avoid double-initializing SDL2_mixer.
+- Tagged militia bow projectiles with a `WeaponSfxTag` so collision hits can route bow impact/blocked sounds.
+
+**Rationale / Tradeoffs**
+- Kept sound asset selection in the game layer; engine layer only provides generic playback.
+- Where the combat model lacks an explicit “block” state, “blocked” SFX uses dodge/glance/parry outcomes as a proxy.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-18).
+- Manual test:
+  - Main menu: click items -> select sound; backing out/closing overlays -> close sound.
+  - Start a run and walk -> footsteps cycle.
+  - Militia: swap weapon (`Left Alt`) -> sheath/unsheath and bow take out/put away.
+  - Militia: fire bow -> bow attack; hit enemies -> bow impact; (with `useRpgCombat=true`) observe blocked/parry cases trigger “blocked” SFX.
+  - Any melee hero: swing -> sword attack; hit enemies -> sword impact; (with `useRpgCombat=true`) observe dodge/parry/glance trigger blocked/parry SFX.
+
+## 2025-12-18 — Options menu modernization + audio sliders (v0.0.154)
+
+**Prompt / Task**
+- Modernize the main menu Options page UI and add separate volume sliders for Music and SFX.
+
+**What Changed**
+- Rebuilt the Options page UI to match the newer menu styling (card layout, section headers, slider controls, toggle rows).
+- Added Music and SFX volume sliders that update playback volume live.
+
+**Steps Taken**
+- Implemented slider interaction (hover focus, click-to-set, click-and-drag, and A/D step changes).
+- Routed values into `Engine::Audio::MusicPlayer::setVolume()` and `Engine::Audio::SfxPlayer::setVolume()`.
+
+**Rationale / Tradeoffs**
+- Kept settings runtime-only for now (not yet persisted to disk) to minimize risk; can add save/config persistence next if desired.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-18).
+- Manual test:
+  - Main Menu -> Options: drag Music slider and confirm music volume changes.
+  - Drag SFX slider and click menu items to confirm SFX volume changes.
+  - Verify Esc returns to main menu and UI close SFX plays.
+
+## 2025-12-18 — Options persistence + Upgrades UI revamp (v0.0.155)
+
+**Prompt / Task**
+- Fix Options screen text overlap/clipping, add a Background Audio toggle, and persist audio settings across restarts.
+- Completely revamp and modernize the Upgrades screen to be coherent and aesthetically pleasing.
+- Attempt to swap the UI font to `dungeon-mode.ttf` at 6px.
+
+**What Changed**
+- Persisted Options settings into the existing save file (`saves/profile.dat`):
+  - Music volume, SFX volume, background-audio toggle, damage numbers toggle, screen shake toggle.
+- Options screen:
+  - Added Background Audio toggle (mutes audio when unfocused if disabled).
+  - Reworked layout metrics and text fitting to avoid overlap/clipping (slider % stays inside the panel; long labels ellipsize).
+- Upgrades screen:
+  - Rebuilt into a modern two-panel layout (scrollable list + details panel).
+  - Added Back/Buy buttons in a consistent footer area and a cleaner confirm modal.
+- Font:
+  - UI now attempts to load `data/dungeon-mode.ttf` at 6px and falls back to `data/TinyUnicode.ttf` at 6px.
+
+**Steps Taken**
+- Extended `SaveManager` schema (backward-compatible JSON fields) and wired load/save into `GameRoot`.
+- Added a single `applyAudioVolumes()` path that applies user volumes and handles background mute based on window focus.
+- Replaced the legacy Upgrades table UI with a scrollable list/details presentation.
+
+**Rationale / Tradeoffs**
+- Settings persist via the existing obfuscated save file to avoid introducing a separate config format.
+- Background Audio is implemented as “mute when unfocused” (not “keep playing”) to match streamer-friendly expectations.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-18).
+- Manual test:
+  - Main Menu -> Options: adjust Music/SFX and restart the game; verify values persist.
+  - Toggle Background Audio off, alt-tab away; verify music/SFX mute until focus returns.
+  - Main Menu -> Upgrades: scroll list, select entries, buy with confirm/cancel, and verify vault gold updates.

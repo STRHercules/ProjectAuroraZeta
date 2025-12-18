@@ -10,7 +10,7 @@
 namespace Game {
 
 struct SaveData {
-    int version{3};
+    int version{4};
     int totalRuns{0};
     int bestWave{0};
     int totalKills{0};
@@ -18,6 +18,13 @@ struct SaveData {
     int64_t vaultGold{0};
     std::string lastDepositedMatchId{};
     Meta::UpgradeLevels upgrades{};
+
+    // Options (persisted).
+    float musicVolume{0.65f};  // 0..1
+    float sfxVolume{0.75f};    // 0..1
+    bool backgroundAudio{true};
+    bool showDamageNumbers{true};
+    bool screenShake{true};
 };
 
 class SaveManager {

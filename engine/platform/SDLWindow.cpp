@@ -22,7 +22,7 @@ SDLWindow::~SDLWindow() {
 }
 
 bool SDLWindow::initialize(const WindowConfig& config) {
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_TIMER) != 0) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_TIMER | SDL_INIT_AUDIO) != 0) {
         logError(std::string("SDL_Init failed: ") + SDL_GetError());
         return false;
     }

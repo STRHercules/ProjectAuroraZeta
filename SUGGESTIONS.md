@@ -134,3 +134,15 @@
 
 ## 2025-12-17 — Suggestions after NPC world collision
 - Add a spatial grid for `SolidTag` colliders so enemies/escorts can query nearby obstacles instead of iterating all scenery every frame.
+
+## 2025-12-18 — Suggestions after background music routing
+- Add an in-game audio options panel (master/music volume + mute) and persist it in `data/` or the save file.
+
+## 2025-12-18 — Suggestions after core SFX routing
+- Add per-category volume sliders (music vs SFX) and a “mute in background” option for streamers.
+
+## 2025-12-18 — Suggestions after options menu modernization
+- Persist audio sliders (and other options) into `data/gameplay.json` overrides or the save file so preferences survive restarts.
+
+## 2025-12-18 — Suggestions after Options persistence + Upgrades UI revamp
+- Add a dedicated “Accessibility” section in Options (UI scale, reduce motion, colorblind palettes) and persist it alongside audio settings.

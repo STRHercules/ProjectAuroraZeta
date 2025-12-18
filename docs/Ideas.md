@@ -13,22 +13,16 @@
         - Healer manages threat spikes
         - DPS balances burst vs survival
 
+# Intermission ending kicks player out of shops
+
 # Chat
 * Ability for players to chat in Multiplayer Lobby/Match
 
 # Add training time to Mini-Units
 * RTS Style queue?
 
-# Map Design
-* Fabricated assets to place in-world
-    * These assets will likely need custom collision data (Bottom 20-40% impassable)
-        * Trees
-        * Rocks
-        * Buildings
-        * Lakes
-        * Large Patches (Grass/Dirt/Etc)
-        * Paths
-        * Cliffs?
+# Potions and Gems should not get affixes
+* Potions of the same type should also stack.
 
 # Zones have no assets
 * Currently no idea how to identify these zones in-game

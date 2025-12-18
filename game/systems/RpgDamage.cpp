@@ -82,7 +82,8 @@ float apply(Engine::ECS::Registry& registry,
             const Engine::Gameplay::RPG::ResolverConfig& rpgCfg,
             std::mt19937& rng,
             std::string_view label,
-            const DebugSink& debugSink) {
+            const DebugSink& debugSink,
+            const OutcomeSink& outcomeSink) {
     if (!useRpgCombat) {
         const float pre = defenderHp.currentHealth + defenderHp.currentShields;
         Engine::Gameplay::applyDamage(defenderHp, dmg, buff);
@@ -169,6 +170,9 @@ float apply(Engine::ECS::Registry& registry,
                                                      defState ? &defState->ccFatigue : nullptr,
                                                      atkState ? &atkState->prd : nullptr,
                                                      defState ? &defState->prd : nullptr);
+    if (outcomeSink) {
+        outcomeSink(outcome);
+    }
     const float shieldDmg = std::min(defenderHp.currentShields, outcome.shieldDamage * buff.damageTakenMultiplier);
     const float healthDmg = std::min(defenderHp.currentHealth, outcome.healthDamage * buff.damageTakenMultiplier);
     defenderHp.currentShields = std::max(0.0f, defenderHp.currentShields - shieldDmg);

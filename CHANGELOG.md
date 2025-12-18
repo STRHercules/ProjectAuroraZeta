@@ -254,3 +254,18 @@
 
 # v0.0.151
 * Visual: made `DirtPatch.png` floor overlays slightly rarer to reduce clumping.
+
+# v0.0.152
+* Audio: added background music for the main menu, gameplay, boss fights, and death screen.
+
+# v0.0.153
+* Audio: added core SFX routing (weapons, footsteps, pickups/consumes, and UI clicks).
+
+# v0.0.154
+* UI: redesigned the main menu Options page and added separate Music/SFX volume sliders.
+
+# v0.0.155
+* UI: Options screen layout now avoids text overlap/clipping.
+* Audio: Options now persists Music/SFX volume across restarts.
+* Audio: added a Background Audio toggle (mutes audio when the game is unfocused).
+* UI: Upgrades screen redesigned with a modern list + details layout and a cleaner purchase flow.

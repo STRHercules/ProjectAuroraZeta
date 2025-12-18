@@ -1,6 +1,9 @@
 set(ENGINE_SOURCES
     core/Application.cpp
     core/Logger.cpp
+    audio/AudioBackend.cpp
+    audio/MusicPlayer.cpp
+    audio/SfxPlayer.cpp
     platform/NullWindow.cpp
     platform/SDLWindow.cpp
     platform/SDLRenderDevice.cpp
@@ -69,6 +72,7 @@ target_include_directories(engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image QUIET)
 find_package(SDL2_ttf REQUIRED)
+find_package(SDL2_mixer QUIET)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -82,6 +86,13 @@ if (SDL2_image_FOUND)
     target_compile_definitions(engine PUBLIC ZETA_HAS_SDL_IMAGE=1)
 else()
     target_link_libraries(engine PUBLIC SDL2::SDL2 SDL2_ttf::SDL2_ttf nlohmann_json::nlohmann_json)
+endif()
+
+if (SDL2_mixer_FOUND)
+    target_link_libraries(engine PUBLIC SDL2_mixer::SDL2_mixer)
+    target_compile_definitions(engine PUBLIC ZETA_HAS_SDL_MIXER=1)
+else()
+    target_compile_definitions(engine PUBLIC ZETA_HAS_SDL_MIXER=0)
 endif()
 
 if (WIN32)

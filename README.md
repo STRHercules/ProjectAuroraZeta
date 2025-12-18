@@ -186,12 +186,13 @@ Loaded from `data/input_bindings.json`; fully remappable via file override.
    - `New Game (Solo)`: pick archetype + difficulty, then `Start Run`.
    - `Host`: set player name, lobby name/password, max players, and difficulty; start hosting then wait in lobby.
    - `Join`: enter player name and password, direct connect or browse, then auto-sync to host settings.
+   - `Options`: adjust Music/SFX volume and a few gameplay toggles.
 3) Use hotkeys above; open shop during intermission; survive as many waves as possible.
 
 ## Building on Linux for Linux
 ```bash
 # Requisites
-sudo apt install -y build-essential cmake libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev
+sudo apt install -y build-essential cmake libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev libsdl2-mixer-dev
 
 # cd to the root of the repo
 # Build the Project
@@ -206,7 +207,7 @@ cmake --build build
 
 ```bash
 # Make sure we have the requisites
-sudo apt install -y build-essential cmake libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev mingw-w64 zip
+sudo apt install -y build-essential cmake libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev libsdl2-mixer-dev mingw-w64 zip
 
 # Create and navigate to the right folder
 mkdir -p ~/winlibs/sdl
@@ -221,10 +222,14 @@ wget https://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-devel-2.22.0-mingw
 # Grab SDL2_image
 wget https://www.libsdl.org/projects/SDL_image/release/SDL2_image-devel-2.8.2-mingw.zip
 
+# Grab SDL2_mixer (optional, enables background music)
+wget https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-devel-2.8.0-mingw.zip
+
 # Extract the .zips
 unzip SDL2-devel-2.30.9-mingw.zip
 unzip SDL2_ttf-devel-2.22.0-mingw.zip
 unzip SDL2_image-devel-2.8.2-mingw.zip
+unzip SDL2_mixer-devel-2.8.0-mingw.zip
 
 # Navigate back to the root directory of the repo
 # This will vary depending on your setup

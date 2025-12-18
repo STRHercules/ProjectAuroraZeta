@@ -26,6 +26,7 @@
 #include "../components/Building.h"
 #include "../components/EscortTarget.h"
 #include "../components/EscortPreMove.h"
+#include "../components/WeaponSfx.h"
 #include "../../engine/ecs/components/Status.h"
 
 namespace {
@@ -85,8 +86,23 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                         }
                         if (!stasis) {
                             Engine::ECS::Entity attacker = (proj.owner != Engine::ECS::kInvalidEntity) ? proj.owner : hero_;
-                            (void)Game::RpgDamage::apply(registry, attacker, targetEnt, health, hit, buff,
-                                                         useRpgCombat_, rpgConfig_, rng_, "proj", debugSink_);
+                            HitSfxInfo hitSfx{};
+                            hitSfx.weapon = WeaponSfx::None;
+                            if (const auto* w = registry.get<Game::WeaponSfxTag>(projEnt)) {
+                                hitSfx.weapon = w->weapon;
+                            }
+                            auto outcomeSink = [&](const Engine::Gameplay::RPG::HitOutcome& out) {
+                                hitSfx.dodged = out.dodged;
+                                hitSfx.parried = out.parried;
+                                hitSfx.glanced = (out.quality == Engine::Gameplay::RPG::HitQuality::Glance);
+                            };
+                            const float dealt = Game::RpgDamage::apply(registry, attacker, targetEnt, health, hit, buff,
+                                                                       useRpgCombat_, rpgConfig_, rng_, "proj", debugSink_,
+                                                                       outcomeSink);
+                            hitSfx.damageDealt = dealt;
+                            if (hitSfxSink_) {
+                                hitSfxSink_(hitSfx);
+                            }
                         }
 
                         // Elemental spell effects (Wizard)

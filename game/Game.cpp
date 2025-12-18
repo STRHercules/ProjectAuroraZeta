@@ -329,6 +329,7 @@ bool GameRoot::onInitialize(Engine::Application& app) {
         sdlRenderer_ = sdl->rawRenderer();
     }
     if (sdlRenderer_) {
+        sdlWindow_ = SDL_RenderGetWindow(sdlRenderer_);
         // Custom cursor
         SDL_Surface* cursorSurf = IMG_Load("assets/GUI/pointer.png");
         if (!cursorSurf) {
@@ -346,12 +347,22 @@ bool GameRoot::onInitialize(Engine::Application& app) {
         if (TTF_Init() != 0) {
             Engine::logWarn(std::string("TTF_Init failed: ") + TTF_GetError());
         } else {
-            constexpr int kUIFontSize = 28;
-            uiFont_ = TTF_OpenFont("data/TinyUnicode.ttf", kUIFontSize);
+            constexpr int kUIFontSize = 32;
+            const std::string primary = resolveAssetPath("data/Tiny.ttf");
+            const std::string fallback = resolveAssetPath("data/TinyUnicode.ttf");
+            if (!primary.empty() && std::filesystem::exists(primary)) {
+                uiFont_ = TTF_OpenFont(primary.c_str(), kUIFontSize);
+                if (uiFont_) {
+                    Engine::logInfo("Loaded TTF font " + primary);
+                }
+            }
             if (!uiFont_) {
-                Engine::logWarn(std::string("TTF_OpenFont failed: ") + TTF_GetError());
-            } else {
-                Engine::logInfo("Loaded TTF font data/TinyUnicode.ttf");
+                uiFont_ = TTF_OpenFont(fallback.c_str(), kUIFontSize);
+                if (!uiFont_) {
+                    Engine::logWarn(std::string("TTF_OpenFont failed: ") + TTF_GetError());
+                } else {
+                    Engine::logInfo("Loaded TTF font " + fallback);
+                }
             }
         }
     } else {
@@ -877,7 +888,257 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     // Start in main menu; actual run spawns on New Game.
     resetRun();
     inMenu_ = true;
+    initializeMusic();
+    initializeSfx();
+    if (collisionSystem_) {
+        collisionSystem_->setHitSfxSink([this](const Game::CollisionSystem::HitSfxInfo& info) {
+            if (!sfx_.isInitialized()) return;
+            if (info.weapon != Game::WeaponSfx::Bow) return;
+            const bool blocked = info.parried || info.dodged || info.glanced;
+            if (blocked) {
+                playBowBlocked();
+            } else if (info.damageDealt > 0.0f) {
+                playBowImpact();
+            }
+        });
+    }
     return true;
+}
+
+void GameRoot::initializeMusic() {
+    auto resolveAudio = [&](const std::string& rel) -> std::string {
+        std::filesystem::path path = rel;
+        if (const char* home = std::getenv("HOME")) {
+            std::filesystem::path p = std::filesystem::path(home) / rel;
+            if (std::filesystem::exists(p)) path = p;
+        }
+        return path.string();
+    };
+
+    if (!music_.initialize()) return;
+
+    const std::string mainMenu = resolveAudio("assets/Audio/Music/MainMenu.mp3");
+    const std::string gameplay = resolveAudio("assets/Audio/Music/GameMusic.mp3");
+    const std::string boss = resolveAudio("assets/Audio/Music/BossMusic.mp3");
+    const std::string death = resolveAudio("assets/Audio/Music/DeathScreen.mp3");
+
+    music_.load(Engine::Audio::MusicTrack::MainMenu, mainMenu);
+    music_.load(Engine::Audio::MusicTrack::Gameplay, gameplay);
+    music_.load(Engine::Audio::MusicTrack::Boss, boss);
+    music_.load(Engine::Audio::MusicTrack::Death, death);
+
+    // Boot into menu music by default.
+    music_.play(Engine::Audio::MusicTrack::MainMenu, /*loop=*/true);
+    musicVolume_ = std::clamp(musicVolume_, 0.0f, 1.0f);
+    applyAudioVolumes();
+}
+
+void GameRoot::initializeSfx() {
+    auto resolveAudio = [&](const std::string& rel) -> std::string {
+        std::filesystem::path path = rel;
+        if (const char* home = std::getenv("HOME")) {
+            std::filesystem::path p = std::filesystem::path(home) / rel;
+            if (std::filesystem::exists(p)) path = p;
+        }
+        return path.string();
+    };
+
+    if (!sfx_.initialize()) return;
+
+    swordAttackSfx_ = {
+        resolveAudio("assets/Audio/Sounds/Attacks/Sword/Sword Attack 1.ogg"),
+        resolveAudio("assets/Audio/Sounds/Attacks/Sword/Sword Attack 2.ogg"),
+        resolveAudio("assets/Audio/Sounds/Attacks/Sword/Sword Attack 3.ogg"),
+    };
+    swordBlockedSfx_ = {
+        resolveAudio("assets/Audio/Sounds/Attacks/Sword/Sword Blocked 1.ogg"),
+        resolveAudio("assets/Audio/Sounds/Attacks/Sword/Sword Blocked 2.ogg"),
+        resolveAudio("assets/Audio/Sounds/Attacks/Sword/Sword Blocked 3.ogg"),
+    };
+    swordImpactSfx_ = {
+        resolveAudio("assets/Audio/Sounds/Attacks/Sword/Sword Impact Hit 1.ogg"),
+        resolveAudio("assets/Audio/Sounds/Attacks/Sword/Sword Impact Hit 2.ogg"),
+        resolveAudio("assets/Audio/Sounds/Attacks/Sword/Sword Impact Hit 3.ogg"),
+    };
+    swordParrySfx_ = {
+        resolveAudio("assets/Audio/Sounds/Attacks/Sword/Sword Parry 1.ogg"),
+        resolveAudio("assets/Audio/Sounds/Attacks/Sword/Sword Parry 2.ogg"),
+        resolveAudio("assets/Audio/Sounds/Attacks/Sword/Sword Parry 3.ogg"),
+    };
+    // Note: assets are named "Sheath" (not "Sheathe") in this repo.
+    swordSheathSfx_ = {
+        resolveAudio("assets/Audio/Sounds/Attacks/Sword/Sword Sheath 1.ogg"),
+        resolveAudio("assets/Audio/Sounds/Attacks/Sword/Sword Sheath 2.ogg"),
+    };
+    swordUnsheathSfx_ = {
+        resolveAudio("assets/Audio/Sounds/Attacks/Sword/Sword Unsheath 1.ogg"),
+        resolveAudio("assets/Audio/Sounds/Attacks/Sword/Sword Unsheath 2.ogg"),
+    };
+
+    bowAttackSfx_ = {
+        resolveAudio("assets/Audio/Sounds/Attacks/Bow/Bow Attack 1.ogg"),
+        resolveAudio("assets/Audio/Sounds/Attacks/Bow/Bow Attack 2.ogg"),
+    };
+    bowBlockedSfx_ = {
+        resolveAudio("assets/Audio/Sounds/Attacks/Bow/Bow Blocked 1.ogg"),
+        resolveAudio("assets/Audio/Sounds/Attacks/Bow/Bow Blocked 2.ogg"),
+        resolveAudio("assets/Audio/Sounds/Attacks/Bow/Bow Blocked 3.ogg"),
+    };
+    bowImpactSfx_ = {
+        resolveAudio("assets/Audio/Sounds/Attacks/Bow/Bow Impact Hit 1.ogg"),
+        resolveAudio("assets/Audio/Sounds/Attacks/Bow/Bow Impact Hit 2.ogg"),
+        resolveAudio("assets/Audio/Sounds/Attacks/Bow/Bow Impact Hit 3.ogg"),
+    };
+    bowPutAwaySfx_ = {resolveAudio("assets/Audio/Sounds/Attacks/Bow/Bow Put Away 1.ogg")};
+    bowTakeOutSfx_ = {resolveAudio("assets/Audio/Sounds/Attacks/Bow/Bow Take Out 1.ogg")};
+
+    footstepDirtSfx_ = {
+        resolveAudio("assets/Audio/Sounds/Footsteps/Dirt Walk 1.ogg"),
+        resolveAudio("assets/Audio/Sounds/Footsteps/Dirt Walk 2.ogg"),
+        resolveAudio("assets/Audio/Sounds/Footsteps/Dirt Walk 3.ogg"),
+        resolveAudio("assets/Audio/Sounds/Footsteps/Dirt Walk 4.ogg"),
+        resolveAudio("assets/Audio/Sounds/Footsteps/Dirt Walk 5.ogg"),
+    };
+
+    sfxConsumeHeal_ = resolveAudio("assets/Audio/Sounds/Other/ConsumeHeal.wav");
+    sfxPickup_ = resolveAudio("assets/Audio/Sounds/Other/Pickup.wav");
+
+    // UI
+    sfxMenuClose_ = resolveAudio("assets/Audio/Sounds/UI/MenuClose.mp3");
+    // Note: file name includes a leading space in this repo.
+    sfxMenuSelect_ = resolveAudio("assets/Audio/Sounds/UI/ MenuSelect.mp3");
+
+    // Preload frequently used SFX to avoid hiccups on first play.
+    (void)sfx_.preload(sfxConsumeHeal_);
+    (void)sfx_.preload(sfxPickup_);
+    (void)sfx_.preload(sfxMenuSelect_);
+    (void)sfx_.preload(sfxMenuClose_);
+    for (const auto& p : footstepDirtSfx_) (void)sfx_.preload(p);
+    sfxVolume_ = std::clamp(sfxVolume_, 0.0f, 1.0f);
+    applyAudioVolumes();
+}
+
+void GameRoot::applyAudioVolumes() {
+    const float userMusic = std::clamp(musicVolume_, 0.0f, 1.0f);
+    const float userSfx = std::clamp(sfxVolume_, 0.0f, 1.0f);
+
+    float musicTarget = userMusic;
+    float sfxTarget = userSfx;
+
+    bool shouldMute = false;
+    if (!backgroundAudio_) {
+        if (!sdlWindow_ && sdlRenderer_) {
+            sdlWindow_ = SDL_RenderGetWindow(sdlRenderer_);
+        }
+        if (sdlWindow_) {
+            shouldMute = (SDL_GetKeyboardFocus() != sdlWindow_);
+        }
+    }
+
+    if (shouldMute) {
+        musicTarget = 0.0f;
+        sfxTarget = 0.0f;
+        focusMuted_ = true;
+    } else {
+        focusMuted_ = false;
+    }
+
+    if (music_.isInitialized()) {
+        music_.setVolume(musicTarget);
+    }
+    if (sfx_.isInitialized()) {
+        sfx_.setVolume(sfxTarget);
+    }
+}
+
+void GameRoot::playUiSelect() {
+    if (!sfx_.isInitialized() || sfxMenuSelect_.empty()) return;
+    (void)sfx_.play(sfxMenuSelect_, 0.85f);
+}
+
+void GameRoot::playUiClose() {
+    if (!sfx_.isInitialized() || sfxMenuClose_.empty()) return;
+    (void)sfx_.play(sfxMenuClose_, 0.85f);
+}
+
+void GameRoot::playPickup(bool isHeal) {
+    if (!sfx_.isInitialized()) return;
+    if (isHeal) {
+        if (!sfxConsumeHeal_.empty()) (void)sfx_.play(sfxConsumeHeal_, 0.95f);
+        return;
+    }
+    if (!sfxPickup_.empty()) (void)sfx_.play(sfxPickup_, 0.9f);
+}
+
+void GameRoot::playSwordAttack() { (void)sfx_.playRandom(swordAttackSfx_, rng_, 0.85f); }
+void GameRoot::playSwordImpact() { (void)sfx_.playRandom(swordImpactSfx_, rng_, 0.9f); }
+void GameRoot::playSwordBlocked() { (void)sfx_.playRandom(swordBlockedSfx_, rng_, 0.9f); }
+void GameRoot::playSwordParry() { (void)sfx_.playRandom(swordParrySfx_, rng_, 0.9f); }
+void GameRoot::playBowAttack() { (void)sfx_.playRandom(bowAttackSfx_, rng_, 0.85f); }
+void GameRoot::playBowImpact() { (void)sfx_.playRandom(bowImpactSfx_, rng_, 0.9f); }
+void GameRoot::playBowBlocked() { (void)sfx_.playRandom(bowBlockedSfx_, rng_, 0.9f); }
+void GameRoot::playSwordSheathOrUnsheath(bool sheathe) {
+    if (sheathe) (void)sfx_.playRandom(swordSheathSfx_, rng_, 0.9f);
+    else (void)sfx_.playRandom(swordUnsheathSfx_, rng_, 0.9f);
+}
+void GameRoot::playBowPutAwayOrTakeOut(bool putAway) {
+    if (putAway) (void)sfx_.playRandom(bowPutAwaySfx_, rng_, 0.9f);
+    else (void)sfx_.playRandom(bowTakeOutSfx_, rng_, 0.9f);
+}
+
+void GameRoot::updateFootsteps(const Engine::ActionState& actions, double dt) {
+    if (!sfx_.isInitialized()) return;
+    if (inMenu_ || paused_ || defeated_ || defeatDelayActive_) return;
+    if (dashTimer_ > 0.0f) return;  // treat dash as not "walking"
+    if (footstepDirtSfx_.empty()) return;
+
+    const auto* hp = registry_.get<Engine::ECS::Health>(hero_);
+    if (hp && !hp->alive()) return;
+
+    const auto* vel = registry_.get<Engine::ECS::Velocity>(hero_);
+    if (!vel) return;
+
+    const float speed2 = vel->value.x * vel->value.x + vel->value.y * vel->value.y;
+    const bool movingInput = (actions.moveX * actions.moveX + actions.moveY * actions.moveY) > 0.05f;
+    const bool moving = movingInput && speed2 > (18.0f * 18.0f);
+    if (!moving) {
+        footstepTimer_ = 0.0;
+        return;
+    }
+
+    footstepTimer_ -= dt;
+    if (footstepTimer_ > 0.0) return;
+
+    const std::size_t idx = footstepIndex_ % footstepDirtSfx_.size();
+    (void)sfx_.play(footstepDirtSfx_[idx], 0.55f);
+    footstepIndex_ = (footstepIndex_ + 1) % footstepDirtSfx_.size();
+    footstepTimer_ = 0.26;
+}
+
+bool GameRoot::isBossActive() const {
+    bool active = false;
+    registry_.view<Engine::ECS::BossTag, Engine::ECS::Health>(
+        [&](Engine::ECS::Entity, const Engine::ECS::BossTag&, const Engine::ECS::Health& hp) {
+            if (hp.alive()) active = true;
+        });
+    return active;
+}
+
+void GameRoot::updateMusicState() {
+    if (!music_.isInitialized()) return;
+
+    Engine::Audio::MusicTrack desired = Engine::Audio::MusicTrack::Gameplay;
+    if (inMenu_) {
+        desired = Engine::Audio::MusicTrack::MainMenu;
+    } else if (defeated_) {
+        desired = Engine::Audio::MusicTrack::Death;
+    } else if (isBossActive()) {
+        desired = Engine::Audio::MusicTrack::Boss;
+    }
+
+    if (!music_.play(desired, /*loop=*/true) && desired != Engine::Audio::MusicTrack::Gameplay) {
+        music_.play(Engine::Audio::MusicTrack::Gameplay, /*loop=*/true);
+    }
 }
 
 void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& input) {
@@ -896,6 +1157,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
     lastMouseX_ = input.mouseX();
     lastMouseY_ = input.mouseY();
     scrollDeltaFrame_ = input.scrollDelta();
+    applyAudioVolumes();
 
     // Sample high-level actions.
     Engine::ActionState actions = actionMapper_.sample(input);
@@ -963,6 +1225,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         clearBuildPreview();
     }
     auto closeOverlays = [&]() {
+        const bool hadAny = itemShopOpen_ || abilityShopOpen_ || levelChoiceOpen_ || characterScreenOpen_ || buildMenuOpen_;
         itemShopOpen_ = false;
         abilityShopOpen_ = false;
         levelChoiceOpen_ = false;
@@ -972,6 +1235,9 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         pauseMenuBlink_ = 0.0;
         pauseClickPrev_ = false;
         refreshPauseState();
+        if (hadAny) {
+            playUiClose();
+        }
     };
     // Debug hotkeys to apply/remove statuses quickly (F6-F9).
     {
@@ -1749,11 +2015,13 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     if (itemShopOpen_) {
                         itemShopOpen_ = false;
                         refreshPauseState();
+                        playUiClose();
                     } else {
                         itemShopOpen_ = true;
                         itemShopSelected_ = 0;
                         shopSellScroll_ = 0.0f;
                         refreshPauseState();
+                        playUiSelect();
                     }
                 }
             }
@@ -1769,6 +2037,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 const auto& inst = inventory_[static_cast<std::size_t>(targetIdx)];
                 const int consumedId = inst.def.id;
                 bool consumed = false;
+                bool didHeal = false;
                 if (!inst.def.rpgConsumableId.empty()) {
                     const Game::RPG::ConsumableDef* def = nullptr;
                     for (const auto& c : rpgConsumables_) {
@@ -1789,6 +2058,9 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                                             hp->currentShields = std::min(hp->maxShields, hp->currentShields + delta);
                                         } else {
                                             hp->currentHealth = std::min(hp->maxHealth, hp->currentHealth + delta);
+                                        }
+                                        if (eff.resource == Game::RPG::ConsumableResource::Health) {
+                                            didHeal = true;
                                         }
                                     } else if (eff.category == Game::RPG::ConsumableCategory::Food && eff.duration > 0.0f) {
                                         rpgConsumableOverTime_.push_back(
@@ -1843,6 +2115,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                             if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
                                 hp->currentHealth = std::min(hp->maxHealth, hp->currentHealth + inst.def.value * hp->maxHealth);
                             }
+                            didHeal = true;
                             consumed = true;
                             break;
                         }
@@ -1891,6 +2164,9 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     }
                 }
                 if (consumed) {
+                    if (didHeal) {
+                        playPickup(/*isHeal=*/true);
+                    }
                     inventory_.erase(inventory_.begin() + targetIdx);
                     // Clear hotbar references if they pointed at the consumed item id.
                     for (auto& slotId : hotbarItemIds_) {
@@ -2885,21 +3161,26 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 switch (p.kind) {
                     case Pickup::Kind::Copper:
                         copper_ += p.amount;
+                        playPickup(/*isHeal=*/false);
                         break;
                     case Pickup::Kind::Gold:
                         gold_ += p.amount;
+                        playPickup(/*isHeal=*/false);
                         break;
                     case Pickup::Kind::Powerup:
                         applyPowerupPickup(p.powerup);
+                        playPickup(/*isHeal=*/p.powerup == Pickup::Powerup::Heal);
                         break;
                     case Pickup::Kind::Item: {
                         if (!addItemToInventory(p.item)) {
                             copper_ += std::max(1, p.item.cost / 2);
                         }
+                        playPickup(/*isHeal=*/false);
                         break;
                     }
                     case Pickup::Kind::Revive:
                         reviveCharges_ += 1;
+                        playPickup(/*isHeal=*/false);
                         break;
                 }
             };
@@ -3044,6 +3325,8 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
     updateGhostState(step);
     updateRemoteCombat(step);
     processDefeatInput(actions, input);
+    updateMusicState();
+    updateFootsteps(actions, step.deltaSeconds);
 
     // Update fog-of-war visibility before rendering.
     updateFogVision();
@@ -3756,6 +4039,14 @@ bool GameRoot::performRangedAutoFire(const Engine::TimeStep& step, const Engine:
     }
     if (!haveTarget) return false;
 
+    // Militia (Damage Dealer) secondary weapon is a bow; use bow SFX for its ranged autos.
+    const bool militiaUsingBow = (activeArchetype_.id == "damage") &&
+                                 archetypeSupportsSecondaryWeapon(activeArchetype_) &&
+                                 usingSecondaryWeapon_;
+    if (militiaUsingBow && sfx_.isInitialized()) {
+        playBowAttack();
+    }
+
     // Trigger hero attack animation (Damage Dealer uses melee attack rows for all offense types).
     if (registry_.has<Game::HeroSpriteSheets>(hero_)) {
         int variant = 0;
@@ -3790,6 +4081,9 @@ bool GameRoot::performRangedAutoFire(const Engine::TimeStep& step, const Engine:
     registry_.emplace<Engine::ECS::Velocity>(proj, Engine::Vec2{dir.x * speedLocal, dir.y * speedLocal});
     const float halfSize = projectileHitboxSize_ * 0.5f * sizeMul;
     registry_.emplace<Engine::ECS::AABB>(proj, Engine::ECS::AABB{Engine::Vec2{halfSize, halfSize}});
+    if (militiaUsingBow) {
+        registry_.emplace<Game::WeaponSfxTag>(proj, Game::WeaponSfxTag{Game::WeaponSfx::Bow});
+    }
     if (archetypeSupportsSecondaryWeapon(activeArchetype_) && !usingSecondaryWeapon_) {
         // Melee mode: no visual projectile.
     } else {
@@ -3911,6 +4205,15 @@ void GameRoot::refreshHeroOffenseTag() {
 void GameRoot::toggleHeroWeaponMode() {
     if (!archetypeSupportsSecondaryWeapon(activeArchetype_)) return;
     usingSecondaryWeapon_ = !usingSecondaryWeapon_;
+    if (activeArchetype_.id == "damage" && sfx_.isInitialized()) {
+        if (usingSecondaryWeapon_) {
+            playSwordSheathOrUnsheath(/*sheathe=*/true);
+            playBowPutAwayOrTakeOut(/*putAway=*/false);
+        } else {
+            playBowPutAwayOrTakeOut(/*putAway=*/true);
+            playSwordSheathOrUnsheath(/*sheathe=*/false);
+        }
+    }
     refreshHeroOffenseTag();
 }
 
@@ -3974,6 +4277,10 @@ bool GameRoot::performMeleeAttack(const Engine::TimeStep& step, const Engine::Ac
     }
     if (!haveTarget) return false;
 
+    if (sfx_.isInitialized()) {
+        playSwordAttack();
+    }
+
     if (registry_.has<Game::HeroSpriteSheets>(hero_)) {
         int variant = 0;
         if (auto* cycle = registry_.get<Game::HeroAttackCycle>(hero_)) {
@@ -4004,6 +4311,9 @@ bool GameRoot::performMeleeAttack(const Engine::TimeStep& step, const Engine::Ac
     dmgEvent.bonusVsTag[Engine::Gameplay::Tag::Biological] = 1.0f;
 
     bool hitAny = false;
+    bool anyParry = false;
+    bool anyBlocked = false;
+    bool anyImpact = false;
     registry_.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::EnemyTag>(
         [&](Engine::ECS::Entity e, Engine::ECS::Transform& tf, Engine::ECS::Health& health, Engine::ECS::EnemyTag&) {
             if (!health.alive()) return;
@@ -4027,13 +4337,20 @@ bool GameRoot::performMeleeAttack(const Engine::TimeStep& step, const Engine::Ac
                 buff.shieldArmorBonus += armorDelta;
                 buff.damageTakenMultiplier *= st->container.damageTakenMultiplier();
             }
-            float dealt = Game::RpgDamage::apply(registry_, hero_, e, health, dmgEvent, buff, useRpgCombat_, rpgResolverConfig_, rng_,
-                                                 "melee", [this](const std::string& line) { pushCombatDebugLine(line); });
+            auto outcomeSink = [&](const Engine::Gameplay::RPG::HitOutcome& out) {
+                if (out.parried) anyParry = true;
+                if (out.dodged || (out.quality == Engine::Gameplay::RPG::HitQuality::Glance)) anyBlocked = true;
+            };
+            float dealt = Game::RpgDamage::apply(registry_, hero_, e, health, dmgEvent, buff, useRpgCombat_,
+                                                 rpgResolverConfig_, rng_, "melee",
+                                                 [this](const std::string& line) { pushCombatDebugLine(line); },
+                                                 outcomeSink);
             if (dealt > 0.0f && dealt < Engine::Gameplay::MIN_DAMAGE_PER_HIT) {
                 dealt = Engine::Gameplay::MIN_DAMAGE_PER_HIT;
             }
             if (dealt > 0.0f) {
                 hitAny = true;
+                anyImpact = true;
                 if (xpPerDamageDealt_ > 0.0f) {
                     xp_ += static_cast<int>(std::round(dealt * xpPerDamageDealt_));
                 }
@@ -4048,6 +4365,12 @@ bool GameRoot::performMeleeAttack(const Engine::TimeStep& step, const Engine::Ac
             }
         });
 
+    if (sfx_.isInitialized()) {
+        if (anyParry) playSwordParry();
+        else if (anyBlocked) playSwordBlocked();
+        else if (anyImpact) playSwordImpact();
+    }
+
     if (hitAny) {
         float rateMul = rageRateBuff_ * frenzyRateBuff_ * (hotzoneSystem_ ? hotzoneSystem_->rateMultiplier() : 1.0f);
         fireCooldown_ = fireInterval_ / std::max(0.1f, rateMul);
@@ -4059,6 +4382,8 @@ void GameRoot::onShutdown() {
     if (netSession_) {
         netSession_->stop();
     }
+    sfx_.shutdown();
+    music_.shutdown();
     saveProgress();
     clearBuildPreview();
     if (fogTexture_) {
@@ -4422,7 +4747,7 @@ void GameRoot::loadProgress() {
     SaveData data{};
     if (mgr.load(data)) {
         saveData_ = data;
-        saveData_.version = 3;
+        saveData_.version = 4;
         totalRuns_ = data.totalRuns;
         bestWave_ = data.bestWave;
         totalKillsAccum_ = data.totalKills;
@@ -4430,6 +4755,11 @@ void GameRoot::loadProgress() {
         vaultGold_ = data.vaultGold;
         lastDepositedMatchId_ = data.lastDepositedMatchId;
         upgradeLevels_ = data.upgrades;
+        musicVolume_ = std::clamp(data.musicVolume, 0.0f, 1.0f);
+        sfxVolume_ = std::clamp(data.sfxVolume, 0.0f, 1.0f);
+        backgroundAudio_ = data.backgroundAudio;
+        showDamageNumbers_ = data.showDamageNumbers;
+        screenShake_ = data.screenShake;
         Engine::logInfo("Save loaded.");
     } else {
         Engine::logWarn("No valid save found; starting fresh profile.");
@@ -4438,7 +4768,7 @@ void GameRoot::loadProgress() {
 }
 
 void GameRoot::saveProgress() {
-    saveData_.version = 3;
+    saveData_.version = 4;
     saveData_.totalRuns = totalRuns_;
     saveData_.bestWave = bestWave_;
     saveData_.totalKills = totalKillsAccum_;
@@ -4446,6 +4776,11 @@ void GameRoot::saveProgress() {
     saveData_.vaultGold = vaultGold_;
     saveData_.lastDepositedMatchId = lastDepositedMatchId_;
     saveData_.upgrades = upgradeLevels_;
+    saveData_.musicVolume = std::clamp(musicVolume_, 0.0f, 1.0f);
+    saveData_.sfxVolume = std::clamp(sfxVolume_, 0.0f, 1.0f);
+    saveData_.backgroundAudio = backgroundAudio_;
+    saveData_.showDamageNumbers = showDamageNumbers_;
+    saveData_.screenShake = screenShake_;
     SaveManager mgr(savePath_);
     if (!mgr.save(saveData_)) {
         Engine::logWarn("Failed to write save file.");
@@ -6356,6 +6691,9 @@ void GameRoot::updateMenuInput(const Engine::ActionState& actions, const Engine:
             }
             advanceSelection(itemCount);
             if (confirmEdge) {
+                if (clickEdge) {
+                    playUiSelect();
+                }
                 switch (menuSelection_) {
                     case 0: menuPage_ = MenuPage::CharacterSelect; menuSelection_ = 0; return;  // Solo
                     case 1: menuPage_ = MenuPage::HostConfig; menuSelection_ = 0; return;
@@ -6384,91 +6722,296 @@ void GameRoot::updateMenuInput(const Engine::ActionState& actions, const Engine:
             }
         } else if (menuPage_ == MenuPage::Upgrades) {
             const auto& defs = Meta::upgradeDefinitions();
-            int itemCount = static_cast<int>(defs.size());
-            if (itemCount > 0) {
-                upgradesSelection_ = std::clamp(upgradesSelection_, 0, itemCount - 1);
+            const int count = static_cast<int>(defs.size());
+            upgradesSelection_ = (count > 0) ? std::clamp(upgradesSelection_, 0, count - 1) : 0;
+
+            const float refW = 1920.0f;
+            const float refH = 1080.0f;
+            const float s = std::min(vw / refW, vh / refH);
+            const float textBoost = 1.12f;
+            const float margin = 28.0f * s;
+            const float gap = 22.0f * s;
+            const float footerH = 120.0f * s;
+            const float titleYRef = 72.0f * s;
+            const float contentTop = titleYRef + 144.0f * s;
+            const float contentBottom = vh - footerH;
+            const float contentH = std::max(160.0f * s, contentBottom - contentTop);
+
+            const float contentW = std::max(1.0f, vw - margin * 2.0f);
+            const float listMinW = 420.0f * s;
+            const float detailsMinW = 420.0f * s;
+            float listW = std::min(560.0f * s, contentW * 0.46f);
+            float detailsW = contentW - listW - gap;
+            if (detailsW < detailsMinW) {
+                detailsW = detailsMinW;
+                listW = std::max(listMinW, contentW - detailsW - gap);
+                detailsW = std::max(detailsMinW, contentW - listW - gap);
             }
-            const float panelW = 760.0f;
-            const float panelX = centerX - panelW * 0.5f;
-            const float panelY = topY + 90.0f;
-            const float rowH = 44.0f;
-            if (!upgradeConfirmOpen_) {
-                advanceSelection(std::max(1, itemCount));
+
+            const float listX = margin;
+            const float panelY = contentTop;
+            const float panelH = contentH;
+            const float detailsX = listX + listW + gap;
+            const float pad = 16.0f * s * textBoost;
+            const float headerH = 52.0f * s * textBoost;
+            const float barW = 10.0f * s;
+
+            const float entryScale = 0.98f * s * textBoost;
+            const float entryH = std::max(40.0f * s, measureTextUnified("Ag", entryScale).y + 18.0f * s);
+
+            const float listY = panelY;
+            const float listH = panelH;
+            const float innerX = listX + pad;
+            const float innerY = listY + headerH;
+            const float innerW = listW - pad * 2.0f;
+            const float innerH = listH - headerH - pad;
+
+            const int maxVisible = std::max(1, static_cast<int>(std::floor(std::max(1.0f, innerH) / std::max(1.0f, entryH))));
+            const float maxScroll = std::max(0.0f, static_cast<float>(count) - static_cast<float>(maxVisible));
+            upgradesScroll_ = std::clamp(upgradesScroll_, 0.0f, maxScroll);
+
+            const bool hoverList = inside(mx, my, listX, listY, listW, listH);
+            if (!upgradeConfirmOpen_ && hoverList && scrollDeltaFrame_ != 0) {
+                upgradesScroll_ = std::clamp(upgradesScroll_ - static_cast<float>(scrollDeltaFrame_) * 0.65f, 0.0f, maxScroll);
             }
-            // Hover rows to move selection; click purchase button to open confirm.
-            for (int i = 0; i < itemCount; ++i) {
-                float y = panelY + 50.0f + static_cast<float>(i) * (rowH + 8.0f);
-                const auto& def = defs[static_cast<std::size_t>(i)];
-                const int* lvlPtr = Meta::levelPtrByKey(upgradeLevels_, def.key);
-                int lvl = lvlPtr ? *lvlPtr : 0;
-                bool maxed = (def.maxLevel >= 0 && lvl >= def.maxLevel);
-                if (inside(mx, my, panelX + 8.0f, y, panelW - 16.0f, rowH)) {
-                    upgradesSelection_ = i;
+
+            const int start =
+                (count > maxVisible) ? std::clamp(static_cast<int>(std::round(upgradesScroll_)), 0, count - maxVisible) : 0;
+            const int end = std::min(count, start + maxVisible);
+
+            auto ensureSelectedVisible = [&]() {
+                if (count <= 0) return;
+                if (upgradesSelection_ < start) {
+                    upgradesScroll_ = std::clamp(static_cast<float>(upgradesSelection_), 0.0f, maxScroll);
+                } else if (upgradesSelection_ >= end) {
+                    upgradesScroll_ =
+                        std::clamp(static_cast<float>(upgradesSelection_ - maxVisible + 1), 0.0f, maxScroll);
                 }
-                float btnW = 110.0f;
-                float btnH = 28.0f;
-                float btnX = panelX + panelW - btnW - 18.0f;
-                float btnY = y + 8.0f;
-                if (clickEdge && inside(mx, my, btnX, btnY, btnW, btnH) && !upgradeConfirmOpen_) {
-                    if (maxed) {
-                        upgradeError_ = "MAX level reached";
-                        upgradeErrorTimer_ = 1.2;
-                    } else {
-                        upgradeConfirmOpen_ = true;
-                        upgradeConfirmIndex_ = i;
+            };
+
+            // Keyboard focus: 0=list, 1=buy, 2=back
+            if (!upgradeConfirmOpen_) {
+                const int focusCount = 3;
+                if (leftEdge) menuSelection_ = (menuSelection_ - 1 + focusCount) % focusCount;
+                if (rightEdge) menuSelection_ = (menuSelection_ + 1) % focusCount;
+                if (menuSelection_ < 0 || menuSelection_ >= focusCount) menuSelection_ = 0;
+
+                if (menuSelection_ == 0 && count > 0) {
+                    if (upEdge) upgradesSelection_ = (upgradesSelection_ - 1 + count) % count;
+                    if (downEdge) upgradesSelection_ = (upgradesSelection_ + 1) % count;
+                    ensureSelectedVisible();
+                }
+            }
+
+            // Mouse row hover/selection
+            if (!upgradeConfirmOpen_ && hoverList) {
+                for (int i = start; i < end; ++i) {
+                    const float rowY = innerY + static_cast<float>(i - start) * entryH;
+                    const bool hovered = inside(mx, my, innerX, rowY, innerW - barW, entryH);
+                    if (!hovered) continue;
+                    menuSelection_ = 0;
+                    upgradesSelection_ = i;
+                    if (clickEdge) {
+                        playUiSelect();
+                    }
+                    break;
+                }
+            }
+
+            auto isMaxed = [&](int idx) {
+                if (idx < 0 || idx >= count) return true;
+                const auto& def = defs[static_cast<std::size_t>(idx)];
+                const int* lvlPtr = Meta::levelPtrByKey(upgradeLevels_, def.key);
+                const int lvl = lvlPtr ? *lvlPtr : 0;
+                return (def.maxLevel >= 0 && lvl >= def.maxLevel);
+            };
+
+            // Buy / back buttons (details panel footer).
+            const float btnH = 56.0f * s;
+            const float btnW = std::min(260.0f * s, detailsW * 0.55f);
+            const float btnY = panelY + panelH - btnH - 18.0f * s;
+            const float buyX = detailsX + detailsW - btnW - 18.0f * s;
+            const float backW = std::min(180.0f * s, detailsW * 0.35f);
+            const float backX = detailsX + 18.0f * s;
+
+            if (!upgradeConfirmOpen_) {
+                if (inside(mx, my, buyX, btnY, btnW, btnH)) {
+                    menuSelection_ = 1;
+                    if (clickEdge) {
+                        if (isMaxed(upgradesSelection_)) {
+                            upgradeError_ = "MAX level reached";
+                            upgradeErrorTimer_ = 1.2;
+                        } else {
+                            playUiSelect();
+                            upgradeConfirmOpen_ = true;
+                            upgradeConfirmIndex_ = upgradesSelection_;
+                        }
+                    }
+                } else if (inside(mx, my, backX, btnY, backW, btnH)) {
+                    menuSelection_ = 2;
+                    if (clickEdge) {
+                        playUiClose();
+                        menuPage_ = MenuPage::Main;
+                        menuSelection_ = 3;
+                        return;
+                    }
+                }
+
+                if (confirmEdge) {
+                    if (menuSelection_ == 2) {
+                        playUiClose();
+                        menuPage_ = MenuPage::Main;
+                        menuSelection_ = 3;
+                        return;
+                    }
+                    if (menuSelection_ == 0 || menuSelection_ == 1) {
+                        if (count > 0 && !isMaxed(upgradesSelection_)) {
+                            playUiSelect();
+                            upgradeConfirmOpen_ = true;
+                            upgradeConfirmIndex_ = upgradesSelection_;
+                        } else if (count > 0 && isMaxed(upgradesSelection_)) {
+                            upgradeError_ = "MAX level reached";
+                            upgradeErrorTimer_ = 1.2;
+                        }
                     }
                 }
             }
-            if (confirmEdge && !upgradeConfirmOpen_ && itemCount > 0) {
-                const auto& def = defs[static_cast<std::size_t>(upgradesSelection_)];
-                const int* lvlPtr = Meta::levelPtrByKey(upgradeLevels_, def.key);
-                int lvl = lvlPtr ? *lvlPtr : 0;
-                bool maxed = (def.maxLevel >= 0 && lvl >= def.maxLevel);
-                if (maxed) {
-                    upgradeError_ = "MAX level reached";
-                    upgradeErrorTimer_ = 1.2;
-                } else {
-                    upgradeConfirmOpen_ = true;
-                    upgradeConfirmIndex_ = upgradesSelection_;
-                }
-            }
+
+            // Confirm modal interaction.
             if (upgradeConfirmOpen_) {
-                float pw = 420.0f;
-                float ph = 150.0f;
-                float px = centerX - pw * 0.5f;
-                float py = topY + 130.0f;
-                float cancelX = px + pw - 190.0f;
-                float confirmX = px + pw - 90.0f;
-                float btnY = py + ph - 44.0f;
-                bool clickConfirm = clickEdge && inside(mx, my, confirmX, btnY, 80.0f, 32.0f);
-                bool clickCancel = clickEdge && inside(mx, my, cancelX, btnY, 80.0f, 32.0f);
-                if (confirmEdge || clickConfirm) {
-                    tryPurchaseUpgrade(upgradeConfirmIndex_);
+                const float pw = 560.0f * s;
+                const float ph = 190.0f * s;
+                const float px = centerX - pw * 0.5f;
+                const float py = topY + 120.0f * s;
+                const float btnW2 = 160.0f * s;
+                const float btnH2 = 44.0f * s;
+                const float btnGap = 18.0f * s;
+                const float cancelX = px + pw - (btnW2 * 2.0f + btnGap + 16.0f * s);
+                const float confirmX = cancelX + btnW2 + btnGap;
+                const float btnY2 = py + ph - btnH2 - 16.0f * s;
+
+                const bool clickCancel = clickEdge && inside(mx, my, cancelX, btnY2, btnW2, btnH2);
+                const bool clickConfirm = clickEdge && inside(mx, my, confirmX, btnY2, btnW2, btnH2);
+
+                if (pauseEdge || menuBackEdge || clickCancel) {
+                    playUiClose();
                     upgradeConfirmOpen_ = false;
-                } else if (pauseEdge || menuBackEdge || clickCancel) {
+                    upgradeConfirmIndex_ = -1;
+                } else if (confirmEdge || clickConfirm) {
+                    if (tryPurchaseUpgrade(upgradeConfirmIndex_)) {
+                        playUiSelect();
+                    }
                     upgradeConfirmOpen_ = false;
+                    upgradeConfirmIndex_ = -1;
                 }
             }
+
             if ((pauseEdge || menuBackEdge) && !upgradeConfirmOpen_) {
+                playUiClose();
                 menuPage_ = MenuPage::Main;
                 menuSelection_ = 3;  // Upgrades slot
+                return;
             }
         } else if (menuPage_ == MenuPage::Options) {
-            const int itemCount = 3;  // toggles + movement mode, back via Esc
+            const float refW = 1920.0f;
+            const float refH = 1080.0f;
+            const float s = std::min(vw / refW, vh / refH);
+
+            const int itemCount = 6;  // music vol, sfx vol, background audio, damage numbers, shake, movement mode
             advanceSelection(itemCount);
-            // hover selection
-            float boxY0 = topY + 110.0f;
-            for (int i = 0; i < itemCount; ++i) {
-                float y = boxY0 + i * 30.0f;
-                if (inside(mx, my, centerX - 150.0f, y, 280.0f, 26.0f)) {
-                    menuSelection_ = i;
+
+            const float panelW = 760.0f * s;
+            const float panelX = centerX - panelW * 0.5f;
+            const float panelY = topY + 84.0f * s;
+            const float pad = 22.0f * s;
+            const float rowH = 56.0f * s;
+            const float rowY0 = panelY + 86.0f * s;
+            const float rowX = panelX + pad;
+            const float rowW = panelW - pad * 2.0f;
+            const float sliderW = std::min(320.0f * s, rowW * 0.52f);
+            const float sliderH = 14.0f * s;
+            const float sliderX = rowX + rowW - sliderW;
+            const float sliderYInset = (rowH - sliderH) * 0.5f;
+
+            auto sliderValueFromMouse = [&](int mouseX, float x, float w) {
+                const float t = std::clamp((static_cast<float>(mouseX) - x) / std::max(1.0f, w), 0.0f, 1.0f);
+                return t;
+            };
+            auto setMusicVolume = [&](float v) {
+                const float next = std::clamp(v, 0.0f, 1.0f);
+                if (std::abs(next - musicVolume_) < 0.001f) return;
+                musicVolume_ = next;
+                optionsDirty_ = true;
+                applyAudioVolumes();
+            };
+            auto setSfxVolume = [&](float v) {
+                const float next = std::clamp(v, 0.0f, 1.0f);
+                if (std::abs(next - sfxVolume_) < 0.001f) return;
+                sfxVolume_ = next;
+                optionsDirty_ = true;
+                applyAudioVolumes();
+            };
+
+            // Stop dragging when mouse released.
+            const bool wasDragging = optionsSliderDragging_;
+            if (!leftClick) {
+                optionsSliderDragging_ = false;
+                optionsSliderDraggingIndex_ = -1;
+                if (wasDragging && optionsDirty_) {
+                    saveProgress();
+                    optionsDirty_ = false;
                 }
             }
-            if (confirmEdge || (clickEdge && inside(mx, my, centerX - 150.0f, boxY0, 280.0f, 26.0f * itemCount + 10.0f))) {
+            if (optionsSliderDragging_) {
+                const int idx = optionsSliderDraggingIndex_;
+                const float v = sliderValueFromMouse(mx, sliderX, sliderW);
+                if (idx == 0) setMusicVolume(v);
+                if (idx == 1) setSfxVolume(v);
+            }
+
+            // Hover selection (rows) + slider capture.
+            for (int i = 0; i < itemCount; ++i) {
+                float y = rowY0 + i * rowH;
+                if (inside(mx, my, rowX, y, rowW, rowH)) {
+                    menuSelection_ = i;
+                    if (clickEdge) {
+                        if (i == 0 || i == 1) {
+                            // Click in slider area begins drag.
+                            float sy = y + sliderYInset;
+                            if (inside(mx, my, sliderX - 10.0f * s, sy - 10.0f * s, sliderW + 20.0f * s, sliderH + 20.0f * s)) {
+                                playUiSelect();
+                                optionsSliderDragging_ = true;
+                                optionsSliderDraggingIndex_ = i;
+                                const float v = sliderValueFromMouse(mx, sliderX, sliderW);
+                                if (i == 0) setMusicVolume(v);
+                                if (i == 1) setSfxVolume(v);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Keyboard left/right for sliders.
+            const float step = 0.05f;
+            if (leftEdge || rightEdge) {
+                const float dir = rightEdge ? 1.0f : -1.0f;
+                if (menuSelection_ == 0) setMusicVolume(musicVolume_ + dir * step);
+                if (menuSelection_ == 1) setSfxVolume(sfxVolume_ + dir * step);
+            }
+
+            if (confirmEdge) {
                 switch (menuSelection_) {
-                    case 0: showDamageNumbers_ = !showDamageNumbers_; break;
-                    case 1: screenShake_ = !screenShake_; break;
-                    case 2: {
+                    case 2:
+                        backgroundAudio_ = !backgroundAudio_;
+                        focusMuted_ = false;
+                        applyAudioVolumes();
+                        playUiSelect();
+                        saveProgress();
+                        optionsDirty_ = false;
+                        break;
+                    case 3: showDamageNumbers_ = !showDamageNumbers_; playUiSelect(); saveProgress(); optionsDirty_ = false; break;
+                    case 4: screenShake_ = !screenShake_; playUiSelect(); saveProgress(); optionsDirty_ = false; break;
+                    case 5: {
                         movementMode_ = (movementMode_ == MovementMode::Modern) ? MovementMode::RTS : MovementMode::Modern;
                         moveTargetActive_ = false;
                         moveCommandPrev_ = false;
@@ -6477,13 +7020,25 @@ void GameRoot::updateMenuInput(const Engine::ActionState& actions, const Engine:
                             const bool defaultFollow = (movementMode_ == MovementMode::Modern);
                             cameraSystem_->resetFollow(defaultFollow);
                         }
+                        playUiSelect();
+                        saveProgress();
+                        optionsDirty_ = false;
                         break;
                     }
+                    default:
+                        break;
                 }
             }
-            if (pauseEdge) {
+            if (pauseEdge || menuBackEdge) {
+                if (optionsDirty_) {
+                    saveProgress();
+                    optionsDirty_ = false;
+                }
+                playUiClose();
                 menuPage_ = MenuPage::Main;
                 menuSelection_ = 0;
+                optionsSliderDragging_ = false;
+                optionsSliderDraggingIndex_ = -1;
             }
         } else if (menuPage_ == MenuPage::CharacterSelect) {
             const int focusCount = 4;  // archetype, difficulty, start, back
@@ -6548,6 +7103,7 @@ void GameRoot::updateMenuInput(const Engine::ActionState& actions, const Engine:
                     if (hovered) {
                         menuSelection_ = selIndex;
                         if (clickEdge) {
+                            playUiSelect();
                             selected = i;
                             if (selIndex == 0) {
                                 localLobbyHeroId_ = list[selected].id;
@@ -6574,11 +7130,12 @@ void GameRoot::updateMenuInput(const Engine::ActionState& actions, const Engine:
             const float startX = centerX - (btnW * 2.0f + btnGap) * 0.5f;
             if (inside(mx, my, startX, btnY, btnW, btnH)) {
                 menuSelection_ = 2;
-                if (clickEdge) { startNewGame(); return; }
+                if (clickEdge) { playUiSelect(); startNewGame(); return; }
             }
             if (inside(mx, my, startX + btnW + btnGap, btnY, btnW, btnH)) {
                 menuSelection_ = 3;
                 if (clickEdge) {
+                    playUiClose();
                     menuPage_ = MenuPage::Main;
                     menuSelection_ = 0;
                     return;
@@ -6596,6 +7153,7 @@ void GameRoot::updateMenuInput(const Engine::ActionState& actions, const Engine:
                 }
             }
             if (pauseEdge) {
+                playUiClose();
                 menuPage_ = MenuPage::Main;
                 menuSelection_ = 0;
             }
@@ -6928,7 +7486,7 @@ void GameRoot::renderMenu() {
     drawTextUnified(title, Engine::Vec2{centerX - titleW * 0.5f, titleY}, titleScale, Engine::Color{190, 235, 255, 245});
 
     // Build info (bottom-right).
-    const std::string buildStr = "Pre-Alpha | Build v0.0.151";
+    const std::string buildStr = "Pre-Alpha | Build v0.0.155";
     const float buildScale = std::clamp(0.95f * s, 0.72f, 0.95f);
     const Engine::Vec2 buildSz = measureTextUnified(buildStr, buildScale);
     drawTextUnified(buildStr, Engine::Vec2{vw - margin - buildSz.x, vh - margin - buildSz.y}, buildScale,
@@ -7014,135 +7572,457 @@ void GameRoot::renderMenu() {
         drawTextUnified("Esc / Mouse1 to return", Engine::Vec2{centerX - 120.0f, topY + 204.0f}, 0.9f,
                         Engine::Color{180, 210, 240, 220});
     } else if (menuPage_ == MenuPage::Upgrades) {
-        const auto& defs = Meta::upgradeDefinitions();
-        Engine::Color c{200, 230, 255, 240};
-        drawTextUnified("Global Upgrades", Engine::Vec2{centerX - 110.0f, topY + 52.0f}, 1.2f, c);
-        const float panelW = 760.0f;
-        const float rowH = 44.0f;
-        const float panelH = std::max(420.0f, 80.0f + static_cast<float>(defs.size()) * (rowH + 8.0f));
-        const float panelX = centerX - panelW * 0.5f;
-        const float panelY = topY + 80.0f;
-        render_->drawFilledRect(Engine::Vec2{panelX, panelY}, Engine::Vec2{panelW, panelH},
-                                Engine::Color{22, 30, 44, 220});
-        drawTextUnified("Name", Engine::Vec2{panelX + 16.0f, panelY + 12.0f}, 1.05f, c);
-        drawTextUnified("Level", Engine::Vec2{panelX + 200.0f, panelY + 12.0f}, 1.05f, c);
-        drawTextUnified("Current", Engine::Vec2{panelX + 280.0f, panelY + 12.0f}, 1.05f, c);
-        drawTextUnified("Next", Engine::Vec2{panelX + 470.0f, panelY + 12.0f}, 1.05f, c);
-        std::ostringstream vault;
-        vault << "Vault Gold: " << vaultGold_;
-        drawTextUnified(vault.str(), Engine::Vec2{panelX + panelW - 160.0f, panelY + 12.0f}, 1.0f,
-                        Engine::Color{240, 210, 120, 240});
-        float rowY = panelY + 50.0f;
-        for (std::size_t i = 0; i < defs.size(); ++i) {
-            const auto& def = defs[i];
-            const int* lvlPtr = Meta::levelPtrByKey(upgradeLevels_, def.key);
-            int lvl = lvlPtr ? *lvlPtr : 0;
-            bool selected = static_cast<int>(i) == upgradesSelection_;
-            bool maxed = (def.maxLevel >= 0 && lvl >= def.maxLevel);
-            int64_t cost = Meta::costForNext(def, lvl);
-            bool affordable = !maxed && vaultGold_ >= cost && cost < std::numeric_limits<int64_t>::max();
-            Engine::Color bg = selected ? Engine::Color{46, 68, 96, 235} : Engine::Color{30, 40, 56, 215};
-            render_->drawFilledRect(Engine::Vec2{panelX + 8.0f, rowY}, Engine::Vec2{panelW - 16.0f, rowH}, bg);
-            drawTextUnified(def.displayName, Engine::Vec2{panelX + 16.0f, rowY + 6.0f}, 1.0f,
-                            Engine::Color{220, 240, 255, 240});
-            std::ostringstream lvlTxt;
-            lvlTxt << "Lv " << lvl;
-            if (def.maxLevel >= 0) lvlTxt << "/" << def.maxLevel;
-            drawTextUnified(lvlTxt.str(), Engine::Vec2{panelX + 200.0f, rowY + 6.0f}, 0.98f,
-                            Engine::Color{200, 220, 235, 230});
-            auto curStr = Meta::currentEffectString(def, upgradeLevels_);
-            auto nextStr = Meta::nextEffectString(def, upgradeLevels_);
-            drawTextUnified(curStr, Engine::Vec2{panelX + 280.0f, rowY + 6.0f}, 0.98f,
-                            Engine::Color{200, 230, 255, 230});
-            drawTextUnified(nextStr, Engine::Vec2{panelX + 470.0f, rowY + 6.0f}, 0.98f,
-                            Engine::Color{180, 210, 240, 220});
-            float btnW = 110.0f;
-            float btnH = 28.0f;
-            float btnX = panelX + panelW - btnW - 18.0f;
-            float btnY = rowY + 8.0f;
-            Engine::Color btnCol =
-                maxed ? Engine::Color{90, 90, 90, 200}
-                      : (affordable ? Engine::Color{80, 140, 100, 235} : Engine::Color{140, 80, 80, 220});
-            render_->drawFilledRect(Engine::Vec2{btnX, btnY}, Engine::Vec2{btnW, btnH}, btnCol);
-            std::ostringstream btnLabel;
-            if (maxed || cost >= std::numeric_limits<int64_t>::max()) {
-                btnLabel << "MAX";
-            } else {
-                btnLabel << cost;
+        const float refW = 1920.0f;
+        const float refH = 1080.0f;
+        const float s = std::min(vw / refW, vh / refH);
+        const float textBoost = 1.12f;
+        const float margin = 28.0f * s;
+        const float gap = 22.0f * s;
+
+        // Page title (under the main game title).
+        {
+            const std::string pageTitle = "Upgrades";
+            const float st = std::clamp(1.35f * s * textBoost, 1.15f, 1.60f);
+            const float tw = measureTextUnified(pageTitle, st).x;
+            drawTextUnified(pageTitle, Engine::Vec2{centerX - tw * 0.5f, titleY + 84.0f * s}, st,
+                            Engine::Color{200, 230, 255, 240});
+            const std::string sub = "Spend Vault Gold on permanent global upgrades • Esc to go back";
+            const float ss = std::clamp(0.88f * s * textBoost, 0.82f, 1.10f);
+            const float sw = measureTextUnified(sub, ss).x;
+            drawTextUnified(sub, Engine::Vec2{centerX - sw * 0.5f, titleY + 114.0f * s}, ss,
+                            Engine::Color{150, 190, 215, 210});
+        }
+
+        const float footerH = 120.0f * s;
+        const float contentTop = titleY + 144.0f * s;
+        const float contentBottom = vh - footerH;
+        const float contentH = std::max(160.0f * s, contentBottom - contentTop);
+        const float panelY = contentTop;
+        const float panelH = contentH;
+
+        const float contentW = std::max(1.0f, vw - margin * 2.0f);
+        const float listMinW = 420.0f * s;
+        const float detailsMinW = 420.0f * s;
+        float listW = std::min(560.0f * s, contentW * 0.46f);
+        float detailsW = contentW - listW - gap;
+        if (detailsW < detailsMinW) {
+            detailsW = detailsMinW;
+            listW = std::max(listMinW, contentW - detailsW - gap);
+            detailsW = std::max(detailsMinW, contentW - listW - gap);
+        }
+
+        const float listX = margin;
+        const float detailsX = listX + listW + gap;
+        const float pad = 16.0f * s * textBoost;
+        const float headerH = 52.0f * s * textBoost;
+        const float barW = 10.0f * s;
+        const float entryScale = 0.98f * s * textBoost;
+        const float entryH = std::max(40.0f * s, measureTextUnified("Ag", entryScale).y + 18.0f * s);
+
+        int mx = lastMouseX_;
+        int my = lastMouseY_;
+        const int scrollDelta = scrollDeltaFrame_;
+        const bool mouseDown = (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(SDL_BUTTON_LEFT)) != 0;
+
+        auto drawCard = [&](float x, float y, float w, float h) {
+            render_->drawFilledRect(Engine::Vec2{x, y + 4.0f * s}, Engine::Vec2{w, h}, Engine::Color{0, 0, 0, 85});
+            render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{w, h}, Engine::Color{12, 16, 24, 220});
+            render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{w, 2.0f}, Engine::Color{45, 70, 95, 190});
+            render_->drawFilledRect(Engine::Vec2{x, y + h - 2.0f}, Engine::Vec2{w, 2.0f}, Engine::Color{45, 70, 95, 190});
+        };
+
+        auto wrapByWidth = [&](const std::string& text, float maxWidth, float scale) {
+            std::vector<std::string> lines;
+            std::istringstream iss(text);
+            std::string word;
+            std::string current;
+            while (iss >> word) {
+                std::string next = current.empty() ? word : (current + " " + word);
+                if (measureTextUnified(next, scale).x <= maxWidth || current.empty()) {
+                    current = std::move(next);
+                } else {
+                    lines.push_back(current);
+                    current = word;
+                }
             }
-            float textX = btnX + (btnW * 0.5f) - 16.0f;
-            drawTextUnified(btnLabel.str(), Engine::Vec2{textX, btnY + 6.0f}, 0.9f,
-                            Engine::Color{220, 240, 255, 240});
-            rowY += rowH + 8.0f;
+            if (!current.empty()) lines.push_back(current);
+            return lines;
+        };
+
+        const auto& defs = Meta::upgradeDefinitions();
+        const int count = static_cast<int>(defs.size());
+        const int sel = (count > 0) ? std::clamp(upgradesSelection_, 0, count - 1) : 0;
+
+        // Left: upgrade list
+        {
+            drawCard(listX, panelY, listW, panelH);
+            const float titleScale = std::clamp(1.05f * s * textBoost, 0.98f, 1.28f);
+            drawTextUnified("Global Upgrades", Engine::Vec2{listX + pad, panelY + 14.0f * s}, titleScale,
+                            Engine::Color{210, 235, 255, 240});
+
+            std::ostringstream vault;
+            vault << "Vault: " << vaultGold_;
+            const float vaultScale = std::clamp(0.92f * s * textBoost, 0.86f, 1.10f);
+            const float vaultW = measureTextUnified(vault.str(), vaultScale).x;
+            drawTextUnified(vault.str(), Engine::Vec2{listX + listW - pad - vaultW, panelY + 16.0f * s}, vaultScale,
+                            Engine::Color{240, 210, 120, 240});
+
+            const float innerX = listX + pad;
+            const float innerY = panelY + headerH;
+            const float innerW = listW - pad * 2.0f;
+            const float innerH = panelH - headerH - pad;
+            const float listAreaW = innerW;
+            const float listAreaH = innerH;
+
+            const bool hoverPanel = inside(mx, my, listX, panelY, listW, panelH);
+            const int maxVisible = std::max(1, static_cast<int>(std::floor(std::max(1.0f, listAreaH) / std::max(1.0f, entryH))));
+            const float maxScroll = std::max(0.0f, static_cast<float>(count) - static_cast<float>(maxVisible));
+
+            // Scroll wheel and track dragging.
+            if (hoverPanel && scrollDelta != 0) {
+                upgradesScroll_ = std::clamp(upgradesScroll_ - static_cast<float>(scrollDelta) * 0.65f, 0.0f, maxScroll);
+            }
+
+            const float trackX = innerX + listAreaW - barW;
+            const float trackY = innerY;
+            const float trackH = listAreaH;
+            if (hoverPanel && mouseDown && count > maxVisible) {
+                if (mx >= static_cast<int>(trackX) && mx <= static_cast<int>(trackX + barW)) {
+                    float t = (static_cast<float>(my) - trackY) / std::max(1.0f, trackH);
+                    t = std::clamp(t, 0.0f, 1.0f);
+                    upgradesScroll_ = t * maxScroll;
+                }
+            }
+
+            const int start = (count > maxVisible) ? std::clamp(static_cast<int>(std::round(upgradesScroll_)), 0, count - maxVisible) : 0;
+            const int end = std::min(count, start + maxVisible);
+
+            for (int i = start; i < end; ++i) {
+                const float rowY = innerY + static_cast<float>(i - start) * entryH;
+                const bool hov = inside(mx, my, innerX, rowY, listAreaW - barW, entryH);
+                const bool selected = (i == sel);
+
+                Engine::Color bg = selected ? Engine::Color{28, 44, 66, 235} : (hov ? Engine::Color{20, 30, 46, 230}
+                                                                                     : Engine::Color{14, 18, 26, 210});
+                render_->drawFilledRect(Engine::Vec2{innerX, rowY}, Engine::Vec2{listAreaW, entryH - 2.0f * s}, bg);
+                Engine::Color accent = selected ? Engine::Color{120, 200, 255, 235} : (hov ? Engine::Color{80, 140, 210, 200}
+                                                                                          : Engine::Color{35, 55, 80, 160});
+                render_->drawFilledRect(Engine::Vec2{innerX, rowY}, Engine::Vec2{5.0f * s, entryH - 2.0f * s}, accent);
+
+                const auto& def = defs[static_cast<std::size_t>(i)];
+                const int* lvlPtr = Meta::levelPtrByKey(upgradeLevels_, def.key);
+                const int lvl = lvlPtr ? *lvlPtr : 0;
+                std::ostringstream lvlTxt;
+                lvlTxt << "Lv " << lvl;
+                if (def.maxLevel >= 0) lvlTxt << "/" << def.maxLevel;
+
+                const float lvlScale = std::clamp(0.86f * s * textBoost, 0.80f, 1.05f);
+                const float lvlW = measureTextUnified(lvlTxt.str(), lvlScale).x;
+                const float lvlX = innerX + listAreaW - barW - 12.0f * s - lvlW;
+                const float nameMaxW = std::max(0.0f, lvlX - (innerX + 14.0f * s) - 10.0f * s);
+                const std::string name = ellipsizeTextUnified(def.displayName, nameMaxW, entryScale);
+                const float textY = rowY + (entryH - measureTextUnified(name, entryScale).y) * 0.5f + 1.0f * s;
+                drawTextUnified(name, Engine::Vec2{innerX + 14.0f * s, textY}, entryScale,
+                                selected ? Engine::Color{235, 255, 255, 250} : Engine::Color{200, 225, 245, 235});
+                drawTextUnified(lvlTxt.str(), Engine::Vec2{lvlX, rowY + (entryH - measureTextUnified("Ag", lvlScale).y) * 0.5f},
+                                lvlScale, Engine::Color{175, 215, 240, 230});
+            }
+
+            if (count > maxVisible) {
+                render_->drawFilledRect(Engine::Vec2{trackX, trackY}, Engine::Vec2{barW, trackH}, Engine::Color{10, 14, 22, 170});
+                const float thumbH = std::max(22.0f * s, trackH * (static_cast<float>(maxVisible) / static_cast<float>(count)));
+                const float ratio = (maxScroll > 0.0f) ? (upgradesScroll_ / maxScroll) : 0.0f;
+                const float thumbY = trackY + (trackH - thumbH) * ratio;
+                render_->drawFilledRect(Engine::Vec2{trackX, thumbY}, Engine::Vec2{barW, thumbH}, Engine::Color{90, 140, 210, 220});
+            }
         }
+
+        // Right: details + buy/back buttons.
+        {
+            drawCard(detailsX, panelY, detailsW, panelH);
+            const float innerX = detailsX + pad;
+            float y = panelY + 16.0f * s;
+            const float titleScale = std::clamp(1.22f * s * textBoost, 1.05f, 1.45f);
+            const float bodyScale = std::clamp(0.92f * s * textBoost, 0.86f, 1.10f);
+            const float mutedScale = std::clamp(0.86f * s * textBoost, 0.80f, 1.02f);
+
+            if (count <= 0) {
+                drawTextUnified("No upgrades available.", Engine::Vec2{innerX, y}, bodyScale, Engine::Color{180, 205, 230, 220});
+            } else {
+                const auto& def = defs[static_cast<std::size_t>(sel)];
+                const int* lvlPtr = Meta::levelPtrByKey(upgradeLevels_, def.key);
+                const int lvl = lvlPtr ? *lvlPtr : 0;
+                const bool maxed = (def.maxLevel >= 0 && lvl >= def.maxLevel);
+                const int64_t cost = Meta::costForNext(def, lvl);
+                const bool affordable = (!maxed && cost < std::numeric_limits<int64_t>::max() && vaultGold_ >= cost);
+
+                drawTextUnified(def.displayName, Engine::Vec2{innerX, y}, titleScale, Engine::Color{235, 255, 255, 250});
+                y += 34.0f * s;
+
+                if (!def.effectLabel.empty()) {
+                    const std::string eff = ellipsizeTextUnified(def.effectLabel, detailsW - pad * 2.0f, bodyScale);
+                    drawTextUnified(eff, Engine::Vec2{innerX, y}, bodyScale, Engine::Color{200, 230, 255, 225});
+                    y += 26.0f * s;
+                }
+
+                const std::string cur = "Current: " + Meta::currentEffectString(def, upgradeLevels_);
+                const std::string nxt = "Next: " + Meta::nextEffectString(def, upgradeLevels_);
+                for (const auto& line : wrapByWidth(cur, detailsW - pad * 2.0f, mutedScale)) {
+                    drawTextUnified(line, Engine::Vec2{innerX, y}, mutedScale, Engine::Color{175, 215, 240, 230});
+                    y += 20.0f * s;
+                }
+                y += 4.0f * s;
+                for (const auto& line : wrapByWidth(nxt, detailsW - pad * 2.0f, mutedScale)) {
+                    drawTextUnified(line, Engine::Vec2{innerX, y}, mutedScale, Engine::Color{160, 195, 220, 220});
+                    y += 20.0f * s;
+                }
+
+                // Footer buttons
+                const float btnH = 56.0f * s;
+                const float btnY = panelY + panelH - btnH - 18.0f * s;
+                const float buyW = std::min(260.0f * s, detailsW * 0.55f);
+                const float backW = std::min(180.0f * s, detailsW * 0.35f);
+                const float buyX = detailsX + detailsW - buyW - 18.0f * s;
+                const float backX = detailsX + 18.0f * s;
+
+                auto button = [&](float x, float y0, float w, float h, bool focused, Engine::Color fill, Engine::Color edge,
+                                  const std::string& label, Engine::Color labelCol) {
+                    render_->drawFilledRect(Engine::Vec2{x, y0 + 2.0f * s}, Engine::Vec2{w, h}, Engine::Color{0, 0, 0, 70});
+                    render_->drawFilledRect(Engine::Vec2{x, y0}, Engine::Vec2{w, h}, fill);
+                    render_->drawFilledRect(Engine::Vec2{x, y0}, Engine::Vec2{w, 2.0f}, edge);
+                    render_->drawFilledRect(Engine::Vec2{x, y0 + h - 2.0f}, Engine::Vec2{w, 2.0f}, edge);
+                    const float ls = std::clamp(0.98f * s * textBoost, 0.90f, 1.18f);
+                    const float lw = measureTextUnified(label, ls).x;
+                    drawTextUnified(label, Engine::Vec2{x + (w - lw) * 0.5f, y0 + (h - measureTextUnified("Ag", ls).y) * 0.5f},
+                                    ls, labelCol);
+                    if (focused) {
+                        render_->drawFilledRect(Engine::Vec2{x, y0}, Engine::Vec2{w, 2.0f}, Engine::Color{120, 200, 255, 210});
+                        render_->drawFilledRect(Engine::Vec2{x, y0 + h - 2.0f}, Engine::Vec2{w, 2.0f}, Engine::Color{120, 200, 255, 210});
+                    }
+                };
+
+                button(backX, btnY, backW, btnH, menuSelection_ == 2, Engine::Color{22, 30, 46, 230}, Engine::Color{45, 70, 95, 190},
+                       "Back", Engine::Color{210, 230, 245, 235});
+
+                std::string buyLabel = "Buy";
+                if (maxed || cost >= std::numeric_limits<int64_t>::max()) buyLabel = "Maxed";
+                else {
+                    std::ostringstream ss;
+                    ss << "Buy (" << cost << ")";
+                    buyLabel = ss.str();
+                }
+                Engine::Color fill = maxed ? Engine::Color{70, 75, 85, 220}
+                                           : (affordable ? Engine::Color{40, 92, 70, 235} : Engine::Color{92, 50, 50, 225});
+                Engine::Color edge = affordable ? Engine::Color{90, 170, 120, 220} : Engine::Color{45, 70, 95, 190};
+                button(buyX, btnY, buyW, btnH, menuSelection_ == 1, fill, edge, buyLabel,
+                       Engine::Color{235, 255, 255, 245});
+            }
+        }
+
+        // Small error toast.
         if (!upgradeError_.empty()) {
-            drawTextUnified(upgradeError_, Engine::Vec2{panelX + 12.0f, panelY + panelH - 28.0f}, 0.9f,
-                            Engine::Color{255, 160, 160, 230});
+            const float toastScale = std::clamp(0.92f * s * textBoost, 0.86f, 1.10f);
+            const float tw = measureTextUnified(upgradeError_, toastScale).x;
+            const float th = measureTextUnified("Ag", toastScale).y;
+            const float px = centerX - (tw + 22.0f * s) * 0.5f;
+            const float py = panelY + panelH - 92.0f * s;
+            render_->drawFilledRect(Engine::Vec2{px, py}, Engine::Vec2{tw + 22.0f * s, th + 18.0f * s},
+                                    Engine::Color{50, 20, 24, 210});
+            drawTextUnified(upgradeError_, Engine::Vec2{px + 11.0f * s, py + 9.0f * s}, toastScale, Engine::Color{255, 180, 180, 235});
         }
-        if (upgradeConfirmOpen_ && upgradeConfirmIndex_ >= 0 &&
-            upgradeConfirmIndex_ < static_cast<int>(defs.size())) {
+
+        // Confirm modal.
+        if (upgradeConfirmOpen_ && upgradeConfirmIndex_ >= 0 && upgradeConfirmIndex_ < count) {
+            render_->drawFilledRect(Engine::Vec2{0.0f, 0.0f}, Engine::Vec2{vw, vh}, Engine::Color{0, 0, 0, 135});
+
             const auto& def = defs[static_cast<std::size_t>(upgradeConfirmIndex_)];
             const int* lvlPtr = Meta::levelPtrByKey(upgradeLevels_, def.key);
-            int lvl = lvlPtr ? *lvlPtr : 0;
-            int64_t cost = Meta::costForNext(def, lvl);
-            float pw = 420.0f;
-            float ph = 150.0f;
-            float px = centerX - pw * 0.5f;
-            float py = topY + 130.0f;
-            render_->drawFilledRect(Engine::Vec2{px, py}, Engine::Vec2{pw, ph}, Engine::Color{24, 34, 48, 235});
+            const int lvl = lvlPtr ? *lvlPtr : 0;
+            const int64_t cost = Meta::costForNext(def, lvl);
+
+            const float pw = 560.0f * s;
+            const float ph = 190.0f * s;
+            const float px = centerX - pw * 0.5f;
+            const float py = topY + 120.0f * s;
+            drawCard(px, py, pw, ph);
+
+            const float titleScale = std::clamp(1.05f * s * textBoost, 0.98f, 1.28f);
+            const float bodyScale = std::clamp(0.92f * s * textBoost, 0.86f, 1.10f);
+            drawTextUnified("Confirm Purchase", Engine::Vec2{px + 16.0f * s, py + 14.0f * s}, titleScale, Engine::Color{210, 235, 255, 240});
+
             std::ostringstream prompt;
-            prompt << "Buy " << def.displayName << " Lv." << (lvl + 1) << " for " << cost << " Gold?";
-            drawTextUnified(prompt.str(), Engine::Vec2{px + 14.0f, py + 20.0f}, 0.95f,
-                            Engine::Color{220, 240, 255, 240});
-            drawTextUnified("Enter / Click confirm | Esc / Cancel", Engine::Vec2{px + 14.0f, py + 52.0f}, 0.9f,
-                            Engine::Color{190, 210, 235, 220});
-            float cancelX = px + pw - 190.0f;
-            float confirmX = px + pw - 90.0f;
-            float btnY = py + ph - 44.0f;
-            render_->drawFilledRect(Engine::Vec2{cancelX, btnY}, Engine::Vec2{80.0f, 32.0f},
-                                    Engine::Color{80, 90, 110, 230});
-            render_->drawFilledRect(Engine::Vec2{confirmX, btnY}, Engine::Vec2{80.0f, 32.0f},
-                                    Engine::Color{90, 140, 110, 235});
-            drawTextUnified("Cancel", Engine::Vec2{cancelX + 12.0f, btnY + 7.0f}, 0.9f,
-                            Engine::Color{220, 230, 240, 240});
-            drawTextUnified("Confirm", Engine::Vec2{confirmX + 8.0f, btnY + 7.0f}, 0.9f,
-                            Engine::Color{220, 240, 255, 240});
+            prompt << "Buy " << def.displayName << " Lv." << (lvl + 1) << " for " << cost << " gold?";
+            for (const auto& line : wrapByWidth(prompt.str(), pw - 32.0f * s, bodyScale)) {
+                drawTextUnified(line, Engine::Vec2{px + 16.0f * s, py + 52.0f * s}, bodyScale, Engine::Color{190, 215, 240, 230});
+                break;
+            }
+            drawTextUnified("Enter confirm • Esc cancel", Engine::Vec2{px + 16.0f * s, py + 80.0f * s}, bodyScale,
+                            Engine::Color{150, 190, 215, 210});
+
+            const float btnW = 160.0f * s;
+            const float btnH = 44.0f * s;
+            const float btnGap = 18.0f * s;
+            const float cancelX = px + pw - (btnW * 2.0f + btnGap + 16.0f * s);
+            const float confirmX = cancelX + btnW + btnGap;
+            const float btnY = py + ph - btnH - 16.0f * s;
+
+            auto drawSmallButton = [&](float x, float y0, float w, float h, Engine::Color fill, const std::string& label) {
+                render_->drawFilledRect(Engine::Vec2{x, y0 + 2.0f * s}, Engine::Vec2{w, h}, Engine::Color{0, 0, 0, 70});
+                render_->drawFilledRect(Engine::Vec2{x, y0}, Engine::Vec2{w, h}, fill);
+                render_->drawFilledRect(Engine::Vec2{x, y0}, Engine::Vec2{w, 2.0f}, Engine::Color{45, 70, 95, 190});
+                render_->drawFilledRect(Engine::Vec2{x, y0 + h - 2.0f}, Engine::Vec2{w, 2.0f}, Engine::Color{45, 70, 95, 190});
+                const float ls = std::clamp(0.98f * s * textBoost, 0.90f, 1.18f);
+                const float lw = measureTextUnified(label, ls).x;
+                drawTextUnified(label, Engine::Vec2{x + (w - lw) * 0.5f, y0 + (h - measureTextUnified("Ag", ls).y) * 0.5f}, ls,
+                                Engine::Color{235, 255, 255, 245});
+            };
+
+            drawSmallButton(cancelX, btnY, btnW, btnH, Engine::Color{70, 80, 98, 235}, "Cancel");
+            drawSmallButton(confirmX, btnY, btnW, btnH, Engine::Color{40, 92, 70, 235}, "Confirm");
         }
     } else if (menuPage_ == MenuPage::Options) {
-        Engine::Color c{200, 240, 200, 240};
-        drawTextUnified("Options", Engine::Vec2{centerX - 50.0f, topY + 70.0f}, 1.2f, c);
-        auto drawOpt = [&](const std::string& label, bool enabled, int idx, float yOff) {
-            Engine::Color box{40, 70, 90, 220};
-            Engine::Color on{140, 230, 160, 240};
-            Engine::Color off{180, 120, 120, 220};
-            float y = topY + yOff;
-            render_->drawFilledRect(Engine::Vec2{centerX - 150.0f, y}, Engine::Vec2{20.0f, 20.0f}, box);
-            if (enabled) {
-                render_->drawFilledRect(Engine::Vec2{centerX - 147.0f, y + 3.0f}, Engine::Vec2{14.0f, 14.0f}, on);
-            } else {
-                render_->drawFilledRect(Engine::Vec2{centerX - 147.0f, y + 3.0f}, Engine::Vec2{14.0f, 14.0f}, off);
-            }
-            bool focused = (menuSelection_ == idx);
-            Engine::Color lc = focused ? Engine::Color{220, 255, 255, 255} : Engine::Color{200, 220, 240, 230};
-            drawTextUnified(label, Engine::Vec2{centerX - 120.0f, y + 2.0f}, 1.0f, lc);
+        const float refW = 1920.0f;
+        const float refH = 1080.0f;
+        const float s = std::min(vw / refW, vh / refH);
+        const float textBoost = 1.10f;
+
+        // Page title (under the main game title).
+        {
+            const std::string pageTitle = "Options";
+            const float st = std::clamp(1.35f * s * textBoost, 1.15f, 1.60f);
+            const float tw = measureTextUnified(pageTitle, st).x;
+            drawTextUnified(pageTitle, Engine::Vec2{centerX - tw * 0.5f, titleY + 84.0f * s}, st,
+                            Engine::Color{200, 230, 255, 240});
+            const std::string sub = "Adjust audio and gameplay preferences • Esc to go back";
+            const float ss = std::clamp(0.88f * s * textBoost, 0.82f, 1.10f);
+            const float sw = measureTextUnified(sub, ss).x;
+            drawTextUnified(sub, Engine::Vec2{centerX - sw * 0.5f, titleY + 114.0f * s}, ss,
+                            Engine::Color{150, 190, 215, 210});
+        }
+
+        const int rowCount = 6;
+        const float panelW = 760.0f * s;
+        const float rowH = 56.0f * s;
+        const float panelH = (86.0f * s) + static_cast<float>(rowCount) * rowH + 56.0f * s;
+        const float panelX = centerX - panelW * 0.5f;
+        const float panelY = topY + 84.0f * s;
+        const float pad = 22.0f * s;
+
+        auto drawCard = [&](float x, float y, float w, float h) {
+            render_->drawFilledRect(Engine::Vec2{x, y + 4.0f * s}, Engine::Vec2{w, h}, Engine::Color{0, 0, 0, 85});
+            render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{w, h}, Engine::Color{12, 16, 24, 220});
+            render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{w, 2.0f}, Engine::Color{45, 70, 95, 190});
+            render_->drawFilledRect(Engine::Vec2{x, y + h - 2.0f}, Engine::Vec2{w, 2.0f}, Engine::Color{45, 70, 95, 190});
         };
-        auto drawModeOpt = [&](const std::string& label, const std::string& value, int idx, float yOff) {
-            Engine::Color box{40, 70, 90, 220};
-            float y = topY + yOff;
-            render_->drawFilledRect(Engine::Vec2{centerX - 150.0f, y}, Engine::Vec2{280.0f, 24.0f}, box);
-            bool focused = (menuSelection_ == idx);
-            Engine::Color lc = focused ? Engine::Color{220, 255, 255, 255} : Engine::Color{200, 220, 240, 230};
-            drawTextUnified(label, Engine::Vec2{centerX - 140.0f, y + 3.0f}, 0.95f, lc);
-            drawTextUnified(value, Engine::Vec2{centerX + 20.0f, y + 3.0f}, 0.95f, lc);
+        drawCard(panelX, panelY, panelW, panelH);
+
+        drawTextUnified("Settings", Engine::Vec2{panelX + pad, panelY + 18.0f * s}, 1.05f * s * textBoost,
+                        Engine::Color{240, 210, 120, 240});
+        render_->drawFilledRect(Engine::Vec2{panelX + pad, panelY + 46.0f * s}, Engine::Vec2{panelW - pad * 2.0f, 2.0f},
+                                Engine::Color{40, 60, 86, 190});
+
+        const float rowX = panelX + pad;
+        const float rowW = panelW - pad * 2.0f;
+        const float rowY0 = panelY + 86.0f * s;
+        const float sliderW = std::min(320.0f * s, rowW * 0.52f);
+        const float sliderH = 14.0f * s;
+        const float sliderX = rowX + rowW - sliderW;
+        const float sliderYInset = (rowH - sliderH) * 0.5f;
+
+        auto rowTextY = [&](float y, float scale) {
+            const float th = measureTextUnified("Ag", scale).y;
+            return y + (rowH - th) * 0.5f + 1.0f * s;
         };
-        drawOpt("Damage Numbers", showDamageNumbers_, 0, 110.0f);
-        drawOpt("Screen Shake", screenShake_, 1, 140.0f);
-        const char* moveLabel = (movementMode_ == MovementMode::Modern)
-                                    ? "Modern (WASD move, C toggles follow)"
-                                    : "RTS-Like (RMB move, WASD pan)";
-        drawModeOpt("Movement Mode", moveLabel, 2, 170.0f);
-        Engine::Color hint{180, 210, 240, 220};
-        drawTextUnified("Esc / Mouse1 to return", Engine::Vec2{centerX - 150.0f, topY + 200.0f}, 0.9f, hint);
+
+        auto drawSliderRow = [&](const std::string& label, float value01, int idx, int rowIndex) {
+            const float y = rowY0 + static_cast<float>(rowIndex) * rowH;
+            const bool focused = (menuSelection_ == idx);
+            const Engine::Color rowBg = focused ? Engine::Color{30, 44, 64, 235} : Engine::Color{20, 28, 42, 210};
+            render_->drawFilledRect(Engine::Vec2{rowX, y}, Engine::Vec2{rowW, rowH}, rowBg);
+            const float labelScale = 0.98f * s * textBoost;
+            const float labelMaxW = std::max(0.0f, (sliderX - 18.0f * s) - (rowX + 10.0f * s));
+            const std::string labelFit = ellipsizeTextUnified(label, labelMaxW, labelScale);
+            drawTextUnified(labelFit, Engine::Vec2{rowX + 10.0f * s, rowTextY(y, labelScale)}, labelScale,
+                            focused ? Engine::Color{225, 255, 255, 245} : Engine::Color{200, 220, 240, 230});
+
+            const float barY = y + sliderYInset;
+            const float t = std::clamp(value01, 0.0f, 1.0f);
+            render_->drawFilledRect(Engine::Vec2{sliderX, barY}, Engine::Vec2{sliderW, sliderH}, Engine::Color{24, 34, 50, 230});
+            render_->drawFilledRect(Engine::Vec2{sliderX, barY}, Engine::Vec2{sliderW * t, sliderH},
+                                    Engine::Color{90, 170, 255, 235});
+            render_->drawFilledRect(Engine::Vec2{sliderX, barY}, Engine::Vec2{sliderW, 2.0f}, Engine::Color{45, 70, 95, 190});
+            render_->drawFilledRect(Engine::Vec2{sliderX, barY + sliderH - 2.0f}, Engine::Vec2{sliderW, 2.0f},
+                                    Engine::Color{45, 70, 95, 190});
+
+            const float knobX = sliderX + sliderW * t;
+            const float knobW = 10.0f * s;
+            const float knobH = sliderH + 10.0f * s;
+            render_->drawFilledRect(Engine::Vec2{knobX - knobW * 0.5f, barY - (knobH - sliderH) * 0.5f},
+                                    Engine::Vec2{knobW, knobH},
+                                    focused ? Engine::Color{220, 245, 255, 245} : Engine::Color{210, 230, 245, 235});
+
+            std::ostringstream pct;
+            pct << static_cast<int>(std::round(t * 100.0f)) << "%";
+            const float pctScale = 0.95f * s * textBoost;
+            const float pctW = measureTextUnified(pct.str(), pctScale).x;
+            const float px = std::max(rowX + 10.0f * s, sliderX - 12.0f * s - pctW);
+            drawTextUnified(pct.str(), Engine::Vec2{px, rowTextY(y, pctScale)}, pctScale, Engine::Color{180, 210, 235, 220});
+        };
+
+        drawSliderRow("Music Volume", musicVolume_, 0, 0);
+        drawSliderRow("SFX Volume", sfxVolume_, 1, 1);
+
+        auto drawToggleRow = [&](const std::string& label, bool enabled, int idx, int rowIndex) {
+            const float y = rowY0 + static_cast<float>(rowIndex) * rowH;
+            const bool focused = (menuSelection_ == idx);
+            const Engine::Color rowBg = focused ? Engine::Color{30, 44, 64, 235} : Engine::Color{20, 28, 42, 210};
+            render_->drawFilledRect(Engine::Vec2{rowX, y}, Engine::Vec2{rowW, rowH}, rowBg);
+            const float labelScale = 0.98f * s * textBoost;
+            const float toggleW = 74.0f * s;
+            const float labelMaxW = std::max(0.0f, (rowX + rowW - toggleW - 18.0f * s) - (rowX + 10.0f * s));
+            const std::string labelFit = ellipsizeTextUnified(label, labelMaxW, labelScale);
+            drawTextUnified(labelFit, Engine::Vec2{rowX + 10.0f * s, rowTextY(y, labelScale)}, labelScale,
+                            focused ? Engine::Color{225, 255, 255, 245} : Engine::Color{200, 220, 240, 230});
+
+            const float toggleH = 26.0f * s;
+            const float tx = rowX + rowW - toggleW;
+            const float ty = y + (rowH - toggleH) * 0.5f;
+            Engine::Color track = enabled ? Engine::Color{80, 160, 115, 235} : Engine::Color{75, 85, 100, 230};
+            render_->drawFilledRect(Engine::Vec2{tx, ty}, Engine::Vec2{toggleW, toggleH}, track);
+            const float knob = toggleH - 6.0f * s;
+            const float kx = enabled ? (tx + toggleW - knob - 3.0f * s) : (tx + 3.0f * s);
+            render_->drawFilledRect(Engine::Vec2{kx, ty + 3.0f * s}, Engine::Vec2{knob, knob},
+                                    Engine::Color{230, 245, 255, 245});
+        };
+
+        drawToggleRow("Background Audio", backgroundAudio_, 2, 2);
+        drawToggleRow("Damage Numbers", showDamageNumbers_, 3, 3);
+        drawToggleRow("Screen Shake", screenShake_, 4, 4);
+
+        // Movement mode row.
+        {
+            const float y = rowY0 + 5.0f * rowH;
+            const bool focused = (menuSelection_ == 5);
+            const Engine::Color rowBg = focused ? Engine::Color{30, 44, 64, 235} : Engine::Color{20, 28, 42, 210};
+            render_->drawFilledRect(Engine::Vec2{rowX, y}, Engine::Vec2{rowW, rowH}, rowBg);
+            const float labelScale = 0.98f * s * textBoost;
+            drawTextUnified("Movement Mode", Engine::Vec2{rowX + 10.0f * s, rowTextY(y, labelScale)}, labelScale,
+                            focused ? Engine::Color{225, 255, 255, 245} : Engine::Color{200, 220, 240, 230});
+
+            const char* moveLabel = (movementMode_ == MovementMode::Modern)
+                                        ? "Modern (WASD move, C toggles follow)"
+                                        : "RTS-Like (RMB move, WASD pan)";
+            const float valueScale = 0.86f * s * textBoost;
+            const float labelColW = std::min(260.0f * s, rowW * 0.40f);
+            const float valueX = rowX + labelColW;
+            const float valueMaxW = std::max(0.0f, (rowX + rowW - 10.0f * s) - valueX);
+            const std::string moveFit = ellipsizeTextUnified(moveLabel, valueMaxW, valueScale);
+            drawTextUnified(moveFit, Engine::Vec2{valueX, rowTextY(y, valueScale)}, valueScale, Engine::Color{170, 205, 235, 220});
+        }
+
+        drawTextUnified("Tip: drag sliders or use A/D • Esc to return",
+                        Engine::Vec2{panelX + pad, panelY + panelH - 34.0f * s},
+                        0.88f * s * textBoost, Engine::Color{150, 190, 215, 210});
     } else if (menuPage_ == MenuPage::CharacterSelect) {
         const float refW = 1920.0f;
         const float refH = 1080.0f;

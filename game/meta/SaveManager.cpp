@@ -3,6 +3,8 @@
 #include <fstream>
 #include <filesystem>
 #include <array>
+#include <algorithm>
+#include <cmath>
 #include <cstring>
 
 #include <nlohmann/json.hpp>
@@ -88,6 +90,14 @@ std::vector<uint8_t> SaveManager::serialize(const SaveData& data) const {
     upgrades["difficulty"] = data.upgrades.difficulty;
     upgrades["mastery"] = data.upgrades.mastery;
     j["global_upgrades"] = upgrades;
+
+    nlohmann::json opts;
+    opts["musicVolume"] = data.musicVolume;
+    opts["sfxVolume"] = data.sfxVolume;
+    opts["backgroundAudio"] = data.backgroundAudio;
+    opts["showDamageNumbers"] = data.showDamageNumbers;
+    opts["screenShake"] = data.screenShake;
+    j["options"] = opts;
     auto str = j.dump();
     return std::vector<uint8_t>(str.begin(), str.end());
 }
@@ -124,6 +134,30 @@ bool SaveManager::deserialize(const std::vector<uint8_t>& bytes, SaveData& outDa
             outData.upgrades.difficulty = g.value("difficulty", 0);
             outData.upgrades.mastery = g.value("mastery", 0);
         }
+
+        // Options: new saves use `options`, but accept legacy top-level keys.
+        const nlohmann::json* opts = nullptr;
+        if (j.contains("options") && j["options"].is_object()) {
+            opts = &j["options"];
+        }
+        const auto readFloat01 = [&](const char* key, float fallback) -> float {
+            float v = fallback;
+            if (opts && opts->contains(key)) v = (*opts).value(key, fallback);
+            else v = j.value(key, fallback);
+            if (!std::isfinite(v)) v = fallback;
+            return std::clamp(v, 0.0f, 1.0f);
+        };
+        const auto readBool = [&](const char* key, bool fallback) -> bool {
+            if (opts && opts->contains(key)) return (*opts).value(key, fallback);
+            return j.value(key, fallback);
+        };
+
+        outData.musicVolume = readFloat01("musicVolume", outData.musicVolume);
+        outData.sfxVolume = readFloat01("sfxVolume", outData.sfxVolume);
+        outData.backgroundAudio = readBool("backgroundAudio", outData.backgroundAudio);
+        outData.showDamageNumbers = readBool("showDamageNumbers", outData.showDamageNumbers);
+        outData.screenShake = readBool("screenShake", outData.screenShake);
+
         for (const auto& def : Meta::upgradeDefinitions()) {
             if (int* ptr = Meta::levelPtrByKey(outData.upgrades, def.key)) {
                 *ptr = Meta::clampLevel(def, *ptr);

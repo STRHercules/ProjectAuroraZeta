@@ -7,11 +7,21 @@
 #include "../../engine/ecs/Registry.h"
 #include "../../engine/core/Time.h"
 #include "../../engine/gameplay/RPGCombat.h"
+#include "../components/WeaponSfx.h"
 
 namespace Game {
 
 class CollisionSystem {
 public:
+    struct HitSfxInfo {
+        WeaponSfx weapon{WeaponSfx::None};
+        bool dodged{false};
+        bool parried{false};
+        bool glanced{false};
+        float damageDealt{0.0f};
+    };
+    using HitSfxSink = std::function<void(const HitSfxInfo&)>;
+
     void setContactDamage(float dmg) { contactDamage_ = dmg; }
     void setThornConfig(float reflectPercent, float maxReflect) {
         thornReflectPercent_ = reflectPercent;
@@ -28,6 +38,7 @@ public:
         rpgConfig_ = cfg;
     }
     void setCombatDebugSink(std::function<void(const std::string&)> sink) { debugSink_ = std::move(sink); }
+    void setHitSfxSink(HitSfxSink sink) { hitSfxSink_ = std::move(sink); }
     void update(Engine::ECS::Registry& registry);
 
 private:
@@ -42,6 +53,7 @@ private:
     Engine::Gameplay::RPG::ResolverConfig rpgConfig_{};
     std::mt19937 rng_{std::random_device{}()};
     std::function<void(const std::string&)> debugSink_{};
+    HitSfxSink hitSfxSink_{};
 };
 
 }  // namespace Game

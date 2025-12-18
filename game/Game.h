@@ -22,6 +22,8 @@
 #include "../engine/gameplay/Combat.h"
 #include "../engine/gameplay/RPGStats.h"
 #include "../engine/ecs/components/Status.h"
+#include "../engine/audio/MusicPlayer.h"
+#include "../engine/audio/SfxPlayer.h"
 #include "../engine/ui/MiniMapHUD.h"
 #include <random>
 #include <fstream>
@@ -69,6 +71,7 @@
 #include "components/HeroPickupAnim.h"
 #include "components/SecondaryWeapon.h"
 #include "components/Ghost.h"
+#include "components/WeaponSfx.h"
 #include "../engine/gameplay/FogOfWar.h"
 #include "../engine/render/FogOfWarRenderer.h"
 #include "net/NetSession.h"
@@ -149,6 +152,24 @@ private:
     void activateMiniUnitRage(float duration, float dmgMul, float atkRateMul, float hpMul, float healMul);
     void updateMiniUnitRage(float dt);
     void detectLocalIp();
+    void initializeMusic();
+    void updateMusicState();
+    bool isBossActive() const;
+    void initializeSfx();
+    void applyAudioVolumes();
+    void updateFootsteps(const Engine::ActionState& actions, double dt);
+    void playUiSelect();
+    void playUiClose();
+    void playPickup(bool isHeal);
+    void playSwordAttack();
+    void playSwordImpact();
+    void playSwordBlocked();
+    void playSwordParry();
+    void playBowAttack();
+    void playBowImpact();
+    void playBowBlocked();
+    void playSwordSheathOrUnsheath(bool sheathe);
+    void playBowPutAwayOrTakeOut(bool putAway);
     void applyRemoteSnapshot(const Game::Net::SnapshotMsg& snap);
     void leaveNetworkSession(bool isHostQuit);
     void applyLocalHeroFromLobby();
@@ -658,10 +679,45 @@ private:
     // Menu/UI state
     bool inMenu_{true};
     MenuPage menuPage_{MenuPage::Main};
+
+    Engine::Audio::MusicPlayer music_;
+    Engine::Audio::SfxPlayer sfx_;
+
+    // SFX assets (resolved paths).
+    std::vector<std::string> swordAttackSfx_{};
+    std::vector<std::string> swordBlockedSfx_{};
+    std::vector<std::string> swordImpactSfx_{};
+    std::vector<std::string> swordParrySfx_{};
+    std::vector<std::string> swordSheathSfx_{};
+    std::vector<std::string> swordUnsheathSfx_{};
+    std::vector<std::string> bowAttackSfx_{};
+    std::vector<std::string> bowBlockedSfx_{};
+    std::vector<std::string> bowImpactSfx_{};
+    std::vector<std::string> bowPutAwaySfx_{};
+    std::vector<std::string> bowTakeOutSfx_{};
+    std::vector<std::string> footstepDirtSfx_{};
+    std::string sfxConsumeHeal_{};
+    std::string sfxPickup_{};
+    std::string sfxMenuSelect_{};
+    std::string sfxMenuClose_{};
+
+    // Footstep playback state.
+    double footstepTimer_{0.0};
+    std::size_t footstepIndex_{0};
+
+    // Options
+    float musicVolume_{0.65f};
+    float sfxVolume_{0.75f};
+    bool backgroundAudio_{true};
+    bool focusMuted_{false};
+    bool optionsDirty_{false};
+    bool optionsSliderDragging_{false};
+    int optionsSliderDraggingIndex_{-1};  // 0=music, 1=sfx
     int menuSelection_{0};
     float archetypeScroll_{0.0f};
     float difficultyScroll_{0.0f};
     int upgradesSelection_{0};
+    float upgradesScroll_{0.0f};
     bool upgradeConfirmOpen_{false};
     int upgradeConfirmIndex_{-1};
     std::string upgradeError_;
@@ -796,6 +852,7 @@ private:
     Engine::TexturePtr dashBarTex_{};
     TTF_Font* uiFont_{nullptr};
     SDL_Renderer* sdlRenderer_{nullptr};
+    SDL_Window* sdlWindow_{nullptr};
     bool restartPrev_{false};
     bool itemShopOpen_{false};
     bool abilityShopOpen_{false};
