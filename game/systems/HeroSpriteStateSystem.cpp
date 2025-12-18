@@ -10,6 +10,7 @@
 #include "../components/HeroAttackAnim.h"
 #include "../components/HeroPickupAnim.h"
 #include "../components/HeroSpriteSheets.h"
+#include "../components/HeroAttackVisualOverride.h"
 #include "../components/LookDirection.h"
 #include "../components/SecondaryWeapon.h"
 #include "../components/Ghost.h"
@@ -160,6 +161,11 @@ void HeroSpriteStateSystem::update(Engine::ECS::Registry& registry, const Engine
     }
     if (look) look->dir = dir;
 
+    // Per-ability attack-sheet overrides are meant to be one-shot; clear them once the attack window ends.
+    if (!attacking && registry.has<Game::HeroAttackVisualOverride>(hero)) {
+        registry.remove<Game::HeroAttackVisualOverride>(hero);
+    }
+
     // Priorities: Knockdown (dead) > Attack > Pickup > Walk > Idle.
     if (!hp->alive() && !ghost) {
         rend->texture = sheets->movement;
@@ -183,6 +189,33 @@ void HeroSpriteStateSystem::update(Engine::ECS::Registry& registry, const Engine
     }
 
     if (attacking && sheets->combat) {
+        // Optional per-ability override sheet (e.g., Tank dash strike, Special thrust).
+        if (const auto* ov = registry.get<Game::HeroAttackVisualOverride>(hero); ov && ov->texture) {
+            rend->texture = ov->texture;
+            // Keep the base on-screen size consistent with movement frames.
+            float base = sheets->baseRenderSize > 0.0f ? sheets->baseRenderSize : rend->size.x;
+            float refW = static_cast<float>(std::max(1, sheets->movementFrameWidth));
+            float scale = base / refW;
+            rend->size = {static_cast<float>(std::max(1, ov->frameWidth)) * scale,
+                          static_cast<float>(std::max(1, ov->frameHeight)) * scale};
+
+            const int frames = framesInSheet(ov->texture, ov->frameWidth);
+            auto rowForDir = [&](LookDir4 d) {
+                switch (d) {
+                    case LookDir4::Right: return ov->rowRight;
+                    case LookDir4::Left:  return ov->mirrorLeftFromRight ? ov->rowRight : ov->rowLeft;
+                    case LookDir4::Front: return ov->rowFront;
+                    case LookDir4::Back:  return ov->rowBack;
+                }
+                return ov->rowFront;
+            };
+            int row = clampRowToSheet(ov->texture, ov->frameHeight, rowForDir(dir));
+            anim->allowFlipX = ov->allowFlipX;
+            resetAnimIfChanged(*anim, row, frames, ov->frameDuration,
+                               ov->frameWidth, ov->frameHeight);
+            return;
+        }
+
         rend->texture = sheets->combat;
         applyRenderSize(sheets, rend, true);
         anim->allowFlipX = false;

@@ -188,7 +188,7 @@ private:
     void applyWaveScaling(int wave);
     float contactDamageCurve(int wave) const;
     float copperRewardCurve(int wave) const;
-    void buildAbilities();
+    void buildAbilities(bool resetState = true);
     void drawAbilityPanel();
     void executeAbility(int index);
     void upgradeFocusedAbility();
@@ -469,6 +469,12 @@ private:
     Engine::TexturePtr wizardElementTex_{};
     int wizardElementColumns_{0};
     float wizardElementFrameDuration_{0.06f};
+    // Spell VFX (optional)
+    Engine::TexturePtr fireExplosionTex_{};
+    Engine::TexturePtr largeFireTex_{};
+    Engine::TexturePtr lightningBlastTex_{};
+    Engine::TexturePtr lightningEnergyTex_{};
+    Engine::ECS::Entity lightningDomeVis_{Engine::ECS::kInvalidEntity};
     DruidForm druidForm_{DruidForm::Human};
     DruidForm druidChosen_{DruidForm::Human};
     bool druidChoiceMade_{false};
@@ -625,6 +631,7 @@ private:
     float dashInvulnTimer_{0.0f};
     Engine::Vec2 dashDir_{};
     std::deque<std::pair<Engine::Vec2, float>> dashTrail_;
+    float dashTrailRedTimer_{0.0f};
     int kills_{0};
     int bossKills_{0};
     int bountyTargetsKilled_{0};
@@ -920,6 +927,8 @@ private:
     std::string eventCountdownLabel_;
     double freezeTimer_{0.0};
     float attackSpeedMul_{1.0f};
+    float moveSpeedBuffMul_{1.0f};
+    float moveSpeedBuffTimer_{0.0f};
     float lifestealPercent_{0.0f};
     float lifestealBuff_{0.0f};
     double lifestealTimer_{0.0};
@@ -989,6 +998,31 @@ private:
     float frenzyTimer_{0.0f};
     float frenzyRateBuff_{1.0f};
     float immortalTimer_{0.0f};
+    // Healer aura (applies to all heroes).
+    float regenAuraTimer_{0.0f};
+    float regenAuraHps_{0.0f};
+    // Temporary shield overcharge (Tank Fortify/Bulwark, Druid bear buffs, etc.).
+    float shieldOverchargeTimer_{0.0f};
+    float shieldOverchargeBonusMax_{0.0f};
+    float shieldOverchargeRegenMul_{1.0f};
+    float shieldOverchargeBaseMax_{0.0f};
+    float shieldOverchargeBaseRegen_{0.0f};
+    bool shieldOverchargeActive_{false};
+    // Assassin escape phase (skip collision resolution while active).
+    float phaseTimer_{0.0f};
+    // Support reach/execute.
+    float supportExtendTimer_{0.0f};
+    float supportExtendBonus_{12.0f};
+    int supportDiamondCharges_{0};
+    // Special consecration.
+    float consecrationTimer_{0.0f};
+    // Assassin shadow dance.
+    bool shadowDanceActive_{false};
+    Engine::Vec2 shadowDanceReturnPos_{};
+    std::vector<Engine::ECS::Entity> shadowDanceTargets_{};
+    int shadowDanceIndex_{0};
+    float shadowDanceStepTimer_{0.0f};
+    float shadowDanceStepInterval_{0.10f};
     int reviveCharges_{0};
     float abilityCooldownMul_{1.0f};
     float abilityVitalCostMul_{1.0f};

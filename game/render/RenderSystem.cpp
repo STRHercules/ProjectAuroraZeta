@@ -156,12 +156,24 @@ void RenderSystem::drawEntitiesPass(const Engine::ECS::Registry& registry, const
             if (const auto* flash = registry.get<Game::HitFlash>(e)) {
                 if (flash->timer > 0.0f) {
                     float t = std::clamp(flash->timer / 0.12f, 0.0f, 1.0f);
-                    auto boost = static_cast<uint8_t>(std::min(255.0f, color.r + 120.0f * t));
-                    color = {boost, boost, std::min<uint8_t>(255, static_cast<uint8_t>(color.b + 40)), color.a};
+                    const bool isEnemy = registry.has<Engine::ECS::EnemyTag>(e) || registry.has<Engine::ECS::BossTag>(e);
+                    if (isEnemy) {
+                        // Flash enemies red on hit.
+                        auto add = static_cast<uint8_t>(std::min(255.0f, color.r + 160.0f * t));
+                        auto sub = static_cast<uint8_t>(std::min(255.0f, 120.0f * t));
+                        color = {add,
+                                 static_cast<uint8_t>(color.g > sub ? (color.g - sub) : 0),
+                                 static_cast<uint8_t>(color.b > sub ? (color.b - sub) : 0),
+                                 color.a};
+                    } else {
+                        // Keep neutral "brighten" flash for non-enemies.
+                        auto boost = static_cast<uint8_t>(std::min(255.0f, color.r + 120.0f * t));
+                        color = {boost, boost, std::min<uint8_t>(255, static_cast<uint8_t>(color.b + 40)), color.a};
+                    }
                 }
             }
             if (cloaked && isHero) {
-                color.a = static_cast<uint8_t>(std::min<int>(color.a, 140));
+                color.a = static_cast<uint8_t>(std::min<int>(color.a, 90));
             }
 
             bool flipX = false;
@@ -172,16 +184,23 @@ void RenderSystem::drawEntitiesPass(const Engine::ECS::Registry& registry, const
             }
 
             if (rend.texture) {
+                // Do not tint playable characters; keep sprites visually "true" and use alpha-only effects (cloak/ghost).
+                Engine::Color tint = color;
+                if (isHero) {
+                    tint.r = 255;
+                    tint.g = 255;
+                    tint.b = 255;
+                }
                 if (const auto* anim = registry.get<Engine::ECS::SpriteAnimation>(e);
                     anim && anim->frameCount > 1) {
                     Engine::IntRect src{anim->frameWidth * anim->currentFrame,
                                         anim->frameHeight * anim->row,
                                         anim->frameWidth,
                                         anim->frameHeight};
-                    device_.drawTextureRegion(*rend.texture, screenPos, scaledSize, src, flipX && anim->allowFlipX);
+                    device_.drawTextureRegionTinted(*rend.texture, screenPos, scaledSize, src, tint, flipX && anim->allowFlipX);
                 } else {
                     Engine::IntRect src{0, 0, rend.texture->width(), rend.texture->height()};
-                    device_.drawTextureRegion(*rend.texture, screenPos, scaledSize, src, flipX);
+                    device_.drawTextureRegionTinted(*rend.texture, screenPos, scaledSize, src, tint, flipX);
                 }
             } else {
                 device_.drawFilledRect(screenPos, scaledSize, color);

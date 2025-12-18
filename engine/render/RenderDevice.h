@@ -24,6 +24,16 @@ public:
     virtual void drawTexture(const class Texture& texture, const Vec2& topLeft, const Vec2& size) = 0;
     virtual void drawTextureRegion(const class Texture& texture, const Vec2& topLeft, const Vec2& size,
                                    const IntRect& source, bool flipX = false) = 0;
+    // Optional tinted draw helpers; default implementations ignore tint.
+    virtual void drawTextureTinted(const class Texture& texture, const Vec2& topLeft, const Vec2& size, const Color& tint) {
+        (void)tint;
+        drawTexture(texture, topLeft, size);
+    }
+    virtual void drawTextureRegionTinted(const class Texture& texture, const Vec2& topLeft, const Vec2& size,
+                                         const IntRect& source, const Color& tint, bool flipX = false) {
+        (void)tint;
+        drawTextureRegion(texture, topLeft, size, source, flipX);
+    }
     virtual void present() = 0;
 };
 

@@ -1073,3 +1073,141 @@
 **Build / Test**
 - Build: `cmake -S . -B build -DZETA_REQUIRE_AUDIO=ON && cmake --build build -j"$(nproc)"` (Linux, 2025-12-18).
 - Tests: `./build/rpg_tests && ./build/combat_tests && ./build/upgrades_tests` (Linux, 2025-12-18).
+
+## 2025-12-18 — Revamp champion ability kits (v0.0.158)
+
+**Prompt / Task**
+- "I want to improve/revamp the abilities for all classes in the game… skip those and focus on those that are new/updated."
+
+**What Changed**
+- Replaced placeholder kits with bespoke ability behaviors for Tank/Healer/Assassin/Support/Special.
+- Added per-ability attack sheet overrides for Tank Dash Strike and Special Righteous Thrust.
+- Druid now swaps to form-specific ability kits in Bear/Wolf forms (and returns to Human kit).
+- Wizard spell visuals improved: Fireball explosion on hit, animated Flame Wall, animated Lightning Bolt and Lightning Dome.
+
+**Steps Taken**
+- Updated `data/abilities.json` with new archetype kits and semantic ability types.
+- Added `HeroAttackVisualOverride` support in `HeroSpriteStateSystem` for per-ability attack sheets.
+- Added `MultiRowSpriteAnim` support in `AnimationSystem` to animate multi-row VFX sheets (Flame Wall + Lightning Dome).
+- Implemented new ability execution logic in `game/GameAbilities.cpp` and supporting timers/ticks in `game/Game.cpp`.
+
+**Rationale / Tradeoffs**
+- Multiplayer ally-targeted heals/revive are treated as host-authoritative (clients do not force state on the host yet).
+- Druid form swaps rebuild the ability bar without resetting unrelated runtime buffs/timers.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-18).
+- Manual test:
+  - Start a run as each archetype and trigger abilities `1`–`4`.
+  - Tank: verify Dash Strike uses `Tank_Dash_Attack.png` while striking.
+  - Special: verify Righteous Thrust uses `Special_Combat_Thrust_with_AttackEffect.png`.
+  - Wizard: cast Fireball into enemies (explosion plays), cast Flame Wall (animated), cast Lightning Bolt/Dome (animated).
+
+## 2025-12-18 — Fix Special thrust animation + one-shot override (v0.0.159)
+
+**Prompt / Task**
+- "After enabling Righteous Thrust, Ellis's animation… sprites are 24x24… attack should only activate once…"
+
+**What Changed**
+- Corrected Righteous Thrust spritesheet framing to 24x24.
+- Cleared `HeroAttackVisualOverride` when the attack window ends so the thrust sheet doesn’t persist into normal melee attacks.
+
+**Steps Taken**
+- Updated the `special_thrust` override sizing and row mapping in `game/GameAbilities.cpp`.
+- Added automatic override cleanup in `game/systems/HeroSpriteStateSystem.cpp`.
+
+**Rationale / Tradeoffs**
+- Keep overrides one-shot by default; if we later need persistent stance swaps, we can add an explicit “persistent override” flag.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-18).
+- Manual test:
+  - Pick **Special**, use `1` once and verify the thrust animation frames correctly.
+- After the ability, hold `M1` and verify normal melee attack animation is restored (no repeated thrust sheet).
+
+## 2025-12-18 — Add dash to Righteous Thrust (v0.0.160)
+
+**Prompt / Task**
+- "Also make the Righteous Thrust dash in the direction towards the cursor"
+
+**What Changed**
+- Righteous Thrust now performs a short dash toward the cursor when activated.
+
+**Steps Taken**
+- Updated the `special_thrust` ability execution to reuse the existing dash movement plumbing (dash timers + velocity).
+
+**Rationale / Tradeoffs**
+- The dash uses the global dash speed multiplier so it stays consistent with other dash movement and effects (trail, etc.).
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-18).
+- Manual test:
+  - Start as **Special**, aim with the cursor, press `1`, and verify Ellis lunges in that direction once per activation.
+
+## 2025-12-18 — Make thrust dash trail red (v0.0.161)
+
+**Prompt / Task**
+- "Let's make sure the dash during Righteous Thrust is red, instead of the standard blue."
+
+**What Changed**
+- Added a short-lived “red dash trail” mode that is triggered by Righteous Thrust and tinted red in the dash trail renderer.
+
+**Steps Taken**
+- Added a `dashTrailRedTimer_` and used it to select colors during dash trail rendering.
+- Set the timer when `special_thrust` triggers; cleared it on normal Space-bar dash.
+
+**Rationale / Tradeoffs**
+- Implemented as a quick tint toggle; if we later want multiple dash colors per ability, we can store color per trail node instead of a global timer.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-18).
+- Manual test:
+  - As **Special**, press `1` and verify the dash trail is red.
+  - Press `Space` and verify the dash trail is blue.
+
+## 2025-12-18 — Fix Cloak transparency + Shadow Dance teleporting (v0.0.162)
+
+**Prompt / Task**
+- "Maria's Cloak not actually making the sprite transparent…"
+- "Maria's Ult should teleport her to each enemy… and return…"
+
+**What Changed**
+- Rendering now supports tint/alpha modulation for textured sprites, so Cloaking transparency and hitflash/ghost alpha work as intended.
+- Shadow Dance is now a timed sequence: teleport → execute per target → return to cast position.
+
+**Steps Taken**
+- Added tinted draw methods to the render device interface and implemented them for the SDL backend.
+- Updated the entity render pass to draw sprites with the computed per-entity tint/alpha.
+- Reworked the `assassin_shadow_dance` ability to queue targets and drive teleports/executions in `Game.cpp` over time.
+
+**Rationale / Tradeoffs**
+- Shadow Dance is host-authoritative in multiplayer (clients won’t force enemy state yet).
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-18).
+- Manual test:
+  - Pick **Assassin**, cast Cloak and verify María becomes visibly transparent during the effect.
+  - Cast Shadow Dance near multiple enemies and verify she hops between them and returns to the cast location at the end.
+
+## 2025-12-18 — Remove player tint + make enemy hitflash red (v0.0.163)
+
+**Prompt / Task**
+- "All characters now have a red tint over top of them…"
+- "Enemies are now also flashing yellow when damaged… make them flash red…"
+
+**What Changed**
+- Player characters no longer render with unintended color tinting.
+- Enemy hitflash tint is now red instead of yellow.
+
+**Steps Taken**
+- Adjusted textured sprite tinting rules in `game/render/RenderSystem.cpp` so heroes render with white RGB (alpha effects still apply).
+- Updated the hitflash tint math for enemies to produce a red flash.
+
+**Rationale / Tradeoffs**
+- Keeps cloaking/ghost transparency working while avoiding visible shading on character sprites.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-18).
+- Manual test:
+  - Take damage as any hero and verify no persistent color tint.
+  - Damage an enemy and verify the flash is red.

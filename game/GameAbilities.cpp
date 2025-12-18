@@ -17,6 +17,11 @@
 #include "components/SpellEffect.h"
 #include "components/AreaDamage.h"
 #include "components/StatusEffects.h"
+#include "components/Facing.h"
+#include "components/TauntTarget.h"
+#include "components/HeroAttackVisualOverride.h"
+#include "components/MultiRowSpriteAnim.h"
+#include "components/Invulnerable.h"
 #include "../engine/math/Vec2.h"
 #include <cmath>
 #include <random>
@@ -45,6 +50,16 @@ void GameRoot::upgradeFocusedAbility() {
     } else if (slot.type == "rage") {
         slot.powerScale *= 1.1f;
         slot.cooldownMax = std::max(4.0f, slot.cooldownMax * 0.92f);
+    } else if (slot.type == "healer_resurrect") {
+        // Solo: passive extra lives; Multiplayer: reduce cooldown.
+        if (!multiplayerEnabled_) {
+            reviveCharges_ = std::max(reviveCharges_, slot.level);
+        } else {
+            slot.cooldownMax = std::max(10.0f, slot.cooldownMax * 0.90f);
+        }
+    } else if (slot.type == "support_diamond") {
+        // No direct scaling here; charges derive from level.
+        slot.cooldownMax = std::max(10.0f, slot.cooldownMax * 0.94f);
     }
 }
 
@@ -95,6 +110,7 @@ void GameRoot::applyPowerupPickup(Pickup::Powerup type) {
 
 void GameRoot::executeAbility(int index) {
     if (index < 0 || index >= static_cast<int>(abilityStates_.size())) return;
+    if (shadowDanceActive_) return;
     auto& slot = abilities_[index];
     auto& st = abilityStates_[index];
     if (const auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
@@ -324,6 +340,465 @@ void GameRoot::executeAbility(int index) {
         }
     }
 
+    auto aimDirFromCursor = [&]() {
+        Engine::Vec2 dir{mouseWorld_.x - heroTf->position.x, mouseWorld_.y - heroTf->position.y};
+        float len2 = dir.x * dir.x + dir.y * dir.y;
+        if (len2 < 0.0001f) return Engine::Vec2{1.0f, 0.0f};
+        float inv = 1.0f / std::sqrt(len2);
+        return Engine::Vec2{dir.x * inv, dir.y * inv};
+    };
+
+    auto targetHeroUnderCursor = [&](float radius) {
+        Engine::ECS::Entity best = hero_;
+        float bestD2 = radius * radius;
+        registry_.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::HeroTag>(
+            [&](Engine::ECS::Entity e, const Engine::ECS::Transform& tf, const Engine::ECS::Health& hp, Engine::ECS::HeroTag&) {
+                (void)hp;
+                float dx = tf.position.x - mouseWorld_.x;
+                float dy = tf.position.y - mouseWorld_.y;
+                float d2 = dx * dx + dy * dy;
+                if (d2 < bestD2) {
+                    bestD2 = d2;
+                    best = e;
+                }
+            });
+        return best;
+    };
+
+    auto applyTauntPulse = [&](Engine::ECS::Entity taunter, float radius, float duration) {
+        const auto* ttf = registry_.get<Engine::ECS::Transform>(taunter);
+        const auto* thp = registry_.get<Engine::ECS::Health>(taunter);
+        if (!ttf || !thp || !thp->alive()) return;
+        float r2 = radius * radius;
+        registry_.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::EnemyTag>(
+            [&](Engine::ECS::Entity e, const Engine::ECS::Transform& tf, const Engine::ECS::Health& hp, Engine::ECS::EnemyTag&) {
+                if (!hp.alive()) return;
+                float dx = tf.position.x - ttf->position.x;
+                float dy = tf.position.y - ttf->position.y;
+                float d2 = dx * dx + dy * dy;
+                if (d2 > r2) return;
+                if (registry_.has<Game::TauntTarget>(e)) {
+                    auto* tt = registry_.get<Game::TauntTarget>(e);
+                    tt->target = taunter;
+                    tt->timer = std::max(tt->timer, duration);
+                } else {
+                    registry_.emplace<Game::TauntTarget>(e, Game::TauntTarget{taunter, duration});
+                }
+            });
+    };
+
+    auto damageNearestEnemy = [&](float radius, float baseDamage, const char* ctx) {
+        Engine::ECS::Entity best = Engine::ECS::kInvalidEntity;
+        float bestD2 = radius * radius;
+        registry_.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::EnemyTag>(
+            [&](Engine::ECS::Entity e, const Engine::ECS::Transform& tf, const Engine::ECS::Health& hp, Engine::ECS::EnemyTag&) {
+                if (!hp.alive()) return;
+                float dx = tf.position.x - heroTf->position.x;
+                float dy = tf.position.y - heroTf->position.y;
+                float d2 = dx * dx + dy * dy;
+                if (d2 < bestD2) {
+                    bestD2 = d2;
+                    best = e;
+                }
+            });
+        if (best == Engine::ECS::kInvalidEntity) return;
+        auto* hp = registry_.get<Engine::ECS::Health>(best);
+        if (!hp || !hp->alive()) return;
+        Engine::Gameplay::DamageEvent dmg{};
+        dmg.type = Engine::Gameplay::DamageType::Normal;
+        dmg.baseDamage = baseDamage;
+        Engine::Gameplay::BuffState buff{};
+        if (auto* armorBuff = registry_.get<Game::ArmorBuff>(best)) {
+            buff = armorBuff->state;
+        }
+        if (auto* st = registry_.get<Engine::ECS::Status>(best)) {
+            if (st->container.isStasis()) return;
+            float armorDelta = st->container.armorDeltaTotal();
+            buff.healthArmorBonus += armorDelta;
+            buff.shieldArmorBonus += armorDelta;
+            buff.damageTakenMultiplier *= st->container.damageTakenMultiplier();
+        }
+        (void)Game::RpgDamage::apply(registry_, hero_, best, *hp, dmg, buff, useRpgCombat_, rpgResolverConfig_, rng_,
+                                     ctx, [this](const std::string& line) { pushCombatDebugLine(line); });
+    };
+
+    // --- New/updated class kits ---
+    if (slot.type == "tank_dash_strike") {
+        spendEnergy();
+        setCooldown(std::max(0.5f, slot.cooldownMax));
+
+        // Dash using existing dash movement plumbing (velocity + trail).
+        Engine::Vec2 dir = aimDirFromCursor();
+        dashDir_ = dir;
+        dashTimer_ = std::max(dashTimer_, 0.22f + 0.02f * slot.level);
+        dashInvulnTimer_ = std::max(dashInvulnTimer_, dashTimer_ * 0.6f);
+        if (auto* inv = registry_.get<Game::Invulnerable>(hero_)) inv->timer = std::max(inv->timer, dashInvulnTimer_);
+        else registry_.emplace<Game::Invulnerable>(hero_, Game::Invulnerable{dashInvulnTimer_});
+
+        // Play dash-attack animation sheet.
+        if (auto dashTex = loadTextureOptional("assets/Sprites/Characters/Tank/Tank_Dash_Attack.png")) {
+            const int frameW = 32;
+            const int frameH = 32;
+            const int frames = std::max(1, dashTex->width() / frameW);
+            const float frameDur = 0.08f;
+            const float dur = std::max(0.05f, static_cast<float>(frames) * frameDur);
+            if (auto* atk = registry_.get<Game::HeroAttackAnim>(hero_)) *atk = Game::HeroAttackAnim{dur, dir, 0};
+            else registry_.emplace<Game::HeroAttackAnim>(hero_, Game::HeroAttackAnim{dur, dir, 0});
+            if (registry_.has<Game::HeroAttackVisualOverride>(hero_)) registry_.remove<Game::HeroAttackVisualOverride>(hero_);
+            registry_.emplace<Game::HeroAttackVisualOverride>(
+                hero_, Game::HeroAttackVisualOverride{dashTex, frameW, frameH, frameDur, /*allowFlipX=*/false,
+                                                      /*rowRight=*/0, /*rowLeft=*/1, /*rowFront=*/2, /*rowBack=*/3, /*mirrorLeft=*/false});
+        }
+
+        // Immediate strike damage around the hero (simple and readable).
+        float dmg = projectileDamage_ * meleeConfig_.damageMultiplier * (1.8f + 0.1f * slot.level) * slot.powerScale * zoneDmgMul;
+        registry_.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::EnemyTag>(
+            [&](Engine::ECS::Entity e, Engine::ECS::Transform& tf, Engine::ECS::Health& hp, Engine::ECS::EnemyTag&) {
+                if (!hp.alive()) return;
+                float dx = tf.position.x - heroTf->position.x;
+                float dy = tf.position.y - heroTf->position.y;
+                float d2 = dx * dx + dy * dy;
+                float r = 78.0f;
+                if (d2 > r * r) return;
+                Engine::Gameplay::DamageEvent dmgEvent{};
+                dmgEvent.type = Engine::Gameplay::DamageType::Normal;
+                dmgEvent.baseDamage = dmg;
+                Engine::Gameplay::BuffState buff{};
+                if (auto* st = registry_.get<Engine::ECS::Status>(e)) {
+                    if (st->container.isStasis()) return;
+                    float armorDelta = st->container.armorDeltaTotal();
+                    buff.healthArmorBonus += armorDelta;
+                    buff.shieldArmorBonus += armorDelta;
+                    buff.damageTakenMultiplier *= st->container.damageTakenMultiplier();
+                }
+                (void)Game::RpgDamage::apply(registry_, hero_, e, hp, dmgEvent, buff, useRpgCombat_, rpgResolverConfig_, rng_,
+                                             "tank_dash_strike", [this](const std::string& line) { pushCombatDebugLine(line); });
+            });
+        return;
+    } else if (slot.type == "tank_fortify") {
+        spendEnergy();
+        setCooldown(slot.cooldownMax);
+        shieldOverchargeActive_ = true;
+        shieldOverchargeTimer_ = std::max(shieldOverchargeTimer_, 6.0f + 0.5f * slot.level);
+        shieldOverchargeBonusMax_ = std::max(shieldOverchargeBonusMax_, 140.0f + 20.0f * slot.level);
+        shieldOverchargeRegenMul_ = std::max(shieldOverchargeRegenMul_, 1.0f);
+        if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
+            if (!shieldOverchargeBaseMax_) shieldOverchargeBaseMax_ = hp->maxShields;
+            if (!shieldOverchargeBaseRegen_) shieldOverchargeBaseRegen_ = hp->shieldRegenRate;
+            hp->maxShields = std::max(hp->maxShields, shieldOverchargeBaseMax_ + shieldOverchargeBonusMax_);
+            hp->currentShields = std::min(hp->maxShields, std::max(hp->currentShields, hp->maxShields));
+        }
+        return;
+    } else if (slot.type == "tank_taunt") {
+        spendEnergy();
+        setCooldown(slot.cooldownMax);
+        applyTauntPulse(hero_, 520.0f, 3.5f + 0.3f * slot.level);
+        return;
+    } else if (slot.type == "tank_bulwark") {
+        spendEnergy();
+        setCooldown(slot.cooldownMax);
+        shieldOverchargeActive_ = true;
+        shieldOverchargeTimer_ = std::max(shieldOverchargeTimer_, 8.0f + 0.6f * slot.level);
+        shieldOverchargeBonusMax_ = std::max(shieldOverchargeBonusMax_, 220.0f + 25.0f * slot.level);
+        shieldOverchargeRegenMul_ = std::max(shieldOverchargeRegenMul_, 4.0f);
+        if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
+            if (!shieldOverchargeBaseMax_) shieldOverchargeBaseMax_ = hp->maxShields;
+            if (!shieldOverchargeBaseRegen_) shieldOverchargeBaseRegen_ = hp->shieldRegenRate;
+            hp->maxShields = std::max(hp->maxShields, shieldOverchargeBaseMax_ + shieldOverchargeBonusMax_);
+        }
+        return;
+    } else if (slot.type == "healer_small_heal" || slot.type == "healer_heavy_heal" || slot.type == "special_heavy_heal") {
+        spendEnergy();
+        setCooldown(slot.cooldownMax);
+        Engine::ECS::Entity target = hero_;
+        if (multiplayerEnabled_) {
+            target = targetHeroUnderCursor(90.0f);
+        }
+        if (auto* hp = registry_.get<Engine::ECS::Health>(target)) {
+            float base = (slot.type == "healer_small_heal") ? 45.0f : 90.0f;
+            if (slot.type == "special_heavy_heal") base = 90.0f;
+            float amount = base * (1.0f + 0.25f * (slot.level - 1)) * slot.powerScale;
+            hp->currentHealth = std::min(hp->maxHealth, hp->currentHealth + amount);
+            hp->regenDelay = 0.0f;
+        }
+        return;
+    } else if (slot.type == "healer_regen_aura") {
+        spendEnergy();
+        setCooldown(slot.cooldownMax);
+        regenAuraTimer_ = std::max(regenAuraTimer_, 6.0f + 0.4f * slot.level);
+        regenAuraHps_ = std::max(regenAuraHps_, (6.0f + 1.5f * slot.level) * slot.powerScale);
+        return;
+    } else if (slot.type == "healer_resurrect") {
+        spendEnergy();
+        setCooldown(slot.cooldownMax);
+        if (!multiplayerEnabled_) {
+            // Solo: ultimate is passive (extra lives). Charges are granted on kit build/upgrade.
+            reviveCharges_ = std::max(reviveCharges_, slot.level);
+            return;
+        }
+        // Multiplayer: host authoritative revive under cursor.
+        if (netSession_ && !netSession_->isHost()) {
+            return;
+        }
+        Engine::ECS::Entity target = targetHeroUnderCursor(90.0f);
+        if (target == Engine::ECS::kInvalidEntity) return;
+        if (auto* hp = registry_.get<Engine::ECS::Health>(target)) {
+            if (hp->alive()) return;
+            hp->currentHealth = std::max(1.0f, hp->maxHealth * 0.75f);
+            hp->currentShields = hp->maxShields;
+            hp->regenDelay = 0.0f;
+        }
+        return;
+    } else if (slot.type == "assassin_cloak") {
+        spendEnergy();
+        setCooldown(slot.cooldownMax);
+        if (auto* st = registry_.get<Engine::ECS::Status>(hero_)) {
+            st->container.apply(statusFactory_.make(Engine::Status::EStatusId::Cloaking), hero_);
+        }
+        return;
+    } else if (slot.type == "assassin_backstab") {
+        spendEnergy();
+        setCooldown(slot.cooldownMax);
+        // Massive single-target melee hit.
+        damageNearestEnemy(110.0f, projectileDamage_ * meleeConfig_.damageMultiplier * (4.5f + 0.5f * slot.level) * slot.powerScale * zoneDmgMul,
+                           "assassin_backstab");
+        return;
+    } else if (slot.type == "assassin_escape") {
+        spendEnergy();
+        setCooldown(slot.cooldownMax);
+        // Purge CC-like statuses and enable collision phasing for a short time.
+        phaseTimer_ = std::max(phaseTimer_, 2.0f + 0.25f * slot.level);
+        if (auto* st = registry_.get<Engine::ECS::Status>(hero_)) {
+            auto hasTag = [](const Engine::Status::StatusSpec& spec, Engine::Status::EStatusTag tag) {
+                for (auto t : spec.tags) {
+                    if (t == tag) return true;
+                }
+                return false;
+            };
+            st->container.purgeIf([&](const Engine::Status::StatusInstance& si) {
+                return hasTag(si.spec, Engine::Status::EStatusTag::CrowdControl) ||
+                       hasTag(si.spec, Engine::Status::EStatusTag::MovementLock) ||
+                       hasTag(si.spec, Engine::Status::EStatusTag::CastingLock) ||
+                       hasTag(si.spec, Engine::Status::EStatusTag::SpeedImpair);
+            });
+        }
+        return;
+    } else if (slot.type == "assassin_shadow_dance") {
+        spendEnergy();
+        setCooldown(slot.cooldownMax);
+        if (multiplayerEnabled_ && netSession_ && !netSession_->isHost()) {
+            return;
+        }
+        // Teleport to each target and execute sequentially; return to cast position when done.
+        shadowDanceActive_ = true;
+        shadowDanceReturnPos_ = heroTf->position;
+        shadowDanceTargets_.clear();
+        shadowDanceIndex_ = 0;
+        shadowDanceStepTimer_ = 0.0f;  // execute immediately next update
+        shadowDanceStepInterval_ = 0.10f;
+
+        const int maxTargets = 3 + slot.level;
+        struct Cand { Engine::ECS::Entity e; float d2; };
+        std::vector<Cand> cands;
+        cands.reserve(64);
+        const float r2 = 620.0f * 620.0f;
+        registry_.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::EnemyTag>(
+            [&](Engine::ECS::Entity e, const Engine::ECS::Transform& tf, const Engine::ECS::Health& hp, Engine::ECS::EnemyTag&) {
+                if (!hp.alive()) return;
+                float dx = tf.position.x - heroTf->position.x;
+                float dy = tf.position.y - heroTf->position.y;
+                float d2 = dx * dx + dy * dy;
+                if (d2 <= r2) {
+                    cands.push_back(Cand{e, d2});
+                }
+            });
+        std::sort(cands.begin(), cands.end(), [](const Cand& a, const Cand& b) { return a.d2 < b.d2; });
+        for (const auto& c : cands) {
+            if (static_cast<int>(shadowDanceTargets_.size()) >= maxTargets) break;
+            shadowDanceTargets_.push_back(c.e);
+        }
+        // Brief invulnerability while dancing.
+        immortalTimer_ = std::max(immortalTimer_, 0.35f * static_cast<float>(std::max(1, static_cast<int>(shadowDanceTargets_.size()))));
+        return;
+    } else if (slot.type == "support_flurry") {
+        spendEnergy();
+        setCooldown(slot.cooldownMax);
+        Engine::Vec2 dir = aimDirFromCursor();
+        std::uniform_real_distribution<float> spread(-0.14f, 0.14f);
+        for (int i = 0; i < 8 + slot.level * 2; ++i) {
+            float ang = std::atan2(dir.y, dir.x) + spread(rng_);
+            Engine::Vec2 d{std::cos(ang), std::sin(ang)};
+            Engine::Gameplay::DamageEvent dmg{};
+            dmg.baseDamage = projectileDamage_ * 0.65f * slot.powerScale * zoneDmgMul;
+            dmg.type = Engine::Gameplay::DamageType::Normal;
+            spawnProjectile(d, projectileSpeed_ * 0.95f, dmg, 0.85f);
+        }
+        return;
+    } else if (slot.type == "support_whirlwind") {
+        spendEnergy();
+        setCooldown(slot.cooldownMax);
+        int count = 10 + slot.level * 2;
+        for (int i = 0; i < count; ++i) {
+            float ang = (6.28318f * static_cast<float>(i)) / static_cast<float>(count);
+            Engine::Vec2 d{std::cos(ang), std::sin(ang)};
+            Engine::Gameplay::DamageEvent dmg{};
+            dmg.baseDamage = projectileDamage_ * 0.55f * slot.powerScale * zoneDmgMul;
+            dmg.type = Engine::Gameplay::DamageType::Normal;
+            spawnProjectile(d, projectileSpeed_ * 0.85f, dmg, 0.8f);
+        }
+        return;
+    } else if (slot.type == "support_extend") {
+        spendEnergy();
+        setCooldown(slot.cooldownMax);
+        supportExtendTimer_ = std::max(supportExtendTimer_, 6.0f + 0.4f * slot.level);
+        supportExtendBonus_ = 12.0f;
+        return;
+    } else if (slot.type == "support_diamond") {
+        spendEnergy();
+        setCooldown(slot.cooldownMax);
+        supportDiamondCharges_ = std::max(supportDiamondCharges_, 3 + slot.level);
+        return;
+    } else if (slot.type == "special_thrust") {
+        spendEnergy();
+        setCooldown(slot.cooldownMax);
+        Engine::Vec2 dir = aimDirFromCursor();
+
+        // Short dash toward cursor (ability-driven).
+        dashDir_ = dir;
+        dashTimer_ = std::max(dashTimer_, 0.16f + 0.01f * slot.level);
+        dashInvulnTimer_ = std::max(dashInvulnTimer_, dashTimer_ * 0.35f);
+        dashTrailRedTimer_ = std::max(dashTrailRedTimer_, 0.30f);
+        if (auto* vel = registry_.get<Engine::ECS::Velocity>(hero_)) {
+            vel->value = {dashDir_.x * heroMoveSpeed_ * moveSpeedBuffMul_ * dashSpeedMul_,
+                          dashDir_.y * heroMoveSpeed_ * moveSpeedBuffMul_ * dashSpeedMul_};
+        }
+        if (dashInvulnTimer_ > 0.0f) {
+            if (auto* inv = registry_.get<Game::Invulnerable>(hero_)) inv->timer = std::max(inv->timer, dashInvulnTimer_);
+            else registry_.emplace<Game::Invulnerable>(hero_, Game::Invulnerable{dashInvulnTimer_});
+        }
+
+        // Force facing from cursor for mirrored sheets.
+        if (auto* face = registry_.get<Game::Facing>(hero_)) {
+            face->dirX = (dir.x < 0.0f) ? -1 : 1;
+        }
+
+        if (auto thrustTex = loadTextureOptional("assets/Sprites/Characters/Special/Special_Combat_Thrust_with_AttackEffect.png")) {
+            const int frameW = 24;
+            const int frameH = 24;
+            const int frames = std::max(1, thrustTex->width() / frameW);
+            const float frameDur = 0.08f;
+            const float dur = std::max(0.05f, static_cast<float>(frames) * frameDur);
+            if (auto* atk = registry_.get<Game::HeroAttackAnim>(hero_)) *atk = Game::HeroAttackAnim{dur, dir, 0};
+            else registry_.emplace<Game::HeroAttackAnim>(hero_, Game::HeroAttackAnim{dur, dir, 0});
+            if (registry_.has<Game::HeroAttackVisualOverride>(hero_)) registry_.remove<Game::HeroAttackVisualOverride>(hero_);
+            // 4-row sheet: row0 = right (left mirrored), row1 = left (unused), row2 = front, row3 = back.
+            registry_.emplace<Game::HeroAttackVisualOverride>(
+                hero_, Game::HeroAttackVisualOverride{thrustTex, frameW, frameH, frameDur, /*allowFlipX=*/true,
+                                                      /*rowRight=*/0, /*rowLeft=*/0, /*rowFront=*/2, /*rowBack=*/3, /*mirrorLeft=*/true});
+        }
+
+        // Thrust damage in a narrow arc.
+        float dmg = projectileDamage_ * meleeConfig_.damageMultiplier * (1.9f + 0.1f * slot.level) * slot.powerScale * zoneDmgMul;
+        float range = 110.0f;
+        float r2 = range * range;
+        registry_.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::EnemyTag>(
+            [&](Engine::ECS::Entity e, Engine::ECS::Transform& tf, Engine::ECS::Health& hp, Engine::ECS::EnemyTag&) {
+                if (!hp.alive()) return;
+                float dx = tf.position.x - heroTf->position.x;
+                float dy = tf.position.y - heroTf->position.y;
+                float d2 = dx * dx + dy * dy;
+                if (d2 > r2) return;
+                float inv = 1.0f / std::max(0.0001f, std::sqrt(d2));
+                Engine::Vec2 to{dx * inv, dy * inv};
+                float dot = dir.x * to.x + dir.y * to.y;
+                if (dot < 0.55f) return;
+                Engine::Gameplay::DamageEvent de{};
+                de.type = Engine::Gameplay::DamageType::Normal;
+                de.baseDamage = dmg;
+                Engine::Gameplay::BuffState buff{};
+                if (auto* st = registry_.get<Engine::ECS::Status>(e)) {
+                    if (st->container.isStasis()) return;
+                    float armorDelta = st->container.armorDeltaTotal();
+                    buff.healthArmorBonus += armorDelta;
+                    buff.shieldArmorBonus += armorDelta;
+                    buff.damageTakenMultiplier *= st->container.damageTakenMultiplier();
+                }
+                (void)Game::RpgDamage::apply(registry_, hero_, e, hp, de, buff, useRpgCombat_, rpgResolverConfig_, rng_,
+                                             "special_thrust", [this](const std::string& line) { pushCombatDebugLine(line); });
+            });
+        return;
+    } else if (slot.type == "special_holy_sacrifice") {
+        spendEnergy();
+        setCooldown(slot.cooldownMax);
+        lifestealBuff_ = std::max(lifestealBuff_, 0.12f + 0.02f * slot.level);
+        lifestealPercent_ = globalModifiers_.playerLifestealAdd + lifestealBuff_;
+        lifestealTimer_ = std::max(lifestealTimer_, 8.0);
+        return;
+    } else if (slot.type == "special_consecration") {
+        spendEnergy();
+        setCooldown(slot.cooldownMax);
+        consecrationTimer_ = std::max(consecrationTimer_, 6.0f + 0.4f * slot.level);
+        return;
+    } else if (slot.type == "druid_bear_primal_rage") {
+        spendEnergy();
+        setCooldown(slot.cooldownMax);
+        shieldOverchargeActive_ = true;
+        shieldOverchargeTimer_ = std::max(shieldOverchargeTimer_, 6.0f + 0.4f * slot.level);
+        shieldOverchargeBonusMax_ = std::max(shieldOverchargeBonusMax_, 120.0f + 15.0f * slot.level);
+        shieldOverchargeRegenMul_ = std::max(shieldOverchargeRegenMul_, 1.5f);
+        rageDamageBuff_ = std::max(rageDamageBuff_, 1.25f + 0.05f * slot.level);
+        rageTimer_ = std::max(rageTimer_, 6.0f + 0.4f * slot.level);
+        return;
+    } else if (slot.type == "druid_bear_iron_fur") {
+        spendEnergy();
+        setCooldown(slot.cooldownMax);
+        shieldOverchargeActive_ = true;
+        shieldOverchargeTimer_ = std::max(shieldOverchargeTimer_, 7.0f + 0.4f * slot.level);
+        shieldOverchargeBonusMax_ = std::max(shieldOverchargeBonusMax_, 160.0f + 15.0f * slot.level);
+        shieldOverchargeRegenMul_ = std::max(shieldOverchargeRegenMul_, 3.0f);
+        return;
+    } else if (slot.type == "druid_bear_taunt") {
+        spendEnergy();
+        setCooldown(slot.cooldownMax);
+        applyTauntPulse(hero_, 520.0f, 3.8f + 0.3f * slot.level);
+        return;
+    } else if (slot.type == "druid_wolf_frenzy") {
+        spendEnergy();
+        setCooldown(slot.cooldownMax);
+        rageRateBuff_ = std::max(rageRateBuff_, 1.35f + 0.05f * slot.level);
+        rageTimer_ = std::max(rageTimer_, 6.0f + 0.4f * slot.level);
+        return;
+    } else if (slot.type == "druid_wolf_roar") {
+        spendEnergy();
+        setCooldown(slot.cooldownMax);
+        // Apply Feared to nearby enemies.
+        float r2 = 360.0f * 360.0f;
+        registry_.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::EnemyTag>(
+            [&](Engine::ECS::Entity e, const Engine::ECS::Transform& tf, const Engine::ECS::Health& hp, Engine::ECS::EnemyTag&) {
+                if (!hp.alive()) return;
+                float dx = tf.position.x - heroTf->position.x;
+                float dy = tf.position.y - heroTf->position.y;
+                float d2 = dx * dx + dy * dy;
+                if (d2 > r2) return;
+                if (auto* st = registry_.get<Engine::ECS::Status>(e)) {
+                    st->container.apply(statusFactory_.make(Engine::Status::EStatusId::Feared), hero_);
+                }
+            });
+        return;
+    } else if (slot.type == "druid_wolf_agility") {
+        spendEnergy();
+        setCooldown(slot.cooldownMax);
+        moveSpeedBuffMul_ = std::max(moveSpeedBuffMul_, 2.0f);
+        moveSpeedBuffTimer_ = std::max(moveSpeedBuffTimer_, 4.0f + 0.35f * slot.level);
+        return;
+    } else if (slot.type == "druid_return_human") {
+        spendEnergy();
+        setCooldown(slot.cooldownMax);
+        applyDruidForm(DruidForm::Human);
+        buildAbilities(/*resetState=*/false);
+        return;
+    }
+
     if (slot.type == "scatter") {
         // Cone blast of pellets
         spendEnergy();
@@ -389,8 +864,9 @@ void GameRoot::executeAbility(int index) {
         setCooldown(std::max(8.0f, slot.cooldownMax));
     } else if (slot.type == "summon_beatle") {
         spendEnergy();
-        bool ok = spawnSummoned("beatle");
-        if (ok) setCooldown(std::max(1.5f, slot.cooldownMax));
+        bool ok1 = spawnSummoned("beatle");
+        bool ok2 = spawnSummoned("beatle");
+        if (ok1 || ok2) setCooldown(std::max(1.5f, slot.cooldownMax));
     } else if (slot.type == "summon_snake") {
         spendEnergy();
         bool ok = spawnSummoned("snake");
@@ -416,13 +892,11 @@ void GameRoot::executeAbility(int index) {
         if (level_ < 2) return;
         druidChosen_ = DruidForm::Bear;
         druidChoiceMade_ = true;
-        applyDruidForm(druidForm_ == DruidForm::Bear ? DruidForm::Human : druidForm_);
         setCooldown(0.2f);
     } else if (slot.type == "druid_select_wolf") {
         if (level_ < 2) return;
         druidChosen_ = DruidForm::Wolf;
         druidChoiceMade_ = true;
-        applyDruidForm(druidForm_ == DruidForm::Wolf ? DruidForm::Human : druidForm_);
         setCooldown(0.2f);
     } else if (slot.type == "druid_toggle") {
         if (!druidChoiceMade_) return;
@@ -432,6 +906,7 @@ void GameRoot::executeAbility(int index) {
         } else {
             applyDruidForm(DruidForm::Human);
         }
+        buildAbilities(/*resetState=*/false);
         setCooldown(std::max(0.2f, slot.cooldownMax));
     } else if (slot.type == "druid_regrowth") {
         spendEnergy();
@@ -475,13 +950,23 @@ void GameRoot::executeAbility(int index) {
         dir = {dir.x * inv, dir.y * inv};
         float spacing = 32.0f;
         Engine::Vec2 start = heroTf->position;
-        Engine::TexturePtr tex = loadTextureOptional("assets/Sprites/Spells/Large_Fire_Anti-Alias_glow_28x28.png");
+        Engine::TexturePtr tex = largeFireTex_ ? largeFireTex_ : loadTextureOptional("assets/Sprites/Spells/Large_Fire_Anti-Alias_glow_28x28.png");
         for (int i = 0; i < segments; ++i) {
             Engine::Vec2 pos{start.x + dir.x * spacing * (i + 1), start.y + dir.y * spacing * (i + 1)};
             Engine::ECS::Entity vis = registry_.create();
             registry_.emplace<Engine::ECS::Transform>(vis, pos);
             registry_.emplace<Engine::ECS::Renderable>(vis,
                 Engine::ECS::Renderable{Engine::Vec2{28.0f, 28.0f}, Engine::Color{255, 160, 90, 200}, tex});
+            // Animate 0..11 across 3 rows (4 columns each).
+            Engine::ECS::SpriteAnimation anim{};
+            anim.frameWidth = 28;
+            anim.frameHeight = 28;
+            anim.frameCount = 4;
+            anim.frameDuration = 0.06f;
+            anim.row = 0;
+            anim.loop = true;
+            registry_.emplace<Engine::ECS::SpriteAnimation>(vis, anim);
+            registry_.emplace<Game::MultiRowSpriteAnim>(vis, Game::MultiRowSpriteAnim{4, 12, 0.06f, true, false});
             flameWalls_.push_back(FlameWallInstance{pos, 4.0f + slot.level * 0.4f, vis});
         }
         setCooldown(std::max(8.0f, slot.cooldownMax));
@@ -522,11 +1007,60 @@ void GameRoot::executeAbility(int index) {
                 (void)Game::RpgDamage::apply(registry_, hero_, e, hp, dmg, buff, useRpgCombat_, rpgResolverConfig_, rng_,
                                              "wizard_lbolt", [this](const std::string& line) { pushCombatDebugLine(line); });
             });
+        // Visual strike: animate lightning blast segments from caster outward.
+        if (lightningBlastTex_) {
+            const int segCount = 7;
+            const float segSpacing = 54.0f;
+            const float baseX = heroTf->position.x;
+            const float y = heroTf->position.y;
+            for (int i = 0; i < segCount; ++i) {
+                float x = baseX + dirSign * segSpacing * (i + 1);
+                auto fx = registry_.create();
+                registry_.emplace<Engine::ECS::Transform>(fx, Engine::Vec2{x, y});
+                registry_.emplace<Engine::ECS::Renderable>(fx,
+                    Engine::ECS::Renderable{Engine::Vec2{108.0f, 36.0f}, Engine::Color{255, 255, 255, 210}, lightningBlastTex_});
+                Engine::ECS::SpriteAnimation anim{};
+                anim.frameWidth = 54;
+                anim.frameHeight = 18;
+                anim.frameCount = 9;
+                anim.frameDuration = 0.035f;
+                anim.loop = false;
+                registry_.emplace<Engine::ECS::SpriteAnimation>(fx, anim);
+                registry_.emplace<Engine::ECS::Projectile>(fx, Engine::ECS::Projectile{Engine::Vec2{0.0f, 0.0f}, {}, 9 * 0.035f});
+                registry_.emplace<Game::Facing>(fx, Game::Facing{dirSign >= 0.0f ? 1 : -1});
+            }
+        }
         setCooldown(std::max(6.0f, slot.cooldownMax));
     } else if (slot.type == "wizard_ldome") {
         spendEnergy();
         lightningDomeTimer_ = std::max(lightningDomeTimer_, 5.0f + 0.5f * wizardStage());
         immortalTimer_ = std::max(immortalTimer_, lightningDomeTimer_);
+        // Spawn/update the dome visual entity (follows hero in Game.cpp while timer > 0).
+        if (lightningEnergyTex_) {
+            if (lightningDomeVis_ == Engine::ECS::kInvalidEntity) {
+                auto fx = registry_.create();
+                lightningDomeVis_ = fx;
+                registry_.emplace<Engine::ECS::Transform>(fx, heroTf->position);
+                registry_.emplace<Engine::ECS::Renderable>(fx,
+                    Engine::ECS::Renderable{Engine::Vec2{240.0f, 240.0f}, Engine::Color{255, 255, 255, 160}, lightningEnergyTex_});
+                Engine::ECS::SpriteAnimation anim{};
+                anim.frameWidth = 48;
+                anim.frameHeight = 48;
+                anim.frameCount = 9;
+                anim.frameDuration = 0.05f;
+                anim.row = 0;
+                anim.loop = true;
+                registry_.emplace<Engine::ECS::SpriteAnimation>(fx, anim);
+                Game::MultiRowSpriteAnim mr{};
+                mr.columns = 9;
+                mr.totalFrames = 9;
+                mr.frameDuration = 0.05f;
+                mr.loop = true;
+                mr.holdFrame = 4;            // linger on 5th frame
+                mr.holdExtraSeconds = 0.18f; // a few frames of extra hold
+                registry_.emplace<Game::MultiRowSpriteAnim>(fx, mr);
+            }
+        }
         setCooldown(std::max(10.0f, slot.cooldownMax));
     } else {
         // Generic placeholder

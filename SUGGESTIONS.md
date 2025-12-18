@@ -157,3 +157,24 @@
 
 ## 2025-12-18 — Suggestions after CI audio enforcement
 - Add a small `--selftest-audio` CLI mode that initializes the mixer backend and exits with a clear error message if initialization fails (usable in CI without launching a window).
+
+## 2025-12-18 — Suggestions after champion ability kit revamp
+- Move new ability magnitudes/durations (heals, shield bonuses, taunt radii, execute counts) into `data/gameplay.json` so balancing can be iterated without recompiles.
+- Add host/client RPCs for ally-targeted heals and resurrect so clients can support teammates without desync (server-authoritative).
+- Add a lightweight “VFX lifetime” component/system (instead of reusing `Engine::ECS::Projectile` for timed cleanup) to keep visuals and gameplay entities separate.
+
+## 2025-12-18 — Suggestions after thrust animation fix
+- Add a small debug overlay toggle that prints the active hero sheet frame size + row to speed up diagnosing sheet mismatches.
+
+## 2025-12-18 — Suggestions after thrust dash
+- Consider separating “ability dash” from the Space-bar dash (separate speed/duration knobs) so Special/Tank lunges can be tuned without affecting the global dash.
+
+## 2025-12-18 — Suggestions after red thrust trail
+- Store dash trail color per node (instead of a global timer) so overlapping dashes (ability then Space) keep their intended colors.
+
+## 2025-12-18 — Suggestions after cloaking + Shadow Dance fixes
+- Consider adding a small generic “tint/alpha” field to `Engine::ECS::Renderable` so systems can set it directly (instead of RenderSystem inferring from statuses).
+- For multiplayer, add an RPC/event for Shadow Dance target list so clients can see the same teleport sequence deterministically.
+
+## 2025-12-18 — Suggestions after sprite tint cleanup
+- Consider moving “team color”/selection colors into UI-only rendering (nameplates/markers) so gameplay sprites stay unshaded.

@@ -80,12 +80,15 @@ The current build includes:
 
 ## Ability Kits (current implementation)
 - **Militia (damage)**: Primary Fire; Scatter Shot cone (6s, 30c); Rage self-buff (12s, 40c); Nova Barrage radial (10s, 45c); Death Blossom ultimate barrage (35s, 60c).
-- **Knight (tank)**: Primary; Shield Bash stun (8s, 30c); Fortify DR (14s, 40c); Taunt Pulse (16s, 45c); Bulwark Dome barrier (40s, 60c).
-- **Summoner**: Arcane Bolt; Summon Beatle (6s, 25c); Summon Snake (9s, 30c); Rally (8s, 20c leash refresh); Swarm Burst (24s, 50c rapid wave).
-- **Druid**: Spirit Arrow; Choose Bear (slot 1, unlock lvl2); Choose Wolf (slot 2, unlock lvl2); Regrowth self-heal (12s, 30c); Shapeshift toggle (0.5s). Bear = HP/shield/armor up, slower, melee; Wolf = speed/damage up, melee.
+- **Knight (tank)**: Primary; Dash Strike (plays `Tank_Dash_Attack.png`); Fortify (shield surge); Taunt Pulse (AoE taunt); Bulwark (shield overcharge + regen).
+- **Healer (healer)**: Primary; Small Heal (targeted in multiplayer / self in solo); Regeneration Aura (team-wide); Heavy Heal; Resurrect (multiplayer targeted revive / solo grants extra lives).
+- **Assassin (assassin)**: Primary; Cloak (stealth); Backstab (massive single-target); Escape (CC cleanse + phasing); Shadow Dance (multi-execute).
+- **Dragoon (support)**: Primary; Flurry (directional burst); Whirlwind (radial burst); Extend (reach buff); Diamond Tipped (execute charges).
+- **Crusader (special)**: Primary; Righteous Thrust (plays `Special_Combat_Thrust_with_AttackEffect.png`); Holy Sacrifice (lifesteal window); Heavy Heal; Consecration (damage aura).
+- **Summoner**: Arcane Bolt; Summon 2 Beatles; Summon Snake; Rally; Swarm Burst.
+- **Druid**: Human: Spirit Arrow; Choose Bear/Wolf (unlock lvl2); Regrowth; Shapeshift toggle. Bear/Wolf forms swap to form-specific kits and can return to Human.
 - **Wizard**: Elemental Bolt (cycles with `Left Alt`); Fireball (6s, 30c AoE); Flame Wall (12s, 45c persistent); Lightning Bolt (9s, 40c stun line); Lightning Dome (24s, 60c protective field).
 - **Builder** (hard-coded kit): Upgrade Light/Heavy/Medic minis (0.6s, low cost, infinite levels, +2% all stats per purchase); Mini-Unit Overdrive ultimate (45s, 35c) gives 30s damage/attack-rate/heal buffs to all minis.
-- **Healer / Assassin / Dragoon / Crusader**: currently use generic placeholders (Primary + three abilities + ultimate) until bespoke kits are authored.
 
 ## Mini-Units, Summons & Structures (from `data/units.json`)
 - **Supply**: builder starts with at least 2 supply; summoner starts with 6 and cap 12; global cap baseline 10; houses add +2 supply each. Every mini-unit consumes 1 supply.

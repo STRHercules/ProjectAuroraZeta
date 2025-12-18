@@ -277,3 +277,31 @@
 
 # v0.0.157
 * Audio: fixed the Win64 build pipeline so the packaged zip includes `SDL2_mixer` and its runtime DLL dependencies (music + SFX), and the launcher reliably starts the packaged EXE.
+
+# v0.0.158
+* Combat: revamped champion ability kits across all archetypes (Tank/Healer/Assassin/Support/Special), replacing placeholder behaviors.
+* Tank: added Dash Strike with the dedicated dash-attack animation sheet, plus functional Fortify/Taunt Pulse/Bulwark.
+* Healer: implemented targeted Small/Heavy heals, team-wide Regeneration Aura, and a Resurrect ultimate (solo grants extra lives; multiplayer revives allies).
+* Assassin: added Cloak, Backstab, Escape (CC cleanse + phasing), and Shadow Dance executes.
+* Support: added Flurry/Whirlwind bursts, Extend reach buff, and Diamond Tipped executes.
+* Special: added Righteous Thrust with dedicated thrust animation, Holy Sacrifice lifesteal window, and Consecration damage aura.
+* Summoner: Summon Beetle now spawns two beetles.
+* Druid: Bear/Wolf forms now swap in dedicated ability kits; returning to Human restores the base kit.
+* Wizard: improved spell visuals (Fireball explosion on hit, animated Flame Wall, animated Lightning Bolt + Lightning Dome).
+
+# v0.0.159
+* Special: fixed Righteous Thrust animation sheet frame size (24x24) and made the thrust override one-shot so it no longer affects normal attacks.
+
+# v0.0.160
+* Special: Righteous Thrust now dashes toward the cursor when activated.
+
+# v0.0.161
+* Special: Righteous Thrust dash trail is now red (distinct from the standard blue dash trail).
+
+# v0.0.162
+* Visual: cloaking now actually makes heroes transparent (texture tint/alpha now applies during rendering).
+* Assassin: Shadow Dance now teleports María to each target one-by-one, executes them, then returns her to the cast location.
+
+# v0.0.163
+* Visual: removed unintended tinting on player characters (sprites render with no color shading).
+* Visual: enemies now flash red (instead of yellow) when damaged.

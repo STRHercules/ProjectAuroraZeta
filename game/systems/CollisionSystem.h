@@ -7,6 +7,7 @@
 #include "../../engine/ecs/Registry.h"
 #include "../../engine/core/Time.h"
 #include "../../engine/gameplay/RPGCombat.h"
+#include "../../engine/assets/Texture.h"
 #include "../components/WeaponSfx.h"
 
 namespace Game {
@@ -39,6 +40,7 @@ public:
     }
     void setCombatDebugSink(std::function<void(const std::string&)> sink) { debugSink_ = std::move(sink); }
     void setHitSfxSink(HitSfxSink sink) { hitSfxSink_ = std::move(sink); }
+    void setFireExplosionTexture(Engine::TexturePtr tex) { fireExplosionTex_ = std::move(tex); }
     void update(Engine::ECS::Registry& registry);
 
 private:
@@ -54,6 +56,7 @@ private:
     std::mt19937 rng_{std::random_device{}()};
     std::function<void(const std::string&)> debugSink_{};
     HitSfxSink hitSfxSink_{};
+    Engine::TexturePtr fireExplosionTex_{};
 };
 
 }  // namespace Game

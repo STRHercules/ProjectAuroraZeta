@@ -1,18 +1,28 @@
-# Enemies
-* Define Enemy types
-    - Define AI
-    - Define Abilities
-    - Define Stat Spread
-* Add Enemies
-    - Slimes
-    - Fire Skulls
+# Powerups that boost abilities
+* Scroll could make lightning red
+
+# Ellis Consecration no animations/effect
+
+# Gear should not go into the active inventory slot - only usable/consumable items should.
+* R / F hotkeys should be visible on the main screen GUI just like Q is 
+
+# Redesign the UI
+- Host
+- Join
+- Lobby
+
+# Implement Abilities
+* Design Abilities for Each Champion
+    - What icon to use
 
 # Gear
 * Better Define Gear
     - Types
     - Rarity
     - Bonuses
-* Fix Potions/Gems having affixes
+* Fix Potions/Gems having affixes/bonuses
+    - Potions should only be supplying health/shields when consumed
+    - Gems should only be adding their gem bonus to weapons/armor
 * Limit bonuses per quality tier
 * Add Unique Drops
     - Weapons, Gear, Consumables

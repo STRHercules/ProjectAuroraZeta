@@ -478,6 +478,9 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     loadUnitDefinitions();
     loadPickupTextures();
     loadProjectileTextures();
+    if (collisionSystem_) {
+        collisionSystem_->setFireExplosionTexture(fireExplosionTex_);
+    }
     loadSceneryDefinitions();
     loadRpgData();
     itemCatalog_ = defaultItemCatalog();
@@ -1619,15 +1622,20 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             const bool movementLocked = status && status->container.blocksMovement();
             const bool feared = status && status->container.isFeared();
             const float moveMul = status ? status->container.moveSpeedMultiplier() : 1.0f;
-            if (paused_ || defeatDelayActive_ || characterScreenOpen_ || ((heroHp && !heroAlive) && !heroGhost) || movementLocked) {
+            if (shadowDanceActive_) {
+                vel->value = {0.0f, 0.0f};
+                moveTargetActive_ = false;
+            } else if (paused_ || defeatDelayActive_ || characterScreenOpen_ || ((heroHp && !heroAlive) && !heroGhost) || movementLocked) {
                 vel->value = {0.0f, 0.0f};
             } else if (feared) {
                 std::uniform_real_distribution<float> ang(0.0f, 6.28318f);
                 float a = ang(rng_);
                 Engine::Vec2 dir{std::cos(a), std::sin(a)};
-                vel->value = {dir.x * heroMoveSpeed_ * moveMul, dir.y * heroMoveSpeed_ * moveMul};
+                vel->value = {dir.x * heroMoveSpeed_ * moveSpeedBuffMul_ * moveMul,
+                              dir.y * heroMoveSpeed_ * moveSpeedBuffMul_ * moveMul};
             } else if (movementMode_ == MovementMode::Modern) {
-                vel->value = {actions.moveX * heroMoveSpeed_ * moveMul, actions.moveY * heroMoveSpeed_ * moveMul};
+                vel->value = {actions.moveX * heroMoveSpeed_ * moveSpeedBuffMul_ * moveMul,
+                              actions.moveY * heroMoveSpeed_ * moveSpeedBuffMul_ * moveMul};
             } else {
                 const bool allowCommands = !abilityShopOpen_ && !itemShopOpen_ && !levelChoiceOpen_;
                 const bool moveEdge = allowCommands && rightClick && !moveCommandPrev_ && selectedMiniUnits_.empty();
@@ -1647,7 +1655,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                         moveMarkerTimer_ = std::max(moveMarkerTimer_, 0.35f);
                     } else {
                         float dist = std::sqrt(dist2);
-                        float invLen = heroMoveSpeed_ / std::max(dist, 0.0001f);
+                        float invLen = (heroMoveSpeed_ * moveSpeedBuffMul_) / std::max(dist, 0.0001f);
                         desiredVel = {toTarget.x * invLen, toTarget.y * invLen};
                     }
                 }
@@ -1659,7 +1667,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         dashPrev_ = actions.dash;
         const auto* status = registry_.get<Engine::ECS::Status>(hero_);
         const bool dashLocked = status && status->container.blocksMovement();
-        if (!paused_ && !defeatDelayActive_ && !characterScreenOpen_ && heroAlive && !dashLocked &&
+        if (!shadowDanceActive_ && !paused_ && !defeatDelayActive_ && !characterScreenOpen_ && heroAlive && !dashLocked &&
             dashEdge && dashCooldownTimer_ <= 0.0f) {
             Engine::Vec2 dir{actions.moveX, actions.moveY};
             if (movementMode_ == MovementMode::RTS) {
@@ -1681,10 +1689,11 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 dashDir_ = dir;
                 dashTimer_ = dashDuration_;
                 dashInvulnTimer_ = dashDuration_ * dashInvulnFraction_;
+                dashTrailRedTimer_ = 0.0f;
                 dashCooldownTimer_ = dashCooldown_;
                 if (auto* vel = registry_.get<Engine::ECS::Velocity>(hero_)) {
-                    vel->value = {dashDir_.x * heroMoveSpeed_ * dashSpeedMul_,
-                                  dashDir_.y * heroMoveSpeed_ * dashSpeedMul_};
+                    vel->value = {dashDir_.x * heroMoveSpeed_ * moveSpeedBuffMul_ * dashSpeedMul_,
+                                  dashDir_.y * heroMoveSpeed_ * moveSpeedBuffMul_ * dashSpeedMul_};
                 }
                 if (auto* inv = registry_.get<Game::Invulnerable>(hero_)) {
                     inv->timer = dashInvulnTimer_;
@@ -2226,13 +2235,17 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         dashTimer_ -= static_cast<float>(step.deltaSeconds);
         if (dashTimer_ < 0.0f) dashTimer_ = 0.0f;
         if (auto* vel = registry_.get<Engine::ECS::Velocity>(hero_)) {
-            vel->value = {dashDir_.x * heroMoveSpeed_ * dashSpeedMul_,
-                          dashDir_.y * heroMoveSpeed_ * dashSpeedMul_};
+            vel->value = {dashDir_.x * heroMoveSpeed_ * moveSpeedBuffMul_ * dashSpeedMul_,
+                          dashDir_.y * heroMoveSpeed_ * moveSpeedBuffMul_ * dashSpeedMul_};
         }
         // Trail node
         if (const auto* tf = registry_.get<Engine::ECS::Transform>(hero_)) {
             dashTrail_.push_back({tf->position, 0.22f});
         }
+    }
+    if (dashTrailRedTimer_ > 0.0f) {
+        dashTrailRedTimer_ -= static_cast<float>(step.deltaSeconds);
+        if (dashTrailRedTimer_ < 0.0f) dashTrailRedTimer_ = 0.0f;
     }
     if (dashCooldownTimer_ > 0.0f) {
         dashCooldownTimer_ -= static_cast<float>(step.deltaSeconds);
@@ -2244,7 +2257,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         }
         // Primary/auto fire spawns projectile toward target.
         fireCooldown_ -= step.deltaSeconds;
-        if (!paused_ && !defeatDelayActive_ && fireCooldown_ <= 0.0) {
+        if (!shadowDanceActive_ && !paused_ && !defeatDelayActive_ && fireCooldown_ <= 0.0) {
             const auto* heroHp = registry_.get<Engine::ECS::Health>(hero_);
             if (heroHp && !heroHp->alive()) {
                 // Do not attack while downed/knocked down.
@@ -2394,6 +2407,120 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         immortalTimer_ -= static_cast<float>(step.deltaSeconds);
         if (immortalTimer_ < 0.0f) immortalTimer_ = 0.0f;
     }
+    // Assassin Shadow Dance sequence (teleport + execute).
+    if (!paused_ && shadowDanceActive_ && hero_ != Engine::ECS::kInvalidEntity) {
+        shadowDanceStepTimer_ -= static_cast<float>(step.deltaSeconds);
+        if (shadowDanceStepTimer_ <= 0.0f) {
+            shadowDanceStepTimer_ = shadowDanceStepInterval_;
+            // Find next valid target.
+            while (shadowDanceIndex_ < static_cast<int>(shadowDanceTargets_.size())) {
+                Engine::ECS::Entity tgt = shadowDanceTargets_[shadowDanceIndex_];
+                shadowDanceIndex_ += 1;
+                auto* tf = registry_.get<Engine::ECS::Transform>(tgt);
+                auto* hp = registry_.get<Engine::ECS::Health>(tgt);
+                if (!tf || !hp || !hp->alive()) {
+                    continue;
+                }
+
+                // Teleport hero to the target.
+                if (auto* heroTf = registry_.get<Engine::ECS::Transform>(hero_)) {
+                    heroTf->position = tf->position;
+                }
+                if (auto* vel = registry_.get<Engine::ECS::Velocity>(hero_)) {
+                    vel->value = {0.0f, 0.0f};
+                }
+                dashTimer_ = 0.0f;
+
+                // Execute the target.
+                Engine::Gameplay::DamageEvent dmg{};
+                dmg.type = Engine::Gameplay::DamageType::Normal;
+                dmg.baseDamage = 999999.0f;
+                Engine::Gameplay::BuffState buff{};
+                if (auto* st = registry_.get<Engine::ECS::Status>(tgt)) {
+                    if (st->container.isStasis()) {
+                        break;
+                    }
+                    float armorDelta = st->container.armorDeltaTotal();
+                    buff.healthArmorBonus += armorDelta;
+                    buff.shieldArmorBonus += armorDelta;
+                    buff.damageTakenMultiplier *= st->container.damageTakenMultiplier();
+                }
+                (void)Game::RpgDamage::apply(registry_, hero_, tgt, *hp, dmg, buff, useRpgCombat_, rpgResolverConfig_, rng_,
+                                             "assassin_shadow_dance", [this](const std::string& line) { pushCombatDebugLine(line); });
+
+                // Drive a brief attack animation.
+                if (auto* atk = registry_.get<Game::HeroAttackAnim>(hero_)) {
+                    *atk = Game::HeroAttackAnim{0.12f, Engine::Vec2{1.0f, 0.0f}, 0};
+                } else {
+                    registry_.emplace<Game::HeroAttackAnim>(hero_, Game::HeroAttackAnim{0.12f, Engine::Vec2{1.0f, 0.0f}, 0});
+                }
+                break;
+            }
+
+            // Done: return to cast position and end.
+            if (shadowDanceIndex_ >= static_cast<int>(shadowDanceTargets_.size())) {
+                if (auto* heroTf = registry_.get<Engine::ECS::Transform>(hero_)) {
+                    heroTf->position = shadowDanceReturnPos_;
+                }
+                if (auto* vel = registry_.get<Engine::ECS::Velocity>(hero_)) {
+                    vel->value = {0.0f, 0.0f};
+                }
+                shadowDanceActive_ = false;
+                shadowDanceTargets_.clear();
+                shadowDanceIndex_ = 0;
+                shadowDanceStepTimer_ = 0.0f;
+                immortalTimer_ = std::max(immortalTimer_, 0.25f);
+            }
+        }
+    }
+    if (regenAuraTimer_ > 0.0f) {
+        regenAuraTimer_ -= static_cast<float>(step.deltaSeconds);
+        if (regenAuraTimer_ < 0.0f) regenAuraTimer_ = 0.0f;
+        if (regenAuraTimer_ == 0.0f) regenAuraHps_ = 0.0f;
+    }
+    if (phaseTimer_ > 0.0f) {
+        phaseTimer_ -= static_cast<float>(step.deltaSeconds);
+        if (phaseTimer_ < 0.0f) phaseTimer_ = 0.0f;
+    }
+    if (supportExtendTimer_ > 0.0f) {
+        supportExtendTimer_ -= static_cast<float>(step.deltaSeconds);
+        if (supportExtendTimer_ < 0.0f) supportExtendTimer_ = 0.0f;
+    }
+    if (moveSpeedBuffTimer_ > 0.0f) {
+        moveSpeedBuffTimer_ -= static_cast<float>(step.deltaSeconds);
+        if (moveSpeedBuffTimer_ <= 0.0f) {
+            moveSpeedBuffTimer_ = 0.0f;
+            moveSpeedBuffMul_ = 1.0f;
+        }
+    }
+    if (shieldOverchargeActive_) {
+        shieldOverchargeTimer_ -= static_cast<float>(step.deltaSeconds);
+        if (shieldOverchargeTimer_ < 0.0f) shieldOverchargeTimer_ = 0.0f;
+        if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
+            if (shieldOverchargeBaseMax_ == 0.0f) shieldOverchargeBaseMax_ = hp->maxShields;
+            if (shieldOverchargeBaseRegen_ == 0.0f) shieldOverchargeBaseRegen_ = hp->shieldRegenRate;
+            hp->maxShields = std::max(hp->maxShields, shieldOverchargeBaseMax_ + shieldOverchargeBonusMax_);
+            hp->shieldRegenRate = std::max(hp->shieldRegenRate, shieldOverchargeBaseRegen_ * shieldOverchargeRegenMul_);
+            hp->currentShields = std::min(hp->maxShields, hp->currentShields);
+        }
+        if (shieldOverchargeTimer_ <= 0.0f) {
+            if (auto* hp = registry_.get<Engine::ECS::Health>(hero_)) {
+                if (shieldOverchargeBaseMax_ > 0.0f) {
+                    hp->maxShields = std::min(hp->maxShields, shieldOverchargeBaseMax_);
+                }
+                if (shieldOverchargeBaseRegen_ > 0.0f) {
+                    hp->shieldRegenRate = shieldOverchargeBaseRegen_;
+                }
+                hp->currentShields = std::min(hp->maxShields, hp->currentShields);
+            }
+            shieldOverchargeActive_ = false;
+            shieldOverchargeTimer_ = 0.0f;
+            shieldOverchargeBonusMax_ = 0.0f;
+            shieldOverchargeRegenMul_ = 1.0f;
+            shieldOverchargeBaseMax_ = 0.0f;
+            shieldOverchargeBaseRegen_ = 0.0f;
+        }
+    }
 
     // Lightning dome tick damage.
     if (lightningDomeTimer_ > 0.0f) {
@@ -2414,6 +2541,11 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 true});
         Engine::Vec2 heroPos{0.0f, 0.0f};
         if (const auto* tf = registry_.get<Engine::ECS::Transform>(hero_)) heroPos = tf->position;
+        if (lightningDomeVis_ != Engine::ECS::kInvalidEntity) {
+            if (auto* vtf = registry_.get<Engine::ECS::Transform>(lightningDomeVis_)) {
+                vtf->position = heroPos;
+            }
+        }
         float r2 = radius * radius;
         registry_.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::EnemyTag>(
             [&](Engine::ECS::Entity e, Engine::ECS::Transform& tf, Engine::ECS::Health& hp, Engine::ECS::EnemyTag&) {
@@ -2435,6 +2567,45 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 }
             });
         if (lightningDomeTimer_ < 0.0f) lightningDomeTimer_ = 0.0f;
+    }
+    if (lightningDomeTimer_ <= 0.0f && lightningDomeVis_ != Engine::ECS::kInvalidEntity) {
+        if (registry_.has<Engine::ECS::Transform>(lightningDomeVis_)) {
+            registry_.destroy(lightningDomeVis_);
+        }
+        lightningDomeVis_ = Engine::ECS::kInvalidEntity;
+    }
+
+    // Consecration tick damage (Special).
+    if (consecrationTimer_ > 0.0f) {
+        consecrationTimer_ -= static_cast<float>(step.deltaSeconds);
+        float radius = 150.0f;
+        float dmg = projectileDamage_ * 0.85f * (hotzoneSystem_ ? hotzoneSystem_->damageMultiplier() : 1.0f);
+        Engine::Gameplay::DamageEvent cons{};
+        cons.type = Engine::Gameplay::DamageType::Spell;
+        cons.rpgDamageType = static_cast<int>(Engine::Gameplay::RPG::DamageType::Arcane);
+        cons.baseDamage = dmg * static_cast<float>(step.deltaSeconds);
+        Engine::Vec2 heroPos{0.0f, 0.0f};
+        if (const auto* tf = registry_.get<Engine::ECS::Transform>(hero_)) heroPos = tf->position;
+        float r2 = radius * radius;
+        registry_.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::EnemyTag>(
+            [&](Engine::ECS::Entity e, Engine::ECS::Transform& tf, Engine::ECS::Health& hp, Engine::ECS::EnemyTag&) {
+                if (!hp.alive()) return;
+                float dx = tf.position.x - heroPos.x;
+                float dy = tf.position.y - heroPos.y;
+                float d2 = dx * dx + dy * dy;
+                if (d2 > r2) return;
+                Engine::Gameplay::BuffState buff{};
+                if (auto* st = registry_.get<Engine::ECS::Status>(e)) {
+                    if (st->container.isStasis()) return;
+                    float armorDelta = st->container.armorDeltaTotal();
+                    buff.healthArmorBonus += armorDelta;
+                    buff.shieldArmorBonus += armorDelta;
+                    buff.damageTakenMultiplier *= st->container.damageTakenMultiplier();
+                }
+                (void)Game::RpgDamage::apply(registry_, hero_, e, hp, cons, buff, useRpgCombat_, rpgResolverConfig_, rng_,
+                                             "aura_consecration", [this](const std::string& line) { pushCombatDebugLine(line); });
+            });
+        if (consecrationTimer_ < 0.0f) consecrationTimer_ = 0.0f;
     }
     // Flame walls tick and cleanup.
     if (!flameWalls_.empty()) {
@@ -3223,6 +3394,10 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 const auto* st = registry_.get<Engine::ECS::Status>(e);
                 if (st && st->container.blocksRegen()) return;
                 Engine::Gameplay::updateRegen(hp, dt);
+                // Healer regeneration aura (simple HoT that respects regen blocking).
+                if (regenAuraTimer_ > 0.0f && regenAuraHps_ > 0.0f && registry_.has<Engine::ECS::HeroTag>(e)) {
+                    hp.currentHealth = std::min(hp.maxHealth, hp.currentHealth + regenAuraHps_ * dt);
+                }
             });
             if (buffSystem_) {
                 buffSystem_->update(registry_, step);
@@ -3393,11 +3568,16 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                 Engine::Vec2 screen = Engine::worldToScreen(it->first, cameraShaken, static_cast<float>(viewportWidth_),
                                                             static_cast<float>(viewportHeight_));
                 float alphaRatio = std::clamp(it->second / 0.22f, 0.0f, 1.0f);
-                Engine::Color c{120, 220, 255, static_cast<uint8_t>(140 * alphaRatio)};
+                const bool redDash = dashTrailRedTimer_ > 0.0f;
+                Engine::Color c = redDash
+                                     ? Engine::Color{255, 90, 90, static_cast<uint8_t>(150 * alphaRatio)}
+                                     : Engine::Color{120, 220, 255, static_cast<uint8_t>(140 * alphaRatio)};
                 float size = heroSize_;
                 render_->drawFilledRect(Engine::Vec2{screen.x - size * 0.55f, screen.y - size * 0.55f},
                                         Engine::Vec2{size * 1.1f, size * 1.1f}, c);
-                Engine::Color cInner{180, 240, 255, static_cast<uint8_t>(120 * alphaRatio)};
+                Engine::Color cInner = redDash
+                                          ? Engine::Color{255, 170, 170, static_cast<uint8_t>(120 * alphaRatio)}
+                                          : Engine::Color{180, 240, 255, static_cast<uint8_t>(120 * alphaRatio)};
                 render_->drawFilledRect(Engine::Vec2{screen.x - size * 0.35f, screen.y - size * 0.35f},
                                         Engine::Vec2{size * 0.7f, size * 0.7f}, cInner);
                 ++it;
@@ -4251,6 +4431,9 @@ bool GameRoot::performMeleeAttack(const Engine::TimeStep& step, const Engine::Ac
     // Dragoon spear: extend melee reach by ~1.5 tiles (48 units).
     if (activeArchetype_.id == "support") {
         addReach(48.0f);
+        if (supportExtendTimer_ > 0.0f) {
+            addReach(supportExtendBonus_);
+        }
     }
     // Core melee roster extra reach (+12 units): Knight, Militia (when in melee), Assassin, Crusader, Druid beast forms.
     const std::string id = activeArchetype_.id;
@@ -4347,6 +4530,22 @@ bool GameRoot::performMeleeAttack(const Engine::TimeStep& step, const Engine::Ac
             float dot = dir.x * toEnemy.x + dir.y * toEnemy.y;
             if (dot < cosHalfArc) return;
 
+            // Support ultimate: execute the next targets instantly (consumes charges per target).
+            if (activeArchetype_.id == "support" && supportDiamondCharges_ > 0) {
+                supportDiamondCharges_ -= 1;
+                health.currentShields = 0.0f;
+                health.currentHealth = 0.0f;
+                Engine::Gameplay::onUnitDamaged(health);
+                hitAny = true;
+                anyImpact = true;
+                if (auto* flash = registry_.get<Game::HitFlash>(e)) {
+                    flash->timer = 0.12f;
+                } else {
+                    registry_.emplace<Game::HitFlash>(e, Game::HitFlash{0.12f});
+                }
+                return;
+            }
+
             Engine::Gameplay::BuffState buff{};
             if (auto* armorBuff = registry_.get<Game::ArmorBuff>(e)) {
                 buff = armorBuff->state;
@@ -4432,6 +4631,8 @@ void GameRoot::reviveLocalPlayer() {
     heroUpgrades_ = {};
     projectileDamage_ = projectileDamagePreset_;
     heroMoveSpeed_ = heroMoveSpeedPreset_;
+    moveSpeedBuffMul_ = 1.0f;
+    moveSpeedBuffTimer_ = 0.0f;
     heroMaxHp_ = heroMaxHpPreset_;
     heroShield_ = heroShieldPreset_;
     heroHealthArmor_ = heroBaseStatsScaled_.baseHealthArmor;
@@ -5079,6 +5280,7 @@ void GameRoot::spawnScenery() {
 
 void GameRoot::resolveHeroWorldCollisions() {
     if (hero_ == Engine::ECS::kInvalidEntity) return;
+    if (phaseTimer_ > 0.0f) return;
     auto* heroTf = registry_.get<Engine::ECS::Transform>(hero_);
     const auto* heroBox = registry_.get<Engine::ECS::AABB>(hero_);
     if (!heroTf || !heroBox) return;
@@ -5519,6 +5721,12 @@ void GameRoot::loadProjectileTextures() {
     if (wizardElementTex_) {
         wizardElementColumns_ = std::max(1, wizardElementTex_->width() / 8);
     }
+
+    // Spell impact VFX
+    fireExplosionTex_ = loadTextureOptional("assets/Sprites/Spells/Fire_Explosion_Anti-Alias_glow.png");
+    largeFireTex_ = loadTextureOptional("assets/Sprites/Spells/Large_Fire_Anti-Alias_glow_28x28.png");
+    lightningBlastTex_ = loadTextureOptional("assets/Sprites/Spells/Lightning_Blast_Anti-Alias_glow_54x18.png");
+    lightningEnergyTex_ = loadTextureOptional("assets/Sprites/Spells/Lightning_Energy_Anti-Alias_glow_48x48.png");
 }
 
 std::string GameRoot::resolveAssetPath(const std::string& path) const {
@@ -7577,7 +7785,7 @@ void GameRoot::renderMenu() {
     drawTextUnified(title, Engine::Vec2{centerX - titleW * 0.5f, titleY}, titleScale, Engine::Color{190, 235, 255, 245});
 
     // Build info (bottom-right).
-    const std::string buildStr = "Pre-Alpha | Build v0.0.157";
+    const std::string buildStr = "Pre-Alpha | Build v0.0.163";
     const float buildScale = std::clamp(0.95f * s, 0.72f, 0.95f);
     const Engine::Vec2 buildSz = measureTextUnified(buildStr, buildScale);
     drawTextUnified(buildStr, Engine::Vec2{vw - margin - buildSz.x, vh - margin - buildSz.y}, buildScale,
@@ -9743,41 +9951,38 @@ std::string GameRoot::resolveArchetypeTexture(const GameRoot::ArchetypeDef& def)
     return manifest_.heroTexture.empty() ? fallback : manifest_.heroTexture;
 }
 
-void GameRoot::buildAbilities() {
+void GameRoot::buildAbilities(bool resetState) {
     abilities_.clear();
     abilityStates_.clear();
     abilityIconIndices_.clear();
     abilityFocus_ = 0;
-    rageTimer_ = 0.0f;
-    rageDamageBuff_ = 1.0f;
-    rageRateBuff_ = 1.0f;
-    abilityCooldownMul_ = 1.0f;
-    abilityVitalCostMul_ = 1.0f;
-    abilityChargesBonus_ = 0;
-    freezeTimer_ = 0.0;
-    attackSpeedMul_ = attackSpeedBaseMul_;
-    lifestealPercent_ = globalModifiers_.playerLifestealAdd;
-    lifestealBuff_ = 0.0f;
-    lifestealTimer_ = 0.0;
-    attackSpeedBuffMul_ = 1.0f;
-    chronoTimer_ = 0.0;
-    chainBonusTemp_ = 0;
-    stormTimer_ = 0.0;
-    chainBase_ = 0;
-    attackSpeedBuffMul_ = 1.0f;
-    chronoTimer_ = 0.0;
-    chainBonusTemp_ = 0;
-    stormTimer_ = 0.0;
-    chainBase_ = 0;
-    turrets_.clear();
-    // Builder-specific scalars reset each build.
-    miniBuffLight_ = 1.0f;
-    miniBuffHeavy_ = 1.0f;
-    miniBuffMedic_ = 1.0f;
-    miniRageTimer_ = 0.0f;
-    miniRageDamageMul_ = 1.0f;
-    miniRageAttackRateMul_ = 1.0f;
-    miniRageHealMul_ = 1.0f;
+    if (resetState) {
+        rageTimer_ = 0.0f;
+        rageDamageBuff_ = 1.0f;
+        rageRateBuff_ = 1.0f;
+        abilityCooldownMul_ = 1.0f;
+        abilityVitalCostMul_ = 1.0f;
+        abilityChargesBonus_ = 0;
+        freezeTimer_ = 0.0;
+        attackSpeedMul_ = attackSpeedBaseMul_;
+        lifestealPercent_ = globalModifiers_.playerLifestealAdd;
+        lifestealBuff_ = 0.0f;
+        lifestealTimer_ = 0.0;
+        attackSpeedBuffMul_ = 1.0f;
+        chronoTimer_ = 0.0;
+        chainBonusTemp_ = 0;
+        stormTimer_ = 0.0;
+        chainBase_ = 0;
+        turrets_.clear();
+        // Builder-specific scalars reset each build.
+        miniBuffLight_ = 1.0f;
+        miniBuffHeavy_ = 1.0f;
+        miniBuffMedic_ = 1.0f;
+        miniRageTimer_ = 0.0f;
+        miniRageDamageMul_ = 1.0f;
+        miniRageAttackRateMul_ = 1.0f;
+        miniRageHealMul_ = 1.0f;
+    }
 
     // Load from data file
     std::ifstream f("data/abilities.json");
@@ -9821,9 +10026,17 @@ void GameRoot::buildAbilities() {
         abilityIconIndices_.push_back(slot.iconIndex);
     };
 
+    // Ability list selection (supports per-form druid kits).
+    std::string abilityKey = activeArchetype_.id;
+    if (activeArchetype_.id == "druid") {
+        if (druidForm_ == DruidForm::Bear) abilityKey = "druid_bear";
+        else if (druidForm_ == DruidForm::Wolf) abilityKey = "druid_wolf";
+        else abilityKey = "druid";
+    }
+
     bool loaded = false;
-    if (j.contains(activeArchetype_.id)) {
-        const auto& arr = j[activeArchetype_.id];
+    if (j.contains(abilityKey)) {
+        const auto& arr = j[abilityKey];
         if (arr.is_array()) {
             for (const auto& a : arr) {
                 AbilityDef def{};
@@ -9839,6 +10052,23 @@ void GameRoot::buildAbilities() {
                 }
             }
             loaded = !abilities_.empty();
+        }
+    }
+
+    // Per-archetype post-processing on data-driven kits.
+    if (loaded) {
+        // Healer ultimate: solo play grants up to 2 spare lives (levels).
+        if (activeArchetype_.id == "healer") {
+            for (std::size_t i = 0; i < abilities_.size() && i < abilityStates_.size(); ++i) {
+                if (abilities_[i].type == "healer_resurrect") {
+                    const int cap = multiplayerEnabled_ ? 5 : 2;
+                    abilities_[i].maxLevel = cap;
+                    abilityStates_[i].maxLevel = cap;
+                    if (!multiplayerEnabled_) {
+                        reviveCharges_ = std::max(reviveCharges_, abilities_[i].level);
+                    }
+                }
+            }
         }
     }
 
@@ -11905,7 +12135,26 @@ void GameRoot::resetRun() {
     druidChoiceMade_ = false;
     wizardElement_ = WizardElement::Fire;
     lightningDomeTimer_ = 0.0f;
+    lightningDomeVis_ = Engine::ECS::kInvalidEntity;
     flameWalls_.clear();
+    regenAuraTimer_ = 0.0f;
+    regenAuraHps_ = 0.0f;
+    shieldOverchargeTimer_ = 0.0f;
+    shieldOverchargeBonusMax_ = 0.0f;
+    shieldOverchargeRegenMul_ = 1.0f;
+    shieldOverchargeBaseMax_ = 0.0f;
+    shieldOverchargeBaseRegen_ = 0.0f;
+    shieldOverchargeActive_ = false;
+    phaseTimer_ = 0.0f;
+    supportExtendTimer_ = 0.0f;
+    supportDiamondCharges_ = 0;
+    consecrationTimer_ = 0.0f;
+    shadowDanceActive_ = false;
+    shadowDanceReturnPos_ = {};
+    shadowDanceTargets_.clear();
+    shadowDanceIndex_ = 0;
+    shadowDanceStepTimer_ = 0.0f;
+    shadowDanceStepInterval_ = 0.10f;
     camera_ = {};
     restartPrev_ = true;  // consume the key that triggered the reset.
     waveWarmup_ = waveWarmupBase_;
@@ -11922,6 +12171,7 @@ void GameRoot::resetRun() {
     dashCooldownTimer_ = 0.0f;
     dashInvulnTimer_ = 0.0f;
     dashDir_ = {0.0f, 0.0f};
+    dashTrailRedTimer_ = 0.0f;
     travelShopUnlocked_ = false;
     inventory_.clear();
     inventory_.shrink_to_fit();

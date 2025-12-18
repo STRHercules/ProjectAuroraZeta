@@ -214,6 +214,29 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                         if (dealt > 0.0f && dealt < Engine::Gameplay::MIN_DAMAGE_PER_HIT) {
                             dealt = Engine::Gameplay::MIN_DAMAGE_PER_HIT;
                         }
+
+                        // Fireball VFX: play explosion sequence on contact (no gameplay impact; AoE is handled separately).
+                        if (fireExplosionTex_) {
+                            if (const auto* eff = registry.get<Game::SpellEffect>(projEnt)) {
+                                if (eff->element == Game::ElementType::Fire && eff->stage >= 3) {
+                                    auto fx = registry.create();
+                                    registry.emplace<Engine::ECS::Transform>(fx, tgtTf.position);
+                                    registry.emplace<Engine::ECS::Renderable>(fx,
+                                        Engine::ECS::Renderable{Engine::Vec2{84.0f, 84.0f}, Engine::Color{255, 255, 255, 220}, fireExplosionTex_});
+                                    Engine::ECS::SpriteAnimation anim{};
+                                    anim.frameWidth = 28;
+                                    anim.frameHeight = 28;
+                                    anim.frameCount = 12;
+                                    anim.frameDuration = 0.04f;
+                                    anim.loop = false;
+                                    anim.holdOnLastFrame = false;
+                                    registry.emplace<Engine::ECS::SpriteAnimation>(fx, anim);
+                                    // Use projectile lifetime as a generic timed-destroy carrier (velocity=0, no ProjectileTag/AABB).
+                                    registry.emplace<Engine::ECS::Projectile>(fx, Engine::ECS::Projectile{Engine::Vec2{0.0f, 0.0f}, {}, 12 * 0.04f});
+                                }
+                            }
+                        }
+
                         deadProjectiles.push_back(projEnt);
                         // Lifesteal to hero if applicable.
                         if (proj.lifesteal > 0.0f) {
