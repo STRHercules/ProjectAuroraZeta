@@ -319,3 +319,22 @@
 
 # v0.0.166
 * Fixed: crash caused by removing components during ECS view iteration (revive/DoT updates are now deferred safely).
+
+# v0.0.167
+* Visual: added new spell VFX sheets (Pop/Burst/Smoke/Sparkle).
+* Special (Ellis): Consecration now places Sparkle VFX across the consecration area (floor-level).
+* Healer (Sally): healing abilities now play Sparkle VFX on the healed target.
+* Assassin (María): Shadow Dance now plays Smoke VFX at the cast location while she teleports away and returns.
+* Damage (Robin): Rage now tints Robin red for the duration of Rage.
+* Flame Skull: fireballs now render as the correct animated `fire_skull_fireball.png` projectile.
+
+# v0.0.168
+* UI: reassigned champion ability icon slots to the new curated icon layout.
+    * Damage (Robin) Primary Fire now swaps icon based on weapon (Sword vs Bow).
+
+# v0.0.169
+* Fixed: shops now pause round/intermission timers in singleplayer (prevents intermission from ending while shopping).
+* UI: Pause menu “Main Menu” now shows a confirmation dialog (Yes/No).
+* UI: Hotbar keys (R/F) are now visible on the in-run HUD above the active-use (Q) item.
+* Inventory: active-use (Q) now only cycles usable items (consumables), not gear.
+* Balance: reduced drop rates for gems, potions/food, and overall item drops.

@@ -521,6 +521,20 @@ void GameRoot::executeAbility(int index) {
             hp->currentHealth = std::min(hp->maxHealth, hp->currentHealth + amount);
             hp->regenDelay = 0.0f;
         }
+        if (spellSparkle_.texture) {
+            if (const auto* tf = registry_.get<Engine::ECS::Transform>(target)) {
+                const float ttl = static_cast<float>(std::max(1, spellSparkle_.frameCount)) *
+                                  (spellSparkle_.frameDuration > 0.0f ? spellSparkle_.frameDuration : 0.06f);
+                (void)spawnSpriteSheetVfx(spellSparkle_,
+                                          tf->position,
+                                          Engine::Vec2{64.0f, 64.0f},
+                                          Engine::Color{255, 255, 255, 220},
+                                          /*loop=*/false,
+                                          /*holdOnLastFrame=*/false,
+                                          /*lifetimeSeconds=*/ttl,
+                                          /*ySortBias=*/0.25f);
+            }
+        }
         return;
     } else if (slot.type == "healer_regen_aura") {
         spendEnergy();
@@ -592,6 +606,7 @@ void GameRoot::executeAbility(int index) {
         // Teleport to each target and execute sequentially; return to cast position when done.
         shadowDanceActive_ = true;
         shadowDanceReturnPos_ = heroTf->position;
+        startShadowDanceSmoke(shadowDanceReturnPos_);
         shadowDanceTargets_.clear();
         shadowDanceIndex_ = 0;
         shadowDanceStepTimer_ = 0.0f;  // execute immediately next update

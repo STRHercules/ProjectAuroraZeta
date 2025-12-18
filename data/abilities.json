@@ -1,59 +1,65 @@
 {
   "damage": [
-    {"name": "Primary Fire", "description": "Standard projectile.", "key": "M1", "cooldown": 0.0, "cost": 0, "type": "primary"},
-    {"name": "Scatter Shot", "description": "Close-range cone blast.", "key": "1", "cooldown": 6.0, "cost": 30, "type": "scatter"},
-    {"name": "Rage", "description": "Boost damage and fire rate briefly.", "key": "2", "cooldown": 12.0, "cost": 40, "type": "rage"},
-    {"name": "Nova Barrage", "description": "Heavy projectiles in all directions.", "key": "3", "cooldown": 10.0, "cost": 45, "type": "nova"},
-    {"name": "Death Blossom", "description": "Ultimate barrage; huge damage.", "key": "4", "cooldown": 35.0, "cost": 60, "type": "ultimate"}
+    {"name": "Primary Fire", "description": "Standard projectile.", "key": "M1", "cooldown": 0.0, "cost": 0, "type": "primary", "icon": 0},
+    {"name": "Scatter Shot", "description": "Close-range cone blast.", "key": "1", "cooldown": 6.0, "cost": 30, "type": "scatter", "icon": 14},
+    {"name": "Rage", "description": "Boost damage and fire rate briefly.", "key": "2", "cooldown": 12.0, "cost": 40, "type": "rage", "icon": 40},
+    {"name": "Nova Barrage", "description": "Heavy projectiles in all directions.", "key": "3", "cooldown": 10.0, "cost": 45, "type": "nova", "icon": 35},
+    {"name": "Death Blossom", "description": "Ultimate barrage; huge damage.", "key": "4", "cooldown": 35.0, "cost": 60, "type": "ultimate", "icon": 29}
   ],
   "tank": [
-    {"name": "Primary Fire", "description": "Sturdy rounds.", "key": "M1", "cooldown": 0.0, "cost": 0, "type": "primary"},
-    {"name": "Dash Strike", "description": "Dash forward and strike through enemies.", "key": "1", "cooldown": 9.0, "cost": 30, "type": "tank_dash_strike"},
-    {"name": "Fortify", "description": "Significantly raises shields for a short time.", "key": "2", "cooldown": 14.0, "cost": 40, "type": "tank_fortify"},
-    {"name": "Taunt Pulse", "description": "Taunt enemies in a large area to target you.", "key": "3", "cooldown": 16.0, "cost": 45, "type": "tank_taunt"},
-    {"name": "Bulwark", "description": "Boost shield regen and max shields for a short time.", "key": "4", "cooldown": 40.0, "cost": 60, "type": "tank_bulwark"}
+    {"name": "Primary Fire", "description": "Sturdy rounds.", "key": "M1", "cooldown": 0.0, "cost": 0, "type": "primary", "icon": 0},
+    {"name": "Dash Strike", "description": "Dash forward and strike through enemies.", "key": "1", "cooldown": 9.0, "cost": 30, "type": "tank_dash_strike", "icon": 37},
+    {"name": "Fortify", "description": "Significantly raises shields for a short time.", "key": "2", "cooldown": 14.0, "cost": 40, "type": "tank_fortify", "icon": 12},
+    {"name": "Taunt Pulse", "description": "Taunt enemies in a large area to target you.", "key": "3", "cooldown": 16.0, "cost": 45, "type": "tank_taunt", "icon": 28},
+    {"name": "Bulwark", "description": "Boost shield regen and max shields for a short time.", "key": "4", "cooldown": 40.0, "cost": 60, "type": "tank_bulwark", "icon": 29}
   ],
   "healer": [
-    {"name": "Primary Fire", "description": "Light rounds.", "key": "M1", "cooldown": 0.0, "cost": 0, "type": "primary"},
-    {"name": "Small Heal", "description": "Heal target ally under cursor (or self in solo).", "key": "1", "cooldown": 6.0, "cost": 25, "type": "healer_small_heal"},
-    {"name": "Regeneration Aura", "description": "Brief regen aura affecting all players.", "key": "2", "cooldown": 14.0, "cost": 40, "type": "healer_regen_aura"},
-    {"name": "Heavy Heal", "description": "Big heal on target ally (or self in solo).", "key": "3", "cooldown": 11.0, "cost": 45, "type": "healer_heavy_heal"},
-    {"name": "Resurrect", "description": "Revive targeted ally in multiplayer; grants spare lives in solo.", "key": "4", "cooldown": 45.0, "cost": 60, "type": "healer_resurrect"}
+    {"name": "Primary Fire", "description": "Light rounds.", "key": "M1", "cooldown": 0.0, "cost": 0, "type": "primary", "icon": 8},
+    {"name": "Small Heal", "description": "Heal target ally under cursor (or self in solo).", "key": "1", "cooldown": 6.0, "cost": 25, "type": "healer_small_heal", "icon": 19},
+    {"name": "Regeneration Aura", "description": "Brief regen aura affecting all players.", "key": "2", "cooldown": 14.0, "cost": 40, "type": "healer_regen_aura", "icon": 21},
+    {"name": "Heavy Heal", "description": "Big heal on target ally (or self in solo).", "key": "3", "cooldown": 11.0, "cost": 45, "type": "healer_heavy_heal", "icon": 5},
+    {"name": "Resurrect", "description": "Revive targeted ally in multiplayer; grants spare lives in solo.", "key": "4", "cooldown": 45.0, "cost": 60, "type": "healer_resurrect", "icon": 16}
   ],
   "assassin": [
-    {"name": "Primary Fire", "description": "Quick strikes.", "key": "M1", "cooldown": 0.0, "cost": 0, "type": "primary"},
-    {"name": "Cloak", "description": "Hide in shadows for a short time.", "key": "1", "cooldown": 12.0, "cost": 30, "type": "assassin_cloak"},
-    {"name": "Backstab", "description": "Backstab a nearby enemy for massive damage.", "key": "2", "cooldown": 7.0, "cost": 35, "type": "assassin_backstab"},
-    {"name": "Escape", "description": "Cleanse CC and phase through collisions while dashing.", "key": "3", "cooldown": 16.0, "cost": 40, "type": "assassin_escape"},
-    {"name": "Shadow Dance", "description": "Execute multiple visible enemies in rapid succession.", "key": "4", "cooldown": 42.0, "cost": 60, "type": "assassin_shadow_dance"}
+    {"name": "Primary Fire", "description": "Quick strikes.", "key": "M1", "cooldown": 0.0, "cost": 0, "type": "primary", "icon": 2},
+    {"name": "Cloak", "description": "Hide in shadows for a short time.", "key": "1", "cooldown": 12.0, "cost": 30, "type": "assassin_cloak", "icon": 6},
+    {"name": "Backstab", "description": "Backstab a nearby enemy for massive damage.", "key": "2", "cooldown": 7.0, "cost": 35, "type": "assassin_backstab", "icon": 36},
+    {"name": "Escape", "description": "Cleanse CC and phase through collisions while dashing.", "key": "3", "cooldown": 16.0, "cost": 40, "type": "assassin_escape", "icon": 27},
+    {"name": "Shadow Dance", "description": "Execute multiple visible enemies in rapid succession.", "key": "4", "cooldown": 42.0, "cost": 60, "type": "assassin_shadow_dance", "icon": 38}
+  ],
+  "builder": [
+    {"name": "Upgrade Light Units", "description": "Permanently buff Light mini-units by +2% to all stats per purchase.", "key": "1", "cooldown": 0.6, "cost": 20, "type": "builder_up_light", "icon": 19},
+    {"name": "Upgrade Heavy Units", "description": "Permanently buff Heavy mini-units by +2% to all stats per purchase.", "key": "2", "cooldown": 0.6, "cost": 25, "type": "builder_up_heavy", "icon": 19},
+    {"name": "Upgrade Medic Units", "description": "Permanently buff Medic mini-units by +2% to all stats per purchase.", "key": "3", "cooldown": 0.6, "cost": 22, "type": "builder_up_medic", "icon": 19},
+    {"name": "Mini-Unit Overdrive", "description": "30s rage: faster attacks, bonus health, bonus damage for all mini-units.", "key": "4", "cooldown": 45.0, "cost": 35, "type": "builder_rage", "icon": 15}
   ],
   "support": [
-    {"name": "Primary Fire", "description": "Polearm strikes.", "key": "M1", "cooldown": 0.0, "cost": 0, "type": "primary"},
-    {"name": "Flurry", "description": "Rapidly attack in a single direction.", "key": "1", "cooldown": 7.0, "cost": 30, "type": "support_flurry"},
-    {"name": "Whirlwind", "description": "Rapidly attack in all directions.", "key": "2", "cooldown": 12.0, "cost": 40, "type": "support_whirlwind"},
-    {"name": "Extend", "description": "Extend reach by 12 units briefly.", "key": "3", "cooldown": 14.0, "cost": 35, "type": "support_extend"},
-    {"name": "Diamond Tipped", "description": "Instantly kill your next targets.", "key": "4", "cooldown": 38.0, "cost": 60, "type": "support_diamond"}
+    {"name": "Primary Fire", "description": "Polearm strikes.", "key": "M1", "cooldown": 0.0, "cost": 0, "type": "primary", "icon": 11},
+    {"name": "Flurry", "description": "Rapidly attack in a single direction.", "key": "1", "cooldown": 7.0, "cost": 30, "type": "support_flurry", "icon": 26},
+    {"name": "Whirlwind", "description": "Rapidly attack in all directions.", "key": "2", "cooldown": 12.0, "cost": 40, "type": "support_whirlwind", "icon": 14},
+    {"name": "Extend", "description": "Extend reach by 12 units briefly.", "key": "3", "cooldown": 14.0, "cost": 35, "type": "support_extend", "icon": 15},
+    {"name": "Diamond Tipped", "description": "Instantly kill your next targets.", "key": "4", "cooldown": 38.0, "cost": 60, "type": "support_diamond", "icon": 55}
   ],
   "special": [
-    {"name": "Primary Fire", "description": "Crusader strike.", "key": "M1", "cooldown": 0.0, "cost": 0, "type": "primary"},
-    {"name": "Righteous Thrust", "description": "Thrust toward the cursor direction.", "key": "1", "cooldown": 8.0, "cost": 30, "type": "special_thrust"},
-    {"name": "Holy Sacrifice", "description": "Melee attacks steal life for a short time.", "key": "2", "cooldown": 14.0, "cost": 40, "type": "special_holy_sacrifice"},
-    {"name": "Heavy Heal", "description": "Big heal on target ally (or self in solo).", "key": "3", "cooldown": 11.0, "cost": 45, "type": "special_heavy_heal"},
-    {"name": "Consecration", "description": "Consecrate ground around you to damage enemies over time.", "key": "4", "cooldown": 40.0, "cost": 60, "type": "special_consecration"}
+    {"name": "Primary Fire", "description": "Crusader strike.", "key": "M1", "cooldown": 0.0, "cost": 0, "type": "primary", "icon": 0},
+    {"name": "Righteous Thrust", "description": "Thrust toward the cursor direction.", "key": "1", "cooldown": 8.0, "cost": 30, "type": "special_thrust", "icon": 11},
+    {"name": "Holy Sacrifice", "description": "Melee attacks steal life for a short time.", "key": "2", "cooldown": 14.0, "cost": 40, "type": "special_holy_sacrifice", "icon": 10},
+    {"name": "Heavy Heal", "description": "Big heal on target ally (or self in solo).", "key": "3", "cooldown": 11.0, "cost": 45, "type": "special_heavy_heal", "icon": 5},
+    {"name": "Consecration", "description": "Consecrate ground around you to damage enemies over time.", "key": "4", "cooldown": 40.0, "cost": 60, "type": "special_consecration", "icon": 51}
   ],
   "summoner": [
-    {"name": "Arcane Bolt", "description": "Light ranged attack.", "key": "M1", "cooldown": 0.0, "cost": 0, "type": "primary"},
-    {"name": "Summon 2 Beatles", "description": "Call two beetle companions.", "key": "1", "cooldown": 6.0, "cost": 25, "type": "summon_beatle"},
-    {"name": "Summon Snake", "description": "Call a snake bruiser.", "key": "2", "cooldown": 9.0, "cost": 30, "type": "summon_snake"},
-    {"name": "Rally", "description": "Pull summons back and refresh their leash.", "key": "3", "cooldown": 8.0, "cost": 20, "type": "summon_rally"},
-    {"name": "Swarm Burst", "description": "Rapidly summon a mixed wave.", "key": "4", "cooldown": 24.0, "cost": 50, "type": "summon_horde"}
+    {"name": "Arcane Bolt", "description": "Light ranged attack.", "key": "M1", "cooldown": 0.0, "cost": 0, "type": "primary", "icon": 9},
+    {"name": "Summon 2 Beatles", "description": "Call two beetle companions.", "key": "1", "cooldown": 6.0, "cost": 25, "type": "summon_beatle", "icon": 24},
+    {"name": "Summon Snake", "description": "Call a snake bruiser.", "key": "2", "cooldown": 9.0, "cost": 30, "type": "summon_snake", "icon": 47},
+    {"name": "Rally", "description": "Pull summons back and refresh their leash.", "key": "3", "cooldown": 8.0, "cost": 20, "type": "summon_rally", "icon": 49},
+    {"name": "Swarm Burst", "description": "Rapidly summon a mixed wave.", "key": "4", "cooldown": 24.0, "cost": 50, "type": "summon_horde", "icon": 7}
   ],
   "druid": [
-    {"name": "Spirit Arrow", "description": "Ranged attack while human.", "key": "M1", "cooldown": 0.0, "cost": 0, "type": "primary"},
-    {"name": "Choose Bear", "description": "Mark Bear as your form (unlock at Lv2).", "key": "1", "cooldown": 0.0, "cost": 0, "type": "druid_select_bear"},
-    {"name": "Choose Wolf", "description": "Mark Wolf as your form (unlock at Lv2).", "key": "2", "cooldown": 0.0, "cost": 0, "type": "druid_select_wolf"},
-    {"name": "Regrowth", "description": "Brief self-heal and regen boost.", "key": "3", "cooldown": 12.0, "cost": 30, "type": "druid_regrowth"},
-    {"name": "Shapeshift", "description": "Toggle chosen form; no cooldown.", "key": "4", "cooldown": 0.5, "cost": 0, "type": "druid_toggle"}
+    {"name": "Spirit Arrow", "description": "Ranged attack while human.", "key": "M1", "cooldown": 0.0, "cost": 0, "type": "primary", "icon": 55},
+    {"name": "Choose Bear", "description": "Mark Bear as your form (unlock at Lv2).", "key": "1", "cooldown": 0.0, "cost": 0, "type": "druid_select_bear", "icon": 12},
+    {"name": "Choose Wolf", "description": "Mark Wolf as your form (unlock at Lv2).", "key": "2", "cooldown": 0.0, "cost": 0, "type": "druid_select_wolf", "icon": 34},
+    {"name": "Regrowth", "description": "Brief self-heal and regen boost.", "key": "3", "cooldown": 12.0, "cost": 30, "type": "druid_regrowth", "icon": 19},
+    {"name": "Shapeshift", "description": "Toggle chosen form; no cooldown.", "key": "4", "cooldown": 0.5, "cost": 0, "type": "druid_toggle", "icon": 20}
   ],
   "druid_bear": [
     {"name": "Primal Rage", "description": "Increase shields and damage for a short time.", "key": "1", "cooldown": 12.0, "cost": 30, "type": "druid_bear_primal_rage"},
@@ -68,10 +74,10 @@
     {"name": "Return (Human)", "description": "Shift back into human form.", "key": "4", "cooldown": 0.5, "cost": 0, "type": "druid_return_human"}
   ],
   "wizard": [
-    {"name": "Elemental Bolt", "description": "Primary that cycles elements (Alt).", "key": "M1", "cooldown": 0.0, "cost": 0, "type": "primary"},
-    {"name": "Fireball", "description": "Stage 3 Fire projectile that explodes.", "key": "1", "cooldown": 6.0, "cost": 30, "type": "wizard_fireball"},
-    {"name": "Flame Wall", "description": "Persistent fire line between you and target.", "key": "2", "cooldown": 12.0, "cost": 45, "type": "wizard_flamewall"},
-    {"name": "Lightning Bolt", "description": "Lateral lightning strike that stuns.", "key": "3", "cooldown": 9.0, "cost": 40, "type": "wizard_lbolt"},
-    {"name": "Lightning Dome", "description": "Protective electric field around caster.", "key": "4", "cooldown": 24.0, "cost": 60, "type": "wizard_ldome"}
+    {"name": "Elemental Bolt", "description": "Primary that cycles elements (Alt).", "key": "M1", "cooldown": 0.0, "cost": 0, "type": "primary", "icon": 31},
+    {"name": "Fireball", "description": "Stage 3 Fire projectile that explodes.", "key": "1", "cooldown": 6.0, "cost": 30, "type": "wizard_fireball", "icon": 30},
+    {"name": "Flame Wall", "description": "Persistent fire line between you and target.", "key": "2", "cooldown": 12.0, "cost": 45, "type": "wizard_flamewall", "icon": 32},
+    {"name": "Lightning Bolt", "description": "Lateral lightning strike that stuns.", "key": "3", "cooldown": 9.0, "cost": 40, "type": "wizard_lbolt", "icon": 62},
+    {"name": "Lightning Dome", "description": "Protective electric field around caster.", "key": "4", "cooldown": 24.0, "cost": 60, "type": "wizard_ldome", "icon": 53}
   ]
 }

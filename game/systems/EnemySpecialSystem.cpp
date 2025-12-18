@@ -117,7 +117,7 @@ void EnemySpecialSystem::update(Engine::ECS::Registry& registry,
                 const float w = static_cast<float>(std::max(1, fireballVis_.frameWidth));
                 const float h = static_cast<float>(std::max(1, fireballVis_.frameHeight));
                 registry.emplace<Engine::ECS::Renderable>(
-                    proj, Engine::ECS::Renderable{Engine::Vec2{w, h}, Engine::Color{255, 255, 255, 255}, fireballVis_.texture});
+                    proj, Engine::ECS::Renderable{Engine::Vec2{w * 2.0f, h * 2.0f}, Engine::Color{255, 255, 255, 255}, fireballVis_.texture});
                 registry.emplace<Engine::ECS::SpriteAnimation>(
                     proj,
                     Engine::ECS::SpriteAnimation{fireballVis_.frameWidth,

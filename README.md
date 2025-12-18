@@ -45,7 +45,7 @@ The current build includes:
   - Power Coil (+10 damage, 40c), Reinforced Plating (+25 HP, 45c), Vector Thrusters (+8% move speed, 35c)
   - Field Medkit (Use/Q, heal 35% HP, 30c), Cryo Capsule (freeze time 2.5s, 70c), Deployable Turret (12s, 90c)
   - Chrono Prism (+15% attack speed aura & slow, 140c), Phase Leech (5% lifesteal, 150c), Storm Core (projectiles chain +2, 160c)
-- **Use rules**: Support items sit in quick-use (`Q`); others apply instantly on purchase/pickup. Traveling shop items apply immediately and count toward their stack caps.
+- **Use rules**: Usable/consumable items can be quick-used with `Q` (use `Tab` to cycle the active usable item). You can also assign consumables to the 2-slot hotbar (`R` / `F`) in the Character screen. Traveling shop items apply immediately and count toward their stack caps.
 
 ## Global Upgrades (Vault Gold Meta)
 - **Where**: Main Menu → Upgrades. Spends vault gold (auto-deposited once per match via deposit guard).
@@ -122,8 +122,10 @@ Loaded from `data/input_bindings.json`; fully remappable via file override.
 - Dash: `Space`
 - Interact / talk / use: `E`
 - Use item: `Q`
+- Cycle active usable item: `Tab`
+- Hotbar 1 / 2: `R` / `F`
 - Abilities: `1`, `2`, `3` (ultimate: `4`)
-- Reload: `F` (or `F1`)
+- Reload: `F1`
 - Swap weapon / stance / element: `Left Alt`
 - Toggle Ability/Item Shop: `B`
 - Build menu (builder): `V`

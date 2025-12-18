@@ -1,24 +1,3 @@
-# Powerups that boost abilities
-* Scroll could make lightning red
-
-# Intermission ending kicks player out of shops
-
-# Ellis Consecration no animations/effect
-
-# Need to manually assign abilities icons that make sense
-
-# 'Main Menu' option on the Esc Screen should come with a Confirmation window.
-
-# Gear should not go into the active inventory slot - only usable/consumable items should.
-* R / F hotkeys should be visible on the main screen GUI just like Q is 
-
-# Gems are wayyyyy too common
-
-# Redesign the UI
-- Host
-- Join
-- Lobby
-
 # Gear
 * Better Define Gear
     - Types
@@ -34,7 +13,24 @@
         - Unique Weapons
         - Unique Trinkets
         - Unique Foods/Potions (Elixers, Feasts)
-* Decrease overall drop rate of gear
+    - Unique Weapons, Gear, Consumables should have unique assets
+
+# Powerups that boost abilities
+* Scroll could make lightning red
+
+# Consumable items that are skills
+* Scrolls
+    - Scroll of Invisiblity
+    - Scroll of Fireball
+    - Scroll of Summon Zombie
+    - Scroll of Revive
+    - Scroll of Rage
+    - Etc
+
+# Redesign the UI
+- Host
+- Join
+- Lobby
 
 # Mod Support
 * Expose as much as possible to make it as easy as possible to mod

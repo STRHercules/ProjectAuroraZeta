@@ -185,3 +185,13 @@
 
 ## 2025-12-18 — Suggestions after fixing bounty spam
 - Add a debug HUD toggle that prints per-enemy tags (Boss/Bounty/etc.) and def id to make spawn-tag regressions obvious.
+
+## 2025-12-18 — Suggestions after ability VFX pass
+- Add a lightweight VFX pooling system (or batched instancing) for “area fill” effects like Consecration to avoid spawning hundreds of entities per cast.
+
+## 2025-12-18 — Suggestions after ability icon layout pass
+- Add an in-game “Icon Legend” dev panel that draws the 11x6 icon grid with indices (0..65) for quick iteration.
+
+## 2025-12-18 — Suggestions after shop pause + loot tuning
+- Add a small “Paused (Shop)” indicator when shops freeze timers in solo so the behavior is explicit to players.
+- Unify hotbar/consumable eligibility checks (HUD, character screen, Q-use) behind a single helper to avoid drift.

@@ -139,6 +139,9 @@ private:
     bool addItemToInventory(const ItemDefinition& def);
     bool sellItemFromInventory(std::size_t idx, int& copperOut);
     void clampInventorySelection();
+    bool isQuickUseEligible(const ItemDefinition& d) const;
+    void clampActiveUseItemSelection();
+    int nextActiveUseItemIndex(int from) const;
     void refreshInventoryCapacityFromBag(bool dropOverflow);
     void dropInventoryOverflow(const Engine::Vec2& dropBase);
     void spawnPickupEntity(const Pickup& payload, const Engine::Vec2& pos, Engine::Color color, float size, float amp, float speed);
@@ -208,10 +211,12 @@ private:
     void updateHeroRpgStats();
     enum class RpgLootSource { Normal, MiniBoss, Boss, Shop };
     Game::RPG::LootTable filteredRpgLootTable(RpgLootSource src) const;
+    Game::RPG::LootTable filteredRpgGemTable(RpgLootSource src) const;
     Game::RPG::LootTable filteredRpgConsumableTable(RpgLootSource src) const;
     Game::RPG::LootTable filteredRpgBagTable(RpgLootSource src) const;
     ItemDefinition buildRpgItemDef(const Game::RPG::GeneratedItem& rolled, bool priceInGold) const;
     std::optional<ItemDefinition> rollRpgEquipment(RpgLootSource src, bool priceInGold);
+    std::optional<ItemDefinition> rollRpgGem(RpgLootSource src, bool priceInGold);
     std::optional<ItemDefinition> rollRpgConsumable(RpgLootSource src, bool priceInGold);
     std::optional<ItemDefinition> rollRpgBag(RpgLootSource src, bool priceInGold);
     bool equipInventoryItem(std::size_t idx);
@@ -380,7 +385,7 @@ private:
         float baseCooldown{8.0f};
         int baseCost{25};
         std::string type;
-        int iconIndex{0};  // optional override (1..66)
+        int iconIndex{-1};  // optional override (0..65); -1 = auto
     };
     struct AbilityState {
         AbilityDef def;
@@ -407,6 +412,19 @@ private:
                                Engine::Color color,
                                bool turret = false,
                                const SpriteSheetDesc* overrideVis = nullptr);
+    Engine::ECS::Entity spawnSpriteSheetVfx(const SpriteSheetDesc& sheet,
+                                            const Engine::Vec2& pos,
+                                            Engine::Vec2 size,
+                                            Engine::Color color,
+                                            bool loop,
+                                            bool holdOnLastFrame,
+                                            float lifetimeSeconds,
+                                            float ySortBias = 0.0f);
+    void startConsecrationSparkles(float radius);
+    void updateConsecrationSparkles(float radius);
+    void stopConsecrationSparkles();
+    void startShadowDanceSmoke(const Engine::Vec2& pos);
+    void stopShadowDanceSmoke();
     HeroSpriteFiles heroSpriteFilesFor(const ArchetypeDef& def) const;
     bool archetypeSupportsSecondaryWeapon(const ArchetypeDef& def) const;
     void toggleHeroWeaponMode();
@@ -476,7 +494,17 @@ private:
     Engine::TexturePtr largeFireTex_{};
     Engine::TexturePtr lightningBlastTex_{};
     Engine::TexturePtr lightningEnergyTex_{};
+    SpriteSheetDesc spellPop_{};
+    SpriteSheetDesc spellBurst_{};
+    SpriteSheetDesc spellSmoke_{};
+    SpriteSheetDesc spellSparkle_{};
     Engine::ECS::Entity lightningDomeVis_{Engine::ECS::kInvalidEntity};
+    struct AnchoredVfx {
+        Engine::ECS::Entity e{Engine::ECS::kInvalidEntity};
+        Engine::Vec2 offset{};
+    };
+    std::vector<AnchoredVfx> consecrationSparkles_{};
+    Engine::ECS::Entity shadowDanceSmoke_{Engine::ECS::kInvalidEntity};
     DruidForm druidForm_{DruidForm::Human};
     DruidForm druidChosen_{DruidForm::Human};
     bool druidChoiceMade_{false};
@@ -514,6 +542,7 @@ private:
     int rpgEquipMiniBossCount_{2};
     int rpgEquipBossCount_{3};
     float rpgMiniBossGemChance_{0.65f};
+    float rpgBossGemChance_{0.25f};
     float rpgConsumableChanceNormal_{0.08f};
     int rpgConsumableMiniBossCount_{1};
     int rpgConsumableBossCount_{2};
@@ -914,6 +943,7 @@ private:
     bool waveClearedPending_{false};
     bool paused_{false};
     bool userPaused_{false};
+    bool pauseConfirmMainMenuOpen_{false};
     bool pauseTogglePrev_{false};
     bool characterScreenPrev_{false};
     bool characterScreenOpen_{false};
@@ -1053,6 +1083,7 @@ private:
     int baseInventoryCapacity_{24};
     int inventoryCapacity_{24};
     int inventorySelected_{-1};
+    int activeUseItemSelected_{-1};  // (Q) active/usable-only selection; gear never occupies this slot.
     std::array<std::optional<ItemInstance>, static_cast<std::size_t>(Game::RPG::EquipmentSlot::Count)> equipped_{};
     float inventoryGridScroll_{0.0f};
     bool inventoryScrollLeftPrev_{false};

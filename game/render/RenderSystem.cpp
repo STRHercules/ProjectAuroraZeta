@@ -20,6 +20,7 @@
 #include "../components/EscortTarget.h"
 #include "../components/BountyTag.h"
 #include "../components/Ghost.h"
+#include "../components/HeroTint.h"
 #include "../../engine/render/BitmapTextRenderer.h"
 #include "../../engine/ecs/components/Tags.h"
 #include "../systems/BuffSystem.h"
@@ -187,9 +188,15 @@ void RenderSystem::drawEntitiesPass(const Engine::ECS::Registry& registry, const
                 // Do not tint playable characters; keep sprites visually "true" and use alpha-only effects (cloak/ghost).
                 Engine::Color tint = color;
                 if (isHero) {
-                    tint.r = 255;
-                    tint.g = 255;
-                    tint.b = 255;
+                    if (const auto* ht = registry.get<Game::HeroTint>(e)) {
+                        tint.r = ht->color.r;
+                        tint.g = ht->color.g;
+                        tint.b = ht->color.b;
+                    } else {
+                        tint.r = 255;
+                        tint.g = 255;
+                        tint.b = 255;
+                    }
                 }
                 if (const auto* anim = registry.get<Engine::ECS::SpriteAnimation>(e);
                     anim && anim->frameCount > 1) {

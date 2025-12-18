@@ -1285,3 +1285,108 @@
 - Manual test:
   - Fight reviving enemies (mummy/skelly) and confirm no crash when revive completes.
   - Get poisoned/bleeding and confirm DoT expires without crashing.
+
+## 2025-12-18 — Ability VFX pass + Rage tint (v0.0.167)
+
+**Prompt / Task**
+- Add new spell VFX assets (Pop/Burst/Smoke/Sparkle) and hook them into:
+  - Ellis Consecration (Sparkle floor VFX)
+  - María ultimate / Shadow Dance (Smoke at teleport origin)
+  - Sally heals (Sparkle on healed target)
+  - Robin Rage (red tint during Rage)
+- Fix Flame Skull fireball to use the correct animated `fire_skull_fireball.png`.
+
+**What Changed**
+- Loaded the new spell sprite sheets and added a small helper to spawn timed sprite-sheet VFX.
+- Added Consecration Sparkle coverage (fills the consecration radius with looping Sparkles that follow the hero).
+- Added Shadow Dance cast-location Smoke VFX.
+- Added heal-target Sparkle VFX.
+- Added a hero tint override component and applied it for Robin’s Rage buff.
+- Adjusted Flame Skull fireball projectile visuals to render at the intended size.
+
+**Steps Taken**
+- Added `game/components/HeroTint.h` and updated `game/render/RenderSystem.cpp` to allow hero tint overrides.
+- Extended `game/Game.cpp`:
+  - Load Pop/Burst/Smoke/Sparkle sheets in `loadProjectileTextures()`.
+  - Add `spawnSpriteSheetVfx()` helper.
+  - Add consecration sparkle spawn/update/cleanup helpers.
+  - Add Shadow Dance smoke spawn/cleanup helpers.
+  - Sync Robin Rage → `HeroTint` component during `onUpdate()`.
+- Updated `game/GameAbilities.cpp`:
+  - Start Shadow Dance smoke at cast position.
+  - Play Sparkle VFX when healing a friendly target.
+- Updated `game/systems/EnemySpecialSystem.cpp` to render Flame Skull fireballs at 2x the source frame size.
+
+**Rationale / Tradeoffs**
+- Reused the existing `Engine::ECS::Projectile` lifetime mechanism for short-lived VFX cleanup to avoid introducing a new timed-despawn system mid-iteration.
+- Consecration fills the area with multiple small VFX entities; this is visually dense but could be optimized later with pooling/batching if needed.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-18).
+- Manual test:
+  - As Ellis, cast Consecration and confirm Sparkles cover the aura area on the floor.
+  - As María, use Shadow Dance and confirm Smoke stays at the cast location while she teleports away and returns.
+  - As Sally, heal a friendly target (or self) and confirm Sparkles play on the healed target.
+  - As Robin, use Rage and confirm Robin is tinted red only while Rage is active.
+  - Fight Flame Skulls and confirm their fireballs render as the animated `fire_skull_fireball.png` projectile.
+
+## 2025-12-18 — Curated ability icon layout (v0.0.168)
+
+**Prompt / Task**
+- Re-assign all champion ability HUD icons to the provided icon indices (including Robin’s weapon-dependent Primary Fire icon).
+
+**What Changed**
+- Ability definitions now carry explicit `icon` indices (0-based) in `data/abilities.json`.
+- Ability HUD now supports both 0-based and legacy 1-based icon indices.
+- Robin’s Primary Fire icon swaps dynamically (Sword icon 0, Bow icon 4).
+
+**Steps Taken**
+- Updated `data/abilities.json` to add `icon` to all champion ability entries and added a data-driven `builder` kit.
+- Updated `game/Game.cpp`:
+  - Treat `AbilityDef.iconIndex` as `-1` (auto) and parse JSON `icon` with `-1` default.
+  - Render ability icons using 0-based indices (while still accepting 1-based values).
+  - Override Robin’s Primary Fire icon based on `usingSecondaryWeapon_`.
+
+**Rationale / Tradeoffs**
+- Keeping icon indices in data makes the icon layout fully designer-controlled without recompiles.
+- Supporting both index styles avoids breaking any older data that still uses 1..66 indexing.
+
+**Build / Test**
+- Build: `cmake --build build -j 8` (Linux, 2025-12-18).
+- Manual test:
+  - Cycle through each archetype and verify M1/1/2/3/4 icons match the provided list.
+  - As Robin, press `Alt` to swap weapons and confirm the Primary Fire icon changes (Sword ↔ Bow).
+
+## 2025-12-18 — Shop pause + pause-menu confirm + loot tuning
+
+**Prompt / Task**
+- Fix: Intermission ending kicks player out of shops (shops should pause timers in singleplayer).
+- Add: Pause menu “Main Menu” confirmation (Yes/No).
+- Fix/UI: Gear should not occupy the active-use (Q) slot; show R/F hotkeys on the in-run HUD.
+- Balance: Reduce drop rates for gems, food/potions, and overall items (inventory fills too fast).
+
+**What Changed**
+- Singleplayer shop overlays now pause combat/intermission phase timers, preventing intermission from expiring mid-shop.
+- Pause menu “Main Menu” now opens a confirmation dialog before exiting the run.
+- Active-use (Q) selection now cycles usable items only (consumables); gear no longer shows in the Q slot.
+- In-run HUD now shows R/F hotbar slots above the Q badge.
+- Tuned RPG loot: gems much rarer (separate gem roll), consumables rarer, and overall drop rates reduced via `data/gameplay.json`.
+
+**Steps Taken**
+- Updated phase-timer gating to pause during shops in singleplayer.
+- Added a pause-menu confirmation modal and routed click handling through it.
+- Split “active-use selection” from inventory UI selection and updated Q-use logic accordingly.
+- Added HUD rendering for R/F hotbar slots.
+- Adjusted drop config values in `data/gameplay.json` and added a boss gem chance knob.
+
+**Rationale / Tradeoffs**
+- Keeping phase timers frozen during shops prevents frustrating forced exits and keeps pacing player-controlled in solo.
+- Separate “gem roll” avoids gems crowding out real equipment drops while preserving the ability to find gems.
+- Dedicated active-use selection avoids breaking character screen inventory interactions while keeping Q strictly consumable-focused.
+
+**Build / Test**
+- Build: `cmake --build build --target game -- -j4` (Linux, 2025-12-18) — success.
+- Manual test:
+  - Start a solo run, open the traveling shop/ability shop during intermission, and confirm the intermission timer does not tick down.
+  - Press `Esc`, click `Main Menu`, verify the Yes/No dialog appears and No keeps you in-game.
+  - Pick up gear + a consumable: confirm the Q “Holding” slot shows only the consumable, and R/F slots render above it.
