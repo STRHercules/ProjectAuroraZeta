@@ -338,3 +338,43 @@
 * UI: Hotbar keys (R/F) are now visible on the in-run HUD above the active-use (Q) item.
 * Inventory: active-use (Q) now only cycles usable items (consumables), not gear.
 * Balance: reduced drop rates for gems, potions/food, and overall item drops.
+
+# v0.0.170
+* Assassin: Cloak duration now scales with ability level.
+
+# v0.0.171
+* Added: new scroll consumables with unique effects (Invisibility, Fireball, Summon Zombie, Revive, Rage, Mirroring, Lightning Prison, Necronomicon, Flame Wall, Phase Step, Sacrifice, Cataclysm).
+    * Cataclysm scroll now summons a red-tinted boss that spawns minions and drops extra loot.
+    * Lightning Prison places a stationary shock field at the cursor.
+    * Mirroring creates a temporary clone ally.
+* Added: Zombie mini-unit definition for summon/servant effects.
+
+# v0.0.172
+* Loot: added new weapon sets (Axes, Cleavers, Clubs, Hammers, Polearms, Scythes, Swords) and Unique Gear drops.
+* Loot: renamed armor tiers, jewelry, capes, arrows, and gems (including new Sunsteel tiers).
+* RPG: expanded affix library (hybrids/all-res/new tiers) and rarity-tier gating with weighted roll bias.
+* RPG: refreshed base item templates; gems are socket-only, potions use neutral rarity, and food regen scales with rarity.
+* UI: unified RPG stat formatting between item details and tooltips (percentage bonuses for mult stats).
+
+# v0.0.173
+* UI: fixed RPG stat lists to avoid duplicate/misaligned speed and gold gain lines.
+* UI: multiplier stats now display as the correct bonus percent in item details.
+
+# v0.0.174
+* UI: removed baseline 100% stat lines from RPG item details and tooltips.
+* UI: attack/move speed and gold gain bonuses now show only when a real bonus exists.
+
+# v0.0.175
+* UI: moved RPG compare (equip) deltas from the Details panel into the hover tooltip to prevent clipping.
+
+# v0.0.176
+* UI: color-coded RPG compare tooltip lines (green for gains, red for losses).
+
+# v0.0.177
+* UI: compare tooltip now hides when the destination slot is empty.
+* UI: Q hotbar now skips items assigned to R/F slots.
+* RPG: added Unique rarity tier (cyan) above Legendary with higher base stats and +1 affix cap.
+* UI: fallback icon clamping for equipment sheets prevents blank icons on mismatched sprite sheets.
+
+# v0.0.178
+* UI: equipment icon clamping now uses ceil grid sizing to support partial sprite sheet widths (e.g., UniqueGear).

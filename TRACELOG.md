@@ -1390,3 +1390,209 @@
   - Start a solo run, open the traveling shop/ability shop during intermission, and confirm the intermission timer does not tick down.
   - Press `Esc`, click `Main Menu`, verify the Yes/No dialog appears and No keeps you in-game.
   - Pick up gear + a consumable: confirm the Q “Holding” slot shows only the consumable, and R/F slots render above it.
+
+## 2025-12-18 — Assassin cloak duration scales per level
+
+**Prompt / Task**
+- Implement ability-level scaling for Maria's Cloak duration.
+
+**What Changed**
+- Assassin Cloak now adds duration per ability level, configurable via `data/gameplay.json`.
+- Added a new gameplay tuning knob for cloak duration per level.
+- Updated build string, changelog, and README note for the new scaling behavior.
+
+**Steps Taken**
+- Added `assassinCloakDurationPerLevel` to gameplay config and loaded it in `GameRoot`.
+- Applied scaled duration when casting Assassin Cloak.
+- Updated build/changelog/docs for the new behavior.
+
+**Rationale / Tradeoffs**
+- Keeps Cloak scaling explicit and tunable without hardcoding a fixed curve in code.
+
+**Build / Test**
+- Build: `cmake --build build` (Linux, 2025-12-18) — success.
+- Manual test:
+  - Start as Assassin, upgrade Cloak, cast at levels 1 and 2+, and confirm the stealth timer lasts longer each level.
+## 2025-12-18 — Scroll consumables + cataclysm boss
+
+**Prompt / Task**
+- Add new scroll consumables tied to updated Scrolls.png icons, with scripted effects (invisibility, fireball, summon zombie, revive, rage, mirroring, lightning prison, necronomicon, flame wall, phase step, sacrifice, cataclysm).
+
+**What Changed**
+- Added scripted consumable support (scriptId + params) and scroll-specific effect handlers in `game/Game.cpp`.
+- Added new scroll items to `data/rpg/loot.json` and new scroll consumable definitions to `data/rpg/consumables.json`.
+- Added zombie mini-unit entry to `data/units.json`.
+- Added cataclysm boss summoner component and temporary lifetime component, plus lightning-prison instances and flame wall damage tuning.
+- Build number bumped to v0.0.171 and changelog updated.
+
+**Steps Taken**
+- Extended consumable data schema (scriptId/params) and loader support.
+- Implemented scroll effect scripts (status cloak, projectile fireball, lightning prison field, flame wall, revive, rage, phase blink, sacrifice level-ups, mirror clone, necro servants, cataclysm boss + minions).
+- Wired new items/consumables data and added supporting mini-unit + runtime systems.
+
+**Rationale / Tradeoffs**
+- Used scriptId + params to keep scroll tuning data-driven without hardcoding balancing numbers.
+- Necromancy resurrects any enemy death during the timer (kill attribution not tracked).
+- Mirroring spawns a mini-unit clone that uses hero sprite/AI-lite rather than full hero ability kit for simplicity.
+- Cataclysm uses a BossSummoner component for periodic minion spawns and extra loot on death.
+
+**Assumptions**
+- Scrolls.png is a 10-column sheet (160px wide), so icon index = row/col by index/10.
+- Scroll effects should be consumable-based and available to all archetypes.
+
+**Build / Test**
+- Build: `cmake --build build`
+- Manual test: Not run (build only).
+
+## 2025-12-19 — RPG loot/affix system refresh
+
+**Prompt / Task**
+- Implement the RPG item/affix system update (new affixes/base stats, rarity-gated tiering, stat display fixes, socket behavior, consumable rules, renames, new weapon/unique gear assets).
+
+**What Changed**
+- Added new affix tiers/hybrids/all-res and rarity-tier weighting in loot rolls; socketable items no longer roll affixes.
+- Unified RPG stat formatting for tooltips/details, and ensured socketed gems + affixes recompute correctly for equipment stats.
+- Made scrolls show descriptions, made food regen scale by rarity, and kept potions visually neutral (no rarity color).
+- Expanded loot tables and generator output for new weapon sheets, unique gear, renames, and updated base templates.
+- Added RPG loot regression tests and bumped build/changelog/docs.
+
+**Steps Taken**
+- Updated `scripts/gen_rpg_loot.py` and regenerated `data/rpg/loot.json`.
+- Extended `game/rpg/RPGContent.*` with tier gating and contribution helpers for tests.
+- Refactored `game/Game.cpp` UI formatting + rarity coloring, and wired food regen via `data/gameplay.json`.
+- Added `tests/RpgLootTests.cpp` and CMake target for new checks.
+
+**Rationale / Tradeoffs**
+- Tier-gated weights keep higher rarities meaningful while still allowing lower-tier variety.
+- Centralized stat formatting prevents tooltip/details drift and fixes mult stat display.
+- Data-driven consumable tuning avoids hardcoded regen values per item name.
+
+**Build / Test**
+- Build: `cmake --build build` (Linux, 2025-12-19) — success.
+- Test: `./build/rpg_loot_tests`
+
+## 2025-12-19 — Fix RPG stat list duplication
+
+**Prompt / Task**
+- Items are showing duplicated Attack Speed/Move Speed/Gold Gain lines and inflated percentages; fix the stat display and contribution math.
+
+**What Changed**
+- Normalized StatContribution aggregation to ignore default 1.0/1.5 baselines for multiplier-style fields.
+- Removed duplicate gold gain line from the mult stat display.
+- Bumped build number and updated changelog.
+
+**Steps Taken**
+- Updated contribution helpers in `game/Game.cpp` and `game/rpg/RPGContent.cpp`.
+- Rebuilt and re-ran the RPG loot tests.
+
+**Rationale / Tradeoffs**
+- StatContribution uses DerivedStats defaults; treating those defaults as zero prevents phantom bonuses from appearing in UI and gameplay math.
+
+**Build / Test**
+- Build: `cmake --build build` (Linux, 2025-12-19) — success.
+- Test: `./build/rpg_loot_tests`
+
+## 2025-12-19 — Remove baseline 100% stat lines
+
+**Prompt / Task**
+- Items still show 100% Attack Speed/Move Speed/Gold Gain; hide baseline values and show only real bonuses.
+
+**What Changed**
+- Zeroed StatContribution defaults before aggregation so contribution math no longer leaks 1.0 baselines into UI.
+- Updated RPG content/test helpers to use the same zeroed contribution baseline.
+- Bumped build number and changelog.
+
+**Steps Taken**
+- Added zeroing helpers in `game/Game.cpp` and `game/rpg/RPGContent.cpp`.
+- Rebuilt and ran RPG loot tests.
+
+**Rationale / Tradeoffs**
+- StatContribution is meant to be additive deltas; normalizing it prevents phantom 100% entries.
+
+**Build / Test**
+- Build: `cmake --build build` (Linux, 2025-12-19) — success.
+- Test: `./build/rpg_loot_tests`
+
+## 2025-12-19 — Move RPG compare to tooltip
+
+**Prompt / Task**
+- Details panel compare section clips; move compare stats into the hover tooltip.
+
+**What Changed**
+- Removed compare section from the Details panel and appended compare deltas to the item tooltip.
+- Bumped build number and changelog.
+
+**Steps Taken**
+- Refactored the compare calculation block into the tooltip rendering path.
+- Rebuilt and re-ran RPG loot tests.
+
+**Rationale / Tradeoffs**
+- Tooltips have dynamic height and avoid clipping in the details panel area.
+
+**Build / Test**
+- Build: `cmake --build build` (Linux, 2025-12-19) — success.
+- Test: `./build/rpg_loot_tests`
+
+## 2025-12-19 — Color-code compare tooltip
+
+**Prompt / Task**
+- Color code compare lines in the hover tooltip.
+
+**What Changed**
+- Added per-line tooltip colors for compare deltas (green gains, red losses).
+- Bumped build number and changelog.
+
+**Steps Taken**
+- Added a color-aware tooltip line builder in `game/Game.cpp`.
+- Rebuilt and re-ran RPG loot tests.
+
+**Rationale / Tradeoffs**
+- Keeps compare readability without reintroducing layout clipping.
+
+**Build / Test**
+- Build: `cmake --build build` (Linux, 2025-12-19) — success.
+- Test: `./build/rpg_loot_tests`
+
+## 2025-12-19 — Unique rarity + hotbar compare tweaks
+
+**Prompt / Task**
+- Hide compare if target slot is empty, keep R/F hotbar items out of Q, add Unique rarity tier above Legendary with stronger stats and extra affix.
+
+**What Changed**
+- Suppressed compare lines when the destination slot is empty.
+- Added Unique rarity (cyan) and updated loot generation weights, stat scaling, and max affixes.
+- Q hotbar now skips items assigned to R/F; tooltip icons clamp to sheet bounds to avoid blanks.
+- Regenerated `data/rpg/loot.json` for Unique rarity entries.
+
+**Steps Taken**
+- Updated rarity enums/colors and loot generation logic in C++.
+- Updated loot generator for Unique gear and reran the script.
+- Adjusted Q hotbar eligibility checks and compare tooltip behavior.
+
+**Rationale / Tradeoffs**
+- Compare-only-when-replacing keeps tooltips concise and avoids misleading empty-slot deltas.
+- Unique tier separated from Legendary for long-term loot progression.
+
+**Build / Test**
+- Build: `cmake --build build` (Linux, 2025-12-19) — success.
+- Test: `./build/rpg_loot_tests`
+
+## 2025-12-19 — UniqueGear icon grid fix
+
+**Prompt / Task**
+- UniqueGear.png updated to 126x111; ensure icons align with the legend rows/cols.
+
+**What Changed**
+- Switched equipment icon grid sizing to ceil division and clamped row/col indices (prevents wrapping on partial-width sheets).
+- Bumped build number and changelog.
+
+**Steps Taken**
+- Adjusted icon extraction in `game/Game.cpp`.
+- Rebuilt and re-ran RPG loot tests.
+
+**Rationale / Tradeoffs**
+- Ceil grid sizing matches sheets that are trimmed or not exact multiples of 16px.
+
+**Build / Test**
+- Build: `cmake --build build` (Linux, 2025-12-19) — success.
+- Test: `./build/rpg_loot_tests`

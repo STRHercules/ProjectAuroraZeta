@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "../../engine/gameplay/RPGStats.h"
+#include "../meta/ItemDefs.h"
 
 namespace Game::RPG {
 
@@ -33,7 +34,7 @@ enum class EquipmentSlot {
     Count
 };
 
-enum class Rarity { Common, Uncommon, Rare, Epic, Legendary };
+enum class Rarity { Common, Uncommon, Rare, Epic, Legendary, Unique };
 
 struct Affix {
     std::string id;
@@ -80,6 +81,8 @@ struct LootTable {
 LootTable defaultLootTable();
 GeneratedItem generateLoot(const LootTable& table, const LootContext& ctx, std::mt19937& rng);
 LootTable loadLootTable(const std::string& path);
+StatContribution computeItemContribution(const LootTable& table, const ItemDefinition& def, int quantity = 1);
+StatContribution computeEquipmentContribution(const LootTable& table, const std::vector<ItemDefinition>& defs);
 
 // Talent nodes: match-permanent bonuses granted every N levels.
 struct TalentNode {
@@ -96,7 +99,7 @@ struct TalentTree {
 };
 
 // Consumables framework.
-enum class ConsumableCategory { Heal, Cleanse, Buff, Bomb, Food };
+enum class ConsumableCategory { Heal, Cleanse, Buff, Bomb, Food, Scripted };
 enum class ConsumableResource { Health, Shields };
 
 struct ConsumableEffect {
@@ -109,11 +112,16 @@ struct ConsumableEffect {
     // If present, prefer this over interpreting `magnitude` as a hardcoded move-speed buff.
     Engine::Gameplay::RPG::StatContribution stats{};
     std::vector<int> cleanseIds;  // status ids to remove when category == Cleanse
+    // Optional scripted effect id (used for scrolls/advanced consumables).
+    std::string scriptId{};
+    // Optional numeric params for scripted effects (schema-free tuning).
+    std::vector<float> params{};
 };
 
 struct ConsumableDef {
     std::string id;
     std::string name;
+    std::string description;
     std::string cooldownGroup;
     float cooldown{10.0f};
     std::vector<ConsumableEffect> effects;

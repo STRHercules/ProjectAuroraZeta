@@ -195,3 +195,32 @@
 ## 2025-12-18 — Suggestions after shop pause + loot tuning
 - Add a small “Paused (Shop)” indicator when shops freeze timers in solo so the behavior is explicit to players.
 - Unify hotbar/consumable eligibility checks (HUD, character screen, Q-use) behind a single helper to avoid drift.
+
+## 2025-12-18 — Suggestions after Assassin cloak scaling
+- Add per-ability level scaling text to the ability tooltip so upgrades communicate the exact bonus.
+## 2025-12-18 — Suggestions after scroll consumables + cataclysm boss
+- Add a small targeting preview (cursor ring/ghost) for revive, lightning prison, and phase step scrolls to reduce miscasts.
+- Consider a dedicated “summoned ally” stat block to unify zombies, mirror clones, and necro servants.
+- Add optional kill-attribution tracking so necronomicon can only convert user kills.
+
+## 2025-12-19 — Suggestions after RPG loot/affix refresh
+- Add a data-driven loot table validation test that asserts every sprite sheet entry has a matching loot item (weapon/unique gear coverage).
+- Add a small “socketed bonus” breakdown in item details to make gem contributions explicit.
+
+## 2025-12-19 — Suggestions after RPG stat display fix
+- Consider splitting `DerivedStats` defaults for live stats vs contribution stats to avoid baseline leakage in future systems.
+
+## 2025-12-19 — Suggestions after baseline cleanup
+- Add a small helper in `engine/gameplay` to create zeroed `StatContribution` so UI and gameplay stay consistent.
+
+## 2025-12-19 — Suggestions after compare tooltip move
+- Consider color-coding compare lines in tooltips (green/red) to keep the clarity from the old Details panel view.
+
+## 2025-12-19 — Suggestions after compare color pass
+- Consider adding small ▲/▼ glyphs next to compare lines for extra clarity.
+
+## 2025-12-19 — Suggestions after Unique tier pass
+- Add a tooltip tag for Unique items (e.g., “Unique”) to reinforce the new tier in UI.
+
+## 2025-12-19 — Suggestions after UniqueGear grid fix
+- Consider validating sprite sheet dimensions in the generator to warn on non-16px multiples.

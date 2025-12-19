@@ -7,7 +7,7 @@
 namespace Game {
 
 enum class ItemKind { Combat, Support, Unique };
-enum class ItemRarity { Common, Uncommon, Rare, Epic, Legendary };
+enum class ItemRarity { Common, Uncommon, Rare, Epic, Legendary, Unique };
 enum class ItemEffect {
     Damage,
     Health,

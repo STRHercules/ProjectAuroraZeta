@@ -1,40 +1,12 @@
-# Gear
-* Better Define Gear
-    - Types
-    - Rarity
-    - Bonuses
-* Fix Potions/Gems having affixes/bonuses
-    - Potions should only be supplying health/shields when consumed
-    - Gems should only be adding their gem bonus to weapons/armor
-* Limit bonuses per quality tier
-* Add Unique Drops
-    - Weapons, Gear, Consumables
-        - Unique Armor
-        - Unique Weapons
-        - Unique Trinkets
-        - Unique Foods/Potions (Elixers, Feasts)
-    - Unique Weapons, Gear, Consumables should have unique assets
-
 # Powerups that boost abilities
-* Scroll could make lightning red
-
-# Consumable items that are skills
-* Scrolls
-    - Scroll of Invisiblity
-    - Scroll of Fireball
-    - Scroll of Summon Zombie
-    - Scroll of Revive
-    - Scroll of Rage
-    - Etc
+* Scroll could make lightning red, and 5x/10x stronger for X minutes
+* Permanent Spell/Ability evolution?
 
 # Redesign the UI
 - Host
 - Join
 - Lobby
-
-# Mod Support
-* Expose as much as possible to make it as easy as possible to mod
-    * Develop mod tools?
+- Server Browser
 
 # Threat/Aggro and Party Synergy (Optional / Co-op Ready)
 * If you ever do co-op, add:
@@ -58,7 +30,7 @@
 
 # Zones have no assets
 * Currently no idea how to identify these zones in-game
-* Potentially going to convert the zones to static areas on the map (coordinates/quadrants) 
+* Potentially going to convert the zones to static areas on the map (coordinates/quadrants), have them activate one at a time for X amount of time
 
 # Lives
 * When playing by yourself, the player will have 2 lives by default.
@@ -98,3 +70,7 @@
     * 10,000 Gold picked up
     * 100 Escorts safely transported
     * 1,000 Assassins thwarted
+
+# Mod Support
+* Expose as much as possible to make it as easy as possible to mod
+    * Develop mod tools?

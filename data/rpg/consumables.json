@@ -81,6 +81,32 @@
     { "id": "potion_sh_giant_50", "name": "Giant Rejuvenation Potion 50%", "cooldownGroup": "potion", "cooldown": 10.0,
       "effects": [ { "category": 0, "resource": 1, "magnitude": 0.375, "duration": 0.0, "damageType": 0 } ] },
     { "id": "potion_sh_giant_25", "name": "Giant Rejuvenation Potion 25%", "cooldownGroup": "potion", "cooldown": 10.0,
-      "effects": [ { "category": 0, "resource": 1, "magnitude": 0.1875, "duration": 0.0, "damageType": 0 } ] }
+      "effects": [ { "category": 0, "resource": 1, "magnitude": 0.1875, "duration": 0.0, "damageType": 0 } ] },
+
+    { "id": "scroll_invisibility", "name": "Scroll of Invisibility", "description": "Become invisible for a short time.", "cooldownGroup": "scroll", "cooldown": 18.0,
+      "effects": [ { "category": 5, "resource": 0, "magnitude": 0.0, "duration": 7.0, "damageType": 0, "scriptId": "scroll_invisibility" } ] },
+    { "id": "scroll_fireball", "name": "Scroll of Fireball", "description": "Launch a fireball that explodes on impact.", "cooldownGroup": "scroll", "cooldown": 10.0,
+      "effects": [ { "category": 5, "resource": 0, "magnitude": 1.0, "duration": 0.0, "damageType": 0, "scriptId": "scroll_fireball" } ] },
+    { "id": "scroll_summon_zombie", "name": "Scroll of Summon Zombie", "description": "Summon a zombie ally for a short duration.", "cooldownGroup": "scroll", "cooldown": 22.0,
+      "effects": [ { "category": 5, "resource": 0, "magnitude": 0.0, "duration": 20.0, "damageType": 0, "scriptId": "scroll_summon_zombie" } ] },
+    { "id": "scroll_revive", "name": "Scroll of Revive", "description": "Revive a fallen ally.", "cooldownGroup": "scroll", "cooldown": 45.0,
+      "effects": [ { "category": 5, "resource": 0, "magnitude": 90.0, "duration": 0.0, "damageType": 0, "scriptId": "scroll_revive", "params": [0.75] } ] },
+    { "id": "scroll_rage", "name": "Scroll of Rage", "description": "Gain a burst of rage, boosting damage briefly.", "cooldownGroup": "scroll", "cooldown": 16.0,
+      "effects": [ { "category": 5, "resource": 0, "magnitude": 1.25, "duration": 6.0, "damageType": 0, "scriptId": "scroll_rage", "params": [1.20] } ] },
+    { "id": "scroll_mirroring", "name": "Scroll of Mirroring", "description": "Create mirrored allies that fight with you.", "cooldownGroup": "scroll", "cooldown": 20.0,
+      "effects": [ { "category": 5, "resource": 0, "magnitude": 0.0, "duration": 12.0, "damageType": 0, "scriptId": "scroll_mirror", "params": [0.60, 280.0, 0.90] } ] },
+    { "id": "scroll_lightning_prison", "name": "Scroll of Lightning Prison", "description": "Trap enemies in a crackling lightning prison.", "cooldownGroup": "scroll", "cooldown": 18.0,
+      "effects": [ { "category": 5, "resource": 0, "magnitude": 1.0, "duration": 6.0, "damageType": 0, "scriptId": "scroll_lightning_prison", "params": [140.0] } ] },
+    { "id": "necronomicon", "name": "Necronomicon", "description": "Summon undead minions from the Necronomicon.", "cooldownGroup": "scroll", "cooldown": 30.0,
+      "effects": [ { "category": 5, "resource": 0, "magnitude": 0.0, "duration": 10.0, "damageType": 0, "scriptId": "scroll_necronomicon", "params": [12.0] } ] },
+    { "id": "scroll_flame_wall", "name": "Scroll of Flame Wall", "description": "Create a wall of flame that scorches enemies.", "cooldownGroup": "scroll", "cooldown": 20.0,
+      "effects": [ { "category": 5, "resource": 0, "magnitude": 1.0, "duration": 6.0, "damageType": 0, "scriptId": "scroll_flame_wall", "params": [8.0, 32.0] } ] },
+    { "id": "scroll_phase_step", "name": "Scroll of Phase Step", "description": "Phase-step forward with brief invulnerability.", "cooldownGroup": "scroll", "cooldown": 14.0,
+      "effects": [ { "category": 5, "resource": 0, "magnitude": 0.0, "duration": 0.28, "damageType": 0, "scriptId": "scroll_phase_step", "params": [300.0] } ] },
+    { "id": "scroll_sacrifice", "name": "Scroll of Sacrifice", "description": "Sacrifice health to unleash massive power.", "cooldownGroup": "scroll", "cooldown": 45.0,
+      "effects": [ { "category": 5, "resource": 0, "magnitude": 0.90, "duration": 0.0, "damageType": 0, "scriptId": "scroll_sacrifice", "params": [5.0] } ] },
+    { "id": "scroll_cataclysm", "name": "Scroll of Cataclysm", "description": "Call down a cataclysmic blast.", "cooldownGroup": "scroll", "cooldown": 60.0,
+      "effects": [ { "category": 5, "resource": 0, "magnitude": 0.0, "duration": 0.0, "damageType": 0, "scriptId": "scroll_cataclysm",
+        "params": [2.5, 100.0, 24.0, 2.5, 0.8, 6.0, 3.0] } ] }
   ]
 }

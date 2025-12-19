@@ -567,7 +567,9 @@ void GameRoot::executeAbility(int index) {
         spendEnergy();
         setCooldown(slot.cooldownMax);
         if (auto* st = registry_.get<Engine::ECS::Status>(hero_)) {
-            st->container.apply(statusFactory_.make(Engine::Status::EStatusId::Cloaking), hero_);
+            auto spec = statusFactory_.make(Engine::Status::EStatusId::Cloaking);
+            spec.duration += assassinCloakDurationPerLevel_ * static_cast<float>(std::max(0, slot.level - 1));
+            st->container.apply(spec, hero_);
         }
         return;
     } else if (slot.type == "assassin_backstab") {
@@ -982,7 +984,7 @@ void GameRoot::executeAbility(int index) {
             anim.loop = true;
             registry_.emplace<Engine::ECS::SpriteAnimation>(vis, anim);
             registry_.emplace<Game::MultiRowSpriteAnim>(vis, Game::MultiRowSpriteAnim{4, 12, 0.06f, true, false});
-            flameWalls_.push_back(FlameWallInstance{pos, 4.0f + slot.level * 0.4f, vis});
+            flameWalls_.push_back(FlameWallInstance{pos, 4.0f + slot.level * 0.4f, 1.0f, vis});
         }
         setCooldown(std::max(8.0f, slot.cooldownMax));
     } else if (slot.type == "wizard_lbolt") {

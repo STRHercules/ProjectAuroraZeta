@@ -64,7 +64,9 @@
 #include "components/MiniUnit.h"
 #include "components/MiniUnitCommand.h"
 #include "components/MiniUnitStats.h"
+#include "components/BossSummoner.h"
 #include "components/TauntTarget.h"
+#include "components/TimedLife.h"
 #include "components/LookDirection.h"
 #include "components/Dying.h"
 #include "components/HeroSpriteSheets.h"
@@ -140,6 +142,8 @@ private:
     bool sellItemFromInventory(std::size_t idx, int& copperOut);
     void clampInventorySelection();
     bool isQuickUseEligible(const ItemDefinition& d) const;
+    bool isQuickUseEligibleForQ(const ItemDefinition& d) const;
+    bool isItemInHotbar(int itemId) const;
     void clampActiveUseItemSelection();
     int nextActiveUseItemIndex(int from) const;
     void refreshInventoryCapacityFromBag(bool dropOverflow);
@@ -221,6 +225,8 @@ private:
     std::optional<ItemDefinition> rollRpgBag(RpgLootSource src, bool priceInGold);
     bool equipInventoryItem(std::size_t idx);
     bool unequipRpgSlot(Game::RPG::EquipmentSlot slot);
+    bool isRpgPotion(const ItemDefinition& def) const;
+    Engine::Color rarityColorForRpgItem(const ItemDefinition& def, Engine::Color fallback) const;
     const Game::RPG::ItemTemplate* findRpgTemplateById(const std::string& id) const;
     const Game::RPG::ItemTemplate* findRpgTemplateFor(const ItemDefinition& def) const;
     Engine::TexturePtr getEquipmentIconSheet(const std::string& sheetName);
@@ -407,6 +413,7 @@ private:
     };
     void placeBuilding(const Engine::Vec2& pos);
     Engine::ECS::Entity spawnMiniUnit(const MiniUnitDef& def, const Engine::Vec2& pos);
+    Engine::ECS::Entity spawnSummonedMiniUnit(const std::string& key, const Engine::Vec2& pos, float lifetime, bool freeCost);
     void applyProjectileVisual(Engine::ECS::Entity e,
                                float sizeMul,
                                Engine::Color color,
@@ -510,8 +517,21 @@ private:
     bool druidChoiceMade_{false};
     WizardElement wizardElement_{WizardElement::Fire};
     float lightningDomeTimer_{0.0f};
-    struct FlameWallInstance { Engine::Vec2 pos; float timer; Engine::ECS::Entity visEntity{Engine::ECS::kInvalidEntity}; };
+    struct FlameWallInstance {
+        Engine::Vec2 pos;
+        float timer;
+        float damageMul;
+        Engine::ECS::Entity visEntity{Engine::ECS::kInvalidEntity};
+    };
     std::vector<FlameWallInstance> flameWalls_{};
+    struct LightningPrisonInstance {
+        Engine::Vec2 pos;
+        float timer;
+        float radius;
+        float damageMul;
+        Engine::ECS::Entity visEntity{Engine::ECS::kInvalidEntity};
+    };
+    std::vector<LightningPrisonInstance> lightningPrisons_{};
     double waveInterval_{2.5};
     double graceDuration_{1.0};
     float contactDamageBase_{10.0f};
@@ -548,6 +568,13 @@ private:
     int rpgConsumableBossCount_{2};
     float rpgBagChanceMiniBoss_{0.12f};
     float rpgBagChanceBoss_{0.25f};
+    std::array<float, 5> rpgFoodRegenByRarity_{{
+        0.08f,  // Common
+        0.12f,  // Uncommon
+        0.16f,  // Rare
+        0.20f,  // Epic
+        0.24f,  // Legendary
+    }};
     // Traveling shop: chance and count of RPG equipment offers (gold shop).
     float rpgShopEquipChance_{0.65f};
     int rpgShopEquipCount_{2};
@@ -578,6 +605,7 @@ private:
     float abilityVisionPerLevel_{1.0f};
     float abilityHealthPerLevel_{5.0f};
     float abilityArmorPerLevel_{1.0f};
+    float assassinCloakDurationPerLevel_{0.5f};
     int abilityRangeMaxBonus_{5};
     int abilityVisionMaxBonus_{5};
     int abilityDamageLevel_{0};
@@ -696,6 +724,7 @@ private:
     int level_{1};
     int xp_{0};
     int xpToNext_{60};
+    int pendingLevelUps_{0};
     int xpBaseToLevel_{60};
     int xpPerKill_{8};
     int xpPerWave_{5};
@@ -1031,6 +1060,8 @@ private:
     float frenzyTimer_{0.0f};
     float frenzyRateBuff_{1.0f};
     float immortalTimer_{0.0f};
+    float necroServantTimer_{0.0f};
+    float necroServantLifetime_{12.0f};
     // Healer aura (applies to all heroes).
     float regenAuraTimer_{0.0f};
     float regenAuraHps_{0.0f};

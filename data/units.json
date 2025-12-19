@@ -69,6 +69,24 @@
       "frameWidth": 16,
       "frameHeight": 16,
       "frameDuration": 0.12
+    },
+    "zombie": {
+      "class": "heavy",
+      "hp": 420.0,
+      "shields": 120.0,
+      "moveSpeed": 140.0,
+      "damage": 32.0,
+      "attackRange": 85.0,
+      "attackRate": 0.95,
+      "tauntRadius": 0.0,
+      "offensiveType": "Melee",
+      "costCopper": 0,
+      "armor": 2.0,
+      "shieldArmor": 2.0,
+      "texture": "assets/Sprites/Enemies/zombie.png",
+      "frameWidth": 16,
+      "frameHeight": 16,
+      "frameDuration": 0.14
     }
   },
   "buildings": {

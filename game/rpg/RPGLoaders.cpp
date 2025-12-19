@@ -151,6 +151,7 @@ std::vector<ConsumableDef> loadConsumables(const std::string& path) {
         ConsumableDef d{};
         d.id = c.value("id", "");
         d.name = c.value("name", "");
+        d.description = c.value("description", "");
         d.cooldownGroup = c.value("cooldownGroup", "potion");
         d.cooldown = c.value("cooldown", 10.0f);
         if (c.contains("effects")) {
@@ -166,6 +167,12 @@ std::vector<ConsumableDef> loadConsumables(const std::string& path) {
                 }
                 if (e.contains("cleanse") && e["cleanse"].is_array()) {
                     for (const auto& id : e["cleanse"]) eff.cleanseIds.push_back(id.get<int>());
+                }
+                eff.scriptId = e.value("scriptId", "");
+                if (e.contains("params") && e["params"].is_array()) {
+                    for (const auto& v : e["params"]) {
+                        eff.params.push_back(v.get<float>());
+                    }
                 }
                 d.effects.push_back(eff);
             }

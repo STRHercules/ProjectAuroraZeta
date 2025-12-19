@@ -82,7 +82,7 @@ The current build includes:
 - **Militia (damage)**: Primary Fire; Scatter Shot cone (6s, 30c); Rage self-buff (12s, 40c); Nova Barrage radial (10s, 45c); Death Blossom ultimate barrage (35s, 60c).
 - **Knight (tank)**: Primary; Dash Strike (plays `Tank_Dash_Attack.png`); Fortify (shield surge); Taunt Pulse (AoE taunt); Bulwark (shield overcharge + regen).
 - **Healer (healer)**: Primary; Small Heal (targeted in multiplayer / self in solo); Regeneration Aura (team-wide); Heavy Heal; Resurrect (multiplayer targeted revive / solo grants extra lives).
-- **Assassin (assassin)**: Primary; Cloak (stealth); Backstab (massive single-target); Escape (CC cleanse + phasing); Shadow Dance (multi-execute).
+- **Assassin (assassin)**: Primary; Cloak (stealth, duration scales per level); Backstab (massive single-target); Escape (CC cleanse + phasing); Shadow Dance (multi-execute).
 - **Dragoon (support)**: Primary; Flurry (directional burst); Whirlwind (radial burst); Extend (reach buff); Diamond Tipped (execute charges).
 - **Crusader (special)**: Primary; Righteous Thrust (plays `Special_Combat_Thrust_with_AttackEffect.png`); Holy Sacrifice (lifesteal window); Heavy Heal; Consecration (damage aura).
 - **Summoner**: Arcane Bolt; Summon 2 Beatles; Summon Snake; Rally; Swarm Burst.
@@ -169,9 +169,12 @@ Loaded from `data/input_bindings.json`; fully remappable via file override.
   - Feature flags: `useRpgCombat`, `useRpgLoot`, `combatDebugOverlay` (RPG resolver debug panel).
   - RPG combat RNG shaping: `rpgCombat.rng.shaped` (2-roll average), `rpgCombat.rng.usePRD` (anti-streak for crit/dodge/parry).
   - RPG drop/shop tuning: `drops.rpgEquipChanceNormal`, `drops.rpgEquipMiniBossCount`, `drops.rpgEquipBossCount`, `drops.rpgMiniBossGemChance`, `shop.rpgEquipChance`, `shop.rpgEquipCount`.
+  - RPG consumable tuning: `rpgConsumables.foodRegenByRarity` (food regen per rarity tier).
 - `data/enemies.json` — enemy archetype tuning (HP/shields/speed/damage multipliers, animation presets, and special behaviors like packs/revive/ranged attacks).
 - `data/rpg/loot.json` — RPG equipment templates, affixes, and icon coordinates for `assets/Sprites/Equipment/*.png`.
   - Regenerate via `python3 scripts/gen_rpg_loot.py`.
+  - Rarity tiers include Unique (cyan) above Legendary.
+- `data/rpg/consumables.json` — RPG consumables (potions/food/scrolls), with optional `description` shown in item details.
 - `data/abilities.json` (fallback `data/abilities_default.json`) — ability names, descriptions, cooldowns, costs, semantic types.
 - `data/menu_presets.json` — archetype & difficulty lists, colors, descriptions, offensive types; used for character select.
 - `data/units.json` — mini-unit and building definitions (stats, costs, textures, AI params).
