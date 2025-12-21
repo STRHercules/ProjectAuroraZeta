@@ -16,6 +16,8 @@ The current build includes:
 - **Combat**: auto-fire primary by offensive type; dash (3.5× speed, 0.18s, 2.5s CD, full i-frames); lifesteal/attack-speed buffs; plasma/melee/thorn handling via tuning; collision system applies damage, lifesteal, hotzone multipliers.
 - **Energy & vitals**: 100 base energy (14/s regen; 26/s during intermission); hero base HP 100, shields 0 (+25 shield bonus for melee), regen delay 2s; pickups include Heal/Recharge/Kaboom/Freeze/Frenzy/Immortal.
 - **HUD**: top-right mini-map centered on the player; enemy blips clamp at the radar edge and hide when targets are cloaked or frozen in stasis.
+- **HUD**: bottom-left toast notifications for pickups, status effects, and talent points (effect timers shown inline).
+- **HUD**: status effect icons render above the player; talent tree nodes show stat icons tinted by archetype color.
 - **Wave system**: spawns around hero every `interval+grace` (2.5s + 1.0s). Enemy HP & shields grow +8%/wave; speed +1%/wave; batch size grows every other wave and per round; player count scales batch size. Bounty elites every 5th wave; milestone bosses begin at wave 20 then every 20 waves (HP×12, speed×0.8, extra armor/shields, visual size capped ~110u).
 - **Hotzones**: rotate every 30s across the 900u map radius (min separation). Bonuses while inside the active zone: Xp Surge (+25% XP), Danger-Pay (+50% copper), Warp Flux (+20% damage, +15% fire rate); warning flash before rotation; Warp Flux can trigger extra elites.
 - **Mini-events** (every 5 waves): Escort Duty (escort NPC 500–1200u), Bounty Hunt (kill 3 elites before timer), Spire Hunt (destroy 3 spawners). Countdown gates early aggro; success grants `events.salvageReward` (60c).
@@ -45,6 +47,7 @@ The current build includes:
   - Power Coil (+10 damage, 40c), Reinforced Plating (+25 HP, 45c), Vector Thrusters (+8% move speed, 35c)
   - Field Medkit (Use/Q, heal 35% HP, 30c), Cryo Capsule (freeze time 2.5s, 70c), Deployable Turret (12s, 90c)
   - Chrono Prism (+15% attack speed aura & slow, 140c), Phase Leech (5% lifesteal, 150c), Storm Core (projectiles chain +2, 160c)
+- **RPG loot scaling**: equipment rolls combat-type implicit stats + affixes; values scale with wave-based item level. Tooltips show item level and implicit rolls.
 - **Use rules**: Usable/consumable items can be quick-used with `Q` (use `Tab` to cycle the active usable item). You can also assign consumables to the 2-slot hotbar (`R` / `F`) in the Character screen. Traveling shop items apply immediately and count toward their stack caps.
 
 ## Global Upgrades (Vault Gold Meta)
@@ -134,6 +137,7 @@ Loaded from `data/input_bindings.json`; fully remappable via file override.
   - Gems are socketable: hover an equipped item with sockets, then click a gem to insert it.
   - Drag-and-drop: drag inventory items to swap positions; drag a gem onto an equipped item to socket it.
   - Right-Click an item with a gem socketed to destroy the gem.
+- Talent tree: `N`
 - Pause: `Esc`
 - Restart run (debug helper): `Backspace`
 - Menu back (fallback): `M`

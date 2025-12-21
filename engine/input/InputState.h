@@ -20,6 +20,7 @@ enum class InputKey {
     ToggleShop,
     InventoryCycle,
     CharacterScreen,
+    TalentTree,
     Pause,
     Dash,
     SwapWeapon,

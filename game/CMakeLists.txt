@@ -20,6 +20,7 @@ set(GAME_SOURCES
     systems/HotzoneSystem.cpp
     systems/ShopSystem.cpp
     systems/MiniUnitSystem.cpp
+    ui/ToastManager.cpp
     status/ZetaStatusFactory.cpp
     GameSelectedBuilding.cpp
     meta/ItemDefs.cpp

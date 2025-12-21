@@ -1596,3 +1596,560 @@
 **Build / Test**
 - Build: `cmake --build build` (Linux, 2025-12-19) — success.
 - Test: `./build/rpg_loot_tests`
+
+## 2025-12-19 — Sight upgrade tuning
+
+**Prompt / Task**
+- Increase default vision by 3 squares; reduce Sight upgrade count to 3; increase cost and per-level gain.
+- TASK.md item/affix overhaul does not apply to this request.
+
+**What Changed**
+- Raised base hero vision and per-level Sight upgrade gain; reduced Sight upgrade max level to 3.
+- Added a data-driven Sight upgrade cost multiplier to increase copper spend.
+- Bumped build number and updated changelog.
+
+**Steps Taken**
+- Updated ability shop tuning defaults and `data/gameplay.json` values.
+- Applied a Sight-specific cost multiplier in the ability shop pricing and UI.
+- Rebuilt the project.
+
+**Rationale / Tradeoffs**
+- Fewer Sight upgrades with higher per-level gain keeps progression punchy while still gating with higher cost.
+
+**Build / Test**
+- Build: `cmake --build build` (Linux, 2025-12-19) — success.
+- Manual test: Open ability shop, verify Sight cost and cap, and confirm vision radius updates after purchase.
+
+## 2025-12-19 — Fixed Sight upgrade costs
+
+**Prompt / Task**
+- Set Sight upgrade costs to 500c, 1250c, 2000c.
+- TASK.md item/affix overhaul does not apply to this request.
+
+**What Changed**
+- Added explicit Sight upgrade cost table and UI uses it.
+- Bumped build number and changelog.
+
+**Steps Taken**
+- Added `visionCosts` to `data/gameplay.json` and loaded it in `Game.cpp`.
+- Updated ability shop cost logic to use the Sight-specific cost table.
+- Rebuilt the project.
+
+**Rationale / Tradeoffs**
+- Fixed costs give precise pricing while keeping other ability costs on the global curve.
+
+**Build / Test**
+- Build: `cmake --build build` (Linux, 2025-12-19) — success.
+- Manual test: Open ability shop and verify Sight costs for levels 1–3.
+
+## 2025-12-19 — Robin range + consumable sell/tooltip updates
+
+**Prompt / Task**
+- Extend Ellis invulnerability after Charge.
+- Normalize Robin melee range; adjust range on Bow/Sword swap.
+- Show food regen and potion restore amounts in item details/tooltip.
+- Increase sell value based on rarity and affix bonuses; show sell price in details/tooltip.
+- TASK.md item/affix overhaul does not apply to this request.
+
+**What Changed**
+- Ellis thrust dash now grants 1.5s post-landing invulnerability.
+- Robin melee reach is configurable; bow swap adds ranged bonus via gameplay config.
+- Sell value now scales with rarity/affix/socket count; UI shows sell price in details/tooltip.
+- Character screen details/tooltip list food regen and potion restore amounts.
+- Added `weaponSwap` + `economy` tuning blocks to `data/gameplay.json`.
+- Bumped build number and changelog; updated GAME_SPEC.
+
+**Steps Taken**
+- Updated `special_thrust` invulnerability timing.
+- Added sell-value helper and replaced 50% refund usage.
+- Added consumable detail formatting and sell price lines in Character screen tooltip/details.
+- Wired `weaponSwap` and `economy` config to gameplay load.
+
+**Rationale / Tradeoffs**
+- Robin sword melee reach set to base (0 bonus) and bow range bonus set to +60 for clearer weapon swap contrast; both are data-tunable.
+- Sell scaling uses rarity multipliers and affix/socket counts to keep bonuses simple and predictable.
+
+**Build / Test**
+- Build: `cmake --build build` (Linux, 2025-12-19) — success.
+- Manual test: Not run (suggest: swap Robin weapon and confirm range feel; use Ellis Charge and confirm post-landing invuln; hover food/potion in Character screen to see regen/restore lines; verify sell prices in details/tooltip and shop sell list).
+
+## 2025-12-19 — RPG affix rarity thresholds data-driven
+
+**Prompt / Task**
+- Assign random bonuses/affixes to gear with thresholds based on rarity.
+
+**What Changed**
+- Added data-driven affix tier weights and affix count ranges per rarity in `data/rpg/loot.json`.
+- Updated RPG loot generation to consume the new thresholds with luck scaling.
+- Documented the new tuning location in `docs/StatLegend.md`.
+- Bumped build number and changelog.
+
+**Steps Taken**
+- Extended `LootTable` with affix tier and count tables.
+- Updated loot table loader and generator to use new defaults and overrides.
+- Added top-level config entries to `data/rpg/loot.json`.
+
+**Rationale / Tradeoffs**
+- Data-driven thresholds keep rarity gating explicit and make tuning easier without touching code.
+- Affix counts now vary within rarity ranges to reduce identical rolls while respecting per-item caps.
+
+**Build / Test**
+- Build: `cmake --build build` (Linux, 2025-12-19) — success.
+- Manual test: Not run (suggest: spawn multiple items per rarity and verify affix tiers/counts vary).
+
+## 2025-12-19 — RPG roll scaling per rarity
+
+**Prompt / Task**
+- Apply random bonuses/affixes on drop, scaling with rarity.
+
+**What Changed**
+- Added per-rarity scalar ranges for base stats and affixes in `data/rpg/loot.json`.
+- Stored roll-time scalars on item definitions and socketed gems.
+- Updated RPG stat aggregation to apply per-item scalars consistently in UI/equip.
+- Added a loot test to verify base/affix scaling is applied.
+- Bumped build number and changelog; updated GAME_SPEC/StatLegend notes.
+
+**Steps Taken**
+- Extended RPG loot table schema and loader for scalar ranges.
+- Rolled per-item base/affix scalars during loot generation.
+- Applied scalars in contribution/aggregation paths and socketing.
+- Updated tests and docs.
+
+**Rationale / Tradeoffs**
+- Per-item scalars deliver variation even within the same item/rarity while keeping tuning data-driven.
+- Socketed gem scalars are stored on the socket entry to prevent stat loss when unsocketing.
+
+**Build / Test**
+- Build: `cmake --build build` (Linux, 2025-12-19) — success.
+- Manual test: Not run (suggest: spawn multiple Epic/Legendary items and confirm differing stat lines and affix magnitudes).
+
+## 2025-12-19 — Lowered character select attribute table
+
+**Prompt / Task**
+- "On the Select Character & Difficulty screen, lets drop the attribute table down 15px or so."
+- TASK.md is focused on the RPG item/affix system and does not apply to this UI spacing tweak.
+
+**What Changed**
+- Lowered the Character Select attributes box by 15px to create more breathing room.
+- Bumped the in-game build number and added a changelog entry.
+
+**Steps Taken**
+- Adjusted the attribute panel Y-offset in `game/Game.cpp`.
+- Updated build string and `CHANGELOG.md`.
+- Built the project.
+
+**Rationale / Tradeoffs**
+- Small spacing tweak improves visual separation between the bio text and the attribute table without reflowing other elements.
+
+**Build / Test**
+- Build: `cmake --build build` (Linux, 2025-12-19) — success.
+- Manual test: Not run (suggest: open Select Character & Difficulty screen and verify the attributes box alignment).
+
+## 2025-12-19 — Lowered character select attribute table further
+
+**Prompt / Task**
+- "Drop it another 15px."
+- TASK.md is focused on the RPG item/affix system and does not apply to this UI spacing tweak.
+
+**What Changed**
+- Lowered the Character Select attributes box an additional 15px.
+- Bumped the in-game build number and added a changelog entry.
+
+**Steps Taken**
+- Adjusted the attribute panel Y-offset in `game/Game.cpp`.
+- Updated build string and `CHANGELOG.md`.
+- Built the project.
+
+**Rationale / Tradeoffs**
+- Improves spacing between the description block and attributes without altering other layout elements.
+
+**Build / Test**
+- Build: `cmake --build build` (Linux, 2025-12-19) — success.
+- Manual test: Not run (suggest: open Select Character & Difficulty screen and confirm the new spacing).
+
+## 2025-12-19 — Talent tree overlay foundation
+
+**Prompt / Task**
+- "Consult TASK.md and begin Implentation of the Talent Tree information provided in the document."
+
+**What Changed**
+- Added tiered, data-driven talent tree parsing with prerequisites and layout positions.
+- Implemented match-scoped talent allocation helpers plus a new Talent Tree overlay with pan/zoom and node interactions.
+- Wired the `N` hotkey to open/close the talent tree and pause gameplay while open.
+- Updated docs, input bindings, and build/changelog metadata.
+
+**Steps Taken**
+- Extended RPG talent structs/loader and updated `data/rpg/talents.json`.
+- Added talent tree UI overlay rendering + input handling in `game/Game.cpp`.
+- Added new input action and default binding for `N`.
+- Updated `README.md`, `GAME_SPEC.md`, build string, and `CHANGELOG.md`.
+- Built the project.
+
+**Rationale / Tradeoffs**
+- Focused on the core data model, allocation rules, and UI scaffolding first so content designers can iterate in JSON while UI polish continues.
+
+**Build / Test**
+- Build: `cmake --build build` (Linux, 2025-12-19) — success.
+- Manual test: Not run (suggest: start a solo match, press `N`, allocate talent points at levels 10/20, verify pause/zoom/pan and stat updates).
+
+## 2025-12-19 — Talent point cadence update
+
+**Prompt / Task**
+- "Let's grant Talent Points every 5 levels instead."
+
+**What Changed**
+- Talent points now grant every 5 levels (was 10).
+- Updated specs and build metadata.
+
+**Steps Taken**
+- Adjusted talent point calculations in `game/Game.cpp`.
+- Updated `TASK.md`, `docs/GAME_SPEC.md`, build string, and `CHANGELOG.md`.
+- Built the project.
+
+**Rationale / Tradeoffs**
+- Faster cadence improves early progression pacing; may require later tuning of tier unlock thresholds.
+
+**Build / Test**
+- Build: `cmake --build build` (Linux, 2025-12-19) — success.
+- Manual test: Not run (suggest: reach level 5/10/15 to verify point grants and allocation gating).
+
+## 2025-12-19 — Talent tree UI layout pass + expanded archetype trees
+
+**Prompt / Task**
+- "Let's make another pass at the Talent Tree Screen... extend ALL archetype talent trees to have at least 4-5 tiers of talents."
+
+**What Changed**
+- Talent Tree overlay now uses SDL clip rects + wrapped/shadowed text to prevent panel bleed and reduce clipping.
+- Added hovered-node tooltip and improved node label readability.
+- Expanded every archetype talent tree to 5 tiers with prerequisites and layout positions in `data/rpg/talents.json`.
+- Bumped build number and updated `CHANGELOG.md`.
+
+**Steps Taken**
+- Updated `GameRoot::drawTalentTreeOverlay()` rendering order and clipping; added text wrapping and shadows for readability.
+- Reworked `data/rpg/talents.json` so all archetypes have 5 tiers (unlock points 0/2/4/6/8).
+- Built the project.
+
+**Rationale / Tradeoffs**
+- Clipping at the SDL renderer level keeps rendering simple while ensuring the tree never draws “behind” adjacent panels.
+- Talent trees are expanded with conservative placeholder stats to enable iterative balancing in data.
+
+**Build / Test**
+- Build: `cmake --build build` (Linux, 2025-12-19) — success.
+- Manual test: start a solo match, press `N`, pan/zoom the tree, hover nodes to confirm tooltip, and verify text stays inside panels; level to 5/10/15/20 to confirm point grants and tier gating.
+
+## 2025-12-19 — Talent bonus percent display fix
+
+**Prompt / Task**
+- "Talents are showing +100% Attack Speed / Move Speed and Gold Gain... it would be +8%"
+
+**What Changed**
+- Stat contributions loaded from JSON now default to zero contributions (instead of DerivedStats baseline defaults), fixing Talent Tree bonus readouts.
+
+**Steps Taken**
+- Zero-initialized `StatContribution` defaults in `parseContribution()` before applying JSON fields.
+- Bumped build number and updated `CHANGELOG.md`.
+- Built the project.
+
+**Rationale / Tradeoffs**
+- `DerivedStats` has non-zero defaults (attackSpeed=1.0, critMult=1.5, goldGainMult=1.0); treating those as contributions made UI show misleading “+100%” lines.
+
+**Build / Test**
+- Build: `cmake --build build` (Linux, 2025-12-19) — success.
+- Manual test: open Talent Tree (`N`) and verify nodes without speed/gold bonuses no longer show “+100%”; nodes with `mult` show small deltas like “+3% Attack Speed”.
+
+## 2025-12-19 — Talent tree layout + branching pass
+
+**Prompt / Task**
+- "The top left banner 'Talent Tree' is behind the background... redesign the Talent Screen Menu... add some variation to the branches..."
+
+**What Changed**
+- Talent Tree title now always renders above panel backgrounds; champion panel is pushed down slightly to avoid overlap.
+- Center panel widened and the two-lane tree layout now zig-zags by tier to create more branch variation (less “straight vertical” feel).
+- Tree auto-centers based on its authored layout bounds, reducing dead space inside the tree viewport.
+
+**Steps Taken**
+- Rebalanced left/center/right panel widths and added a small top padding lane in `GameRoot::drawTalentTreeOverlay()`.
+- Adjusted draw order so the title/hint draws after panels.
+- Added a tier-based horizontal spread for nodes that use the default `pos.x` lanes.
+- Built the project.
+
+**Rationale / Tradeoffs**
+- Keeping authored `pos` values intact while applying a tier-based spread lets us improve readability without rewriting all JSON layouts.
+
+**Build / Test**
+- Build: `cmake --build build` (Linux, 2025-12-19) — success.
+- Manual test: open Talent Tree (`N`) and confirm title visibility, reduced empty side space, and non-vertical branch paths between tiers.
+
+## 2025-12-20 — Epic+ gear attributes + talent attribute bonuses
+
+**Prompt / Task**
+- "Starting with Epic Quality, gear should begin to add Attributes... I would also like high-level talents to increase attributes, in addition to their existing bonuses."
+
+**What Changed**
+- Added data-driven Epic/Legendary/Unique attribute bonus rolls for RPG gear and surfaced them in item tooltips.
+- Added attribute bonuses to tier 5 talent nodes and reflected them in talent details.
+- Updated loot/talent data, build number, and documentation.
+
+**Steps Taken**
+- Extended RPG loot data/model to roll attribute bonuses by rarity and apply them to generated items.
+- Added talent attribute parsing and aggregation into hero attribute totals.
+- Updated UI detail panels to display attribute bonuses.
+- Built the project.
+
+**Rationale / Tradeoffs**
+- Kept attribute bonuses data-driven via `data/rpg/loot.json` and `data/rpg/talents.json` while reusing existing aggregation flow.
+
+**Build / Test**
+- Build: `cmake --build build` (Linux, 2025-12-20) — success.
+- Manual test: defeat a boss or open shop until Epic+ gear drops; confirm +STR/DEX/INT/END/LCK lines appear and derived stats rise; open talent tree and verify tier 5 nodes show attribute bonuses.
+
+## 2025-12-20 — Loot rolls + wave-scaled RPG gear
+
+**Prompt / Task**
+- "Consult TASK.md and begin."
+- Loot System: typed rolled stats + wave scaling (incl. Uniques).
+
+**What Changed**
+- Added combat-type implicit stat pools and combatType tags for RPG weapons/ammo.
+- Implemented item level + scaling for implicit stats, affixes, and Unique base stats; stored ilvl + implicit rolls on item instances.
+- Updated RPG stat aggregation, tooltips, and cleave/lifesteal/status-chance handling.
+- Added `rpgLoot` tuning block in `data/gameplay.json` and updated build/changelog/readme.
+
+**Steps Taken**
+- Extended RPG stats data model, loaders, and loot generator to roll implicit stat lines by rarity and combat type.
+- Applied ilvl scaling in contribution calculations and centralized stat totals via `computeItemContribution`.
+- Implemented cleave/lifesteal hooks in RPG damage and wired cleave config from gameplay settings.
+- Built the project.
+
+**Rationale / Tradeoffs**
+- Stored per-item scale factors to keep rolled values consistent across tuning changes.
+- Ignored static base stats for non-Unique items, logging in dev to catch legacy definitions.
+
+**Build / Test**
+- Build: `cmake --build build` (Linux, 2025-12-20) — success.
+- Manual test: spawn/loot RPG items at low vs. high wave; confirm item level increases, implicit rolls vary, and affix values scale.
+
+## 2025-12-20 — Armor implicit guarantee + empty gear fix
+
+**Prompt / Task**
+- "All 'Armor' pieces should always have a +Armor value."
+- "Gear should never drop with NO stats/bonuses/affixes."
+
+**What Changed**
+- Added armor and fallback implicit stat pools, plus an armor implicit stat id.
+- Ensured armor slots always include an armor line and non-consumable gear always has at least one stat line.
+- Socketable items now fall back to scaled base stats when otherwise empty.
+
+**Steps Taken**
+- Extended loot parsing and implicit stat support to include armor and fallback pools.
+- Updated loot generation to guarantee armor and inject a fallback stat line when needed.
+- Updated loot data, changelog, build number, and GAME_SPEC.
+
+**Rationale / Tradeoffs**
+- Guarantees armor/gear utility without re-enabling static base stats for non-Unique equipment.
+
+**Build / Test**
+- Build: `cmake --build build` (Linux, 2025-12-20) — success.
+- Manual test: spawn/loot armor and gems; verify armor pieces always show +Armor and no gear drops with empty stat lists.
+
+## 2025-12-20 — Tooltip dedupe for RPG stats
+
+**Prompt / Task**
+- "This piece of armor only supplies 2 armor, yet it is listed twice in details and tooltip - armor should only be listed once"
+
+**What Changed**
+- Hover tooltip now omits implicit stat lines and only shows total RPG stat lines.
+
+**Steps Taken**
+- Updated hover tooltip assembly to avoid listing implicit lines alongside totals.
+- Updated build number, changelog, and GAME_SPEC.
+
+**Rationale / Tradeoffs**
+- Keeps tooltip concise while still reflecting final totals; detailed breakdown remains on the Details card.
+
+**Build / Test**
+- Build: `cmake --build build` (Linux, 2025-12-20) — success.
+- Manual test: hover RPG gear and confirm armor appears once; check Details card still lists implicit + total sections.
+
+## 2025-12-20 — Compare tooltip stat coverage
+
+**Prompt / Task**
+- "Compare isnt listing all of the stat differences between the hovered and equipped items"
+
+**What Changed**
+- Expanded compare tooltip to include deltas for offense, defense, utility, and resistances.
+
+**Steps Taken**
+- Extended compare stat list to cover all fields in `DerivedStats` plus resistances.
+- Updated build number, changelog, and GAME_SPEC.
+
+**Rationale / Tradeoffs**
+- Keeps compare output accurate for any stat-affecting gear, at the cost of longer lists when many stats change.
+
+**Build / Test**
+- Build: `cmake --build build` (Linux, 2025-12-20) — success.
+- Manual test: hover gear with resists/tenacity/armorPen and confirm compare shows those deltas.
+
+## 2025-12-20 — Armor implicit rarity scaling
+
+**Prompt / Task**
+- "Armor value on gear should scale based on rarity"
+
+**What Changed**
+- Added `armorImplicitScalarByRarity` to loot tuning and applied it to armor implicit rolls.
+
+**Steps Taken**
+- Extended loot table defaults/loaders to support rarity-based armor scalar ranges.
+- Applied rarity scalar multiplier when rolling armor implicit lines.
+- Updated data, build number, changelog, and GAME_SPEC.
+
+**Rationale / Tradeoffs**
+- Keeps armor bonuses meaningful across rarities without reintroducing static base stats on non-Unique gear.
+
+**Build / Test**
+- Build: `cmake --build build` (Linux, 2025-12-20) — success.
+- Manual test: spawn common vs legendary armor at same wave and confirm armor roll is higher on higher rarity.
+
+## 2025-12-20 — Rage scroll tint + scroll fireball speed + fear reapply guard
+
+**Prompt / Task**
+- "Rage Scroll should tint the user Red during the rage duration"
+- "Fireball Scroll projectile should be slower"
+- "also few times - couldnt isolate it - i would get stuck... Seems when a monster would come into contact with me"
+
+**What Changed**
+- Rage tint now applies to all heroes while rage is active (including the Scroll of Rage).
+- Scroll of Fireball now uses a data-driven speed multiplier (reduced).
+- Contact-applied Fear no longer refreshes while already feared to avoid prolonged movement locks.
+
+**Steps Taken**
+- Removed archetype gating on rage tint and applied the hero tint whenever `rageTimer_` is active.
+- Added a scroll fireball speed parameter in consumables data and used it when spawning the projectile.
+- Guarded Fear reapplication in contact damage handling to prevent continuous refresh.
+- Updated build number and changelog.
+
+**Rationale / Tradeoffs**
+- Rage tint should be consistent across sources of rage buffs.
+- Slower fireball is tunable via data for future balance tweaks.
+- Fear refresh suppression reduces "stuck" reports but slightly lowers effective CC uptime.
+- TASK.md (loot overhaul) not touched; changes scoped to scrolls + contact fear behavior.
+
+**Build / Test**
+- Build: `cmake --build build` (Linux, 2025-12-20) — success.
+- Manual test: use Scroll of Rage and verify red tint; use Scroll of Fireball and confirm slower travel; allow wraith contact and confirm Fear expires without constant refresh.
+
+## 2025-12-20 — Fear wander movement
+
+**Prompt / Task**
+- "'Fear' should make the player character wander for a very short time, not just idle in place."
+
+**What Changed**
+- Fear now drives short bursts of random wander movement for the hero instead of locking them in place.
+
+**Steps Taken**
+- Excluded Feared from movement-lock suppression in hero movement logic.
+- Added a short wander timer + direction so fear movement is stable for brief intervals.
+- Reset fear wander state on ability rebuild.
+- Updated build number and changelog.
+
+**Rationale / Tradeoffs**
+- Fear should feel like loss of control with brief wandering rather than a hard stop.
+- TASK.md (loot overhaul) not touched; change scoped to movement behavior.
+
+**Build / Test**
+- Build: `cmake --build build` (Linux, 2025-12-20) — success.
+- Manual test: let a wraith apply Fear and confirm the hero wanders in short bursts instead of idling.
+
+## 2025-12-20 — Toast notification system
+
+**Prompt / Task**
+- Consult TASK.md and begin implementation of the Toast system.
+
+**What Changed**
+- Added a toast manager with animated enter/exit, stacking, and effect persistence timers.
+- Hooked pickup, status-effect, and talent-point events into the toast pipeline.
+- Added toast tuning knobs in `data/gameplay.json` and documented the new HUD behavior.
+
+**Steps Taken**
+- Implemented `game/ui/ToastManager.{h,cpp}` with rounded panels, accent bars, easing, and stack settling.
+- Wired status-to-toast sync, pickup toast dispatch, and talent point gain notifications in `game/Game.cpp`.
+- Added toast config parsing, reset handling, build number bump, and changelog/docs updates.
+
+**Rationale / Tradeoffs**
+- Centralized toast logic to keep UI code maintainable and enable data-driven tuning.
+- Effect toasts sync directly to hero status durations to avoid drift and prevent duplicates.
+
+**Build / Test**
+- Build: `cmake --build build` (Linux, 2025-12-20) — success.
+- Manual test: pick up copper/gold/items, trigger a status effect (Fear/Stasis), and level to 5 to confirm toast spawn, countdown, and exit animations.
+
+## 2025-12-21 — Talent icons, status effect HUD, ranged weapons batch
+
+**Prompt / Task**
+- Update pickup visuals for new 32x16 health/recharge assets (remove recharge scaling).
+- Add talent tree icon sprites with archetype tinting, status effect icons above the player, and a new ranged weapon sheet.
+
+**What Changed**
+- Added talent stat icon rendering in the talent tree (tinted per archetype color).
+- Added status effect icon rendering above the player using the new status icon sheet.
+- Updated pickup rendering to respect the 32x16 recharge/health textures (recharge now 1:1).
+- Added the Ranged_Weapons2 weapon set to RPG loot definitions.
+- Updated docs and build metadata for v0.0.200.
+
+**Steps Taken**
+- Located pickup render scaling and talent tree render code paths.
+- Loaded new GUI sheets, mapped talent stats to sprite cells, and drew tinted icons.
+- Rendered status effect icons from the status container above the hero.
+- Added new ranged weapon entries to `data/rpg/loot.json`.
+- Updated README/GAME_SPEC/CHANGELOG and incremented build string.
+
+**Rationale / Tradeoffs**
+- Reused existing stat data to choose talent icons, keeping the system data-driven without extra JSON fields.
+- Mapped status icons in application order to align with the status container sequence.
+
+**Build / Test**
+- Build: `cmake --build build`
+- Manual test: Not run (needs in-game validation for talent icons, status icons, and pickup sizing).
+
+## 2025-12-21 — Status effect icon legend mapping
+
+**Prompt / Task**
+- Map StatusEffects sprite indices per new legend and assign icons for implemented effects.
+
+**What Changed**
+- Remapped status effect icon indices to match the new sheet legend.
+- Added HUD icon hooks for dead state, armor buffs, invulnerability, lifesteal, and speed bonuses.
+
+**Steps Taken**
+- Updated status-id-to-icon mapping.
+- Expanded status icon rendering to evaluate hero state/buffs.
+- Bumped build number and changelog.
+
+**Rationale / Tradeoffs**
+- Only mapped statuses with clear sheet equivalents; unmapped statuses remain hidden.
+
+**Build / Test**
+- Build: `cmake --build build`
+- Manual test: Not run (needs in-game status icon verification).
+
+## 2025-12-21 — Escort facing fix
+
+**Prompt / Task**
+- Escort NPC faces the opposite direction from movement.
+
+**What Changed**
+- Sync escort Facing component with movement velocity during escort event updates.
+- Bumped build to v0.0.202 and updated changelog.
+
+**Steps Taken**
+- Located escort movement logic in `game/systems/EventSystem.cpp`.
+- Updated facing direction based on horizontal velocity.
+- Built the project.
+ - TASK.md tracked prior asset work; not applicable to this bug fix.
+
+**Rationale / Tradeoffs**
+- Keeps existing facing component in use while correcting sprite mirroring per movement.
+
+**Build / Test**
+- Build: `cmake --build build`
+- Manual test: Not run (needs in-game escort event check).

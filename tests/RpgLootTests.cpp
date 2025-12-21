@@ -103,5 +103,32 @@ int main() {
         assert(withoutRing.flat.critChance == 0.0f);
     }
 
+    // Rarity scalar application: base + affix scaling applied per item definition.
+    {
+        LootTable table{};
+        table.affixes.push_back({"atk_flat_s", "+3 Attack Power", [] {
+            Engine::Gameplay::RPG::StatContribution c{};
+            c.flat.attackPower = 3.0f;
+            return c;
+        }()});
+
+        ItemTemplate sword{};
+        sword.id = "scaled_sword";
+        sword.name = "Scaled Sword";
+        sword.slot = EquipmentSlot::MainHand;
+        sword.rarity = Rarity::Epic;
+        sword.baseStats.flat.attackPower = 10.0f;
+        table.items.push_back(sword);
+
+        ItemDefinition def{};
+        def.rpgTemplateId = "scaled_sword";
+        def.rpgAffixIds = {"atk_flat_s"};
+        def.rpgBaseScalar = 1.2f;
+        def.rpgAffixScalar = 1.5f;
+
+        const auto stats = computeItemContribution(table, def, 1);
+        assert(static_cast<int>(std::round(stats.flat.attackPower)) == 17);
+    }
+
     return 0;
 }

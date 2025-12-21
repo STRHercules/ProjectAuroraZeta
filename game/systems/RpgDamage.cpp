@@ -5,11 +5,15 @@
 #include <sstream>
 
 #include "../../engine/ecs/components/RPGStats.h"
+#include "../../engine/ecs/components/Transform.h"
+#include "../../engine/ecs/components/Tags.h"
 #include "../status/ZetaStatusFactory.h"
 
 namespace Game::RpgDamage {
 
 namespace {
+
+Game::RpgDamage::CleaveConfig cleaveConfig{};
 
 constexpr bool isValidRpgDamageTypeInt(int v) {
     return v >= 0 && v < static_cast<int>(Engine::Gameplay::RPG::DamageType::Count);
@@ -72,18 +76,23 @@ Engine::ECS::RPGCombatState* ensureCombatState(Engine::ECS::Registry& registry, 
 
 }  // namespace
 
-float apply(Engine::ECS::Registry& registry,
-            Engine::ECS::Entity attacker,
-            Engine::ECS::Entity defender,
-            Engine::ECS::Health& defenderHp,
-            const Engine::Gameplay::DamageEvent& dmg,
-            const Engine::Gameplay::BuffState& buff,
-            bool useRpgCombat,
-            const Engine::Gameplay::RPG::ResolverConfig& rpgCfg,
-            std::mt19937& rng,
-            std::string_view label,
-            const DebugSink& debugSink,
-            const OutcomeSink& outcomeSink) {
+void setCleaveConfig(const CleaveConfig& cfg) {
+    cleaveConfig = cfg;
+}
+
+float applyInternal(Engine::ECS::Registry& registry,
+                    Engine::ECS::Entity attacker,
+                    Engine::ECS::Entity defender,
+                    Engine::ECS::Health& defenderHp,
+                    const Engine::Gameplay::DamageEvent& dmg,
+                    const Engine::Gameplay::BuffState& buff,
+                    bool useRpgCombat,
+                    const Engine::Gameplay::RPG::ResolverConfig& rpgCfg,
+                    std::mt19937& rng,
+                    bool allowCleave,
+                    std::string_view label,
+                    const DebugSink& debugSink,
+                    const OutcomeSink& outcomeSink) {
     if (!useRpgCombat) {
         const float pre = defenderHp.currentHealth + defenderHp.currentShields;
         Engine::Gameplay::applyDamage(defenderHp, dmg, buff);
@@ -197,6 +206,64 @@ float apply(Engine::ECS::Registry& registry,
         }
     }
 
+    const float totalDealt = shieldDmg + healthDmg;
+    if (attacker != Engine::ECS::kInvalidEntity && totalDealt > 0.0f) {
+        if (auto* atkHp = registry.get<Engine::ECS::Health>(attacker)) {
+            float heal = 0.0f;
+            if (atk.stats.lifesteal > 0.0f) {
+                heal += totalDealt * atk.stats.lifesteal;
+            }
+            if (atk.stats.lifeOnHit > 0.0f) {
+                heal += atk.stats.lifeOnHit;
+            }
+            if (heal > 0.0f) {
+                atkHp->currentHealth = std::min(atkHp->maxHealth, atkHp->currentHealth + heal);
+            }
+        }
+    }
+
+    if (allowCleave && attacker != Engine::ECS::kInvalidEntity && defender != Engine::ECS::kInvalidEntity) {
+        const float chance = std::clamp(atk.stats.cleaveChance, 0.0f, 0.95f);
+        if (chance > 0.0f && cleaveConfig.radius > 0.0f && cleaveConfig.damageMultiplier > 0.0f &&
+            cleaveConfig.maxTargets > 0 && Engine::Gameplay::RPG::rollUnit(rng, rpgCfg.rng.shaped) < chance) {
+            const auto* defTf = registry.get<Engine::ECS::Transform>(defender);
+            if (defTf) {
+                const float r2 = cleaveConfig.radius * cleaveConfig.radius;
+                Engine::Gameplay::DamageEvent cleaveDmg = dmg;
+                cleaveDmg.baseDamage = dmg.baseDamage * cleaveConfig.damageMultiplier;
+                cleaveDmg.rpgOnHitStatuses.clear();
+                int hitCount = 0;
+                auto applyToTarget = [&](Engine::ECS::Entity target, Engine::ECS::Health& hp) {
+                    if (target == defender) return;
+                    (void)applyInternal(registry, attacker, target, hp, cleaveDmg, buff, useRpgCombat, rpgCfg, rng,
+                                        false, "cleave", {}, {});
+                    hitCount += 1;
+                };
+                if (registry.has<Engine::ECS::EnemyTag>(defender)) {
+                    registry.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::EnemyTag>(
+                        [&](Engine::ECS::Entity e, const Engine::ECS::Transform& tf, Engine::ECS::Health& hp, const Engine::ECS::EnemyTag&) {
+                            if (hitCount >= cleaveConfig.maxTargets) return;
+                            if (!hp.alive()) return;
+                            float dx = tf.position.x - defTf->position.x;
+                            float dy = tf.position.y - defTf->position.y;
+                            if (dx * dx + dy * dy > r2) return;
+                            applyToTarget(e, hp);
+                        });
+                } else if (registry.has<Engine::ECS::HeroTag>(defender)) {
+                    registry.view<Engine::ECS::Transform, Engine::ECS::Health, Engine::ECS::HeroTag>(
+                        [&](Engine::ECS::Entity e, const Engine::ECS::Transform& tf, Engine::ECS::Health& hp, const Engine::ECS::HeroTag&) {
+                            if (hitCount >= cleaveConfig.maxTargets) return;
+                            if (!hp.alive()) return;
+                            float dx = tf.position.x - defTf->position.x;
+                            float dy = tf.position.y - defTf->position.y;
+                            if (dx * dx + dy * dy > r2) return;
+                            applyToTarget(e, hp);
+                        });
+                }
+            }
+        }
+    }
+
     if (debugSink) {
         std::ostringstream line;
         if (!label.empty()) {
@@ -210,6 +277,22 @@ float apply(Engine::ECS::Registry& registry,
     }
 
     return shieldDmg + healthDmg;
+}
+
+float apply(Engine::ECS::Registry& registry,
+            Engine::ECS::Entity attacker,
+            Engine::ECS::Entity defender,
+            Engine::ECS::Health& defenderHp,
+            const Engine::Gameplay::DamageEvent& dmg,
+            const Engine::Gameplay::BuffState& buff,
+            bool useRpgCombat,
+            const Engine::Gameplay::RPG::ResolverConfig& rpgCfg,
+            std::mt19937& rng,
+            std::string_view label,
+            const DebugSink& debugSink,
+            const OutcomeSink& outcomeSink) {
+    return applyInternal(registry, attacker, defender, defenderHp, dmg, buff, useRpgCombat, rpgCfg, rng,
+                         true, label, debugSink, outcomeSink);
 }
 
 }  // namespace Game::RpgDamage

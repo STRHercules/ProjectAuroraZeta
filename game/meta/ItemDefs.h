@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "../../engine/gameplay/RPGStats.h"
+
 namespace Game {
 
 enum class ItemKind { Combat, Support, Unique };
@@ -44,10 +46,22 @@ struct ItemDefinition {
     // Optional RPG consumable hook (ties into data/rpg/consumables.json).
     std::string rpgConsumableId;
     std::vector<std::string> rpgAffixIds;
+    Engine::Gameplay::RPG::Attributes rpgAttributeBonus{};
     int rpgSocketsMax{0};
+    float rpgBaseScalar{1.0f};
+    float rpgAffixScalar{1.0f};
+    int rpgItemLevel{1};
+    float rpgItemScale{1.0f};
+    std::vector<Engine::Gameplay::RPG::StatContribution> rpgImplicitStats;
     struct RpgSocketedGem {
         std::string templateId;
         std::vector<std::string> affixIds;
+        float baseScalar{1.0f};
+        float affixScalar{1.0f};
+        ItemRarity rarity{ItemRarity::Common};
+        int itemLevel{1};
+        float itemScale{1.0f};
+        std::vector<Engine::Gameplay::RPG::StatContribution> implicitStats;
     };
     std::vector<RpgSocketedGem> rpgSocketed;
 };

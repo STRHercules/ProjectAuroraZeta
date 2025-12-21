@@ -531,3 +531,116 @@ Panels -
     - 16x32 
     - Bottom Row should have collision
     - Top Row should not have collision, and the player should go behind the asset in this area.
+
+## Effects
+`~/assets/Sprites/Spells/`..
+`Pop.png`
+- 160x32 Sheet
+- 32x32 Assets
+- Played Left to Right
+`Burst.png`
+- 416x32 Sheet
+- 32x32 Assets
+- Played Left to Right
+`Smoke.png`
+- 320x32 Sheet
+- 32x32 Assets
+- Played Left to Right
+`Sparkle.png`
+- 224x32 Sheet
+- 32x32 Assets
+- Played Left to Right
+
+
+## Audio 
+- `~/assets/Audio/Sounds/Attacks/`
+    * Sword/
+        Sword Attack 1.ogg
+        Sword Attack 2.ogg
+        Sword Attack 3.ogg
+        Sword Blocked 1.ogg
+        Sword Blocked 2.ogg
+        Sword Blocked 3.ogg
+        Sword Impact Hit 1.ogg
+        Sword Impact Hit 2.ogg
+        Sword Impact Hit 3.ogg
+        Sword Parry 1.ogg
+        Sword Parry 2.ogg
+        Sword Parry 3.ogg
+        Sword Sheathe 1.ogg
+        Sword Sheathe 2.ogg
+        Sword Unsheath 1.ogg
+        Sword Unsheath 2.ogg
+    * Bow/
+        Bow Attack 1.ogg
+        Bow Attack 2.ogg
+        Bow Blocked 1.ogg
+        Bow Blocked 2.ogg
+        Bow Blocked 3.ogg
+        Bow Impact Hit 1.ogg
+        Bow Impact Hit 2.ogg
+        Bow Imapct Hit 3.ogg
+        Bow Put Away 1.ogg
+        Bow Take Out 1.ogg
+- These sounds should be played at relevent moments.
+    - Sword attack when swinging melee weapon
+    - Sword blocked when target 'blocks' the attack
+    - Sword impact hit when target takes a hit from melee
+    - Sword parry when the target parries
+    - Sword Sheathe and Unsheathe should be for the Militia Class that can swap between sword and Bow, when putting sword away, and when pulling it back out.
+    - Mimic this logic for the Bow sounds, based on their names. 
+    - Sounds with multiple entries, should play one at random to give sound variation. (Sword Attack 1, Sword Attack 2, Sword Attack 3, etc.)
+
+
+- `~/assets/Audio/Sounds/Footsteps`
+    Dirt Walk 1
+    Dirt Walk 2
+    Dirt Walk 3
+    Dirt Walk 4
+    Dirt Walk 5
+    - The player will cycle through these 5 sounds while walking around. Do not play footsteps when not walking.
+    
+- `~/assets/Audio/Sounds/Other`
+    ConsumeHeal.wav
+        - Will play when the player consumes a potion, or food to heal.
+        - Will play when the player picks up a health pickup to heal.
+    Pickup.wav
+        - Will play when the player picks any non-healing items.
+    TinyChime.wav
+        - Unused for now.
+
+- `~/assets/Audio/Sounds/UI`
+    MenuSelect.mp3
+        - When clicking Menu items
+    MenuClose.mp3
+        - When closing GUIs/Menus
+
+- `~/assets/Audio/Sounds/Spells`
+    Fireball 1.ogg
+    Fireball 2.ogg
+    Fireball 3.ogg
+    Firebuff 1.ogg
+    Firebuff 2.ogg
+    Firespray 1.ogg
+    Firespray 2.ogg
+    Ice Barrage 1.ogg
+    Ice Barrage 2.ogg
+    Ice Freeze 1.ogg
+    Ice Freeze 2.ogg
+    Ice Throw 1.ogg
+    Ice Throw 2.ogg
+    Ice Wall 1.ogg
+    Ice Wall 2.ogg
+    Rock Meteor Swarm 1.ogg
+    Rock Meteor Swarm 2.ogg
+    Rock Meteor Throw 1.ogg
+    Rock Meteor Throw 2.ogg
+    Rock Wall 1.ogg
+    Rock Wall 2.ogg
+    Spell Impact 1.ogg
+    Spell Impact 2.ogg
+    Spell Impact 3.ogg
+    Waterspray 1.ogg
+    Waterspray 2.ogg
+    Wave Attack 1.ogg
+    Wave Attack 2.ogg

@@ -132,7 +132,7 @@ HitOutcome ResolveHit(const CombatantState& attacker,
     for (const auto& st : attack.onHitStatuses) {
         StatusApplicationResult res{};
         res.id = st.id;
-        float chance = st.baseChance - defender.stats.tenacity * 0.01f;
+        float chance = st.baseChance + attacker.stats.statusChance - defender.stats.tenacity * 0.01f;
         chance = clamp01(chance);
         float durMul = 1.0f - defender.stats.tenacity * 0.01f;
         durMul = std::clamp(durMul, 0.25f, 1.0f);

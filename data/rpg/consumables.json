@@ -86,7 +86,7 @@
     { "id": "scroll_invisibility", "name": "Scroll of Invisibility", "description": "Become invisible for a short time.", "cooldownGroup": "scroll", "cooldown": 18.0,
       "effects": [ { "category": 5, "resource": 0, "magnitude": 0.0, "duration": 7.0, "damageType": 0, "scriptId": "scroll_invisibility" } ] },
     { "id": "scroll_fireball", "name": "Scroll of Fireball", "description": "Launch a fireball that explodes on impact.", "cooldownGroup": "scroll", "cooldown": 10.0,
-      "effects": [ { "category": 5, "resource": 0, "magnitude": 1.0, "duration": 0.0, "damageType": 0, "scriptId": "scroll_fireball" } ] },
+      "effects": [ { "category": 5, "resource": 0, "magnitude": 1.0, "duration": 0.0, "damageType": 0, "scriptId": "scroll_fireball", "params": [0.65] } ] },
     { "id": "scroll_summon_zombie", "name": "Scroll of Summon Zombie", "description": "Summon a zombie ally for a short duration.", "cooldownGroup": "scroll", "cooldown": 22.0,
       "effects": [ { "category": 5, "resource": 0, "magnitude": 0.0, "duration": 20.0, "damageType": 0, "scriptId": "scroll_summon_zombie" } ] },
     { "id": "scroll_revive", "name": "Scroll of Revive", "description": "Revive a fallen ally.", "cooldownGroup": "scroll", "cooldown": 45.0,

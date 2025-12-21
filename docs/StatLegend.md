@@ -7,6 +7,9 @@ Stat legend:
 - accuracy: improves hit quality/accuracy
 - critChance: chance to crit (0–1)
 - armorPen: reduces target armor mitigation
+- lifesteal: heals for a % of damage dealt (0–1)
+- lifeOnHit: flat heal per hit
+- cleaveChance: chance to cleave nearby targets (0–1)
 - armor: physical mitigation
 - evasion: dodge/parry contribution
 - tenacity: status resistance
@@ -16,6 +19,7 @@ Stat legend:
 - resourceRegen: resource regen bonus
 - goldGainMult: gold gain multiplier (base 1.0)
 - rarityScore: increases loot rarity score
+- statusChance: additive bonus to on-hit status chance (0–1)
 - resist_*: damage-type resistance (0–1)
 - * (mult): multiplicative modifier (applied as 1 + value)
 
@@ -97,7 +101,7 @@ Hybrid affixes
 - prospector_s: +5% Gold Gain, +0.6 Rarity Score
 - precision_s: +4 Accuracy, +3% Crit Chance
 
-Base gear templates (implicit stats before affixes)
+Base gear templates (Unique-only baseline stats)
 
 Weapons
 - Sword: attackPower 12
@@ -128,5 +132,8 @@ Armor + accessories
 - Charm (loot/econ): goldGainMult 0.05 or rarityScore 0.6
 
 Notes
+- Non-Unique RPG gear ignores static template stats; implicit rolls + affixes supply stats instead.
 - Full item catalog and sprite mappings live in `data/rpg/loot.json`.
 - Rarity-gated affix tiers: _s (low), _m (mid), _l (high).
+- Affix tier weights and affix count ranges are configurable in `data/rpg/loot.json`.
+- Base stat and affix power scalars per rarity are configurable in `data/rpg/loot.json` (`baseStatScalarByRarity`, `affixScalarByRarity`).

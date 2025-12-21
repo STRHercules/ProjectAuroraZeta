@@ -224,3 +224,78 @@
 
 ## 2025-12-19 — Suggestions after UniqueGear grid fix
 - Consider validating sprite sheet dimensions in the generator to warn on non-16px multiples.
+
+## 2025-12-19 — Suggestions after Sight upgrade tuning
+- Consider adding per-upgrade cost multipliers for other ability shop rows to support targeted balance passes without changing global costs.
+
+## 2025-12-19 — Suggestions after Sight fixed costs
+- Consider exposing per-upgrade cost arrays for other ability shop rows when tuning becomes more granular.
+
+## 2025-12-19 — Suggestions after Robin range + consumable sell/tooltip updates
+- Add an in-game range indicator when swapping Robin weapons to show current attack distance.
+- Consider a dedicated economy tuning table for sell multipliers per item kind (consumable vs equipment).
+
+## 2025-12-19 — Suggestions after affix rarity thresholds
+- Add a small loot test that validates affix count ranges per rarity and ensures tier weights are applied when configured.
+
+## 2025-12-19 — Suggestions after roll scaling per rarity
+- Consider exposing scalar ranges in UI debug tooling to help balance per-rarity roll spread.
+
+## 2025-12-19 — Suggestions after character select spacing tweak
+- Consider exposing character select layout offsets in a small UI tuning table to avoid recompiles for layout nudges.
+
+## 2025-12-19 — Suggestions after character select spacing tweak (round 2)
+- Add a debug toggle to draw layout baselines/boxes for menu panels to speed up spacing tweaks.
+
+## 2025-12-19 — Suggestions after talent tree overlay foundation
+- Add keyboard/controller navigation for talent nodes plus a small minimap to help with large trees.
+
+## 2025-12-19 — Suggestions after talent point pacing update
+- Consider exposing the talent point cadence as a tuning value in `data/gameplay.json`.
+
+## 2025-12-19 — Suggestions after talent tree UI layout pass
+- Consider adding a small shared UI helper for clipped/wrapped text blocks (word-wrap + ellipsis) to reuse across overlays.
+
+## 2025-12-19 — Suggestions after talent stat line fix
+- Consider separating `DerivedStats` into `DerivedStats` + `DerivedStatDeltas` to avoid baseline-default confusion in future UI/debug views.
+
+## 2025-12-19 — Suggestions after talent tree branch spacing pass
+- Consider adding per-archetype layout presets (lane spread, node size) so each tree can have a distinct silhouette without manual pixel tweaking.
+
+## 2025-12-20 — Suggestions after Epic+ gear attributes + talent attribute bonuses
+- Consider adding per-archetype attribute weight tables for loot rolls to better match class identity.
+
+## 2025-12-20 — Suggestions after loot roll scaling update
+- Add non-weapon implicit stat pools (armor/jewelry) or gem-specific pools so socketables stay meaningful without static base stats.
+
+## 2025-12-20 — Suggestions after armor implicit guarantee + empty gear fix
+- Consider adding slot-specific implicit pools (armor/jewelry/gems) to better target fallback stats by item type.
+
+## 2025-12-20 — Suggestions after tooltip dedupe for RPG stats
+- Add a toggle in UI settings for "Show implicit breakdown in hover tooltip" for power users.
+
+## 2025-12-20 — Suggestions after compare tooltip stat coverage
+- Consider grouping compare lines into sections (offense/defense/utility/resists) to keep long deltas readable.
+
+## 2025-12-20 — Suggestions after armor implicit rarity scaling
+- Consider adding per-slot armor implicit ranges (e.g., chest > boots) for finer balance control.
+
+## 2025-12-20 — Suggestions after scroll rage tint + fear refresh guard
+- Add a small status icon or HUD message when movement is locked (Fear/Stasis) to clarify "stuck" moments.
+
+## 2025-12-20 — Suggestions after fear wander movement
+- Consider adding a fear-specific movement speed scalar in data so designers can tune how frantic the wander feels.
+
+## 2025-12-20 — Suggestions after toast system
+- Consider adding tiny icons per toast type and a UI setting to adjust toast size/position for accessibility.
+
+## 2025-12-21 — Suggestions after talent/status icon updates
+- Add optional `iconRow`/`iconCol` overrides in `data/rpg/talents.json` for manual art direction on special nodes.
+- Expose status icon order in `data/statuses.json` so sheet layout changes don’t require code edits.
+
+## 2025-12-21 — Suggestions after status icon legend update
+- Add explicit status-to-icon index mapping in `data/statuses.json` so icon changes stay data-driven.
+- Consider a separate icon row for buffs vs debuffs to reduce ambiguity when multiple effects are active.
+
+## 2025-12-21 — Suggestions after escort facing fix
+- Consider deriving sprite flip from velocity when Facing is absent to avoid stale facing on non-combat NPCs.

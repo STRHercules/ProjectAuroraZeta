@@ -1,16 +1,555 @@
 {
   "talents": {
-    "tank": [
-      { "id": "iron_wall", "name": "Iron Wall", "description": "+10 Armor", "maxRank": 3,
-        "bonus": { "flat": { "armor": 10 } } },
-      { "id": "unyielding", "name": "Unyielding", "description": "+5 Tenacity", "maxRank": 3,
-        "bonus": { "flat": { "tenacity": 5 } } }
-    ],
-    "wizard": [
-      { "id": "arcane_finesse", "name": "Arcane Finesse", "description": "+6 Spell Power", "maxRank": 5,
-        "bonus": { "flat": { "spellPower": 6 } } },
-      { "id": "critical_sparks", "name": "Critical Sparks", "description": "+2% Crit Chance", "maxRank": 3,
-        "bonus": { "flat": { "critChance": 0.02 } } }
-    ]
+    "tank": {
+      "tiers": [
+        {
+          "tier": 1,
+          "unlockPoints": 0,
+          "nodes": [
+            { "id": "tank_iron_wall", "name": "Iron Wall", "description": "+10 Armor", "maxRank": 3,
+              "bonus": { "flat": { "armor": 10 } }, "pos": [-1, 0], "requires": [] },
+            { "id": "tank_unyielding", "name": "Unyielding", "description": "+5 Tenacity", "maxRank": 3,
+              "bonus": { "flat": { "tenacity": 5 } }, "pos": [1, 0], "requires": [] }
+          ]
+        },
+        {
+          "tier": 2,
+          "unlockPoints": 2,
+          "nodes": [
+            { "id": "tank_bulwark_spirit", "name": "Bulwark Spirit", "description": "+4% Max Health", "maxRank": 3,
+              "bonus": { "mult": { "healthMax": 0.04 } }, "pos": [-1, 1], "requires": ["tank_iron_wall"] },
+            { "id": "tank_fortified_core", "name": "Fortified Core", "description": "+6 Armor", "maxRank": 3,
+              "bonus": { "flat": { "armor": 6 } }, "pos": [1, 1], "requires": ["tank_unyielding"] }
+          ]
+        },
+        {
+          "tier": 3,
+          "unlockPoints": 4,
+          "nodes": [
+            { "id": "tank_vanguard_endurance", "name": "Vanguard Endurance", "description": "+0.20 Health Regen", "maxRank": 5,
+              "bonus": { "flat": { "healthRegen": 0.20 } }, "pos": [-1, 2], "requires": ["tank_bulwark_spirit"] },
+            { "id": "tank_shield_bastion", "name": "Shield Bastion", "description": "+6% Max Shields", "maxRank": 3,
+              "bonus": { "mult": { "shieldMax": 0.06 } }, "pos": [1, 2], "requires": ["tank_fortified_core"] }
+          ]
+        },
+        {
+          "tier": 4,
+          "unlockPoints": 6,
+          "nodes": [
+            { "id": "tank_immovable", "name": "Immovable", "description": "+4% Damage Reduction (Armor)", "maxRank": 3,
+              "bonus": { "mult": { "armor": 0.04 } }, "pos": [-1, 3], "requires": ["tank_vanguard_endurance"] },
+            { "id": "tank_stalwart_resolve", "name": "Stalwart Resolve", "description": "+6 Tenacity", "maxRank": 3,
+              "bonus": { "flat": { "tenacity": 6 } }, "pos": [1, 3], "requires": ["tank_shield_bastion"] }
+          ]
+        },
+        {
+          "tier": 5,
+          "unlockPoints": 8,
+          "nodes": [
+            { "id": "tank_indomitable", "name": "Indomitable", "description": "+6% Max Health & +1 END", "maxRank": 3,
+              "bonus": { "mult": { "healthMax": 0.06 } }, "attributes": { "END": 1 }, "pos": [-1, 4], "requires": ["tank_immovable", "tank_stalwart_resolve"] },
+            { "id": "tank_aegis_mastery", "name": "Aegis Mastery", "description": "+4% Cooldown Reduction & +1 STR", "maxRank": 3,
+              "bonus": { "flat": { "cooldownReduction": 0.04 } }, "attributes": { "STR": 1 }, "pos": [1, 4], "requires": ["tank_immovable", "tank_stalwart_resolve"] }
+          ]
+        }
+      ]
+    },
+
+    "healer": {
+      "tiers": [
+        {
+          "tier": 1,
+          "unlockPoints": 0,
+          "nodes": [
+            { "id": "healer_soothing_hands", "name": "Soothing Hands", "description": "+0.20 Health Regen", "maxRank": 5,
+              "bonus": { "flat": { "healthRegen": 0.20 } }, "pos": [-1, 0], "requires": [] },
+            { "id": "healer_shieldweaver", "name": "Shieldweaver", "description": "+0.20 Shield Regen", "maxRank": 5,
+              "bonus": { "flat": { "shieldRegen": 0.20 } }, "pos": [1, 0], "requires": [] }
+          ]
+        },
+        {
+          "tier": 2,
+          "unlockPoints": 2,
+          "nodes": [
+            { "id": "healer_blessed_pace", "name": "Blessed Pace", "description": "+4% Move Speed", "maxRank": 3,
+              "bonus": { "mult": { "moveSpeed": 0.04 } }, "pos": [-1, 1], "requires": ["healer_soothing_hands"] },
+            { "id": "healer_mending_focus", "name": "Mending Focus", "description": "+6% Cooldown Reduction", "maxRank": 3,
+              "bonus": { "flat": { "cooldownReduction": 0.06 } }, "pos": [1, 1], "requires": ["healer_shieldweaver"] }
+          ]
+        },
+        {
+          "tier": 3,
+          "unlockPoints": 4,
+          "nodes": [
+            { "id": "healer_vital_reservoir", "name": "Vital Reservoir", "description": "+5% Max Health", "maxRank": 3,
+              "bonus": { "mult": { "healthMax": 0.05 } }, "pos": [-1, 2], "requires": ["healer_blessed_pace"] },
+            { "id": "healer_ward_reservoir", "name": "Ward Reservoir", "description": "+5% Max Shields", "maxRank": 3,
+              "bonus": { "mult": { "shieldMax": 0.05 } }, "pos": [1, 2], "requires": ["healer_mending_focus"] }
+          ]
+        },
+        {
+          "tier": 4,
+          "unlockPoints": 6,
+          "nodes": [
+            { "id": "healer_lucid_flow", "name": "Lucid Flow", "description": "+6% Resource Regen", "maxRank": 3,
+              "bonus": { "flat": { "resourceRegen": 0.06 } }, "pos": [-1, 3], "requires": ["healer_vital_reservoir"] },
+            { "id": "healer_divine_precision", "name": "Divine Precision", "description": "+2% Crit Chance", "maxRank": 3,
+              "bonus": { "flat": { "critChance": 0.02 } }, "pos": [1, 3], "requires": ["healer_ward_reservoir"] }
+          ]
+        },
+        {
+          "tier": 5,
+          "unlockPoints": 8,
+          "nodes": [
+            { "id": "healer_sanctuary", "name": "Sanctuary", "description": "+4% Max Health & Shields & +1 INT", "maxRank": 3,
+              "bonus": { "mult": { "healthMax": 0.04, "shieldMax": 0.04 } }, "attributes": { "INT": 1 }, "pos": [-1, 4], "requires": ["healer_lucid_flow", "healer_divine_precision"] },
+            { "id": "healer_seraphic_tempo", "name": "Seraphic Tempo", "description": "+4% Cooldown Reduction & +1 END", "maxRank": 3,
+              "bonus": { "flat": { "cooldownReduction": 0.04 } }, "attributes": { "END": 1 }, "pos": [1, 4], "requires": ["healer_lucid_flow", "healer_divine_precision"] }
+          ]
+        }
+      ]
+    },
+
+    "damage": {
+      "tiers": [
+        {
+          "tier": 1,
+          "unlockPoints": 0,
+          "nodes": [
+            { "id": "damage_keen_edge", "name": "Keen Edge", "description": "+8 Attack Power", "maxRank": 5,
+              "bonus": { "flat": { "attackPower": 8 } }, "pos": [-1, 0], "requires": [] },
+            { "id": "damage_swift_strikes", "name": "Swift Strikes", "description": "+3% Attack Speed", "maxRank": 5,
+              "bonus": { "mult": { "attackSpeed": 0.03 } }, "pos": [1, 0], "requires": [] }
+          ]
+        },
+        {
+          "tier": 2,
+          "unlockPoints": 2,
+          "nodes": [
+            { "id": "damage_steady_aim", "name": "Steady Aim", "description": "+6 Accuracy", "maxRank": 3,
+              "bonus": { "flat": { "accuracy": 6 } }, "pos": [-1, 1], "requires": ["damage_keen_edge"] },
+            { "id": "damage_cut_through", "name": "Cut Through", "description": "+6 Armor Pen", "maxRank": 3,
+              "bonus": { "flat": { "armorPen": 6 } }, "pos": [1, 1], "requires": ["damage_swift_strikes"] }
+          ]
+        },
+        {
+          "tier": 3,
+          "unlockPoints": 4,
+          "nodes": [
+            { "id": "damage_critical_instinct", "name": "Critical Instinct", "description": "+2% Crit Chance", "maxRank": 3,
+              "bonus": { "flat": { "critChance": 0.02 } }, "pos": [-1, 2], "requires": ["damage_steady_aim"] },
+            { "id": "damage_relentless", "name": "Relentless", "description": "+10 Attack Power", "maxRank": 3,
+              "bonus": { "flat": { "attackPower": 10 } }, "pos": [1, 2], "requires": ["damage_cut_through"] }
+          ]
+        },
+        {
+          "tier": 4,
+          "unlockPoints": 6,
+          "nodes": [
+            { "id": "damage_hunter_stride", "name": "Hunter's Stride", "description": "+4% Move Speed", "maxRank": 3,
+              "bonus": { "mult": { "moveSpeed": 0.04 } }, "pos": [-1, 3], "requires": ["damage_critical_instinct"] },
+            { "id": "damage_bloodthirst", "name": "Bloodthirst", "description": "+3% Attack Power", "maxRank": 3,
+              "bonus": { "mult": { "attackPower": 0.03 } }, "pos": [1, 3], "requires": ["damage_relentless"] }
+          ]
+        },
+        {
+          "tier": 5,
+          "unlockPoints": 8,
+          "nodes": [
+            { "id": "damage_master_of_arms", "name": "Master of Arms", "description": "+2% Crit Chance & +3% Attack Speed & +1 STR", "maxRank": 3,
+              "bonus": { "flat": { "critChance": 0.02 }, "mult": { "attackSpeed": 0.03 } }, "attributes": { "STR": 1 }, "pos": [-1, 4], "requires": ["damage_hunter_stride", "damage_bloodthirst"] },
+            { "id": "damage_executioner", "name": "Executioner", "description": "+8 Armor Pen & +1 DEX", "maxRank": 3,
+              "bonus": { "flat": { "armorPen": 8 } }, "attributes": { "DEX": 1 }, "pos": [1, 4], "requires": ["damage_hunter_stride", "damage_bloodthirst"] }
+          ]
+        }
+      ]
+    },
+
+    "assassin": {
+      "tiers": [
+        {
+          "tier": 1,
+          "unlockPoints": 0,
+          "nodes": [
+            { "id": "assassin_shadowstep", "name": "Shadowstep", "description": "+5% Move Speed", "maxRank": 3,
+              "bonus": { "mult": { "moveSpeed": 0.05 } }, "pos": [-1, 0], "requires": [] },
+            { "id": "assassin_razor_focus", "name": "Razor Focus", "description": "+2% Crit Chance", "maxRank": 3,
+              "bonus": { "flat": { "critChance": 0.02 } }, "pos": [1, 0], "requires": [] }
+          ]
+        },
+        {
+          "tier": 2,
+          "unlockPoints": 2,
+          "nodes": [
+            { "id": "assassin_evasive", "name": "Evasive", "description": "+8 Evasion", "maxRank": 3,
+              "bonus": { "flat": { "evasion": 8 } }, "pos": [-1, 1], "requires": ["assassin_shadowstep"] },
+            { "id": "assassin_puncture", "name": "Puncture", "description": "+8 Armor Pen", "maxRank": 3,
+              "bonus": { "flat": { "armorPen": 8 } }, "pos": [1, 1], "requires": ["assassin_razor_focus"] }
+          ]
+        },
+        {
+          "tier": 3,
+          "unlockPoints": 4,
+          "nodes": [
+            { "id": "assassin_quick_hands", "name": "Quick Hands", "description": "+4% Attack Speed", "maxRank": 5,
+              "bonus": { "mult": { "attackSpeed": 0.04 } }, "pos": [-1, 2], "requires": ["assassin_evasive"] },
+            { "id": "assassin_deadly_precision", "name": "Deadly Precision", "description": "+0.10 Crit Mult", "maxRank": 3,
+              "bonus": { "flat": { "critMult": 0.10 } }, "pos": [1, 2], "requires": ["assassin_puncture"] }
+          ]
+        },
+        {
+          "tier": 4,
+          "unlockPoints": 6,
+          "nodes": [
+            { "id": "assassin_smoke_and_mirrors", "name": "Smoke & Mirrors", "description": "+6% Cooldown Reduction", "maxRank": 3,
+              "bonus": { "flat": { "cooldownReduction": 0.06 } }, "pos": [-1, 3], "requires": ["assassin_quick_hands"] },
+            { "id": "assassin_finisher", "name": "Finisher", "description": "+10 Attack Power", "maxRank": 3,
+              "bonus": { "flat": { "attackPower": 10 } }, "pos": [1, 3], "requires": ["assassin_deadly_precision"] }
+          ]
+        },
+        {
+          "tier": 5,
+          "unlockPoints": 8,
+          "nodes": [
+            { "id": "assassin_ghostblade", "name": "Ghostblade", "description": "+2% Crit Chance & +6 Armor Pen & +1 DEX", "maxRank": 3,
+              "bonus": { "flat": { "critChance": 0.02, "armorPen": 6 } }, "attributes": { "DEX": 1 }, "pos": [-1, 4], "requires": ["assassin_smoke_and_mirrors", "assassin_finisher"] },
+            { "id": "assassin_vanish", "name": "Vanish", "description": "+6% Move Speed & +1 LCK", "maxRank": 3,
+              "bonus": { "mult": { "moveSpeed": 0.06 } }, "attributes": { "LCK": 1 }, "pos": [1, 4], "requires": ["assassin_smoke_and_mirrors", "assassin_finisher"] }
+          ]
+        }
+      ]
+    },
+
+    "builder": {
+      "tiers": [
+        {
+          "tier": 1,
+          "unlockPoints": 0,
+          "nodes": [
+            { "id": "builder_sturdy_frame", "name": "Sturdy Frame", "description": "+8 Armor", "maxRank": 3,
+              "bonus": { "flat": { "armor": 8 } }, "pos": [-1, 0], "requires": [] },
+            { "id": "builder_field_kit", "name": "Field Kit", "description": "+5% Cooldown Reduction", "maxRank": 3,
+              "bonus": { "flat": { "cooldownReduction": 0.05 } }, "pos": [1, 0], "requires": [] }
+          ]
+        },
+        {
+          "tier": 2,
+          "unlockPoints": 2,
+          "nodes": [
+            { "id": "builder_pack_mule", "name": "Pack Mule", "description": "+6% Max Health", "maxRank": 3,
+              "bonus": { "mult": { "healthMax": 0.06 } }, "pos": [-1, 1], "requires": ["builder_sturdy_frame"] },
+            { "id": "builder_power_tools", "name": "Power Tools", "description": "+8 Attack Power", "maxRank": 3,
+              "bonus": { "flat": { "attackPower": 8 } }, "pos": [1, 1], "requires": ["builder_field_kit"] }
+          ]
+        },
+        {
+          "tier": 3,
+          "unlockPoints": 4,
+          "nodes": [
+            { "id": "builder_scouting", "name": "Scouting", "description": "+4% Move Speed", "maxRank": 3,
+              "bonus": { "mult": { "moveSpeed": 0.04 } }, "pos": [-1, 2], "requires": ["builder_pack_mule"] },
+            { "id": "builder_overclock", "name": "Overclock", "description": "+6% Resource Regen", "maxRank": 3,
+              "bonus": { "flat": { "resourceRegen": 0.06 } }, "pos": [1, 2], "requires": ["builder_power_tools"] }
+          ]
+        },
+        {
+          "tier": 4,
+          "unlockPoints": 6,
+          "nodes": [
+            { "id": "builder_reinforced_plating", "name": "Reinforced Plating", "description": "+4% Armor", "maxRank": 3,
+              "bonus": { "mult": { "armor": 0.04 } }, "pos": [-1, 3], "requires": ["builder_scouting"] },
+            { "id": "builder_grease_monkey", "name": "Grease Monkey", "description": "+6% Cooldown Reduction", "maxRank": 3,
+              "bonus": { "flat": { "cooldownReduction": 0.06 } }, "pos": [1, 3], "requires": ["builder_overclock"] }
+          ]
+        },
+        {
+          "tier": 5,
+          "unlockPoints": 8,
+          "nodes": [
+            { "id": "builder_master_crafter", "name": "Master Crafter", "description": "+5% Max Health & +5% Attack Power & +1 INT", "maxRank": 3,
+              "bonus": { "mult": { "healthMax": 0.05, "attackPower": 0.05 } }, "attributes": { "INT": 1 }, "pos": [-1, 4], "requires": ["builder_reinforced_plating", "builder_grease_monkey"] },
+            { "id": "builder_battle_rig", "name": "Battle Rig", "description": "+6 Armor & +4% Move Speed & +1 END", "maxRank": 3,
+              "bonus": { "flat": { "armor": 6 }, "mult": { "moveSpeed": 0.04 } }, "attributes": { "END": 1 }, "pos": [1, 4], "requires": ["builder_reinforced_plating", "builder_grease_monkey"] }
+          ]
+        }
+      ]
+    },
+
+    "support": {
+      "tiers": [
+        {
+          "tier": 1,
+          "unlockPoints": 0,
+          "nodes": [
+            { "id": "support_guard_stance", "name": "Guard Stance", "description": "+6 Armor", "maxRank": 3,
+              "bonus": { "flat": { "armor": 6 } }, "pos": [-1, 0], "requires": [] },
+            { "id": "support_true_strike", "name": "True Strike", "description": "+6 Accuracy", "maxRank": 3,
+              "bonus": { "flat": { "accuracy": 6 } }, "pos": [1, 0], "requires": [] }
+          ]
+        },
+        {
+          "tier": 2,
+          "unlockPoints": 2,
+          "nodes": [
+            { "id": "support_vitality", "name": "Vitality", "description": "+5% Max Health", "maxRank": 3,
+              "bonus": { "mult": { "healthMax": 0.05 } }, "pos": [-1, 1], "requires": ["support_guard_stance"] },
+            { "id": "support_halberd_mastery", "name": "Halberd Mastery", "description": "+8 Attack Power", "maxRank": 3,
+              "bonus": { "flat": { "attackPower": 8 } }, "pos": [1, 1], "requires": ["support_true_strike"] }
+          ]
+        },
+        {
+          "tier": 3,
+          "unlockPoints": 4,
+          "nodes": [
+            { "id": "support_stalwart", "name": "Stalwart", "description": "+6 Tenacity", "maxRank": 3,
+              "bonus": { "flat": { "tenacity": 6 } }, "pos": [-1, 2], "requires": ["support_vitality"] },
+            { "id": "support_battle_rhythm", "name": "Battle Rhythm", "description": "+3% Attack Speed", "maxRank": 5,
+              "bonus": { "mult": { "attackSpeed": 0.03 } }, "pos": [1, 2], "requires": ["support_halberd_mastery"] }
+          ]
+        },
+        {
+          "tier": 4,
+          "unlockPoints": 6,
+          "nodes": [
+            { "id": "support_marching_orders", "name": "Marching Orders", "description": "+4% Move Speed", "maxRank": 3,
+              "bonus": { "mult": { "moveSpeed": 0.04 } }, "pos": [-1, 3], "requires": ["support_stalwart"] },
+            { "id": "support_piercing", "name": "Piercing", "description": "+6 Armor Pen", "maxRank": 3,
+              "bonus": { "flat": { "armorPen": 6 } }, "pos": [1, 3], "requires": ["support_battle_rhythm"] }
+          ]
+        },
+        {
+          "tier": 5,
+          "unlockPoints": 8,
+          "nodes": [
+            { "id": "support_bannerlord", "name": "Bannerlord", "description": "+4% Max Health & +4% Move Speed & +1 END", "maxRank": 3,
+              "bonus": { "mult": { "healthMax": 0.04, "moveSpeed": 0.04 } }, "attributes": { "END": 1 }, "pos": [-1, 4], "requires": ["support_marching_orders", "support_piercing"] },
+            { "id": "support_warlike", "name": "Warlike", "description": "+5% Attack Power & +1 STR", "maxRank": 3,
+              "bonus": { "mult": { "attackPower": 0.05 } }, "attributes": { "STR": 1 }, "pos": [1, 4], "requires": ["support_marching_orders", "support_piercing"] }
+          ]
+        }
+      ]
+    },
+
+    "special": {
+      "tiers": [
+        {
+          "tier": 1,
+          "unlockPoints": 0,
+          "nodes": [
+            { "id": "special_all_rounder", "name": "All-Rounder", "description": "+6 Attack Power", "maxRank": 3,
+              "bonus": { "flat": { "attackPower": 6 } }, "pos": [-1, 0], "requires": [] },
+            { "id": "special_arcane_spark", "name": "Arcane Spark", "description": "+6 Spell Power", "maxRank": 3,
+              "bonus": { "flat": { "spellPower": 6 } }, "pos": [1, 0], "requires": [] }
+          ]
+        },
+        {
+          "tier": 2,
+          "unlockPoints": 2,
+          "nodes": [
+            { "id": "special_hardened", "name": "Hardened", "description": "+6 Armor", "maxRank": 3,
+              "bonus": { "flat": { "armor": 6 } }, "pos": [-1, 1], "requires": ["special_all_rounder"] },
+            { "id": "special_quick_thought", "name": "Quick Thought", "description": "+4% Cooldown Reduction", "maxRank": 3,
+              "bonus": { "flat": { "cooldownReduction": 0.04 } }, "pos": [1, 1], "requires": ["special_arcane_spark"] }
+          ]
+        },
+        {
+          "tier": 3,
+          "unlockPoints": 4,
+          "nodes": [
+            { "id": "special_fleetfooted", "name": "Fleetfooted", "description": "+4% Move Speed", "maxRank": 3,
+              "bonus": { "mult": { "moveSpeed": 0.04 } }, "pos": [-1, 2], "requires": ["special_hardened"] },
+            { "id": "special_lucky", "name": "Lucky", "description": "+2% Crit Chance", "maxRank": 3,
+              "bonus": { "flat": { "critChance": 0.02 } }, "pos": [1, 2], "requires": ["special_quick_thought"] }
+          ]
+        },
+        {
+          "tier": 4,
+          "unlockPoints": 6,
+          "nodes": [
+            { "id": "special_reservoir", "name": "Reservoir", "description": "+4% Max Health", "maxRank": 3,
+              "bonus": { "mult": { "healthMax": 0.04 } }, "pos": [-1, 3], "requires": ["special_fleetfooted"] },
+            { "id": "special_battery", "name": "Battery", "description": "+4% Resource Regen", "maxRank": 3,
+              "bonus": { "flat": { "resourceRegen": 0.04 } }, "pos": [1, 3], "requires": ["special_lucky"] }
+          ]
+        },
+        {
+          "tier": 5,
+          "unlockPoints": 8,
+          "nodes": [
+            { "id": "special_omniscale", "name": "Omniscale", "description": "+3% Attack Power & Spell Power & +1 LCK", "maxRank": 3,
+              "bonus": { "mult": { "attackPower": 0.03, "spellPower": 0.03 } }, "attributes": { "LCK": 1 }, "pos": [-1, 4], "requires": ["special_reservoir", "special_battery"] },
+            { "id": "special_apex", "name": "Apex", "description": "+4% Max Health & +4% Cooldown Reduction & +1 END", "maxRank": 3,
+              "bonus": { "mult": { "healthMax": 0.04 }, "flat": { "cooldownReduction": 0.04 } }, "attributes": { "END": 1 }, "pos": [1, 4], "requires": ["special_reservoir", "special_battery"] }
+          ]
+        }
+      ]
+    },
+
+    "summoner": {
+      "tiers": [
+        {
+          "tier": 1,
+          "unlockPoints": 0,
+          "nodes": [
+            { "id": "summoner_bindings", "name": "Bindings", "description": "+6 Spell Power", "maxRank": 5,
+              "bonus": { "flat": { "spellPower": 6 } }, "pos": [-1, 0], "requires": [] },
+            { "id": "summoner_warding", "name": "Warding", "description": "+5% Max Shields", "maxRank": 3,
+              "bonus": { "mult": { "shieldMax": 0.05 } }, "pos": [1, 0], "requires": [] }
+          ]
+        },
+        {
+          "tier": 2,
+          "unlockPoints": 2,
+          "nodes": [
+            { "id": "summoner_eldritch_flow", "name": "Eldritch Flow", "description": "+6% Resource Regen", "maxRank": 3,
+              "bonus": { "flat": { "resourceRegen": 0.06 } }, "pos": [-1, 1], "requires": ["summoner_bindings"] },
+            { "id": "summoner_thick_skin", "name": "Thick Skin", "description": "+6 Armor", "maxRank": 3,
+              "bonus": { "flat": { "armor": 6 } }, "pos": [1, 1], "requires": ["summoner_warding"] }
+          ]
+        },
+        {
+          "tier": 3,
+          "unlockPoints": 4,
+          "nodes": [
+            { "id": "summoner_familiar_arts", "name": "Familiar Arts", "description": "+8 Spell Power", "maxRank": 3,
+              "bonus": { "flat": { "spellPower": 8 } }, "pos": [-1, 2], "requires": ["summoner_eldritch_flow"] },
+            { "id": "summoner_ritual_speed", "name": "Ritual Speed", "description": "+6% Cooldown Reduction", "maxRank": 3,
+              "bonus": { "flat": { "cooldownReduction": 0.06 } }, "pos": [1, 2], "requires": ["summoner_thick_skin"] }
+          ]
+        },
+        {
+          "tier": 4,
+          "unlockPoints": 6,
+          "nodes": [
+            { "id": "summoner_unseen_steps", "name": "Unseen Steps", "description": "+4% Move Speed", "maxRank": 3,
+              "bonus": { "mult": { "moveSpeed": 0.04 } }, "pos": [-1, 3], "requires": ["summoner_familiar_arts"] },
+            { "id": "summoner_vital_link", "name": "Vital Link", "description": "+5% Max Health", "maxRank": 3,
+              "bonus": { "mult": { "healthMax": 0.05 } }, "pos": [1, 3], "requires": ["summoner_ritual_speed"] }
+          ]
+        },
+        {
+          "tier": 5,
+          "unlockPoints": 8,
+          "nodes": [
+            { "id": "summoner_grand_ritual", "name": "Grand Ritual", "description": "+5% Spell Power & +4% Cooldown Reduction & +1 INT", "maxRank": 3,
+              "bonus": { "mult": { "spellPower": 0.05 }, "flat": { "cooldownReduction": 0.04 } }, "attributes": { "INT": 1 }, "pos": [-1, 4], "requires": ["summoner_unseen_steps", "summoner_vital_link"] },
+            { "id": "summoner_veil", "name": "Veil", "description": "+6% Max Shields & +4% Move Speed & +1 END", "maxRank": 3,
+              "bonus": { "mult": { "shieldMax": 0.06, "moveSpeed": 0.04 } }, "attributes": { "END": 1 }, "pos": [1, 4], "requires": ["summoner_unseen_steps", "summoner_vital_link"] }
+          ]
+        }
+      ]
+    },
+
+    "druid": {
+      "tiers": [
+        {
+          "tier": 1,
+          "unlockPoints": 0,
+          "nodes": [
+            { "id": "druid_primal_strength", "name": "Primal Strength", "description": "+8 Attack Power", "maxRank": 3,
+              "bonus": { "flat": { "attackPower": 8 } }, "pos": [-1, 0], "requires": [] },
+            { "id": "druid_naturalism", "name": "Naturalism", "description": "+6 Spell Power", "maxRank": 3,
+              "bonus": { "flat": { "spellPower": 6 } }, "pos": [1, 0], "requires": [] }
+          ]
+        },
+        {
+          "tier": 2,
+          "unlockPoints": 2,
+          "nodes": [
+            { "id": "druid_wildheart", "name": "Wildheart", "description": "+5% Max Health", "maxRank": 3,
+              "bonus": { "mult": { "healthMax": 0.05 } }, "pos": [-1, 1], "requires": ["druid_primal_strength"] },
+            { "id": "druid_river_mind", "name": "River Mind", "description": "+6% Cooldown Reduction", "maxRank": 3,
+              "bonus": { "flat": { "cooldownReduction": 0.06 } }, "pos": [1, 1], "requires": ["druid_naturalism"] }
+          ]
+        },
+        {
+          "tier": 3,
+          "unlockPoints": 4,
+          "nodes": [
+            { "id": "druid_predators_gait", "name": "Predator's Gait", "description": "+4% Move Speed", "maxRank": 3,
+              "bonus": { "mult": { "moveSpeed": 0.04 } }, "pos": [-1, 2], "requires": ["druid_wildheart"] },
+            { "id": "druid_feral_fury", "name": "Feral Fury", "description": "+3% Attack Speed", "maxRank": 5,
+              "bonus": { "mult": { "attackSpeed": 0.03 } }, "pos": [1, 2], "requires": ["druid_river_mind"] }
+          ]
+        },
+        {
+          "tier": 4,
+          "unlockPoints": 6,
+          "nodes": [
+            { "id": "druid_thick_hide", "name": "Thick Hide", "description": "+6 Armor", "maxRank": 3,
+              "bonus": { "flat": { "armor": 6 } }, "pos": [-1, 3], "requires": ["druid_predators_gait"] },
+            { "id": "druid_bloom", "name": "Bloom", "description": "+0.20 Health Regen", "maxRank": 5,
+              "bonus": { "flat": { "healthRegen": 0.20 } }, "pos": [1, 3], "requires": ["druid_feral_fury"] }
+          ]
+        },
+        {
+          "tier": 5,
+          "unlockPoints": 8,
+          "nodes": [
+            { "id": "druid_balance", "name": "Balance", "description": "+4% Attack Power & Spell Power & +1 STR", "maxRank": 3,
+              "bonus": { "mult": { "attackPower": 0.04, "spellPower": 0.04 } }, "attributes": { "STR": 1 }, "pos": [-1, 4], "requires": ["druid_thick_hide", "druid_bloom"] },
+            { "id": "druid_stormskin", "name": "Stormskin", "description": "+5% Max Health & +4% Cooldown Reduction & +1 END", "maxRank": 3,
+              "bonus": { "mult": { "healthMax": 0.05 }, "flat": { "cooldownReduction": 0.04 } }, "attributes": { "END": 1 }, "pos": [1, 4], "requires": ["druid_thick_hide", "druid_bloom"] }
+          ]
+        }
+      ]
+    },
+
+    "wizard": {
+      "tiers": [
+        {
+          "tier": 1,
+          "unlockPoints": 0,
+          "nodes": [
+            { "id": "wizard_arcane_finesse", "name": "Arcane Finesse", "description": "+6 Spell Power", "maxRank": 5,
+              "bonus": { "flat": { "spellPower": 6 } }, "pos": [-1, 0], "requires": [] },
+            { "id": "wizard_critical_sparks", "name": "Critical Sparks", "description": "+2% Crit Chance", "maxRank": 3,
+              "bonus": { "flat": { "critChance": 0.02 } }, "pos": [1, 0], "requires": [] }
+          ]
+        },
+        {
+          "tier": 2,
+          "unlockPoints": 2,
+          "nodes": [
+            { "id": "wizard_mana_flux", "name": "Mana Flux", "description": "+6% Cooldown Reduction", "maxRank": 3,
+              "bonus": { "flat": { "cooldownReduction": 0.06 } }, "pos": [-1, 1], "requires": ["wizard_arcane_finesse"] },
+            { "id": "wizard_glass_cannon", "name": "Glass Cannon", "description": "+8% Spell Power", "maxRank": 3,
+              "bonus": { "mult": { "spellPower": 0.08 } }, "pos": [1, 1], "requires": ["wizard_critical_sparks"] }
+          ]
+        },
+        {
+          "tier": 3,
+          "unlockPoints": 4,
+          "nodes": [
+            { "id": "wizard_elemental_attunement", "name": "Elemental Attunement", "description": "+6 Spell Power", "maxRank": 3,
+              "bonus": { "flat": { "spellPower": 6 } }, "pos": [-1, 2], "requires": ["wizard_mana_flux"] },
+            { "id": "wizard_spellblade", "name": "Spellblade", "description": "+8 Attack Power", "maxRank": 3,
+              "bonus": { "flat": { "attackPower": 8 } }, "pos": [1, 2], "requires": ["wizard_glass_cannon"] }
+          ]
+        },
+        {
+          "tier": 4,
+          "unlockPoints": 6,
+          "nodes": [
+            { "id": "wizard_arcane_reserve", "name": "Arcane Reserve", "description": "+6% Resource Regen", "maxRank": 3,
+              "bonus": { "flat": { "resourceRegen": 0.06 } }, "pos": [-1, 3], "requires": ["wizard_elemental_attunement"] },
+            { "id": "wizard_spell_speed", "name": "Spell Speed", "description": "+3% Move Speed", "maxRank": 3,
+              "bonus": { "mult": { "moveSpeed": 0.03 } }, "pos": [1, 3], "requires": ["wizard_spellblade"] }
+          ]
+        },
+        {
+          "tier": 5,
+          "unlockPoints": 8,
+          "nodes": [
+            { "id": "wizard_archmage", "name": "Archmage", "description": "+5% Spell Power & +2% Crit Chance & +1 INT", "maxRank": 3,
+              "bonus": { "mult": { "spellPower": 0.05 }, "flat": { "critChance": 0.02 } }, "attributes": { "INT": 1 }, "pos": [-1, 4],
+              "requires": ["wizard_arcane_reserve", "wizard_spell_speed"] },
+            { "id": "wizard_mastery", "name": "Mastery", "description": "+4% Cooldown Reduction & +1 LCK", "maxRank": 3,
+              "bonus": { "flat": { "cooldownReduction": 0.04 } }, "attributes": { "LCK": 1 }, "pos": [1, 4],
+              "requires": ["wizard_arcane_reserve", "wizard_spell_speed"] }
+          ]
+        }
+      ]
+    }
   }
 }

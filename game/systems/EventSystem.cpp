@@ -401,10 +401,14 @@ void EventSystem::update(Engine::ECS::Registry& registry, const Engine::TimeStep
                     Engine::Vec2 v = escortVel->value;
                     auto* anim = registry.get<Engine::ECS::SpriteAnimation>(escortEnt);
                     auto* look = registry.get<Game::LookDirection>(escortEnt);
+                    auto* facing = registry.get<Game::Facing>(escortEnt);
                     LookDir4 dir = look ? look->dir : LookDir4::Front;
                     if (std::abs(v.x) > kMoveEps || std::abs(v.y) > kMoveEps) {
                         dir = dirFromVec(v, dir);
                         if (look) look->dir = dir;
+                        if (facing && std::abs(v.x) > kMoveEps) {
+                            facing->dirX = (v.x < 0.0f) ? -1 : 1;
+                        }
                         if (anim && anim->row != rowWalk(dir)) {
                             anim->row = rowWalk(dir);
                             anim->currentFrame = 0;

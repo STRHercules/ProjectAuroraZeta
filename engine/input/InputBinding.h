@@ -21,6 +21,7 @@ struct InputBindings {
     std::vector<std::string> restart;
     std::vector<std::string> toggleShop;
     std::vector<std::string> characterScreen;
+    std::vector<std::string> talentTree;
     std::vector<std::string> pause;
     std::vector<std::string> dash;
     std::vector<std::string> swapWeapon;

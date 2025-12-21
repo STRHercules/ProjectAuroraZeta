@@ -25,6 +25,7 @@
 #include "../engine/audio/MusicPlayer.h"
 #include "../engine/audio/SfxPlayer.h"
 #include "../engine/ui/MiniMapHUD.h"
+#include "ui/ToastManager.h"
 #include <random>
 #include <fstream>
 #include <array>
@@ -134,11 +135,16 @@ private:
     void drawAbilityShopOverlay();
     void drawInventoryOverlay();
     void drawPauseOverlay();
+    void drawTalentTreeOverlay(const Engine::InputState& input);
     void drawCharacterScreen(const Engine::InputState& input);
     void drawAbilityHud(const Engine::InputState& input);
     void drawResourceCluster();
+    void drawStatusEffectIcons(const Engine::Camera2D& camera);
+    void syncHeroStatusToasts();
+    void pushPickupToast(const Pickup& p, std::optional<int> soldValue = std::nullopt);
     void refreshShopInventory();
     bool addItemToInventory(const ItemDefinition& def);
+    int itemSellValue(const ItemDefinition& def) const;
     bool sellItemFromInventory(std::size_t idx, int& copperOut);
     void clampInventorySelection();
     bool isQuickUseEligible(const ItemDefinition& d) const;
@@ -210,8 +216,17 @@ private:
     void loadRpgData();
     void updateRpgConsumables(double dt);
     void updateRpgTalentAllocation();
+    const Game::RPG::TalentTree* activeTalentTree() const;
+    const Game::RPG::TalentTier* findTalentTierForNode(const std::string& nodeId) const;
+    const Game::RPG::TalentNode* findTalentNode(const std::string& nodeId) const;
+    int rpgTalentPointsAvailable() const;
+    bool canSpendTalentPoint(const std::string& nodeId) const;
+    bool spendTalentPoint(const std::string& nodeId);
+    void resetTalentTree();
     Engine::Gameplay::RPG::StatContribution collectRpgEquippedContribution() const;
     Engine::Gameplay::RPG::StatContribution collectRpgTalentContribution() const;
+    Engine::Gameplay::RPG::Attributes collectRpgEquippedAttributes() const;
+    Engine::Gameplay::RPG::Attributes collectRpgTalentAttributes() const;
     void updateHeroRpgStats();
     enum class RpgLootSource { Normal, MiniBoss, Boss, Shop };
     Game::RPG::LootTable filteredRpgLootTable(RpgLootSource src) const;
@@ -575,9 +590,24 @@ private:
         0.20f,  // Epic
         0.24f,  // Legendary
     }};
+    std::array<float, 6> rpgSellRarityMultipliers_{{
+        1.0f,  // Common
+        1.2f,  // Uncommon
+        1.45f, // Rare
+        1.75f, // Epic
+        2.1f,  // Legendary
+        2.5f,  // Unique
+    }};
+    float rpgSellAffixBonus_{0.08f};
     // Traveling shop: chance and count of RPG equipment offers (gold shop).
     float rpgShopEquipChance_{0.65f};
     int rpgShopEquipCount_{2};
+    // RPG loot scaling + cleave tuning.
+    int rpgItemLevelWaveDivisor_{3};
+    float rpgItemScalePerLevel_{0.06f};
+    float rpgCleaveRadius_{90.0f};
+    float rpgCleaveDamageMult_{0.4f};
+    int rpgCleaveMaxTargets_{2};
     int copperPickupMin_{4};
     int copperPickupMax_{10};
     int copperPickupMinBase_{4};
@@ -599,15 +629,17 @@ private:
     float shopSpeedBonus_{20.0f};  // flat bonus to move speed
     int abilityShopBaseCost_{8};
     float abilityShopCostGrowth_{1.18f};
+    float abilityVisionCostMultiplier_{1.5f};
+    std::array<int, 3> abilityVisionCosts_{{500, 1250, 2000}};
     float abilityDamagePerLevel_{1.0f};
     float abilityAttackSpeedPerLevel_{0.05f};
     float abilityRangePerLevel_{60.0f};  // world units of extra range per level
-    float abilityVisionPerLevel_{1.0f};
+    float abilityVisionPerLevel_{2.0f};
     float abilityHealthPerLevel_{5.0f};
     float abilityArmorPerLevel_{1.0f};
     float assassinCloakDurationPerLevel_{0.5f};
     int abilityRangeMaxBonus_{5};
-    int abilityVisionMaxBonus_{5};
+    int abilityVisionMaxBonus_{3};
     int abilityDamageLevel_{0};
     int abilityAttackSpeedLevel_{0};
     int abilityRangeLevel_{0};
@@ -632,6 +664,8 @@ private:
     double fireIntervalBase_{0.2};
     float autoFireRangeBonus_{0.0f};
     float autoFireBaseRange_{320.0f};
+    float robinBowRangeBonus_{60.0f};
+    float robinSwordMeleeRangeBonus_{0.0f};
     bool autoAttackEnabled_{true};
     bool defeatDelayActive_{false};
     float defeatDelayTimer_{0.0f};
@@ -933,6 +967,7 @@ private:
     Engine::Gameplay::RPG::ResolverConfig rpgResolverConfig_{};
     std::unordered_map<std::string, int> rpgTalentRanks_{};
     int rpgTalentPointsSpent_{0};
+    int rpgTalentPointsAvailable_{0};
     int rpgTalentLevelCached_{0};
     std::string rpgTalentArchetypeCached_{};
     struct CombatDebugLine {
@@ -947,6 +982,8 @@ private:
     Engine::TexturePtr shieldBarTex_{};
     Engine::TexturePtr energyBarTex_{};
     Engine::TexturePtr dashBarTex_{};
+    Engine::TexturePtr talentIconTex_{};
+    Engine::TexturePtr statusEffectTex_{};
     TTF_Font* uiFont_{nullptr};
     SDL_Renderer* sdlRenderer_{nullptr};
     SDL_Window* sdlWindow_{nullptr};
@@ -976,6 +1013,16 @@ private:
     bool pauseTogglePrev_{false};
     bool characterScreenPrev_{false};
     bool characterScreenOpen_{false};
+    bool talentTreeOpen_{false};
+    bool talentTreePrev_{false};
+    bool talentTreeClickPrev_{false};
+    bool talentTreeMiddlePrev_{false};
+    bool talentTreeDragging_{false};
+    int talentTreeDragStartX_{0};
+    int talentTreeDragStartY_{0};
+    Engine::Vec2 talentTreePan_{0.0f, 0.0f};
+    float talentTreeZoom_{1.0f};
+    std::string talentTreeSelectedId_{};
     bool shopTogglePrev_{false};
     double pauseMenuBlink_{0.0};
     bool inCombat_{true};
@@ -1016,6 +1063,11 @@ private:
     float uiShieldFill_{0.0f};
     float uiEnergyFill_{0.0f};
     float uiDashFill_{0.0f};
+    Game::UI::ToastManager toastManager_{};
+    Game::UI::ToastConfig toastConfig_{};
+    Game::UI::ToastTheme toastTheme_{};
+    int talentPointsTotalCached_{0};
+    bool talentToastPrimed_{false};
     // Mini-map HUD
     Engine::UI::MiniMapHUD miniMapHud_{};
     bool miniMapEnabled_{true};
@@ -1057,6 +1109,8 @@ private:
     float rageTimer_{0.0f};
     float rageDamageBuff_{1.0f};
     float rageRateBuff_{1.0f};
+    float fearWanderTimer_{0.0f};
+    Engine::Vec2 fearWanderDir_{1.0f, 0.0f};
     float frenzyTimer_{0.0f};
     float frenzyRateBuff_{1.0f};
     float immortalTimer_{0.0f};
@@ -1107,7 +1161,7 @@ private:
     bool useRpgLoot_{false};
     Game::RPG::LootTable rpgLootTable_{};
     std::vector<Game::RPG::ConsumableDef> rpgConsumables_;
-    std::unordered_map<std::string, std::vector<Game::RPG::TalentNode>> rpgTalents_;
+    std::unordered_map<std::string, Game::RPG::TalentTree> rpgTalents_;
     std::mt19937 rpgRng_{std::random_device{}()};
     // Inventory
     std::vector<ItemInstance> inventory_;
@@ -1158,8 +1212,8 @@ private:
     int fogHeightTiles_{512};
     float fogOriginOffsetX_{0.0f};
     float fogOriginOffsetY_{0.0f};
-    float heroVisionRadiusBaseTiles_{8.0f};  // increased default vision (+2 tiles)
-    float heroVisionRadiusTiles_{8.0f};
+    float heroVisionRadiusBaseTiles_{11.0f};  // increased default vision (+3 tiles)
+    float heroVisionRadiusTiles_{11.0f};
     SDL_Texture* fogTexture_{nullptr};
 };
 

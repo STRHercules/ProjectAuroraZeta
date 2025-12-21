@@ -8,13 +8,13 @@ Title: **Project Aurora Zeta** (working title)
 
 ## 1. High-Level Vision
 
-A co-op, wave-based, top-down/isometric sci‑fi shooter with RTS-style camera controls and hero‑based progression. Up to 6 players survive escalating waves of enemies on the forbidden planet Zeta. Progress is tracked via persistent kill counts, talent trees, and hero unlocks. Cosmetics and some meta systems are “kill sinks.”
+A co-op, wave-based, top-down/isometric sci‑fi shooter with RTS-style camera controls and hero‑based progression. Up to 6 players survive escalating waves of enemies on the forbidden planet Zeta. Progress is tracked via persistent kill counts and hero unlocks; talents are match-scoped. Cosmetics and some meta systems are “kill sinks.”
 
 Core pillars:
 
 1. **Hero-driven wave survival** (1–6 players).
 2. **RTS-lite camera + ARPG readability**.
-3. **Persistent progression via kills, talents, challenges, and hero evolutions**.
+3. **Persistent progression via kills, challenges, and hero evolutions** (talents are match-scoped).
 4. **Custom “raw” C++/C# stack – no third-party game engine runtime.**
 
 ---
@@ -62,8 +62,8 @@ Loop per run:
      - Map variant.
      - Optional mutators (e.g., “Double Boss HP, +50% currency gain”).
    - Each player:
-     - Picks a **hero** (class archetype).
-     - Selects a **Career Perk** (persistent talent).
+    - Picks a **hero** (class archetype).
+    - Selects a **Career Perk** (future meta perk).
      - Optionally applies **cosmetic skins** (paid for in total kills, i.e., permanent kill sinks). :contentReference[oaicite:6]{index=6}  
 
 2. **Crash-Drop Intro (~30 seconds)**
@@ -141,6 +141,10 @@ Loop per run:
   - Drag-select is not primary; one hero per player.
   - Pings and camera define the “RTS feel.”
 
+HUD notes:
+- Bottom-left toast notifications for pickups, status effects (with countdowns), and talent point gains.
+- Status effect icons render above the player character; talent tree nodes display stat icons tinted by archetype color.
+
 ### 4.3 Spectator Drones (Dead Players)
 
 - On death, player controls a **spectator drone**:
@@ -193,6 +197,10 @@ Tier-2+ and EX heroes add exotic mechanics like terrain manipulation, time-dilat
 - Level-ups grant:
   - Ability ranks.
   - Choice of **2–3 augments per ability** (branching upgrade paths).
+- **Talent Tree (match-scoped)**
+  - Earn 1 talent point every 5 levels (floor(level / 5)).
+  - Talents reset at match end; no persistence to save file.
+  - `N` opens the talent tree and pauses all timers while open.
 - Boss waves drop **phase shards**:
   - Used for **Hero Evolution (EX form)** at high waves (e.g., 60+).
   - EX form changes visual model, modifies ultimate and possibly core playstyle.
@@ -205,12 +213,9 @@ Persistent systems (saved locally in encrypted file):
   - Per hero.
   - Per archetype (Assault, Builder, etc.).
   - Global total kills.
-- **Talent Tree**
-  - Three tracks: Offense, Defense, Utility.
-  - Nodes affect base stats, resource gain, cooldowns, etc.
-- **Prestige**
-  - Resets talent tree.
-  - Grants permanent +10% global XP gain and cosmetic border/badge.
+- **Prestige** (future meta progression)
+  - Planned: reset meta unlocks for long-term goals.
+  - Grants permanent cosmetic borders/badges.
 - **Challenges**
   - Example: “Finish Hard difficulty using only Builder heroes.”
   - Award: unique skins, titles, or permanent small passive buffs.
@@ -359,10 +364,11 @@ All persistent data is stored in an **encrypted local save file**:
 
 - Heroes unlocked.
 - Kills per hero/class/global.
-- Talent tree state and prestige level.
 - Challenges completed.
 - Cosmetics owned/unlocked.
 - Career stats (waves reached, bosses killed, etc.). :contentReference[oaicite:20]{index=20}  
+
+Match-scoped talents are excluded from persistence and reset every run.
 
 Save format and encryption details are defined in the Technical section below.
 
@@ -373,7 +379,7 @@ Save format and encryption details are defined in the Technical section below.
   - Item purchases from in-run Shop.
 - **Out-of-match**: Persistent **kill totals** are used to:
   - Unlock new heroes.
-  - Unlock tiers of Talent Tree.
+  - Unlock cosmetics and (future) prestige tiers.
   - Purchase cosmetics and vanity items (kill sink).
 
 Example cosmetic purchase:
@@ -526,7 +532,7 @@ Codex should implement the game in a sequence of small, verifiable milestones.
 
 ### Milestone 7 – Full Progression + Talent Tree
 
-- Implement talent tree UI and logic, including prestige.
+- Implement match-scoped talent tree UI and logic; prestige remains a future meta goal.
 - Connect persistent stats, hero unlocks, and challenges.
 - Implement kill-sink cosmetic purchase.
 
@@ -542,7 +548,7 @@ Codex should implement the game in a sequence of small, verifiable milestones.
 - Shared RPG stat model (STR/DEX/INT/END/LCK → derived AP/SP/AS/MS/ACC/EVA/CRIT/ARM/RES/TEN/shields) with clampable resists and armor curve `ARM/(ARM+K)`.
 - Single combat resolver order: hit quality → dodge/parry → crit → roll band (shaped) → armor/resist → shields → on-hit statuses with tenacity “saving throw” and CC fatigue (DR: 1.0 → 0.7 → 0.5 → immune).
 - Data-first attack/loot/talent structs live under `engine/gameplay/RPG*` and `game/rpg/`, usable by players and AI.
-- Loot generator rolls rarity (Luck-aware), base templates, and affixes; equipment contributions feed the aggregation pipeline.
+- Loot generator rolls rarity (Luck-aware), base templates, and affixes; per-rarity stat/affix scalars add roll-time variance; equipment contributions feed the aggregation pipeline.
 - Talent nodes award match-permanent stat contributions; consumables share cooldown categories (heal/cleanse/buff/bomb/food).
 - Character select now shows archetype biography, core attributes, specialties, and perk blurb sourced from `data/rpg/archetypes.json`.
 - Feature flags in `data/gameplay.json` (`useRpgCombat`, `useRpgLoot`, `rpgCombat` block) allow incremental rollout; loot/consumables/talents load from `data/rpg/*.json` with fallbacks.
@@ -559,6 +565,42 @@ Codex should implement the game in a sequence of small, verifiable milestones.
 - Elemental `SpellEffect` now maps into RPG damage types so resistances/vulnerabilities can matter beyond Physical/Arcane/True.
 - RNG shaping supports optional PRD-style anti-streak for crit/dodge/parry via `data/gameplay.json` (`rpgCombat.rng.usePRD`).
 - Consumable Buff effects can carry data-driven stat contributions via `data/rpg/consumables.json` (`effects[].stats`).
+
+### New in v0.0.181 – Economy + Consumable UI
+
+- Item sell value scales with rarity and affix/socket bonuses (tunable in `data/gameplay.json` under `economy`).
+- Character screen details/tooltip now show food regen and potion restore amounts.
+- Robin weapon swap ranges are tunable via `data/gameplay.json` (`weaponSwap` block).
+
+### New in v0.0.191 – Attribute Growth Hooks
+
+- Epic+ RPG gear now rolls random attribute bonuses (values and chances are data-driven in `data/rpg/loot.json`).
+- Tier 5 talent nodes grant attribute bonuses alongside their existing stat effects (tuned in `data/rpg/talents.json`).
+
+### New in v0.0.192 – Loot Rolls + Wave Scaling
+
+- Non-Unique RPG gear now ignores static base stats; power comes from rolled implicit stat lines + affixes.
+- Weapons/ammo use combat-type implicit stat pools (Melee/Ranged/Magical/Ammo) with per-rarity roll counts.
+- Item level scales from wave; implicit stats, affixes, and Unique base stats scale by ilvl.
+- RPG tooltips now show item level and rolled implicit stats.
+- Cleave chance, lifesteal, life-on-hit, and status chance hooks added to RPG stats/combat.
+
+### New in v0.0.193 – Armor Guarantees + Empty Gear Fix
+
+- Armor slots always include at least one +Armor line (implicit if needed).
+- Non-consumable gear now guarantees at least one stat line; socketables fall back to scaled base stats if otherwise empty.
+
+### New in v0.0.194 – Tooltip Cleanup
+
+- Hover tooltips now show only total RPG stat lines to avoid duplicate implicit entries.
+
+### New in v0.0.195 – Compare Coverage
+
+- RPG compare tooltip now reports deltas for all major derived stats and resistances.
+
+### New in v0.0.196 – Armor Rarity Scaling
+
+- Armor implicit rolls now scale with rarity (tunable via `armorImplicitScalarByRarity` in `data/rpg/loot.json`).
 
 ---
 

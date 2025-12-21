@@ -291,8 +291,8 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                         }
 
                         deadProjectiles.push_back(projEnt);
-                        // Lifesteal to hero if applicable.
-                        if (proj.lifesteal > 0.0f) {
+                        // Lifesteal to hero if applicable (handled via RPG stats when RPG combat is enabled).
+                        if (!useRpgCombat_ && proj.lifesteal > 0.0f) {
                             registry.view<Engine::ECS::Health, Engine::ECS::HeroTag>(
                                 [&](Engine::ECS::Entity, Engine::ECS::Health& heroHp, Engine::ECS::HeroTag&) {
                                     float heal = dealt * proj.lifesteal;
@@ -437,9 +437,11 @@ void CollisionSystem::update(Engine::ECS::Registry& registry) {
                                         registry.emplace<Engine::ECS::Status>(heroEnt, Engine::ECS::Status{});
                                     }
                                     if (auto* st = registry.get<Engine::ECS::Status>(heroEnt)) {
-                                        auto spec = statusFactory().make(Engine::Status::EStatusId::Feared);
-                                        spec.duration = onHit->fearDuration;
-                                        (void)st->container.apply(spec, enemyEnt);
+                                        if (!st->container.has(Engine::Status::EStatusId::Feared)) {
+                                            auto spec = statusFactory().make(Engine::Status::EStatusId::Feared);
+                                            spec.duration = onHit->fearDuration;
+                                            (void)st->container.apply(spec, enemyEnt);
+                                        }
                                     }
                                 }
                             }

@@ -9,6 +9,13 @@
       "usePRD": true
     }
   },
+  "rpgLoot": {
+    "itemLevelWaveDivisor": 3,
+    "itemScalePerLevel": 0.06,
+    "cleaveRadius": 90.0,
+    "cleaveDamageMult": 0.4,
+    "cleaveMaxTargets": 2
+  },
   "enemy": {
     "hp": 40.0,
     "shields": 20.0,
@@ -70,6 +77,10 @@
     "arcDegrees": 70.0,
     "damageMultiplier": 1.3
   },
+  "weaponSwap": {
+    "robinBowRangeBonus": 60.0,
+    "robinSwordMeleeRangeBonus": 0.0
+  },
   "plasma": {
     "shieldDamageMultiplier": 1.5,
     "healthDamageMultiplier": 0.75
@@ -124,7 +135,36 @@
     "intermissionRegenPerSecond": 26.0
   },
   "ui": {
-    "enemyLowThreshold": 5
+    "enemyLowThreshold": 5,
+    "toast": {
+      "enabled": true,
+      "marginLeft": 24.0,
+      "marginBottom": 24.0,
+      "maxWidth": 380.0,
+      "paddingX": 14.0,
+      "paddingY": 10.0,
+      "spacing": 10.0,
+      "enterDuration": 0.22,
+      "exitDuration": 0.22,
+      "enterOffset": 28.0,
+      "exitOffset": 12.0,
+      "settleSpeed": 16.0,
+      "lifetime": 2.8,
+      "maxVisible": 7,
+      "titleScale": 0.95,
+      "subtitleScale": 0.82,
+      "timerScale": 0.82,
+      "subtitleGap": 4.0,
+      "cornerRadius": 12.0,
+      "accentWidth": 5.0,
+      "shadowOffset": 4.0,
+      "shadowAlpha": 90.0,
+      "panelAlpha": 215.0,
+      "outlineAlpha": 150.0,
+      "topBorderHeight": 2.0,
+      "bottomBorderHeight": 2.0,
+      "timerGap": 8.0
+    }
   },
   "shop": {
     "damageCost": 25,
@@ -142,11 +182,13 @@
     "damagePerLevel": 1.0,
     "attackSpeedPerLevel": 0.05,
     "rangePerLevel": 60.0,
-    "visionPerLevel": 1.0,
+    "visionPerLevel": 2.0,
     "healthPerLevel": 5.0,
     "armorPerLevel": 1.0,
     "rangeMax": 5,
-    "visionMax": 5
+    "visionMax": 3,
+    "visionCostMultiplier": 1.5,
+    "visionCosts": [500, 1250, 2000]
   },
   "abilityScaling": {
     "assassinCloakDurationPerLevel": 0.5
@@ -175,6 +217,10 @@
   },
   "rpgConsumables": {
     "foodRegenByRarity": [0.08, 0.12, 0.16, 0.20, 0.24]
+  },
+  "economy": {
+    "sellRarityMultipliers": [1.0, 1.2, 1.45, 1.75, 2.1, 2.5],
+    "sellAffixBonus": 0.08
   },
   "dash": {
     "speedMultiplier": 3.5,

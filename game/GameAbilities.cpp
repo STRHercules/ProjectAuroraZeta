@@ -683,7 +683,8 @@ void GameRoot::executeAbility(int index) {
         // Short dash toward cursor (ability-driven).
         dashDir_ = dir;
         dashTimer_ = std::max(dashTimer_, 0.16f + 0.01f * slot.level);
-        dashInvulnTimer_ = std::max(dashInvulnTimer_, dashTimer_ * 0.35f);
+        // Keep Ellis invulnerable through the thrust and a short post-landing window.
+        dashInvulnTimer_ = std::max(dashInvulnTimer_, dashTimer_ + 1.5f);
         dashTrailRedTimer_ = std::max(dashTrailRedTimer_, 0.30f);
         if (auto* vel = registry_.get<Engine::ECS::Velocity>(hero_)) {
             vel->value = {dashDir_.x * heroMoveSpeed_ * moveSpeedBuffMul_ * dashSpeedMul_,

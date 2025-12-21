@@ -19,6 +19,7 @@ InputKey toInputKey(const std::string& key) {
         if (k == "f1") return InputKey::Reload;
         if (k == "f") return InputKey::Hotbar2;
         if (k == "m") return InputKey::MenuBack;
+        if (k == "n") return InputKey::TalentTree;
         if (k == "1") return InputKey::Ability1;
         if (k == "2") return InputKey::Ability2;
         if (k == "3") return InputKey::Ability3;
@@ -38,6 +39,7 @@ InputKey toInputKey(const std::string& key) {
     if (lower == "r" || lower == "restart") return InputKey::Restart;
     if (lower == "b" || lower == "toggle_shop" || lower == "shop") return InputKey::ToggleShop;
     if (lower == "i" || lower == "character" || lower == "character_screen") return InputKey::CharacterScreen;
+    if (lower == "n" || lower == "talent_tree" || lower == "talenttree") return InputKey::TalentTree;
     if (lower == "v" || lower == "build" || lower == "build_menu") return InputKey::BuildMenu;
     if (lower == "swap_weapon" || lower == "weapon_swap" || lower == "lalt" || lower == "leftalt" || lower == "alt") return InputKey::SwapWeapon;
     if (lower == "escape" || lower == "pause" || lower == "esc") return InputKey::Pause;
@@ -109,6 +111,14 @@ ActionState ActionMapper::sample(const InputState& input) const {
         InputKey mapped = toInputKey(key);
         if (mapped != InputKey::Count && input.isDown(mapped)) {
             act.characterScreen = true;
+            break;
+        }
+    }
+    act.talentTree = input.isDown(InputKey::TalentTree);
+    for (const auto& key : bindings_.talentTree) {
+        InputKey mapped = toInputKey(key);
+        if (mapped != InputKey::Count && input.isDown(mapped)) {
+            act.talentTree = true;
             break;
         }
     }

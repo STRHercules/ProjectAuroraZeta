@@ -18,6 +18,14 @@ namespace Game::RpgDamage {
 using DebugSink = std::function<void(const std::string&)>;
 using OutcomeSink = std::function<void(const Engine::Gameplay::RPG::HitOutcome&)>;
 
+struct CleaveConfig {
+    float radius{90.0f};
+    float damageMultiplier{0.4f};
+    int maxTargets{2};
+};
+
+void setCleaveConfig(const CleaveConfig& cfg);
+
 // Applies damage to `defenderHp` (which must correspond to `defender`) and returns total damage dealt (shield+health).
 // When `useRpgCombat` is enabled, uses Engine::Gameplay::RPG::ResolveHit() with per-entity RPG snapshots.
 float apply(Engine::ECS::Registry& registry,

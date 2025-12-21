@@ -1,3 +1,22 @@
+# Assign some sort of class identifier to each Champion
+
+# Normalize asset sizing/scale, style
+- Increase scale of Star, Kaboom, Recharge pickups
+    - Potentially change Kaboom to a more visual 'bomb'
+    - Recharge is very small
+- Frenzy makes little sense visually
+- Better refine health pickups
+
+# Fear is causing death quite a lot
+
+# Introduce 
+
+# Monsters are still being recolored, some assets are flashing colors
+
+# Game sometimes closes match to main menu when handling items in inventory
+
+# Cap monster speed at a certain point
+
 # Powerups that boost abilities
 * Scroll could make lightning red, and 5x/10x stronger for X minutes
 * Permanent Spell/Ability evolution?
@@ -24,9 +43,6 @@
 
 # Add training time to Mini-Units
 * RTS Style queue?
-
-# Potions and Gems should not get affixes
-* Potions of the same type should also stack.
 
 # Zones have no assets
 * Currently no idea how to identify these zones in-game

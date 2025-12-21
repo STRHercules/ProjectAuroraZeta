@@ -124,6 +124,124 @@ inline std::string buildingKey(Game::BuildingType type) {
     return "turret";
 }
 
+inline bool statusHasTag(const Engine::Status::StatusSpec& spec, Engine::Status::EStatusTag tag) {
+    for (const auto& t : spec.tags) {
+        if (t == tag) return true;
+    }
+    return false;
+}
+
+inline Game::UI::ToastCategory statusToastCategory(const Engine::Status::StatusSpec& spec) {
+    if (spec.isDebuff) return Game::UI::ToastCategory::Debuff;
+    if (statusHasTag(spec, Engine::Status::EStatusTag::CrowdControl) ||
+        statusHasTag(spec, Engine::Status::EStatusTag::MovementLock) ||
+        statusHasTag(spec, Engine::Status::EStatusTag::CastingLock) ||
+        statusHasTag(spec, Engine::Status::EStatusTag::SpeedImpair)) {
+        return Game::UI::ToastCategory::Debuff;
+    }
+    return Game::UI::ToastCategory::Buff;
+}
+
+inline std::string statusDisplayName(Engine::Status::EStatusId id) {
+    switch (id) {
+        case Engine::Status::EStatusId::ArmorReduction: return "Armor Broken";
+        case Engine::Status::EStatusId::Blindness: return "Blindness";
+        case Engine::Status::EStatusId::Cauterize: return "Cauterize";
+        case Engine::Status::EStatusId::Feared: return "Feared";
+        case Engine::Status::EStatusId::Silenced: return "Silenced";
+        case Engine::Status::EStatusId::Stasis: return "Stasis";
+        case Engine::Status::EStatusId::Cloaking: return "Cloaking";
+        case Engine::Status::EStatusId::Unstoppable: return "Unstoppable";
+    }
+    return "Status";
+}
+
+inline int statusIconIndex(Engine::Status::EStatusId id) {
+    switch (id) {
+        case Engine::Status::EStatusId::Blindness: return 4;
+        case Engine::Status::EStatusId::Feared: return 5;
+        case Engine::Status::EStatusId::Stasis: return 8;
+        case Engine::Status::EStatusId::Cauterize: return 9;
+        case Engine::Status::EStatusId::Unstoppable: return 10;
+        case Engine::Status::EStatusId::ArmorReduction:
+        case Engine::Status::EStatusId::Silenced:
+        case Engine::Status::EStatusId::Cloaking:
+            return -1;
+    }
+    return -1;
+}
+
+struct TalentIconRef {
+    int row{0};
+    int col{0};
+    bool valid{false};
+};
+
+inline TalentIconRef talentIconForNode(const Game::RPG::TalentNode& node) {
+    TalentIconRef best{};
+    float bestScore = 0.0f;
+    auto consider = [&](float value, int row, int col, float scale) {
+        if (value == 0.0f) return;
+        const float score = std::abs(value) * scale;
+        if (!best.valid || score > bestScore) {
+            best = TalentIconRef{row, col, true};
+            bestScore = score;
+        }
+    };
+
+    const auto& f = node.bonus.flat;
+    consider(f.accuracy, 2, 14, 1.0f);         // R3C15
+    consider(f.armor, 1, 7, 1.0f);             // R2C8
+    consider(f.armorPen, 2, 15, 1.0f);         // R3C16
+    consider(f.attackPower, 1, 6, 1.0f);       // R2C7
+    consider(f.cooldownReduction, 3, 14, 100.0f);  // R4C15
+    consider(f.critChance, 2, 3, 100.0f);      // R3C4
+    consider(f.critMult, 2, 1, 100.0f);        // R3C2
+    consider(f.evasion, 4, 3, 1.0f);           // R5C4
+    consider(f.healthRegen, 4, 12, 1.0f);      // R5C13
+    consider(f.resourceRegen, 4, 13, 1.0f);    // R5C14
+    consider(f.shieldRegen, 4, 14, 1.0f);      // R5C15
+    consider(f.spellPower, 1, 14, 1.0f);       // R2C15
+    consider(f.tenacity, 0, 13, 1.0f);         // R1C14
+
+    const auto& m = node.bonus.mult;
+    consider(m.armor, 1, 9, 100.0f);           // R2C10
+    consider(m.attackPower, 1, 6, 100.0f);     // R2C7
+    consider(m.attackSpeed, 2, 0, 100.0f);     // R3C1
+    consider(m.healthMax, 0, 9, 100.0f);       // R1C10
+    consider(m.moveSpeed, 3, 6, 100.0f);       // R4C7
+    consider(m.shieldMax, 1, 0, 100.0f);       // R2C1
+    consider(m.spellPower, 1, 13, 100.0f);     // R2C14
+
+    return best;
+}
+
+inline Engine::Color talentArchetypeColor(const std::string& archetypeId) {
+    if (archetypeId == "tank") return Engine::Color{0x2F, 0x3A, 0x44, 255};
+    if (archetypeId == "healer") return Engine::Color{0x7E, 0xE6, 0xC4, 255};
+    if (archetypeId == "damage") return Engine::Color{0xD7, 0x26, 0x3D, 255};
+    if (archetypeId == "assassin") return Engine::Color{0x6A, 0x1B, 0x9A, 255};
+    if (archetypeId == "builder") return Engine::Color{0xB5, 0x6A, 0x3A, 255};
+    if (archetypeId == "support") return Engine::Color{0x2E, 0x6B, 0xE6, 255};
+    if (archetypeId == "special") return Engine::Color{0x00, 0xE5, 0xFF, 255};
+    if (archetypeId == "summoner") return Engine::Color{0x0F, 0xA3, 0xA8, 255};
+    if (archetypeId == "druid") return Engine::Color{0x3F, 0x8F, 0x4E, 255};
+    if (archetypeId == "wizard") return Engine::Color{0x8B, 0x5C, 0xF6, 255};
+    return Engine::Color{200, 210, 225, 255};
+}
+
+inline std::string powerupDisplayName(Game::Pickup::Powerup powerup) {
+    switch (powerup) {
+        case Game::Pickup::Powerup::Heal: return "Health Surge";
+        case Game::Pickup::Powerup::Kaboom: return "Kaboom";
+        case Game::Pickup::Powerup::Recharge: return "Recharge";
+        case Game::Pickup::Powerup::Frenzy: return "Frenzy";
+        case Game::Pickup::Powerup::Immortal: return "Immortal";
+        case Game::Pickup::Powerup::Freeze: return "Freeze";
+        default: return "Powerup";
+    }
+}
+
 constexpr std::size_t offensiveTypeIndex(Game::OffensiveType type) {
     return static_cast<std::size_t>(type);
 }
@@ -434,6 +552,8 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     shieldBarTex_ = loadGuiTex("assets/Sprites/GUI/armorbar.png");
     energyBarTex_ = loadGuiTex("assets/Sprites/GUI/energybar.png");
     dashBarTex_ = loadGuiTex("assets/Sprites/GUI/dashbar.png");
+    talentIconTex_ = loadGuiTex("assets/Sprites/GUI/Talents.png");
+    statusEffectTex_ = loadGuiTex("assets/Sprites/GUI/StatusEffects.png");
     if (eventSystem_) eventSystem_->setTextureManager(textureManager_.get());
     loadProgress();
     netSession_ = std::make_unique<Game::Net::NetSession>();
@@ -564,8 +684,14 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     bool useRpgLoot = useRpgLoot_;
     bool combatDebugOverlay = combatDebugOverlay_;
     auto rpgCfg = rpgResolverConfig_;
+    int rpgItemLevelWaveDivisor = rpgItemLevelWaveDivisor_;
+    float rpgItemScalePerLevel = rpgItemScalePerLevel_;
+    float rpgCleaveRadius = rpgCleaveRadius_;
+    float rpgCleaveDamageMult = rpgCleaveDamageMult_;
+    int rpgCleaveMaxTargets = rpgCleaveMaxTargets_;
     bool showDamageNumbers = showDamageNumbers_;
     bool screenShake = screenShake_;
+    UI::ToastConfig toastConfig = toastConfig_;
     int xpPerKill = xpPerKill_;
     int xpPerWave = xpPerWave_;
     float xpPerDmgDealt = xpPerDamageDealt_;
@@ -605,6 +731,14 @@ bool GameRoot::onInitialize(Engine::Application& app) {
                     rpgCfg.rng.shaped = rr.value("shaped", rpgCfg.rng.shaped);
                     rpgCfg.rng.usePRD = rr.value("usePRD", rpgCfg.rng.usePRD);
                 }
+            }
+            if (j.contains("rpgLoot") && j["rpgLoot"].is_object()) {
+                const auto& rl = j["rpgLoot"];
+                rpgItemLevelWaveDivisor = std::max(1, rl.value("itemLevelWaveDivisor", rpgItemLevelWaveDivisor));
+                rpgItemScalePerLevel = rl.value("itemScalePerLevel", rpgItemScalePerLevel);
+                rpgCleaveRadius = rl.value("cleaveRadius", rpgCleaveRadius);
+                rpgCleaveDamageMult = rl.value("cleaveDamageMult", rpgCleaveDamageMult);
+                rpgCleaveMaxTargets = rl.value("cleaveMaxTargets", rpgCleaveMaxTargets);
             }
             if (j.contains("enemy")) {
                 waveSettings.enemyHp = j["enemy"].value("hp", waveSettings.enemyHp);
@@ -660,6 +794,10 @@ bool GameRoot::onInitialize(Engine::Application& app) {
                 meleeConfig_.arcDegrees = j["melee"].value("arcDegrees", meleeConfig_.arcDegrees);
                 meleeConfig_.damageMultiplier = j["melee"].value("damageMultiplier", meleeConfig_.damageMultiplier);
             }
+            if (j.contains("weaponSwap") && j["weaponSwap"].is_object()) {
+                robinBowRangeBonus_ = j["weaponSwap"].value("robinBowRangeBonus", robinBowRangeBonus_);
+                robinSwordMeleeRangeBonus_ = j["weaponSwap"].value("robinSwordMeleeRangeBonus", robinSwordMeleeRangeBonus_);
+            }
             if (j.contains("plasma") && j["plasma"].is_object()) {
                 plasmaConfig_.shieldDamageMultiplier = j["plasma"].value("shieldDamageMultiplier", plasmaConfig_.shieldDamageMultiplier);
                 plasmaConfig_.healthDamageMultiplier = j["plasma"].value("healthDamageMultiplier", plasmaConfig_.healthDamageMultiplier);
@@ -709,6 +847,36 @@ bool GameRoot::onInitialize(Engine::Application& app) {
             }
             if (j.contains("ui")) {
                 enemyLowThreshold = j["ui"].value("enemyLowThreshold", enemyLowThreshold);
+                if (j["ui"].contains("toast") && j["ui"]["toast"].is_object()) {
+                    const auto& jt = j["ui"]["toast"];
+                    toastConfig.enabled = jt.value("enabled", toastConfig.enabled);
+                    toastConfig.marginLeft = jt.value("marginLeft", toastConfig.marginLeft);
+                    toastConfig.marginBottom = jt.value("marginBottom", toastConfig.marginBottom);
+                    toastConfig.maxWidth = jt.value("maxWidth", toastConfig.maxWidth);
+                    toastConfig.paddingX = jt.value("paddingX", toastConfig.paddingX);
+                    toastConfig.paddingY = jt.value("paddingY", toastConfig.paddingY);
+                    toastConfig.spacing = jt.value("spacing", toastConfig.spacing);
+                    toastConfig.enterDuration = jt.value("enterDuration", toastConfig.enterDuration);
+                    toastConfig.exitDuration = jt.value("exitDuration", toastConfig.exitDuration);
+                    toastConfig.enterOffset = jt.value("enterOffset", toastConfig.enterOffset);
+                    toastConfig.exitOffset = jt.value("exitOffset", toastConfig.exitOffset);
+                    toastConfig.settleSpeed = jt.value("settleSpeed", toastConfig.settleSpeed);
+                    toastConfig.lifetime = jt.value("lifetime", toastConfig.lifetime);
+                    toastConfig.maxVisible = jt.value("maxVisible", toastConfig.maxVisible);
+                    toastConfig.titleScale = jt.value("titleScale", toastConfig.titleScale);
+                    toastConfig.subtitleScale = jt.value("subtitleScale", toastConfig.subtitleScale);
+                    toastConfig.timerScale = jt.value("timerScale", toastConfig.timerScale);
+                    toastConfig.subtitleGap = jt.value("subtitleGap", toastConfig.subtitleGap);
+                    toastConfig.cornerRadius = jt.value("cornerRadius", toastConfig.cornerRadius);
+                    toastConfig.accentWidth = jt.value("accentWidth", toastConfig.accentWidth);
+                    toastConfig.shadowOffset = jt.value("shadowOffset", toastConfig.shadowOffset);
+                    toastConfig.shadowAlpha = jt.value("shadowAlpha", toastConfig.shadowAlpha);
+                    toastConfig.panelAlpha = jt.value("panelAlpha", toastConfig.panelAlpha);
+                    toastConfig.outlineAlpha = jt.value("outlineAlpha", toastConfig.outlineAlpha);
+                    toastConfig.topBorderHeight = jt.value("topBorderHeight", toastConfig.topBorderHeight);
+                    toastConfig.bottomBorderHeight = jt.value("bottomBorderHeight", toastConfig.bottomBorderHeight);
+                    toastConfig.timerGap = jt.value("timerGap", toastConfig.timerGap);
+                }
             }
             if (j.contains("shop")) {
                 shopDamageCost = j["shop"].value("damageCost", shopDamageCost);
@@ -721,6 +889,13 @@ bool GameRoot::onInitialize(Engine::Application& app) {
             if (j.contains("abilityShop")) {
                 abilityShopBaseCost_ = j["abilityShop"].value("baseCost", abilityShopBaseCost_);
                 abilityShopCostGrowth_ = j["abilityShop"].value("costGrowth", abilityShopCostGrowth_);
+                abilityVisionCostMultiplier_ = j["abilityShop"].value("visionCostMultiplier", abilityVisionCostMultiplier_);
+                if (j["abilityShop"].contains("visionCosts") && j["abilityShop"]["visionCosts"].is_array()) {
+                    const auto& costs = j["abilityShop"]["visionCosts"];
+                    for (std::size_t i = 0; i < abilityVisionCosts_.size() && i < costs.size(); ++i) {
+                        abilityVisionCosts_[i] = costs[i].get<int>();
+                    }
+                }
                 abilityDamagePerLevel_ = j["abilityShop"].value("damagePerLevel", abilityDamagePerLevel_);
                 abilityAttackSpeedPerLevel_ = j["abilityShop"].value("attackSpeedPerLevel", abilityAttackSpeedPerLevel_);
                 abilityRangePerLevel_ = j["abilityShop"].value("rangePerLevel", abilityRangePerLevel_);
@@ -776,6 +951,16 @@ bool GameRoot::onInitialize(Engine::Application& app) {
                         rpgFoodRegenByRarity_[i] = arr[i].get<float>();
                     }
                 }
+            }
+            if (j.contains("economy") && j["economy"].is_object()) {
+                const auto& eco = j["economy"];
+                if (eco.contains("sellRarityMultipliers") && eco["sellRarityMultipliers"].is_array()) {
+                    const auto& arr = eco["sellRarityMultipliers"];
+                    for (std::size_t i = 0; i < rpgSellRarityMultipliers_.size() && i < arr.size(); ++i) {
+                        rpgSellRarityMultipliers_[i] = arr[i].get<float>();
+                    }
+                }
+                rpgSellAffixBonus_ = std::max(0.0f, eco.value("sellAffixBonus", rpgSellAffixBonus_));
             }
             if (j.contains("shop") && j["shop"].is_object()) {
                 rpgShopEquipChance_ = j["shop"].value("rpgEquipChance", rpgShopEquipChance_);
@@ -870,6 +1055,8 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     dashInvulnFraction_ = dashInvulnFrac;
     showDamageNumbers_ = showDamageNumbers;
     screenShake_ = screenShake;
+    toastConfig_ = toastConfig;
+    toastManager_.configure(toastConfig_, toastTheme_);
     salvageReward_ = salvageReward;
     pickupItemShare_ = std::clamp(pickupItemShare, 0.0f, 1.0f);
     copperPickupMinBase_ = copperPickupMin_;
@@ -903,6 +1090,12 @@ bool GameRoot::onInitialize(Engine::Application& app) {
     useRpgLoot_ = useRpgLoot;
     combatDebugOverlay_ = combatDebugOverlay;
     rpgResolverConfig_ = rpgCfg;
+    rpgItemLevelWaveDivisor_ = std::max(1, rpgItemLevelWaveDivisor);
+    rpgItemScalePerLevel_ = rpgItemScalePerLevel;
+    rpgCleaveRadius_ = rpgCleaveRadius;
+    rpgCleaveDamageMult_ = rpgCleaveDamageMult;
+    rpgCleaveMaxTargets_ = std::max(0, rpgCleaveMaxTargets);
+    Game::RpgDamage::setCleaveConfig({rpgCleaveRadius_, rpgCleaveDamageMult_, rpgCleaveMaxTargets_});
     if (collisionSystem_) collisionSystem_->setRpgCombat(useRpgCombat_, rpgResolverConfig_);
     if (enemyAISystem_) enemyAISystem_->setRpgCombat(useRpgCombat_, rpgResolverConfig_, &rng_);
     if (miniUnitSystem_) miniUnitSystem_->setRpgCombat(useRpgCombat_, rpgResolverConfig_, &rng_);
@@ -1253,6 +1446,8 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
     pauseTogglePrev_ = actions.pause;
     bool characterEdge = actions.characterScreen && !characterScreenPrev_;
     characterScreenPrev_ = actions.characterScreen;
+    bool talentTreeEdge = actions.talentTree && !talentTreePrev_;
+    talentTreePrev_ = actions.talentTree;
     bool menuBackEdge = actions.menuBack && !menuBackPrev_;
     menuBackPrev_ = actions.menuBack;
     const bool buildMenuEdge = actions.buildMenu && !buildMenuPrev_;
@@ -1268,11 +1463,13 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         clearBuildPreview();
     }
     auto closeOverlays = [&]() {
-        const bool hadAny = itemShopOpen_ || abilityShopOpen_ || levelChoiceOpen_ || characterScreenOpen_ || buildMenuOpen_;
+        const bool hadAny = itemShopOpen_ || abilityShopOpen_ || levelChoiceOpen_ || characterScreenOpen_ ||
+                            talentTreeOpen_ || buildMenuOpen_;
         itemShopOpen_ = false;
         abilityShopOpen_ = false;
         levelChoiceOpen_ = false;
         characterScreenOpen_ = false;
+        talentTreeOpen_ = false;
         buildMenuOpen_ = false;
         clearBuildPreview();
         pauseConfirmMainMenuOpen_ = false;
@@ -1356,7 +1553,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
     }
     if (!inMenu_) {
         bool anyOverlay = userPaused_ || itemShopOpen_ || abilityShopOpen_ || levelChoiceOpen_ || characterScreenOpen_ ||
-                          buildMenuOpen_;
+                          talentTreeOpen_ || buildMenuOpen_;
         if (pausePressed) {
             if (anyOverlay) {
                 closeOverlays();
@@ -1373,6 +1570,17 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
     }
     if (characterEdge && !inMenu_) {
         characterScreenOpen_ = !characterScreenOpen_;
+    }
+    if (talentTreeEdge && !inMenu_) {
+        if (!talentTreeOpen_) {
+            closeOverlays();
+            talentTreeOpen_ = true;
+            playUiSelect();
+        } else {
+            talentTreeOpen_ = false;
+            playUiClose();
+        }
+        refreshPauseState();
     }
     refreshPauseState();
     if (actions.toggleFollow && (itemShopOpen_ || abilityShopOpen_)) {
@@ -1438,7 +1646,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         pauseMenuBlink_ = 0.0;
     }
     // Pause menu mouse handling
-    if (paused_ && !itemShopOpen_ && !abilityShopOpen_ && !levelChoiceOpen_ && !defeated_) {
+    if (paused_ && !itemShopOpen_ && !abilityShopOpen_ && !levelChoiceOpen_ && !talentTreeOpen_ && !defeated_) {
         bool leftClick = input.isMouseButtonDown(0);
         bool edge = leftClick && !pauseClickPrev_;
         pauseClickPrev_ = leftClick;
@@ -1686,20 +1894,28 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
 
         if (auto* vel = registry_.get<Engine::ECS::Velocity>(hero_)) {
             const auto* status = registry_.get<Engine::ECS::Status>(hero_);
-            const bool movementLocked = status && status->container.blocksMovement();
             const bool feared = status && status->container.isFeared();
+            const bool movementLocked = status && status->container.blocksMovement() && !feared;
             const float moveMul = status ? status->container.moveSpeedMultiplier() : 1.0f;
+            if (!feared) {
+                fearWanderTimer_ = 0.0f;
+            }
             if (shadowDanceActive_) {
                 vel->value = {0.0f, 0.0f};
                 moveTargetActive_ = false;
             } else if (paused_ || defeatDelayActive_ || characterScreenOpen_ || ((heroHp && !heroAlive) && !heroGhost) || movementLocked) {
                 vel->value = {0.0f, 0.0f};
             } else if (feared) {
-                std::uniform_real_distribution<float> ang(0.0f, 6.28318f);
-                float a = ang(rng_);
-                Engine::Vec2 dir{std::cos(a), std::sin(a)};
-                vel->value = {dir.x * heroMoveSpeed_ * moveSpeedBuffMul_ * moveMul,
-                              dir.y * heroMoveSpeed_ * moveSpeedBuffMul_ * moveMul};
+                fearWanderTimer_ = std::max(0.0f, fearWanderTimer_ - static_cast<float>(step.deltaSeconds));
+                if (fearWanderTimer_ <= 0.0f) {
+                    std::uniform_real_distribution<float> ang(0.0f, 6.28318f);
+                    std::uniform_real_distribution<float> dur(0.18f, 0.35f);
+                    float a = ang(rng_);
+                    fearWanderDir_ = {std::cos(a), std::sin(a)};
+                    fearWanderTimer_ = dur(rng_);
+                }
+                vel->value = {fearWanderDir_.x * heroMoveSpeed_ * moveSpeedBuffMul_ * moveMul,
+                              fearWanderDir_.y * heroMoveSpeed_ * moveSpeedBuffMul_ * moveMul};
             } else if (movementMode_ == MovementMode::Modern) {
                 vel->value = {actions.moveX * heroMoveSpeed_ * moveSpeedBuffMul_ * moveMul,
                               actions.moveY * heroMoveSpeed_ * moveSpeedBuffMul_ * moveMul};
@@ -1794,9 +2010,16 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
     if (abilityShopOpen_ || itemShopOpen_) {
             // Ability shop point-click purchase: any left click buys the currently selected (hovered) card.
             if (abilityShopOpen_) {
-                auto costForLevel = [&](int level) {
+                auto costForLevel = [&](int level, float multiplier = 1.0f) {
                     return static_cast<int>(std::round(static_cast<float>(abilityShopBaseCost_) *
-                                                       std::pow(abilityShopCostGrowth_, static_cast<float>(level))));
+                                                       std::pow(abilityShopCostGrowth_, static_cast<float>(level)) *
+                                                       multiplier));
+                };
+                auto visionCostForLevel = [&](int level) {
+                    if (level >= 0 && level < static_cast<int>(abilityVisionCosts_.size())) {
+                        return abilityVisionCosts_[static_cast<std::size_t>(level)];
+                    }
+                    return costForLevel(level, abilityVisionCostMultiplier_);
                 };
                 struct AbilityCard {
                     int maxLevel{999};
@@ -1833,9 +2056,11 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                         projectileLifetime_ += abilityRangePerLevel_ / std::max(1.0f, projectileSpeed_);
                         return true;
                     }};
-                    cards[3] = AbilityCard{abilityVisionMaxBonus_, abilityVisionLevel_, costForLevel(abilityVisionLevel_), [&]() {
+                    cards[3] = AbilityCard{
+                        abilityVisionMaxBonus_, abilityVisionLevel_,
+                        visionCostForLevel(abilityVisionLevel_), [&]() {
                         if (abilityVisionLevel_ >= abilityVisionMaxBonus_) return false;
-                        int cost = costForLevel(abilityVisionLevel_);
+                        int cost = visionCostForLevel(abilityVisionLevel_);
                         if (copper_ < cost) return false;
                         copper_ -= cost;
                         abilityVisionLevel_ += 1;
@@ -2193,6 +2418,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                                     if (eff.scriptId == "scroll_fireball") {
                                         if (!heroTf) return false;
                                         float scale = eff.magnitude > 0.0f ? eff.magnitude : 1.0f;
+                                        float speedMul = getParam(eff, 0, 0.9f);
                                         Engine::Vec2 dir = aimDirFromCursor();
                                         Engine::Gameplay::DamageEvent dmg{};
                                         dmg.type = Engine::Gameplay::DamageType::Spell;
@@ -2204,7 +2430,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                                                 0.55f,
                                                 4.5f,
                                                 false});
-                                        auto proj = spawnProjectileLocal(dir, projectileSpeed_ * 0.9f, dmg, 1.3f);
+                                        auto proj = spawnProjectileLocal(dir, projectileSpeed_ * speedMul, dmg, 1.3f);
                                         if (registry_.has<Game::SpellEffect>(proj)) registry_.remove<Game::SpellEffect>(proj);
                                         registry_.emplace<Game::SpellEffect>(proj, Game::SpellEffect{Game::ElementType::Fire, 3});
                                         registry_.emplace<Game::AreaDamage>(proj, Game::AreaDamage{96.0f, 1.0f});
@@ -2551,11 +2777,12 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                                         auto hasStatsPayload = [&](const Engine::Gameplay::RPG::StatContribution& sc) {
                                             if (sc.flat.attackPower != 0.0f || sc.flat.spellPower != 0.0f || sc.flat.attackSpeed != 0.0f ||
                                                 sc.flat.moveSpeed != 0.0f || sc.flat.accuracy != 0.0f || sc.flat.critChance != 0.0f ||
-                                                sc.flat.critMult != 0.0f || sc.flat.armorPen != 0.0f || sc.flat.evasion != 0.0f ||
+                                                sc.flat.critMult != 0.0f || sc.flat.armorPen != 0.0f || sc.flat.lifesteal != 0.0f ||
+                                                sc.flat.lifeOnHit != 0.0f || sc.flat.cleaveChance != 0.0f || sc.flat.evasion != 0.0f ||
                                                 sc.flat.armor != 0.0f || sc.flat.tenacity != 0.0f || sc.flat.shieldMax != 0.0f ||
                                                 sc.flat.shieldRegen != 0.0f || sc.flat.healthMax != 0.0f || sc.flat.healthRegen != 0.0f ||
                                                 sc.flat.cooldownReduction != 0.0f || sc.flat.resourceRegen != 0.0f || sc.flat.goldGainMult != 0.0f ||
-                                                sc.flat.rarityScore != 0.0f) {
+                                                sc.flat.rarityScore != 0.0f || sc.flat.statusChance != 0.0f) {
                                                 return true;
                                             }
                                             for (float v : sc.flat.resists.values) {
@@ -2563,11 +2790,12 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                                             }
                                             if (sc.mult.attackPower != 0.0f || sc.mult.spellPower != 0.0f || sc.mult.attackSpeed != 0.0f ||
                                                 sc.mult.moveSpeed != 0.0f || sc.mult.accuracy != 0.0f || sc.mult.critChance != 0.0f ||
-                                                sc.mult.critMult != 0.0f || sc.mult.armorPen != 0.0f || sc.mult.evasion != 0.0f ||
+                                                sc.mult.critMult != 0.0f || sc.mult.armorPen != 0.0f || sc.mult.lifesteal != 0.0f ||
+                                                sc.mult.lifeOnHit != 0.0f || sc.mult.cleaveChance != 0.0f || sc.mult.evasion != 0.0f ||
                                                 sc.mult.armor != 0.0f || sc.mult.tenacity != 0.0f || sc.mult.shieldMax != 0.0f ||
                                                 sc.mult.shieldRegen != 0.0f || sc.mult.healthMax != 0.0f || sc.mult.healthRegen != 0.0f ||
                                                 sc.mult.cooldownReduction != 0.0f || sc.mult.resourceRegen != 0.0f || sc.mult.goldGainMult != 0.0f ||
-                                                sc.mult.rarityScore != 0.0f) {
+                                                sc.mult.rarityScore != 0.0f || sc.mult.statusChance != 0.0f) {
                                                 return true;
                                             }
                                             for (float v : sc.mult.resists.values) {
@@ -2907,8 +3135,8 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         necroServantTimer_ -= static_cast<float>(step.deltaSeconds);
         if (necroServantTimer_ < 0.0f) necroServantTimer_ = 0.0f;
     }
-    // Robin (damage archetype): Rage tint while the buff is active.
-    if (hero_ != Engine::ECS::kInvalidEntity && activeArchetype_.id == "damage") {
+    // Rage tint while the buff is active (applies to all archetypes, incl. Rage Scrolls).
+    if (hero_ != Engine::ECS::kInvalidEntity) {
         if (rageTimer_ > 0.0f) {
             if (auto* ht = registry_.get<Game::HeroTint>(hero_)) {
                 ht->color = Engine::Color{255, 90, 90, 255};
@@ -4212,21 +4440,29 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                         copper_ += p.amount;
                         copperPickedUp_ += static_cast<int64_t>(p.amount);
                         playPickup(/*isHeal=*/false);
+                        pushPickupToast(p);
                         break;
                     case Pickup::Kind::Gold:
                         gold_ += p.amount;
                         goldPickedUp_ += static_cast<int64_t>(p.amount);
                         playPickup(/*isHeal=*/false);
+                        pushPickupToast(p);
                         break;
                     case Pickup::Kind::Powerup:
                         powerupsCollected_ += 1;
                         applyPowerupPickup(p.powerup);
                         playPickup(/*isHeal=*/p.powerup == Pickup::Powerup::Heal);
+                        pushPickupToast(p);
                         break;
                     case Pickup::Kind::Item: {
                         itemsCollected_ += 1;
+                        int soldValue = 0;
                         if (!addItemToInventory(p.item)) {
-                            copper_ += std::max(1, p.item.cost / 2);
+                            soldValue = itemSellValue(p.item);
+                            copper_ += soldValue;
+                            pushPickupToast(p, soldValue);
+                        } else {
+                            pushPickupToast(p);
                         }
                         playPickup(/*isHeal=*/false);
                         break;
@@ -4235,6 +4471,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                         reviveCharges_ += 1;
                         revivesCollected_ += 1;
                         playPickup(/*isHeal=*/false);
+                        pushPickupToast(p);
                         break;
                 }
             };
@@ -4308,6 +4545,8 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                     registry_.remove<Game::DamageOverTime>(e);
                 }
             }
+
+            syncHeroStatusToasts();
 
             // Enemy revive downtime timer.
             std::vector<Engine::ECS::Entity> revivesFinished;
@@ -4458,6 +4697,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
     processDefeatInput(actions, input);
     updateMusicState();
     updateFootsteps(actions, step.deltaSeconds);
+    toastManager_.update(paused_ ? 0.0f : static_cast<float>(step.deltaSeconds));
 
     // Update fog-of-war visibility before rendering.
     updateFogVision();
@@ -4539,6 +4779,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         }
 
         // Fog overlay is rendered after entities so explored/fogged areas shade world props consistently.
+        drawStatusEffectIcons(cameraShaken);
 
         // Mini-map HUD overlay (top-right).
         if (miniMapEnabled_) {
@@ -5055,6 +5296,20 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             });
             drawCombatDebugOverlay();
         }
+
+        Game::UI::ToastRenderContext toastCtx{};
+        toastCtx.render = render_;
+        toastCtx.sdl = sdlRenderer_;
+        toastCtx.measureText = [this](const std::string& text, float scale) { return measureTextUnified(text, scale); };
+        toastCtx.drawText = [this](const std::string& text, const Engine::Vec2& pos, float scale, Engine::Color color) {
+            drawTextUnified(text, pos, scale, color);
+        };
+        toastCtx.viewportW = viewportWidth_;
+        toastCtx.viewportH = viewportHeight_;
+        toastCtx.uiScale = ingameHudLayout(viewportWidth_, viewportHeight_).s;
+        toastCtx.anchorX = toastConfig_.marginLeft * toastCtx.uiScale;
+        toastCtx.anchorY = toastConfig_.marginBottom * toastCtx.uiScale + kHudBottomSafeMargin;
+        toastManager_.render(toastCtx);
     // Shop overlays (TTF path)
     if (itemShopOpen_) {
         drawItemShopOverlay();
@@ -5099,7 +5354,7 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         drawSelectedBuildingPanel(lastMouseX_, lastMouseY_, buildingPanelLeftEdge);
         buildingPanelClickPrev_ = input.isMouseButtonDown(0);
         buildingSelectPrev_ = input.isMouseButtonDown(0);
-    if (paused_ && !itemShopOpen_ && !abilityShopOpen_ && !levelChoiceOpen_ && !defeated_) {
+    if (paused_ && !itemShopOpen_ && !abilityShopOpen_ && !levelChoiceOpen_ && !talentTreeOpen_ && !defeated_) {
         drawPauseOverlay();
     }
         if (!inMenu_) {
@@ -5107,6 +5362,9 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
         }
         if (levelChoiceOpen_) {
             drawLevelChoiceOverlay();
+        }
+        if (talentTreeOpen_) {
+            drawTalentTreeOverlay(input);
         }
         if (characterScreenOpen_) {
             drawCharacterScreen(input);
@@ -5169,7 +5427,11 @@ bool GameRoot::performRangedAutoFire(const Engine::TimeStep& step, const Engine:
     Engine::Vec2 dir{};
     bool haveTarget = false;
     float visionRange = heroVisionRadiusTiles_ * static_cast<float>(fogTileSize_ > 0 ? fogTileSize_ : 32);
-    float allowedRange = std::min(visionRange, autoFireBaseRange_ + autoFireRangeBonus_);
+    float rangeBonus = 0.0f;
+    if (activeArchetype_.id == "damage" && usingSecondaryWeapon_) {
+        rangeBonus += robinBowRangeBonus_;
+    }
+    float allowedRange = std::min(visionRange, autoFireBaseRange_ + autoFireRangeBonus_ + rangeBonus);
     float allowedRange2 = allowedRange * allowedRange;
     const bool allowManualTargeting = movementMode_ != MovementMode::RTS;  // StarCraft-style: no left-click attack in RTS mode.
     if (allowManualTargeting && actions.primaryFire) {
@@ -5401,7 +5663,7 @@ bool GameRoot::performMeleeAttack(const Engine::TimeStep& step, const Engine::Ac
             addReach(supportExtendBonus_);
         }
     }
-    // Core melee roster extra reach (+12 units): Knight, Militia (when in melee), Assassin, Crusader, Druid beast forms.
+    // Core melee roster extra reach (+12 units): Knight, Assassin, Crusader, Druid beast forms.
     const std::string id = activeArchetype_.id;
     const bool isKnight = (id == "tank");
     const bool isMilitia = (id == "damage");
@@ -5409,8 +5671,11 @@ bool GameRoot::performMeleeAttack(const Engine::TimeStep& step, const Engine::Ac
     const bool isCrusader = (id == "special");
     const bool isDruidForm = (id == "druid" && druidForm_ != DruidForm::Human);
     const bool militiaInMelee = isMilitia && heroBaseOffense_ == Game::OffensiveType::Melee;
-    if (isKnight || isAssassin || isCrusader || isDruidForm || militiaInMelee) {
+    if (isKnight || isAssassin || isCrusader || isDruidForm) {
         addReach(12.0f);
+    }
+    if (militiaInMelee) {
+        addReach(robinSwordMeleeRangeBonus_);
     }
     float meleeRange2 = meleeRange * meleeRange;
     const bool allowManualTargeting = movementMode_ != MovementMode::RTS;  // StarCraft-style: no left-click attack in RTS mode.
@@ -7162,8 +7427,23 @@ ItemDefinition GameRoot::buildRpgItemDef(const Game::RPG::GeneratedItem& rolled,
         def.affixes.push_back(af.name);
         def.rpgAffixIds.push_back(af.id);
     }
+    def.rpgImplicitStats = rolled.implicitStats;
+    def.rpgAttributeBonus = rolled.attributeBonus;
+    auto pushAttrLine = [&](const char* label, int value) {
+        if (value <= 0) return;
+        def.affixes.push_back(std::string("+") + std::to_string(value) + " " + label);
+    };
+    pushAttrLine("STR", def.rpgAttributeBonus.STR);
+    pushAttrLine("DEX", def.rpgAttributeBonus.DEX);
+    pushAttrLine("INT", def.rpgAttributeBonus.INT);
+    pushAttrLine("END", def.rpgAttributeBonus.END);
+    pushAttrLine("LCK", def.rpgAttributeBonus.LCK);
     def.rpgSocketsMax = std::max(0, rolled.def.socketsMax);
     def.rpgSocketed.clear();
+    def.rpgBaseScalar = rolled.baseScalar;
+    def.rpgAffixScalar = rolled.affixScalar;
+    def.rpgItemLevel = std::max(1, rolled.itemLevel);
+    def.rpgItemScale = rolled.itemScale > 0.0f ? rolled.itemScale : 1.0f;
     switch (rolled.def.rarity) {
         case Game::RPG::Rarity::Common: def.rarity = ItemRarity::Common; break;
         case Game::RPG::Rarity::Uncommon: def.rarity = ItemRarity::Uncommon; break;
@@ -7225,6 +7505,8 @@ std::optional<ItemDefinition> GameRoot::rollRpgEquipment(RpgLootSource src, bool
     Game::RPG::LootContext ctx{};
     ctx.level = std::max(1, level_);
     ctx.luck = static_cast<float>(activeArchetype_.rpgAttributes.LCK) * 0.05f;
+    ctx.itemLevel = Game::RPG::ComputeItemLevelFromWave(wave_, rpgItemLevelWaveDivisor_);
+    ctx.itemScalePerLevel = rpgItemScalePerLevel_;
     Game::RPG::LootTable table = filteredRpgLootTable(src);
     auto rolled = Game::RPG::generateLoot(table, ctx, rpgRng_);
     if (rolled.def.id.empty()) return std::nullopt;
@@ -7235,6 +7517,8 @@ std::optional<ItemDefinition> GameRoot::rollRpgGem(RpgLootSource src, bool price
     Game::RPG::LootContext ctx{};
     ctx.level = std::max(1, level_);
     ctx.luck = static_cast<float>(activeArchetype_.rpgAttributes.LCK) * 0.05f;
+    ctx.itemLevel = Game::RPG::ComputeItemLevelFromWave(wave_, rpgItemLevelWaveDivisor_);
+    ctx.itemScalePerLevel = rpgItemScalePerLevel_;
     Game::RPG::LootTable table = filteredRpgGemTable(src);
     if (table.items.empty()) return std::nullopt;
     auto rolled = Game::RPG::generateLoot(table, ctx, rpgRng_);
@@ -7246,6 +7530,8 @@ std::optional<ItemDefinition> GameRoot::rollRpgConsumable(RpgLootSource src, boo
     Game::RPG::LootContext ctx{};
     ctx.level = std::max(1, level_);
     ctx.luck = static_cast<float>(activeArchetype_.rpgAttributes.LCK) * 0.05f;
+    ctx.itemLevel = Game::RPG::ComputeItemLevelFromWave(wave_, rpgItemLevelWaveDivisor_);
+    ctx.itemScalePerLevel = rpgItemScalePerLevel_;
     Game::RPG::LootTable table = filteredRpgConsumableTable(src);
     if (table.items.empty()) return std::nullopt;
     auto rolled = Game::RPG::generateLoot(table, ctx, rpgRng_);
@@ -7257,6 +7543,8 @@ std::optional<ItemDefinition> GameRoot::rollRpgBag(RpgLootSource src, bool price
     Game::RPG::LootContext ctx{};
     ctx.level = std::max(1, level_);
     ctx.luck = static_cast<float>(activeArchetype_.rpgAttributes.LCK) * 0.05f;
+    ctx.itemLevel = Game::RPG::ComputeItemLevelFromWave(wave_, rpgItemLevelWaveDivisor_);
+    ctx.itemScalePerLevel = rpgItemScalePerLevel_;
     Game::RPG::LootTable table = filteredRpgBagTable(src);
     if (table.items.empty()) return std::nullopt;
     auto rolled = Game::RPG::generateLoot(table, ctx, rpgRng_);
@@ -7275,6 +7563,9 @@ void zeroContribution(Engine::Gameplay::RPG::StatContribution& c) {
         d.critChance = 0.0f;
         d.critMult = 0.0f;
         d.armorPen = 0.0f;
+        d.lifesteal = 0.0f;
+        d.lifeOnHit = 0.0f;
+        d.cleaveChance = 0.0f;
         d.evasion = 0.0f;
         d.armor = 0.0f;
         d.tenacity = 0.0f;
@@ -7286,10 +7577,19 @@ void zeroContribution(Engine::Gameplay::RPG::StatContribution& c) {
         d.resourceRegen = 0.0f;
         d.goldGainMult = 0.0f;
         d.rarityScore = 0.0f;
+        d.statusChance = 0.0f;
         for (float& v : d.resists.values) v = 0.0f;
     };
     zeroDerived(c.flat);
     zeroDerived(c.mult);
+}
+
+void addAttributes(Engine::Gameplay::RPG::Attributes& dst, const Engine::Gameplay::RPG::Attributes& src, int scale = 1) {
+    dst.STR += src.STR * scale;
+    dst.DEX += src.DEX * scale;
+    dst.INT += src.INT * scale;
+    dst.END += src.END * scale;
+    dst.LCK += src.LCK * scale;
 }
 
 void addContribution(Engine::Gameplay::RPG::StatContribution& dst, const Engine::Gameplay::RPG::StatContribution& src, float scalar = 1.0f) {
@@ -7307,11 +7607,15 @@ void addContribution(Engine::Gameplay::RPG::StatContribution& dst, const Engine:
     addFlat(dst.flat.critChance, src.flat.critChance);
     addFlat(dst.flat.critMult, normDefault(src.flat.critMult, 1.5f));
     addFlat(dst.flat.armorPen, src.flat.armorPen);
+    addFlat(dst.flat.lifesteal, src.flat.lifesteal);
+    addFlat(dst.flat.lifeOnHit, src.flat.lifeOnHit);
+    addFlat(dst.flat.cleaveChance, src.flat.cleaveChance);
     addFlat(dst.flat.evasion, src.flat.evasion);
     addFlat(dst.flat.armor, src.flat.armor);
     addFlat(dst.flat.tenacity, src.flat.tenacity);
     addFlat(dst.flat.shieldMax, src.flat.shieldMax);
     addFlat(dst.flat.shieldRegen, src.flat.shieldRegen);
+    addFlat(dst.flat.statusChance, src.flat.statusChance);
     addFlat(dst.flat.healthMax, src.flat.healthMax);
     addFlat(dst.flat.healthRegen, src.flat.healthRegen);
     addFlat(dst.flat.cooldownReduction, src.flat.cooldownReduction);
@@ -7330,6 +7634,9 @@ void addContribution(Engine::Gameplay::RPG::StatContribution& dst, const Engine:
     addMult(dst.mult.critChance, src.mult.critChance);
     addMult(dst.mult.critMult, normDefault(src.mult.critMult, 1.5f));
     addMult(dst.mult.armorPen, src.mult.armorPen);
+    addMult(dst.mult.lifesteal, src.mult.lifesteal);
+    addMult(dst.mult.lifeOnHit, src.mult.lifeOnHit);
+    addMult(dst.mult.cleaveChance, src.mult.cleaveChance);
     addMult(dst.mult.evasion, src.mult.evasion);
     addMult(dst.mult.armor, src.mult.armor);
     addMult(dst.mult.tenacity, src.mult.tenacity);
@@ -7341,6 +7648,7 @@ void addContribution(Engine::Gameplay::RPG::StatContribution& dst, const Engine:
     addMult(dst.mult.resourceRegen, src.mult.resourceRegen);
     addMult(dst.mult.goldGainMult, normDefault(src.mult.goldGainMult, 1.0f));
     addMult(dst.mult.rarityScore, src.mult.rarityScore);
+    addMult(dst.mult.statusChance, src.mult.statusChance);
     for (std::size_t i = 0; i < dst.mult.resists.values.size(); ++i) {
         dst.mult.resists.values[i] += src.mult.resists.values[i] * scalar;
     }
@@ -7379,11 +7687,15 @@ std::vector<std::string> formatRpgStatLines(const Engine::Gameplay::RPG::StatCon
     addFlatInt(total.flat.armorPen, "Armor Pen");
     addFlatInt(total.flat.evasion, "Evasion");
     addFlatInt(total.flat.tenacity, "Tenacity");
+    addFlatInt(total.flat.lifeOnHit, "Life on Hit");
 
     addPercent(total.flat.critChance, "Crit Chance");
+    addPercent(total.flat.lifesteal, "Lifesteal");
+    addPercent(total.flat.cleaveChance, "Cleave Chance");
     addPercent(total.flat.cooldownReduction, "Cooldown Reduction");
     addPercent(total.flat.goldGainMult, "Gold Gain");
     addPercent(total.flat.resourceRegen, "Resource Regen");
+    addPercent(total.flat.statusChance, "Status Chance");
     if (std::abs(total.flat.rarityScore) >= 0.0001f) {
         addFlatFloat(total.flat.rarityScore, "Rarity Score", 1);
     }
@@ -7410,37 +7722,206 @@ std::vector<std::string> formatRpgStatLines(const Engine::Gameplay::RPG::StatCon
 
     return lines;
 }
+
+std::vector<std::string> formatRpgImplicitStatLines(const std::vector<Engine::Gameplay::RPG::StatContribution>& stats) {
+    std::vector<std::string> lines;
+    for (const auto& line : stats) {
+        const auto formatted = formatRpgStatLines(line);
+        for (const auto& s : formatted) lines.push_back(s);
+    }
+    return lines;
+}
+
+std::vector<std::string> formatRpgAttributeLines(const Engine::Gameplay::RPG::Attributes& attrs) {
+    std::vector<std::string> lines;
+    auto addAttr = [&](int v, const char* label) {
+        if (v == 0) return;
+        std::ostringstream s;
+        s << (v >= 0 ? "+" : "") << v << " " << label;
+        lines.push_back(s.str());
+    };
+    addAttr(attrs.STR, "STR");
+    addAttr(attrs.DEX, "DEX");
+    addAttr(attrs.INT, "INT");
+    addAttr(attrs.END, "END");
+    addAttr(attrs.LCK, "LCK");
+    return lines;
+}
 }  // namespace
+
+const Game::RPG::TalentTree* GameRoot::activeTalentTree() const {
+    auto it = rpgTalents_.find(activeArchetype_.id);
+    if (it == rpgTalents_.end()) return nullptr;
+    return &it->second;
+}
+
+const Game::RPG::TalentTier* GameRoot::findTalentTierForNode(const std::string& nodeId) const {
+    const auto* tree = activeTalentTree();
+    if (!tree) return nullptr;
+    for (const auto& tier : tree->tiers) {
+        for (const auto& node : tier.nodes) {
+            if (node.id == nodeId) return &tier;
+        }
+    }
+    return nullptr;
+}
+
+const Game::RPG::TalentNode* GameRoot::findTalentNode(const std::string& nodeId) const {
+    const auto* tree = activeTalentTree();
+    if (!tree) return nullptr;
+    for (const auto& tier : tree->tiers) {
+        for (const auto& node : tier.nodes) {
+            if (node.id == nodeId) return &node;
+        }
+    }
+    return nullptr;
+}
+
+int GameRoot::rpgTalentPointsAvailable() const {
+    return std::max(0, level_ / 5 - rpgTalentPointsSpent_);
+}
+
+bool GameRoot::canSpendTalentPoint(const std::string& nodeId) const {
+    const auto* node = findTalentNode(nodeId);
+    const auto* tier = findTalentTierForNode(nodeId);
+    if (!node || !tier) return false;
+    const int available = rpgTalentPointsAvailable();
+    if (available <= 0) return false;
+    int currentRank = 0;
+    auto rankIt = rpgTalentRanks_.find(nodeId);
+    if (rankIt != rpgTalentRanks_.end()) currentRank = rankIt->second;
+    currentRank = std::max(0, currentRank);
+    if (currentRank >= node->maxRank) return false;
+    if (rpgTalentPointsSpent_ < tier->unlockPoints) return false;
+    for (const auto& req : node->prereqs) {
+        auto it = rpgTalentRanks_.find(req);
+        if (it == rpgTalentRanks_.end() || it->second < 1) return false;
+    }
+    return true;
+}
+
+bool GameRoot::spendTalentPoint(const std::string& nodeId) {
+    if (!canSpendTalentPoint(nodeId)) return false;
+    rpgTalentRanks_[nodeId] += 1;
+    rpgTalentPointsSpent_ += 1;
+    updateRpgTalentAllocation();
+    updateHeroRpgStats();
+    return true;
+}
+
+void GameRoot::resetTalentTree() {
+    rpgTalentRanks_.clear();
+    rpgTalentPointsSpent_ = 0;
+    updateRpgTalentAllocation();
+}
 
 void GameRoot::updateRpgTalentAllocation() {
     if (rpgTalentArchetypeCached_ != activeArchetype_.id) {
         rpgTalentRanks_.clear();
         rpgTalentPointsSpent_ = 0;
+        rpgTalentPointsAvailable_ = 0;
         rpgTalentLevelCached_ = 0;
         rpgTalentArchetypeCached_ = activeArchetype_.id;
+        talentTreeSelectedId_.clear();
+        talentPointsTotalCached_ = 0;
+        talentToastPrimed_ = false;
     }
-    if (level_ == rpgTalentLevelCached_) return;
     rpgTalentLevelCached_ = level_;
+    const int totalPoints = std::max(0, level_ / 5);
+    const int prevTotalPoints = talentPointsTotalCached_;
+    if (rpgTalentPointsSpent_ > totalPoints) {
+        rpgTalentPointsSpent_ = totalPoints;
+    }
+    rpgTalentPointsAvailable_ = std::max(0, totalPoints - rpgTalentPointsSpent_);
+    if (talentToastPrimed_ && totalPoints > prevTotalPoints && toastConfig_.enabled) {
+        toastManager_.pushTalentPointToast("Talent Point Gained!");
+    }
+    talentPointsTotalCached_ = totalPoints;
+    talentToastPrimed_ = true;
+}
 
-    const int points = std::max(0, level_ / 10);
-    if (points <= rpgTalentPointsSpent_) return;
+void GameRoot::syncHeroStatusToasts() {
+    if (!toastConfig_.enabled) return;
+    std::unordered_set<std::string> activeKeys;
+    if (hero_ == Engine::ECS::kInvalidEntity) {
+        toastManager_.endMissingEffectToasts(activeKeys);
+        return;
+    }
+    const auto* status = registry_.get<Engine::ECS::Status>(hero_);
+    if (!status) {
+        toastManager_.endMissingEffectToasts(activeKeys);
+        return;
+    }
+    for (const auto& inst : status->container.all()) {
+        if (inst.spec.duration <= 0.0f) continue;
+        if (inst.remaining <= 0.0f) continue;
+        std::string key = "status_" + std::to_string(static_cast<int>(inst.spec.id));
+        toastManager_.addOrRefreshEffectToast(key, statusDisplayName(inst.spec.id), inst.remaining, inst.spec.duration,
+                                              statusToastCategory(inst.spec));
+        activeKeys.insert(key);
+    }
 
-    auto treeIt = rpgTalents_.find(activeArchetype_.id);
-    if (treeIt == rpgTalents_.end()) return;
-    const auto& nodes = treeIt->second;
-    int available = points - rpgTalentPointsSpent_;
-    for (int i = 0; i < available; ++i) {
-        bool spent = false;
-        for (const auto& node : nodes) {
-            int& rank = rpgTalentRanks_[node.id];
-            if (rank < node.maxRank) {
-                rank += 1;
-                rpgTalentPointsSpent_ += 1;
-                spent = true;
-                break;
-            }
+    auto addTimerToast = [&](const std::string& key, const std::string& label, float remaining, UI::ToastCategory category) {
+        if (remaining <= 0.0f) return;
+        toastManager_.addOrRefreshEffectToast(key, label, remaining, remaining, category);
+        activeKeys.insert(key);
+    };
+
+    addTimerToast("powerup_freeze", "Freeze", static_cast<float>(freezeTimer_), UI::ToastCategory::Debuff);
+    addTimerToast("powerup_frenzy", "Frenzy", frenzyTimer_, UI::ToastCategory::Buff);
+    addTimerToast("powerup_immortal", "Immortal", immortalTimer_, UI::ToastCategory::Buff);
+    toastManager_.endMissingEffectToasts(activeKeys);
+}
+
+void GameRoot::pushPickupToast(const Pickup& p, std::optional<int> soldValue) {
+    if (!toastConfig_.enabled) return;
+    std::string text;
+    std::optional<Engine::Color> accent;
+
+    switch (p.kind) {
+        case Pickup::Kind::Copper: {
+            std::ostringstream s;
+            s << "Picked up: Copper (+" << p.amount << ")";
+            text = s.str();
+            accent = Engine::Color{255, 200, 110, 235};
+            break;
         }
-        if (!spent) break;
+        case Pickup::Kind::Gold: {
+            std::ostringstream s;
+            s << "Picked up: Gold (+" << p.amount << ")";
+            text = s.str();
+            accent = Engine::Color{255, 220, 140, 235};
+            break;
+        }
+        case Pickup::Kind::Powerup: {
+            text = "Picked up: " + powerupDisplayName(p.powerup);
+            accent = Engine::Color{150, 220, 255, 235};
+            break;
+        }
+        case Pickup::Kind::Revive: {
+            text = "Picked up: Revive Tome";
+            accent = Engine::Color{180, 255, 200, 235};
+            break;
+        }
+        case Pickup::Kind::Item: {
+            std::string name = p.item.name;
+            if (p.item.rpgItemLevel > 0) {
+                name += " (ilvl " + std::to_string(std::max(1, p.item.rpgItemLevel)) + ")";
+            }
+            if (soldValue.has_value()) {
+                std::ostringstream s;
+                s << "Inventory full: " << name << " sold (+" << *soldValue << "c)";
+                text = s.str();
+            } else {
+                text = "Picked up: " + name;
+            }
+            accent = rarityColorForRpgItem(p.item, toastTheme_.neutral);
+            break;
+        }
+    }
+
+    if (!text.empty()) {
+        toastManager_.pushPickupToast(text, accent);
     }
 }
 
@@ -7533,33 +8014,19 @@ void GameRoot::drawItemIcon(const ItemDefinition& def, const Engine::Vec2& pos, 
 Engine::Gameplay::RPG::StatContribution GameRoot::collectRpgEquippedContribution() const {
     Engine::Gameplay::RPG::StatContribution total{};
     zeroContribution(total);
-    auto findAffix = [&](const std::string& id) -> const Game::RPG::Affix* {
-        for (const auto& a : rpgLootTable_.affixes) {
-            if (a.id == id) return &a;
-        }
-        return nullptr;
-    };
     for (const auto& opt : equipped_) {
         if (!opt.has_value()) continue;
         const auto& inst = *opt;
-        const auto& def = inst.def;
-        const auto* t = findRpgTemplateById(def.rpgTemplateId);
-        if (t) addContribution(total, t->baseStats, static_cast<float>(std::max(1, inst.quantity)));
-        for (const auto& affId : def.rpgAffixIds) {
-            if (const auto* a = findAffix(affId)) {
-                addContribution(total, a->stats, static_cast<float>(std::max(1, inst.quantity)));
-            }
-        }
-        // Socketed gems (their base stats + rolled affixes).
-        for (const auto& g : def.rpgSocketed) {
-            const auto* gt = findRpgTemplateById(g.templateId);
-            if (gt) addContribution(total, gt->baseStats, static_cast<float>(std::max(1, inst.quantity)));
-            for (const auto& ga : g.affixIds) {
-                if (const auto* a = findAffix(ga)) {
-                    addContribution(total, a->stats, static_cast<float>(std::max(1, inst.quantity)));
-                }
-            }
-        }
+        addContribution(total, Game::RPG::computeItemContribution(rpgLootTable_, inst.def, std::max(1, inst.quantity)), 1.0f);
+    }
+    return total;
+}
+
+Engine::Gameplay::RPG::Attributes GameRoot::collectRpgEquippedAttributes() const {
+    Engine::Gameplay::RPG::Attributes total{};
+    for (const auto& opt : equipped_) {
+        if (!opt.has_value()) continue;
+        addAttributes(total, opt->def.rpgAttributeBonus, 1);
     }
     return total;
 }
@@ -7567,15 +8034,32 @@ Engine::Gameplay::RPG::StatContribution GameRoot::collectRpgEquippedContribution
 Engine::Gameplay::RPG::StatContribution GameRoot::collectRpgTalentContribution() const {
     Engine::Gameplay::RPG::StatContribution total{};
     zeroContribution(total);
-    auto treeIt = rpgTalents_.find(activeArchetype_.id);
-    if (treeIt == rpgTalents_.end()) return total;
-    const auto& nodes = treeIt->second;
-    for (const auto& node : nodes) {
-        auto it = rpgTalentRanks_.find(node.id);
-        if (it == rpgTalentRanks_.end()) continue;
-        int rank = std::max(0, it->second);
-        if (rank <= 0) continue;
-        addContribution(total, node.bonus, static_cast<float>(rank));
+    const auto* tree = activeTalentTree();
+    if (!tree) return total;
+    for (const auto& tier : tree->tiers) {
+        for (const auto& node : tier.nodes) {
+            auto it = rpgTalentRanks_.find(node.id);
+            if (it == rpgTalentRanks_.end()) continue;
+            int rank = std::max(0, it->second);
+            if (rank <= 0) continue;
+            addContribution(total, node.bonus, static_cast<float>(rank));
+        }
+    }
+    return total;
+}
+
+Engine::Gameplay::RPG::Attributes GameRoot::collectRpgTalentAttributes() const {
+    Engine::Gameplay::RPG::Attributes total{};
+    const auto* tree = activeTalentTree();
+    if (!tree) return total;
+    for (const auto& tier : tree->tiers) {
+        for (const auto& node : tier.nodes) {
+            auto it = rpgTalentRanks_.find(node.id);
+            if (it == rpgTalentRanks_.end()) continue;
+            int rank = std::max(0, it->second);
+            if (rank <= 0) continue;
+            addAttributes(total, node.attributes, rank);
+        }
     }
     return total;
 }
@@ -7587,6 +8071,18 @@ void GameRoot::updateHeroRpgStats() {
     Engine::Gameplay::RPG::StatContribution mods = collectRpgEquippedContribution();
     addContribution(mods, collectRpgTalentContribution(), 1.0f);
     addContribution(mods, rpgActiveBuffContribution_, 1.0f);
+    if (globalModifiers_.playerLifestealAdd > 0.0f) {
+        Engine::Gameplay::RPG::StatContribution lifesteal{};
+        zeroContribution(lifesteal);
+        lifesteal.flat.lifesteal = globalModifiers_.playerLifestealAdd;
+        addContribution(mods, lifesteal, 1.0f);
+    }
+    if (lifestealBuff_ > 0.0f) {
+        Engine::Gameplay::RPG::StatContribution lifesteal{};
+        zeroContribution(lifesteal);
+        lifesteal.flat.lifesteal = lifestealBuff_;
+        addContribution(mods, lifesteal, 1.0f);
+    }
 
     if (!registry_.has<Engine::ECS::RPGStats>(hero_)) {
         registry_.emplace<Engine::ECS::RPGStats>(hero_, Engine::ECS::RPGStats{});
@@ -7594,7 +8090,10 @@ void GameRoot::updateHeroRpgStats() {
     auto* rpg = registry_.get<Engine::ECS::RPGStats>(hero_);
     if (!rpg) return;
     rpg->baseFromHealth = false;
-    rpg->attributes = activeArchetype_.rpgAttributes;
+    Engine::Gameplay::RPG::Attributes attrs = activeArchetype_.rpgAttributes;
+    addAttributes(attrs, collectRpgEquippedAttributes(), 1);
+    addAttributes(attrs, collectRpgTalentAttributes(), 1);
+    rpg->attributes = attrs;
     rpg->modifiers = mods;
 
     // Use the legacy run-tuned values as the RPG "base template" so RPG scaling stays comparable.
@@ -7665,7 +8164,7 @@ void GameRoot::spawnPickupEntity(const Pickup& payload, const Engine::Vec2& pos,
         switch (payload.powerup) {
             case Pickup::Powerup::Heal: tex = pickupHealPowerupTex_; break;
             case Pickup::Powerup::Kaboom: tex = pickupKaboomTex_; break;
-            case Pickup::Powerup::Recharge: tex = pickupRechargeTex_; scale *= 1.8f; break;
+            case Pickup::Powerup::Recharge: tex = pickupRechargeTex_; break;
             case Pickup::Powerup::Frenzy: tex = pickupFrenzyTex_; break;
             case Pickup::Powerup::Immortal: tex = pickupImmortalTex_; anim = Engine::ECS::SpriteAnimation{16, 16, 6, 0.08f}; break;
             case Pickup::Powerup::Freeze: tex = pickupFreezeTex_; break;
@@ -9288,7 +9787,7 @@ void GameRoot::renderMenu() {
     drawTextUnified(title, Engine::Vec2{centerX - titleW * 0.5f, titleY}, titleScale, Engine::Color{190, 235, 255, 245});
 
     // Build info (bottom-right).
-    const std::string buildStr = "Pre-Alpha | Build v0.0.178";
+    const std::string buildStr = "Pre-Alpha | Build v0.0.202";
     const float buildScale = std::clamp(0.95f * s, 0.72f, 0.95f);
     const Engine::Vec2 buildSz = measureTextUnified(buildStr, buildScale);
     drawTextUnified(buildStr, Engine::Vec2{vw - margin - buildSz.x, vh - margin - buildSz.y}, buildScale,
@@ -10347,7 +10846,7 @@ void GameRoot::renderMenu() {
 
             // Attributes box (right)
             float ax = rightColX;
-            float ay = panelY + previewH + 22.0f * s;
+            float ay = panelY + previewH + 52.0f * s;
             render_->drawFilledRect(Engine::Vec2{ax, ay}, Engine::Vec2{rightColW, 142.0f * s}, Engine::Color{10, 14, 22, 170});
             render_->drawFilledRect(Engine::Vec2{ax, ay}, Engine::Vec2{rightColW, 2.0f}, Engine::Color{45, 70, 95, 190});
             drawTextUnified("Attributes", Engine::Vec2{ax + 10.0f * s, ay + 10.0f * s}, std::clamp(0.92f * s * textBoost, 0.86f, 1.15f),
@@ -11463,6 +11962,8 @@ void GameRoot::buildAbilities(bool resetState) {
         rageTimer_ = 0.0f;
         rageDamageBuff_ = 1.0f;
         rageRateBuff_ = 1.0f;
+        fearWanderTimer_ = 0.0f;
+        fearWanderDir_ = {1.0f, 0.0f};
         abilityCooldownMul_ = 1.0f;
         abilityVitalCostMul_ = 1.0f;
         abilityChargesBonus_ = 0;
@@ -12042,7 +12543,7 @@ void GameRoot::drawItemShopOverlay() {
     render_->drawFilledRect(Engine::Vec2{lay.invX, lay.invY}, Engine::Vec2{lay.invW, 2.0f}, Engine::Color{45, 70, 95, 190});
     drawTextUnified("Inventory", Engine::Vec2{lay.invX + pad, lay.invY + 14.0f * s}, std::clamp(0.95f * s, 0.82f, 1.05f),
                     Engine::Color{200, 230, 255, 220});
-    drawTextUnified("Click to sell (50%)", Engine::Vec2{lay.invX + pad, lay.invY + 34.0f * s}, std::clamp(0.82f * s, 0.76f, 0.92f),
+    drawTextUnified("Click to sell", Engine::Vec2{lay.invX + pad, lay.invY + 34.0f * s}, std::clamp(0.82f * s, 0.76f, 0.92f),
                     Engine::Color{160, 190, 215, 210});
 
     const float invHeader = 50.0f * s;
@@ -12068,7 +12569,7 @@ void GameRoot::drawItemShopOverlay() {
         drawTextUnified(ellipsizeTextUnified(stripRaritySuffixLocal(inst.def.name), maxName, ts),
                         Engine::Vec2{listX + 12.0f * s, y + 8.0f * s}, ts,
                         rarityColorForRpgItem(inst.def, Engine::Color{185, 210, 235, 220}));
-        int refund = std::max(1, inst.def.cost / 2);
+        int refund = itemSellValue(inst.def);
         std::ostringstream sell;
         sell << refund << "g";
         Engine::Vec2 ss = measureTextUnified(sell.str(), ts);
@@ -12140,9 +12641,16 @@ void GameRoot::drawAbilityShopOverlay() {
                my >= static_cast<int>(y) && my <= static_cast<int>(y + h);
     };
 
-    auto costForLevel = [&](int level) {
+    auto costForLevel = [&](int level, float multiplier = 1.0f) {
         return static_cast<int>(std::round(static_cast<float>(abilityShopBaseCost_) *
-                                           std::pow(abilityShopCostGrowth_, static_cast<float>(level))));
+                                           std::pow(abilityShopCostGrowth_, static_cast<float>(level)) *
+                                           multiplier));
+    };
+    auto visionCostForLevel = [&](int level) {
+        if (level >= 0 && level < static_cast<int>(abilityVisionCosts_.size())) {
+            return abilityVisionCosts_[static_cast<std::size_t>(level)];
+        }
+        return costForLevel(level, abilityVisionCostMultiplier_);
     };
 
     struct UpgradeRow {
@@ -12157,7 +12665,8 @@ void GameRoot::drawAbilityShopOverlay() {
     rows[0] = {"Weapon Damage", "Increase base damage.", abilityDamageLevel_, 999, costForLevel(abilityDamageLevel_)};
     rows[1] = {"Attack Speed", "Fire faster.", abilityAttackSpeedLevel_, 999, costForLevel(abilityAttackSpeedLevel_)};
     rows[2] = {"Weapon Range", "Increase auto-fire range.", abilityRangeLevel_, abilityRangeMaxBonus_, costForLevel(abilityRangeLevel_)};
-    rows[3] = {"Sight Range", "Increase vision radius.", abilityVisionLevel_, abilityVisionMaxBonus_, costForLevel(abilityVisionLevel_)};
+    rows[3] = {"Sight Range", "Increase vision radius.", abilityVisionLevel_, abilityVisionMaxBonus_,
+               visionCostForLevel(abilityVisionLevel_)};
     rows[4] = {"Max Health", "Increase maximum HP.", abilityHealthLevel_, 999, costForLevel(abilityHealthLevel_)};
     rows[5] = {"Armor", "Reduce incoming damage.", abilityArmorLevel_, 999, costForLevel(abilityArmorLevel_)};
 
@@ -12301,7 +12810,7 @@ void GameRoot::drawAbilityShopOverlay() {
 }
 
 void GameRoot::drawPauseOverlay() {
-    if (!render_ || !paused_ || itemShopOpen_ || abilityShopOpen_ || levelChoiceOpen_ || defeated_) return;
+    if (!render_ || !paused_ || itemShopOpen_ || abilityShopOpen_ || levelChoiceOpen_ || talentTreeOpen_ || defeated_) return;
     if (!pauseConfirmMainMenuOpen_) {
         const float panelW = 320.0f;
         const float panelH = 200.0f;
@@ -12365,6 +12874,615 @@ void GameRoot::drawPauseOverlay() {
     };
     drawBtn("Yes", yesX, btnY, hoverYes, Engine::Color{70, 55, 55, 230});
     drawBtn("No", noX, btnY, hoverNo, Engine::Color{32, 48, 64, 230});
+}
+
+void GameRoot::drawTalentTreeOverlay(const Engine::InputState& input) {
+    if (!render_ || !talentTreeOpen_) return;
+    updateRpgTalentAllocation();
+
+    auto drawTextShadowed = [&](const std::string& text, const Engine::Vec2& pos, float scale, Engine::Color color,
+                                Engine::Color shadow = Engine::Color{0, 0, 0, 170}, Engine::Vec2 offset = Engine::Vec2{1.0f, 1.0f}) {
+        drawTextUnified(text, Engine::Vec2{pos.x + offset.x, pos.y + offset.y}, scale, shadow);
+        drawTextUnified(text, pos, scale, color);
+    };
+    auto wrapText = [&](const std::string& text, float maxWidth, float scale) -> std::vector<std::string> {
+        std::vector<std::string> lines;
+        if (text.empty() || maxWidth <= 0.0f) return lines;
+        std::string cur;
+        std::string word;
+        auto flushWord = [&]() {
+            if (word.empty()) return;
+            if (cur.empty()) {
+                cur = word;
+            } else {
+                std::string candidate = cur + " " + word;
+                if (measureTextUnified(candidate, scale).x <= maxWidth) {
+                    cur = std::move(candidate);
+                } else {
+                    lines.push_back(cur);
+                    cur = word;
+                }
+            }
+            word.clear();
+        };
+        for (char ch : text) {
+            if (ch == '\n') {
+                flushWord();
+                if (!cur.empty()) {
+                    lines.push_back(cur);
+                    cur.clear();
+                } else {
+                    lines.push_back(std::string{});
+                }
+                continue;
+            }
+            if (std::isspace(static_cast<unsigned char>(ch))) {
+                flushWord();
+                continue;
+            }
+            word.push_back(ch);
+        }
+        flushWord();
+        if (!cur.empty()) lines.push_back(cur);
+        // Ensure very long single words don't overflow.
+        for (auto& l : lines) {
+            l = ellipsizeTextUnified(l, maxWidth, scale);
+        }
+        return lines;
+    };
+
+    const bool leftClick = input.isMouseButtonDown(0);
+    const bool middleClick = input.isMouseButtonDown(1);
+    const bool leftEdge = leftClick && !talentTreeClickPrev_;
+    talentTreeClickPrev_ = leftClick;
+    const bool middleEdge = middleClick && !talentTreeMiddlePrev_;
+    talentTreeMiddlePrev_ = middleClick;
+    const int mx = input.mouseX();
+    const int my = input.mouseY();
+
+    render_->drawFilledRect(Engine::Vec2{0.0f, 0.0f},
+                            Engine::Vec2{static_cast<float>(viewportWidth_), static_cast<float>(viewportHeight_)},
+                            Engine::Color{8, 12, 18, 190});
+
+    const float uiScale = 1.05f;
+    const float margin = 18.0f;
+    const float panelW = static_cast<float>(viewportWidth_) - margin * 2.0f;
+    const float panelH = static_cast<float>(viewportHeight_) - margin * 2.0f;
+    const float panelX = margin;
+    const float panelY = margin;
+    render_->drawFilledRect(Engine::Vec2{panelX, panelY}, Engine::Vec2{panelW, panelH}, Engine::Color{14, 18, 26, 238});
+    render_->drawFilledRect(Engine::Vec2{panelX + 1.0f, panelY + 1.0f},
+                            Engine::Vec2{panelW - 2.0f, panelH - 2.0f}, Engine::Color{18, 24, 34, 236});
+
+    const float pad = 14.0f;
+    const float contentTopPad = 10.0f;  // breathing room under the top title bar
+    const float leftW = std::floor(panelW * 0.18f);
+    const float rightW = std::floor(panelW * 0.22f);
+    const float bottomH = 58.0f;
+    const float centerW = panelW - leftW - rightW - pad * 4.0f;
+    const float contentH = panelH - bottomH - pad * 2.0f - contentTopPad;
+    const float centerH = contentH;
+    const float leftX = panelX + pad;
+    const float centerX = leftX + leftW + pad;
+    const float rightX = centerX + centerW + pad;
+    const float contentY = panelY + pad + contentTopPad;
+    const float centerY = contentY;
+    const float rightY = contentY;
+    const float bottomY = panelY + panelH - bottomH - pad;
+
+    auto drawPanel = [&](float x, float y, float w, float h, const std::string& title, float titleOffset = 12.0f) {
+        render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{w, h}, Engine::Color{10, 14, 22, 210});
+        render_->drawFilledRect(Engine::Vec2{x + 1.0f, y + 1.0f}, Engine::Vec2{w - 2.0f, h - 2.0f},
+                                Engine::Color{14, 18, 26, 215});
+        drawTextShadowed(title, Engine::Vec2{x + 12.0f, y + titleOffset}, 0.98f * uiScale, Engine::Color{210, 235, 255, 240});
+    };
+
+    drawPanel(leftX, contentY, leftW, contentH, "Champion");
+    drawPanel(centerX, centerY, centerW, centerH, "Tree", 10.0f);
+    drawPanel(rightX, rightY, rightW, contentH, "Details");
+
+    // Draw the title after panels so it never ends up behind panel backgrounds.
+    drawTextShadowed("Talent Tree", Engine::Vec2{panelX + 16.0f, panelY + 8.0f}, 1.2f * uiScale,
+                     Engine::Color{220, 245, 255, 245});
+    const std::string hint = "N to close • Drag middle mouse to pan • Scroll to zoom";
+    const float hintScale = 0.78f * uiScale;
+    const float hintW = measureTextUnified(hint, hintScale).x;
+    const float hintX = std::max(panelX + 16.0f, panelX + panelW - hintW - 16.0f);
+    drawTextShadowed(hint, Engine::Vec2{hintX, panelY + 12.0f}, hintScale, Engine::Color{160, 190, 215, 210},
+                     Engine::Color{0, 0, 0, 150});
+
+    float ly = contentY + 38.0f;
+    auto leftLine = [&](const std::string& k, const std::string& v, Engine::Color kc = Engine::Color{180, 205, 225, 220}) {
+        const float ks = 0.86f * uiScale;
+        drawTextShadowed(k, Engine::Vec2{leftX + 12.0f, ly}, ks, kc, Engine::Color{0, 0, 0, 140});
+        const Engine::Vec2 vsz = measureTextUnified(v, ks);
+        drawTextShadowed(v, Engine::Vec2{leftX + leftW - 12.0f - vsz.x, ly}, ks, Engine::Color{220, 240, 255, 230},
+                         Engine::Color{0, 0, 0, 140});
+        ly += 18.0f * uiScale;
+    };
+    drawTextShadowed(ellipsizeTextUnified(activeArchetype_.name, leftW - 24.0f, 1.0f * uiScale),
+                     Engine::Vec2{leftX + 12.0f, ly}, 1.0f * uiScale, Engine::Color{220, 235, 250, 240});
+    ly += 20.0f * uiScale;
+    leftLine("Level", std::to_string(level_));
+    leftLine("Points", std::to_string(rpgTalentPointsAvailable()) + " avail");
+    leftLine("Spent", std::to_string(rpgTalentPointsSpent_));
+    ly += 8.0f;
+    if (!activeArchetype_.biography.empty()) {
+        const float bioTitleScale = 0.84f * uiScale;
+        const float bioScale = 0.78f * uiScale;
+        drawTextShadowed("Bio", Engine::Vec2{leftX + 12.0f, ly}, bioTitleScale, Engine::Color{170, 200, 225, 210},
+                         Engine::Color{0, 0, 0, 140});
+        ly += 18.0f * uiScale;
+        // Clip bio to the left panel interior and wrap across multiple lines.
+        SDL_Rect clip{static_cast<int>(leftX + 10.0f), static_cast<int>(contentY + 34.0f),
+                      static_cast<int>(leftW - 20.0f), static_cast<int>(contentH - 44.0f)};
+        bool hadClip = SDL_RenderIsClipEnabled(sdlRenderer_) != SDL_FALSE;
+        SDL_Rect prevClip{};
+        SDL_RenderGetClipRect(sdlRenderer_, &prevClip);
+        SDL_RenderSetClipRect(sdlRenderer_, &clip);
+        const float maxW = leftW - 24.0f;
+        const float lineH = std::max(14.0f, measureTextUnified("Ag", bioScale).y + 2.0f);
+        const float maxY = contentY + contentH - 16.0f;
+        auto lines = wrapText(activeArchetype_.biography, maxW, bioScale);
+        for (std::size_t i = 0; i < lines.size(); ++i) {
+            if (ly + lineH > maxY) break;
+            const bool lastRoom = (ly + lineH * 2.0f > maxY) && (i + 1 < lines.size());
+            const std::string s = lastRoom ? ellipsizeTextUnified(lines[i], maxW, bioScale) : lines[i];
+            drawTextShadowed(s, Engine::Vec2{leftX + 12.0f, ly}, bioScale, Engine::Color{190, 210, 230, 210},
+                             Engine::Color{0, 0, 0, 120});
+            ly += lineH;
+            if (lastRoom) break;
+        }
+        SDL_RenderSetClipRect(sdlRenderer_, hadClip ? &prevClip : nullptr);
+    }
+
+    const auto* tree = activeTalentTree();
+    if (!tree) {
+        drawTextShadowed("No talents configured for this archetype.", Engine::Vec2{centerX + 24.0f, centerY + 34.0f},
+                         0.9f * uiScale, Engine::Color{200, 210, 230, 220});
+    } else {
+        const float baseCell = 110.0f;
+        const float zoomStep = 0.08f;
+        const float minZoom = 0.65f;
+        const float maxZoom = 1.6f;
+        if (scrollDeltaFrame_ != 0 && mx >= static_cast<int>(centerX) &&
+            mx <= static_cast<int>(centerX + centerW) &&
+            my >= static_cast<int>(centerY) &&
+            my <= static_cast<int>(centerY + centerH)) {
+            talentTreeZoom_ = std::clamp(talentTreeZoom_ + static_cast<float>(scrollDeltaFrame_) * zoomStep, minZoom, maxZoom);
+        }
+
+        if (middleEdge) {
+            talentTreeDragging_ = true;
+            talentTreeDragStartX_ = mx;
+            talentTreeDragStartY_ = my;
+        }
+        if (!middleClick) {
+            talentTreeDragging_ = false;
+        }
+        if (talentTreeDragging_) {
+            const int dx = mx - talentTreeDragStartX_;
+            const int dy = my - talentTreeDragStartY_;
+            talentTreePan_.x += static_cast<float>(dx);
+            talentTreePan_.y += static_cast<float>(dy);
+            talentTreeDragStartX_ = mx;
+            talentTreeDragStartY_ = my;
+        }
+
+        auto nodeGridPos = [&](const Game::RPG::TalentNode& node) {
+            float gx = static_cast<float>(node.pos[0]);
+            float gy = static_cast<float>(node.pos[1]);
+            if (std::abs(gx) <= 1.01f) {
+                // Zig-zag the two-lane layout to create more visually interesting branching.
+                const float spread = (node.tier % 2 == 0) ? 2.15f : 1.55f;
+                gx *= spread;
+            }
+            return Engine::Vec2{gx, gy};
+        };
+
+        const float cell = baseCell * talentTreeZoom_;
+        Engine::Vec2 baseCenter{centerX + centerW * 0.5f, centerY + centerH * 0.5f};
+        float minGX = 999999.0f;
+        float maxGX = -999999.0f;
+        float minGY = 999999.0f;
+        float maxGY = -999999.0f;
+        for (const auto& tier : tree->tiers) {
+            for (const auto& node : tier.nodes) {
+                const Engine::Vec2 g = nodeGridPos(node);
+                minGX = std::min(minGX, g.x);
+                maxGX = std::max(maxGX, g.x);
+                minGY = std::min(minGY, g.y);
+                maxGY = std::max(maxGY, g.y);
+            }
+        }
+        const Engine::Vec2 gridCenter{(minGX + maxGX) * 0.5f, (minGY + maxGY) * 0.5f};
+        Engine::Vec2 treeCenter = baseCenter + talentTreePan_ - Engine::Vec2{gridCenter.x * cell, gridCenter.y * cell};
+
+        // Clip all tree rendering to the center panel so nodes/edges never bleed behind other panels.
+        SDL_Rect treeClip{static_cast<int>(centerX + 6.0f), static_cast<int>(centerY + 34.0f),
+                          static_cast<int>(centerW - 12.0f), static_cast<int>(centerH - 42.0f)};
+        bool hadClip = SDL_RenderIsClipEnabled(sdlRenderer_) != SDL_FALSE;
+        SDL_Rect prevClip{};
+        SDL_RenderGetClipRect(sdlRenderer_, &prevClip);
+        SDL_RenderSetClipRect(sdlRenderer_, &treeClip);
+
+        float minX = 999999.0f;
+        float maxX = -999999.0f;
+        float minY = 999999.0f;
+        float maxY = -999999.0f;
+        for (const auto& tier : tree->tiers) {
+            for (const auto& node : tier.nodes) {
+                const Engine::Vec2 g = nodeGridPos(node);
+                float x = treeCenter.x + g.x * cell;
+                float y = treeCenter.y + g.y * cell;
+                minX = std::min(minX, x);
+                maxX = std::max(maxX, x);
+                minY = std::min(minY, y);
+                maxY = std::max(maxY, y);
+            }
+        }
+        const float clampPad = 40.0f;
+        float minAllowedX = centerX + clampPad;
+        float maxAllowedX = centerX + centerW - clampPad;
+        float minAllowedY = centerY + clampPad;
+        float maxAllowedY = centerY + centerH - clampPad;
+        if (minX < minAllowedX) talentTreePan_.x += (minAllowedX - minX);
+        if (maxX > maxAllowedX) talentTreePan_.x -= (maxX - maxAllowedX);
+        if (minY < minAllowedY) talentTreePan_.y += (minAllowedY - minY);
+        if (maxY > maxAllowedY) talentTreePan_.y -= (maxY - maxAllowedY);
+
+        treeCenter = baseCenter + talentTreePan_ - Engine::Vec2{gridCenter.x * cell, gridCenter.y * cell};
+
+        auto nodePos = [&](const Game::RPG::TalentNode& node) {
+            const Engine::Vec2 g = nodeGridPos(node);
+            return Engine::Vec2{treeCenter.x + g.x * cell, treeCenter.y + g.y * cell};
+        };
+
+        // Tier lines
+        for (const auto& tier : tree->tiers) {
+            float avgY = 0.0f;
+            int count = 0;
+            for (const auto& node : tier.nodes) {
+                avgY += static_cast<float>(node.pos[1]);
+                count += 1;
+            }
+            if (count <= 0) continue;
+            avgY /= static_cast<float>(count);
+            float lineY = treeCenter.y + avgY * cell;
+            if (lineY < centerY + 24.0f || lineY > centerY + centerH - 24.0f) continue;
+            Engine::Color lineCol = (rpgTalentPointsSpent_ >= tier.unlockPoints) ? Engine::Color{60, 110, 170, 140}
+                                                                                : Engine::Color{40, 60, 90, 140};
+            render_->drawFilledRect(Engine::Vec2{centerX + 10.0f, lineY}, Engine::Vec2{centerW - 20.0f, 1.0f}, lineCol);
+        }
+
+        // Edges
+        for (const auto& tier : tree->tiers) {
+            for (const auto& node : tier.nodes) {
+                const Engine::Vec2 dst = nodePos(node);
+                for (const auto& reqId : node.prereqs) {
+                    const auto* reqNode = findTalentNode(reqId);
+                    if (!reqNode) continue;
+                    const Engine::Vec2 src = nodePos(*reqNode);
+                    bool reqMet = false;
+                    auto it = rpgTalentRanks_.find(reqId);
+                    if (it != rpgTalentRanks_.end() && it->second > 0) reqMet = true;
+                    Engine::Color edge = reqMet ? Engine::Color{90, 160, 220, 200}
+                                                : Engine::Color{50, 70, 90, 180};
+                    float midX = dst.x;
+                    float horizX = std::min(src.x, midX);
+                    float horizW = std::abs(midX - src.x);
+                    render_->drawFilledRect(Engine::Vec2{horizX, src.y}, Engine::Vec2{std::max(2.0f, horizW), 2.0f}, edge);
+                    float vertY = std::min(src.y, dst.y);
+                    float vertH = std::abs(dst.y - src.y);
+                    render_->drawFilledRect(Engine::Vec2{midX, vertY}, Engine::Vec2{2.0f, std::max(2.0f, vertH)}, edge);
+                }
+            }
+        }
+
+        std::string hoveredId;
+        const float rawNodeSize = 44.0f * talentTreeZoom_;
+        const float nodeSize = std::clamp(rawNodeSize, 30.0f, 62.0f);
+        for (const auto& tier : tree->tiers) {
+            const bool tierUnlocked = rpgTalentPointsSpent_ >= tier.unlockPoints;
+            for (const auto& node : tier.nodes) {
+                Engine::Vec2 pos = nodePos(node);
+                const float x = pos.x - nodeSize * 0.5f;
+                const float y = pos.y - nodeSize * 0.5f;
+                bool inside = (mx >= static_cast<int>(x) && mx <= static_cast<int>(x + nodeSize) &&
+                               my >= static_cast<int>(y) && my <= static_cast<int>(y + nodeSize));
+                if (inside) hoveredId = node.id;
+
+                int rank = 0;
+                auto it = rpgTalentRanks_.find(node.id);
+                if (it != rpgTalentRanks_.end()) rank = it->second;
+
+                bool prereqsMet = true;
+                for (const auto& req : node.prereqs) {
+                    auto rit = rpgTalentRanks_.find(req);
+                    if (rit == rpgTalentRanks_.end() || rit->second < 1) {
+                        prereqsMet = false;
+                        break;
+                    }
+                }
+
+                bool canSpend = canSpendTalentPoint(node.id);
+                bool maxed = rank >= node.maxRank;
+
+                Engine::Color bg{18, 26, 38, 225};
+                Engine::Color border{50, 70, 95, 210};
+                if (!tierUnlocked || !prereqsMet) {
+                    bg = Engine::Color{14, 18, 26, 210};
+                    border = Engine::Color{35, 50, 70, 200};
+                } else if (maxed) {
+                    bg = Engine::Color{20, 50, 30, 230};
+                    border = Engine::Color{120, 220, 150, 240};
+                } else if (rank > 0) {
+                    bg = Engine::Color{24, 38, 60, 230};
+                    border = Engine::Color{120, 180, 230, 235};
+                } else if (canSpend) {
+                    bg = Engine::Color{26, 36, 52, 235};
+                    border = Engine::Color{210, 230, 250, 240};
+                }
+                if (inside) {
+                    bg = Engine::Color{30, 44, 62, 235};
+                }
+
+                render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{nodeSize, nodeSize}, bg);
+                render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{nodeSize, 2.0f}, border);
+                render_->drawFilledRect(Engine::Vec2{x, y + nodeSize - 2.0f}, Engine::Vec2{nodeSize, 2.0f}, border);
+                render_->drawFilledRect(Engine::Vec2{x, y}, Engine::Vec2{2.0f, nodeSize}, border);
+                render_->drawFilledRect(Engine::Vec2{x + nodeSize - 2.0f, y}, Engine::Vec2{2.0f, nodeSize}, border);
+
+                if (talentIconTex_) {
+                    const TalentIconRef icon = talentIconForNode(node);
+                    if (icon.valid) {
+                        const float iconSize = nodeSize * 0.55f;
+                        const float iconX = pos.x - iconSize * 0.5f;
+                        const float iconY = pos.y - iconSize * 0.5f;
+                        const Engine::IntRect src{icon.col * 16, icon.row * 16, 16, 16};
+                        Engine::Color tint = talentArchetypeColor(activeArchetype_.id);
+                        tint.a = static_cast<uint8_t>((tierUnlocked && prereqsMet) ? 235 : 130);
+                        render_->drawTextureRegionTinted(*talentIconTex_, Engine::Vec2{iconX, iconY},
+                                                         Engine::Vec2{iconSize, iconSize}, src, tint);
+                    }
+                }
+
+                const std::string rankText = std::to_string(rank) + "/" + std::to_string(node.maxRank);
+                drawTextShadowed(rankText, Engine::Vec2{x + 6.0f, y + nodeSize - 16.0f}, 0.66f * uiScale,
+                                 Engine::Color{190, 210, 230, 220}, Engine::Color{0, 0, 0, 150});
+
+                // Tiny node label centered under the box (kept inside clip).
+                const float labelScale = 0.62f * uiScale;
+                const std::string label = ellipsizeTextUnified(node.name, nodeSize + 22.0f, labelScale);
+                const Engine::Vec2 lsz = measureTextUnified(label, labelScale);
+                drawTextShadowed(label, Engine::Vec2{pos.x - lsz.x * 0.5f, y + nodeSize + 4.0f}, labelScale,
+                                 Engine::Color{165, 190, 215, 210}, Engine::Color{0, 0, 0, 150});
+
+                if (inside && leftEdge) {
+                    talentTreeSelectedId_ = node.id;
+                    if (canSpend) {
+                        spendTalentPoint(node.id);
+                        playUiSelect();
+                    }
+                }
+            }
+        }
+
+        // Tier labels on top (avoid getting hidden by nodes/edges).
+        for (const auto& tier : tree->tiers) {
+            float avgY = 0.0f;
+            int count = 0;
+            for (const auto& node : tier.nodes) {
+                avgY += static_cast<float>(node.pos[1]);
+                count += 1;
+            }
+            if (count <= 0) continue;
+            avgY /= static_cast<float>(count);
+            float lineY = treeCenter.y + avgY * cell;
+            if (lineY < centerY + 24.0f || lineY > centerY + centerH - 24.0f) continue;
+            std::ostringstream tlabel;
+            tlabel << "Tier " << tier.tier << " • " << tier.unlockPoints << " pts";
+            drawTextShadowed(tlabel.str(), Engine::Vec2{centerX + 18.0f, lineY - 16.0f}, 0.7f * uiScale,
+                             Engine::Color{150, 180, 210, 210}, Engine::Color{0, 0, 0, 140});
+        }
+
+        // Tooltip for hovered node (drawn last for readability).
+        if (!hoveredId.empty()) {
+            const auto* h = findTalentNode(hoveredId);
+            const auto* ht = findTalentTierForNode(hoveredId);
+            if (h && ht) {
+                int rank = 0;
+                auto it = rpgTalentRanks_.find(h->id);
+                if (it != rpgTalentRanks_.end()) rank = it->second;
+                const bool canSpend = canSpendTalentPoint(h->id);
+                const bool maxed = rank >= h->maxRank;
+                std::string state = "Locked";
+                if (maxed) state = "Maxed";
+                else if (rank > 0) state = "Purchased";
+                else if (canSpend) state = "Available";
+                const float tipScale = 0.80f * uiScale;
+                const float tipPad = 10.0f;
+                std::string title = h->name + " (" + state + ")";
+                Engine::Vec2 titleSz = measureTextUnified(title, tipScale);
+                float tipW = std::clamp(titleSz.x + tipPad * 2.0f, 200.0f, 360.0f);
+                float tipX = static_cast<float>(mx) + 14.0f;
+                float tipY = static_cast<float>(my) + 14.0f;
+                if (tipX + tipW > centerX + centerW - 10.0f) tipX = centerX + centerW - tipW - 10.0f;
+                if (tipY + 54.0f > centerY + centerH - 10.0f) tipY = centerY + centerH - 54.0f - 10.0f;
+                render_->drawFilledRect(Engine::Vec2{tipX, tipY + 3.0f}, Engine::Vec2{tipW, 48.0f}, Engine::Color{0, 0, 0, 70});
+                render_->drawFilledRect(Engine::Vec2{tipX, tipY}, Engine::Vec2{tipW, 48.0f}, Engine::Color{12, 16, 24, 235});
+                render_->drawFilledRect(Engine::Vec2{tipX, tipY}, Engine::Vec2{tipW, 2.0f}, Engine::Color{55, 90, 130, 220});
+                drawTextShadowed(ellipsizeTextUnified(title, tipW - tipPad * 2.0f, tipScale),
+                                 Engine::Vec2{tipX + tipPad, tipY + 8.0f}, tipScale,
+                                 Engine::Color{220, 240, 255, 245});
+                std::ostringstream rs;
+                rs << "Rank " << rank << "/" << h->maxRank << " • Tier " << ht->tier;
+                drawTextShadowed(rs.str(), Engine::Vec2{tipX + tipPad, tipY + 26.0f}, 0.72f * uiScale,
+                                 Engine::Color{170, 200, 225, 220});
+            }
+        }
+
+        SDL_RenderSetClipRect(sdlRenderer_, hadClip ? &prevClip : nullptr);
+
+        const std::string detailId = !hoveredId.empty() ? hoveredId : talentTreeSelectedId_;
+        const auto* detail = detailId.empty() ? nullptr : findTalentNode(detailId);
+        float dy = rightY + 38.0f;
+        if (detail) {
+            drawTextShadowed(ellipsizeTextUnified(detail->name, rightW - 24.0f, 0.98f * uiScale),
+                             Engine::Vec2{rightX + 12.0f, dy}, 0.98f * uiScale, Engine::Color{220, 235, 250, 240});
+            dy += 20.0f * uiScale;
+            std::ostringstream r;
+            int rank = 0;
+            auto it = rpgTalentRanks_.find(detail->id);
+            if (it != rpgTalentRanks_.end()) rank = it->second;
+            r << "Rank " << rank << " / " << detail->maxRank;
+            drawTextShadowed(r.str(), Engine::Vec2{rightX + 12.0f, dy}, 0.84f * uiScale, Engine::Color{170, 200, 225, 220});
+            dy += 18.0f * uiScale;
+            // Clip + wrap details to avoid bleed/clipping.
+            SDL_Rect dclip{static_cast<int>(rightX + 10.0f), static_cast<int>(rightY + 34.0f),
+                           static_cast<int>(rightW - 20.0f), static_cast<int>(contentH - 44.0f)};
+            bool hadDClip = SDL_RenderIsClipEnabled(sdlRenderer_) != SDL_FALSE;
+            SDL_Rect prevDClip{};
+            SDL_RenderGetClipRect(sdlRenderer_, &prevDClip);
+            SDL_RenderSetClipRect(sdlRenderer_, &dclip);
+
+            const float bodyScale = 0.82f * uiScale;
+            const float maxW = rightW - 24.0f;
+            const float lineH = std::max(14.0f, measureTextUnified("Ag", bodyScale).y + 3.0f);
+            const float maxY = rightY + contentH - 16.0f;
+            auto descLines = wrapText(detail->description, maxW, bodyScale);
+            for (std::size_t i = 0; i < descLines.size(); ++i) {
+                if (dy + lineH > maxY) break;
+                const bool lastRoom = (dy + lineH * 2.0f > maxY) && (i + 1 < descLines.size());
+                const std::string s = lastRoom ? ellipsizeTextUnified(descLines[i], maxW, bodyScale) : descLines[i];
+                drawTextShadowed(s, Engine::Vec2{rightX + 12.0f, dy}, bodyScale, Engine::Color{200, 220, 240, 220},
+                                 Engine::Color{0, 0, 0, 120});
+                dy += lineH;
+                if (lastRoom) break;
+            }
+            dy += 8.0f;
+
+            drawTextShadowed("Bonuses", Engine::Vec2{rightX + 12.0f, dy}, 0.82f * uiScale, Engine::Color{170, 200, 225, 220});
+            dy += lineH;
+            auto bonusLines = formatRpgStatLines(detail->bonus);
+            const auto attrLines = formatRpgAttributeLines(detail->attributes);
+            bonusLines.insert(bonusLines.end(), attrLines.begin(), attrLines.end());
+            if (bonusLines.empty()) bonusLines.push_back("No stat bonuses");
+            for (std::size_t i = 0; i < bonusLines.size(); ++i) {
+                if (dy + lineH > maxY) break;
+                if (i >= 8) {
+                    drawTextShadowed("...", Engine::Vec2{rightX + 12.0f, dy}, bodyScale, Engine::Color{170, 200, 225, 200});
+                    dy += lineH;
+                    break;
+                }
+                drawTextShadowed(bonusLines[i], Engine::Vec2{rightX + 12.0f, dy}, bodyScale,
+                                 Engine::Color{190, 210, 230, 210}, Engine::Color{0, 0, 0, 120});
+                dy += lineH;
+            }
+            dy += 8.0f;
+
+            if (!detail->prereqs.empty()) {
+                drawTextShadowed("Requirements", Engine::Vec2{rightX + 12.0f, dy}, 0.82f * uiScale, Engine::Color{170, 200, 225, 220});
+                dy += lineH;
+                for (std::size_t i = 0; i < detail->prereqs.size(); ++i) {
+                    if (dy + lineH > maxY) break;
+                    const auto* reqNode = findTalentNode(detail->prereqs[i]);
+                    const std::string reqLabel = reqNode ? reqNode->name : detail->prereqs[i];
+                    const std::string req = "• " + reqLabel;
+                    drawTextShadowed(ellipsizeTextUnified(req, maxW, bodyScale), Engine::Vec2{rightX + 12.0f, dy}, bodyScale,
+                                     Engine::Color{190, 210, 230, 210}, Engine::Color{0, 0, 0, 120});
+                    dy += lineH;
+                }
+            }
+
+            SDL_RenderSetClipRect(sdlRenderer_, hadDClip ? &prevDClip : nullptr);
+        } else {
+            drawTextShadowed("Select a node to see details.", Engine::Vec2{rightX + 12.0f, dy}, 0.84f * uiScale,
+                             Engine::Color{180, 200, 220, 210});
+        }
+    }
+
+    const float btnW = 120.0f;
+    const float btnH = 36.0f;
+    const float btnGap = 14.0f;
+    float btnY = bottomY + 10.0f;
+    float btnX = panelX + panelW - (btnW * 3.0f + btnGap * 2.0f) - 16.0f;
+    auto drawButton = [&](const std::string& label, float x, Engine::Color bg) -> bool {
+        bool hover = mx >= static_cast<int>(x) && mx <= static_cast<int>(x + btnW) &&
+                     my >= static_cast<int>(btnY) && my <= static_cast<int>(btnY + btnH);
+        Engine::Color c = hover ? Engine::Color{30, 42, 60, 235} : bg;
+        render_->drawFilledRect(Engine::Vec2{x, btnY}, Engine::Vec2{btnW, btnH}, c);
+        render_->drawFilledRect(Engine::Vec2{x, btnY}, Engine::Vec2{btnW, 2.0f}, Engine::Color{50, 70, 95, 200});
+        drawTextUnified(label, Engine::Vec2{x + 18.0f, btnY + 8.0f}, 0.84f * uiScale, Engine::Color{210, 230, 250, 235});
+        return hover;
+    };
+    bool confirmHover = drawButton("Confirm", btnX, Engine::Color{18, 26, 38, 220});
+    bool resetHover = drawButton("Reset", btnX + btnW + btnGap, Engine::Color{18, 26, 38, 220});
+    bool closeHover = drawButton("Close", btnX + (btnW + btnGap) * 2.0f, Engine::Color{18, 26, 38, 220});
+
+    if (leftEdge) {
+        if (confirmHover || closeHover) {
+            talentTreeOpen_ = false;
+            playUiClose();
+            refreshPauseState();
+        } else if (resetHover) {
+            resetTalentTree();
+            playUiSelect();
+        }
+    }
+}
+
+void GameRoot::drawStatusEffectIcons(const Engine::Camera2D& camera) {
+    if (!render_ || !statusEffectTex_) return;
+    constexpr int kCell = 16;
+    const int cols = std::max(1, (statusEffectTex_->width() + kCell - 1) / kCell);
+    if (cols <= 0) return;
+
+    registry_.view<Engine::ECS::Transform, Engine::ECS::Renderable, Engine::ECS::Health, Engine::ECS::HeroTag>(
+        [&](Engine::ECS::Entity e, const Engine::ECS::Transform& tf, const Engine::ECS::Renderable& rend,
+            const Engine::ECS::Health& hp, const Engine::ECS::HeroTag&) {
+            std::vector<int> iconIndices;
+            iconIndices.reserve(6);
+
+            const bool isDead = hp.currentHealth <= 0.0f;
+            if (isDead) {
+                iconIndices.push_back(0);  // Dead icon.
+            } else if (const auto* status = registry_.get<Engine::ECS::Status>(e)) {
+                for (const auto& inst : status->container.all()) {
+                    int idx = statusIconIndex(inst.spec.id);
+                    if (idx >= 0) iconIndices.push_back(idx);
+                }
+            }
+
+            if (e == hero_ && !isDead) {
+                if (registry_.has<Game::ArmorBuff>(e)) iconIndices.push_back(13);  // Reinforced.
+                if (lifestealBuff_ > 0.0f) iconIndices.push_back(11);  // Lifesteal.
+                if (immortalTimer_ > 0.0f) iconIndices.push_back(10);  // Invulnerable.
+                if (moveSpeedBuffMul_ > 1.01f || attackSpeedBuffMul_ > 1.01f ||
+                    frenzyRateBuff_ > 1.01f || rageRateBuff_ > 1.01f) {
+                    iconIndices.push_back(14);  // Attack/Move speed bonus.
+                }
+            }
+
+            if (iconIndices.empty()) return;
+
+            const float iconSize = 16.0f * camera.zoom;
+            const float gap = 3.0f * camera.zoom;
+            const float heroScale = 2.0f;
+            Engine::Vec2 screen = Engine::worldToScreen(tf.position, camera,
+                                                        static_cast<float>(viewportWidth_),
+                                                        static_cast<float>(viewportHeight_));
+            float baseY = screen.y - rend.size.y * 0.5f * camera.zoom * heroScale - 8.0f * camera.zoom - iconSize;
+            float totalW = iconIndices.size() * iconSize + (iconIndices.size() - 1) * gap;
+            float startX = screen.x - totalW * 0.5f;
+
+            for (std::size_t i = 0; i < iconIndices.size(); ++i) {
+                int col = std::clamp(iconIndices[i], 0, cols - 1);
+                Engine::IntRect src{col * kCell, 0, kCell, kCell};
+                Engine::Vec2 pos{startX + i * (iconSize + gap), baseY};
+                render_->drawTextureRegion(*statusEffectTex_, pos, Engine::Vec2{iconSize, iconSize}, src);
+            }
+        });
 }
 
 void GameRoot::drawResourceCluster() {
@@ -13140,28 +14258,65 @@ void GameRoot::drawCharacterScreen(const Engine::InputState& input) {
     if (!detail && inventorySelected_ >= 0 && inventorySelected_ < static_cast<int>(inventory_.size())) {
         detail = &inventory_[static_cast<std::size_t>(inventorySelected_)].def;
     }
-    auto findAffix = [&](const std::string& id) -> const Game::RPG::Affix* {
-        for (const auto& a : rpgLootTable_.affixes) if (a.id == id) return &a;
+    auto computeContribution = [&](const ItemDefinition& def) {
+        return Game::RPG::computeItemContribution(rpgLootTable_, def, 1);
+    };
+    auto findConsumableDef = [&](const ItemDefinition& def) -> const Game::RPG::ConsumableDef* {
+        if (def.rpgConsumableId.empty()) return nullptr;
+        for (const auto& c : rpgConsumables_) {
+            if (c.id == def.rpgConsumableId) return &c;
+        }
         return nullptr;
     };
-    auto computeContribution = [&](const ItemDefinition& def) {
-        Engine::Gameplay::RPG::StatContribution total{};
-        zeroContribution(total);
-        if (const auto* t = findRpgTemplateFor(def)) {
-            addContribution(total, t->baseStats, 1.0f);
+    auto formatPercent = [&](float value) -> std::string {
+        float pct = value * 100.0f;
+        float rounded = std::round(pct * 10.0f) / 10.0f;
+        bool whole = std::abs(rounded - std::round(rounded)) < 0.05f;
+        std::ostringstream s;
+        s.setf(std::ios::fixed);
+        s << std::setprecision(whole ? 0 : 1) << rounded << "%";
+        return s.str();
+    };
+    auto formatDuration = [&](float seconds) -> std::string {
+        float rounded = std::round(seconds * 10.0f) / 10.0f;
+        bool whole = std::abs(rounded - std::round(rounded)) < 0.05f;
+        std::ostringstream s;
+        s.setf(std::ios::fixed);
+        s << std::setprecision(whole ? 0 : 1) << rounded << "s";
+        return s.str();
+    };
+    auto consumableInfoLines = [&](const ItemDefinition& def) -> std::vector<std::string> {
+        std::vector<std::string> out;
+        const auto* c = findConsumableDef(def);
+        if (!c) return out;
+        const bool isFood = (c->cooldownGroup == "food");
+        const bool isPotion = (c->cooldownGroup == "potion");
+        if (!isFood && !isPotion) return out;
+        float foodMag = 0.0f;
+        if (isFood && !rpgFoodRegenByRarity_.empty()) {
+            const int idx = std::clamp(static_cast<int>(def.rarity), 0,
+                                       static_cast<int>(rpgFoodRegenByRarity_.size() - 1));
+            foodMag = rpgFoodRegenByRarity_[static_cast<std::size_t>(idx)];
         }
-        for (const auto& id : def.rpgAffixIds) {
-            if (const auto* a = findAffix(id)) addContribution(total, a->stats, 1.0f);
-        }
-        for (const auto& g : def.rpgSocketed) {
-            if (const auto* gt = findRpgTemplateById(g.templateId)) {
-                addContribution(total, gt->baseStats, 1.0f);
+        for (const auto& eff : c->effects) {
+            if (eff.category != Game::RPG::ConsumableCategory::Food &&
+                eff.category != Game::RPG::ConsumableCategory::Heal) {
+                continue;
             }
-            for (const auto& ga : g.affixIds) {
-                if (const auto* a = findAffix(ga)) addContribution(total, a->stats, 1.0f);
+            float mag = eff.magnitude;
+            if (isFood && foodMag > 0.0f) {
+                mag = foodMag;
+            }
+            if (mag <= 0.0f) continue;
+            const char* resource = (eff.resource == Game::RPG::ConsumableResource::Shields) ? "Shields" : "Health";
+            if (eff.duration > 0.0f) {
+                out.push_back(std::string("Regenerates ") + formatPercent(mag) + " " + resource + " per sec for " +
+                              formatDuration(eff.duration));
+            } else {
+                out.push_back(std::string("Restores ") + formatPercent(mag) + " " + resource);
             }
         }
-        return total;
+        return out;
     };
     float dy = detailsY + 38.0f;
     if (!detail) {
@@ -13176,22 +14331,48 @@ void GameRoot::drawCharacterScreen(const Engine::InputState& input) {
                         Engine::Color{175, 200, 225, 220});
         dy += 18.0f * uiScale;
 
-        int sell = std::max(1, detail->cost / 2);
+        auto drawDetailLine = [&](const std::string& s, Engine::Color c = Engine::Color{190, 220, 255, 220}) {
+            drawTextUnified(s, Engine::Vec2{col3X + 14.0f, dy}, 0.78f * uiScale, c);
+            dy += 16.0f * uiScale;
+        };
+
+        int sell = itemSellValue(*detail);
         drawTextUnified("Sell: " + std::to_string(sell) + "c", Engine::Vec2{col3X + 12.0f, dy}, 0.80f * uiScale,
                         Engine::Color{180, 255, 200, 220});
         dy += 18.0f * uiScale;
+        if (!detail->rpgTemplateId.empty()) {
+            drawTextUnified("Item Level " + std::to_string(std::max(1, detail->rpgItemLevel)),
+                            Engine::Vec2{col3X + 12.0f, dy}, 0.80f * uiScale, Engine::Color{190, 220, 255, 210});
+            dy += 18.0f * uiScale;
+        }
+
+        const auto consumableLines = consumableInfoLines(*detail);
+        if (!consumableLines.empty()) {
+            drawTextUnified("Consumable", Engine::Vec2{col3X + 12.0f, dy}, 0.84f * uiScale, Engine::Color{200, 230, 255, 230});
+            dy += 18.0f * uiScale;
+            for (const auto& line : consumableLines) {
+                drawDetailLine("• " + line);
+            }
+            dy += 6.0f * uiScale;
+        }
 
         // RPG stats breakdown (base template + affixes).
         if (!detail->rpgTemplateId.empty()) {
             Engine::Gameplay::RPG::StatContribution total = computeContribution(*detail);
             auto addLine = [&](const std::string& s) {
-                drawTextUnified(s, Engine::Vec2{col3X + 14.0f, dy}, 0.78f * uiScale, Engine::Color{190, 220, 255, 220});
-                dy += 16.0f * uiScale;
+                drawDetailLine(s);
             };
+            const auto implicitLines = formatRpgImplicitStatLines(detail->rpgImplicitStats);
+            if (!implicitLines.empty()) {
+                dy += 4.0f;
+                drawTextUnified("Implicit Rolls", Engine::Vec2{col3X + 12.0f, dy}, 0.84f * uiScale, Engine::Color{200, 230, 255, 230});
+                dy += 18.0f * uiScale;
+                for (const auto& line : implicitLines) addLine(line);
+            }
             const auto statLines = formatRpgStatLines(total);
             if (!statLines.empty()) {
                 dy += 4.0f;
-                drawTextUnified("Bonuses", Engine::Vec2{col3X + 12.0f, dy}, 0.84f * uiScale, Engine::Color{200, 230, 255, 230});
+                drawTextUnified("Total Bonuses", Engine::Vec2{col3X + 12.0f, dy}, 0.84f * uiScale, Engine::Color{200, 230, 255, 230});
                 dy += 18.0f * uiScale;
                 for (const auto& line : statLines) addLine(line);
             }
@@ -13246,48 +14427,52 @@ void GameRoot::drawCharacterScreen(const Engine::InputState& input) {
                  rarityColorForRpgItem(*hoveredDef, baseColor));
         if (!hoveredDef->rpgTemplateId.empty()) {
             pushLine(hoveredDef->desc, baseColor);
+            pushLine("Item Level " + std::to_string(std::max(1, hoveredDef->rpgItemLevel)), baseColor);
+            const auto consumableLines = consumableInfoLines(*hoveredDef);
+            for (const auto& line : consumableLines) {
+                pushLine("• " + line, baseColor);
+            }
             const auto total = computeContribution(*hoveredDef);
             const auto statLines = formatRpgStatLines(total);
             for (const auto& line : statLines) {
                 pushLine("• " + line, baseColor);
             }
+            const auto attrLines = formatRpgAttributeLines(hoveredDef->rpgAttributeBonus);
+            for (const auto& line : attrLines) {
+                pushLine("• " + line, baseColor);
+            }
             if (!hoveredIsEquipped && hoveredInvIdx.has_value() && *hoveredInvIdx < inventory_.size()) {
                 const auto* t = findRpgTemplateFor(*hoveredDef);
-                if (t && !t->socketable && hero_ != Engine::ECS::kInvalidEntity) {
-                    const ItemInstance& inst = inventory_[*hoveredInvIdx];
-                    auto contributionFromEquipped = [&](const auto& eq) {
-                        Engine::Gameplay::RPG::StatContribution contrib{};
-                        zeroContribution(contrib);
-                        auto findAffix2 = [&](const std::string& id) -> const Game::RPG::Affix* {
-                            for (const auto& a : rpgLootTable_.affixes) if (a.id == id) return &a;
-                            return nullptr;
+                    if (t && !t->socketable && hero_ != Engine::ECS::kInvalidEntity) {
+                        const ItemInstance& inst = inventory_[*hoveredInvIdx];
+                        auto contributionFromEquipped = [&](const auto& eq) {
+                            Engine::Gameplay::RPG::StatContribution contrib{};
+                            zeroContribution(contrib);
+                            for (const auto& opt : eq) {
+                                if (!opt.has_value()) continue;
+                                const auto& inst2 = *opt;
+                                addContribution(contrib, Game::RPG::computeItemContribution(rpgLootTable_, inst2.def, std::max(1, inst2.quantity)), 1.0f);
+                            }
+                            return contrib;
                         };
+
+                    auto attributesFromEquipped = [&](const auto& eq) {
+                        Engine::Gameplay::RPG::Attributes attrs{};
                         for (const auto& opt : eq) {
                             if (!opt.has_value()) continue;
-                            const auto& inst2 = *opt;
-                            const auto& def2 = inst2.def;
-                            const auto* tt = findRpgTemplateById(def2.rpgTemplateId);
-                            if (tt) addContribution(contrib, tt->baseStats, static_cast<float>(std::max(1, inst2.quantity)));
-                            for (const auto& affId : def2.rpgAffixIds) {
-                                if (const auto* a = findAffix2(affId)) addContribution(contrib, a->stats, static_cast<float>(std::max(1, inst2.quantity)));
-                            }
-                            for (const auto& g : def2.rpgSocketed) {
-                                if (const auto* gt = findRpgTemplateById(g.templateId)) {
-                                    addContribution(contrib, gt->baseStats, static_cast<float>(std::max(1, inst2.quantity)));
-                                }
-                                for (const auto& ga : g.affixIds) {
-                                    if (const auto* a = findAffix2(ga)) addContribution(contrib, a->stats, static_cast<float>(std::max(1, inst2.quantity)));
-                                }
-                            }
+                            addAttributes(attrs, opt->def.rpgAttributeBonus, 1);
                         }
-                        return contrib;
+                        return attrs;
                     };
 
                     auto computeDerivedForEquipped = [&](const auto& eq) {
                         Engine::Gameplay::RPG::StatContribution mods = contributionFromEquipped(eq);
                         addContribution(mods, collectRpgTalentContribution(), 1.0f);
                         Engine::Gameplay::RPG::AggregationInput input{};
-                        input.attributes = activeArchetype_.rpgAttributes;
+                        Engine::Gameplay::RPG::Attributes attrs = activeArchetype_.rpgAttributes;
+                        addAttributes(attrs, attributesFromEquipped(eq), 1);
+                        addAttributes(attrs, collectRpgTalentAttributes(), 1);
+                        input.attributes = attrs;
                         input.base.baseHealth = heroMaxHp_;
                         input.base.baseShields = heroShield_;
                         input.base.baseArmor = heroHealthArmor_;
@@ -13342,12 +14527,32 @@ void GameRoot::drawCharacterScreen(const Engine::InputState& input) {
 
                     std::vector<std::pair<std::string, Engine::Color>> compareLines;
                     compareLines.push_back(formatDelta("Attack Power", nxt.attackPower - cur.attackPower));
+                    compareLines.push_back(formatDelta("Spell Power", nxt.spellPower - cur.spellPower));
                     compareLines.push_back(formatDelta("Attack Speed", nxt.attackSpeed - cur.attackSpeed, "x"));
                     compareLines.push_back(formatDelta("Move Speed", nxt.moveSpeed - cur.moveSpeed));
+                    compareLines.push_back(formatDelta("Accuracy", nxt.accuracy - cur.accuracy));
                     compareLines.push_back(formatDelta("Max Health", nxt.healthMax - cur.healthMax));
+                    compareLines.push_back(formatDelta("Health Regen", nxt.healthRegen - cur.healthRegen));
                     compareLines.push_back(formatDelta("Max Shields", nxt.shieldMax - cur.shieldMax));
+                    compareLines.push_back(formatDelta("Shield Regen", nxt.shieldRegen - cur.shieldRegen));
                     compareLines.push_back(formatDelta("Armor", nxt.armor - cur.armor));
-                    compareLines.push_back(formatDelta("Crit", nxt.critChance - cur.critChance, "%"));
+                    compareLines.push_back(formatDelta("Armor Pen", nxt.armorPen - cur.armorPen));
+                    compareLines.push_back(formatDelta("Evasion", nxt.evasion - cur.evasion));
+                    compareLines.push_back(formatDelta("Tenacity", nxt.tenacity - cur.tenacity));
+                    compareLines.push_back(formatDelta("Life on Hit", nxt.lifeOnHit - cur.lifeOnHit));
+                    compareLines.push_back(formatDelta("Crit Chance", nxt.critChance - cur.critChance, "%"));
+                    compareLines.push_back(formatDelta("Crit Mult", nxt.critMult - cur.critMult, "x"));
+                    compareLines.push_back(formatDelta("Lifesteal", nxt.lifesteal - cur.lifesteal, "%"));
+                    compareLines.push_back(formatDelta("Cleave Chance", nxt.cleaveChance - cur.cleaveChance, "%"));
+                    compareLines.push_back(formatDelta("Cooldown Reduction", nxt.cooldownReduction - cur.cooldownReduction, "%"));
+                    compareLines.push_back(formatDelta("Resource Regen", nxt.resourceRegen - cur.resourceRegen, "%"));
+                    compareLines.push_back(formatDelta("Status Chance", nxt.statusChance - cur.statusChance, "%"));
+                    compareLines.push_back(formatDelta("Gold Gain", nxt.goldGainMult - cur.goldGainMult, "%"));
+                    compareLines.push_back(formatDelta("Rarity Score", nxt.rarityScore - cur.rarityScore));
+                    static constexpr const char* kResistLabels[] = {"Fire Resist", "Frost Resist", "Shock Resist", "Poison Resist", "Arcane Resist", "True Resist"};
+                    for (std::size_t i = 0; i < nxt.resists.values.size() && i < std::size(kResistLabels); ++i) {
+                        compareLines.push_back(formatDelta(kResistLabels[i], nxt.resists.values[i] - cur.resists.values[i], "%"));
+                    }
 
                         bool hasCompare = false;
                         for (const auto& cl : compareLines) if (!cl.first.empty()) { hasCompare = true; break; }
@@ -13367,6 +14572,7 @@ void GameRoot::drawCharacterScreen(const Engine::InputState& input) {
                 pushLine("• " + hoveredDef->affixes[i], baseColor);
             }
         }
+        pushLine("Sell: " + std::to_string(itemSellValue(*hoveredDef)) + "c", Engine::Color{180, 255, 200, 220});
         std::string clickHint = hoveredIsEquipped ? "Click: Unequip" : "Click: Equip";
         if (!hoveredIsEquipped) {
             const auto* t = findRpgTemplateFor(*hoveredDef);
@@ -13450,6 +14656,12 @@ void GameRoot::drawCharacterScreen(const Engine::InputState& input) {
                 ItemDefinition::RpgSocketedGem g{};
                 g.templateId = gemInst.def.rpgTemplateId;
                 g.affixIds = gemInst.def.rpgAffixIds;
+                g.baseScalar = gemInst.def.rpgBaseScalar;
+                g.affixScalar = gemInst.def.rpgAffixScalar;
+                g.rarity = gemInst.def.rarity;
+                g.itemLevel = gemInst.def.rpgItemLevel;
+                g.itemScale = gemInst.def.rpgItemScale;
+                g.implicitStats = gemInst.def.rpgImplicitStats;
                 targetDef.rpgSocketed.push_back(std::move(g));
                 if (gemInst.quantity > 1) {
                     gemInst.quantity -= 1;
@@ -13750,9 +14962,17 @@ void GameRoot::resetRun() {
     inventoryGridScroll_ = 0.0f;
     rpgTalentRanks_.clear();
     rpgTalentPointsSpent_ = 0;
+    rpgTalentPointsAvailable_ = 0;
     rpgTalentLevelCached_ = 0;
     rpgTalentArchetypeCached_.clear();
+    talentPointsTotalCached_ = 0;
+    talentToastPrimed_ = false;
+    talentTreeOpen_ = false;
+    talentTreeSelectedId_.clear();
+    talentTreePan_ = {};
+    talentTreeZoom_ = 1.0f;
     combatDebugLines_.clear();
+    toastManager_.clear();
     inventoryScrollLeftPrev_ = false;
     inventoryScrollRightPrev_ = false;
     inventoryCyclePrev_ = false;
@@ -13858,10 +15078,30 @@ bool GameRoot::addItemToInventory(const ItemDefinition& def) {
     return true;
 }
 
+int GameRoot::itemSellValue(const ItemDefinition& def) const {
+    int base = std::max(1, def.cost / 2);
+    const int rarityIndex = std::clamp(static_cast<int>(def.rarity), 0,
+                                       static_cast<int>(rpgSellRarityMultipliers_.size() - 1));
+    float rarityMul = rpgSellRarityMultipliers_[static_cast<std::size_t>(rarityIndex)];
+    int affixCount = 0;
+    if (!def.rpgAffixIds.empty()) {
+        affixCount += static_cast<int>(def.rpgAffixIds.size());
+    } else {
+        affixCount += static_cast<int>(def.affixes.size());
+    }
+    for (const auto& g : def.rpgSocketed) {
+        affixCount += 1;  // count the socketed gem's base bonus
+        affixCount += static_cast<int>(g.affixIds.size());
+    }
+    float affixMul = 1.0f + rpgSellAffixBonus_ * static_cast<float>(affixCount);
+    int sell = static_cast<int>(std::round(static_cast<float>(base) * rarityMul * affixMul));
+    return std::max(1, sell);
+}
+
 bool GameRoot::sellItemFromInventory(std::size_t idx, int& copperOut) {
     if (idx >= inventory_.size()) return false;
     const auto& inst = inventory_[idx];
-    int refund = std::max(1, inst.def.cost / 2);
+    int refund = itemSellValue(inst.def);
     copperOut += refund;
     inventory_.erase(inventory_.begin() + static_cast<std::ptrdiff_t>(idx));
     clampInventorySelection();
@@ -14039,7 +15279,8 @@ void GameRoot::refreshPauseState() {
     // In multiplayer, overlays (shop, level-up, build, inventory) do NOT pause the match.
     bool overlayPause = !multiplayerEnabled_ &&
                         (itemShopOpen_ || abilityShopOpen_ || levelChoiceOpen_ || characterScreenOpen_);
-    paused_ = userPaused_ || overlayPause || defeated_;
+    bool forcePause = talentTreeOpen_;
+    paused_ = userPaused_ || overlayPause || forcePause || defeated_;
 }
 
 }  // namespace Game

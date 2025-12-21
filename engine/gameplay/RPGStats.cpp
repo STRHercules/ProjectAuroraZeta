@@ -25,9 +25,13 @@ DerivedStats makeBase(const AggregationInput& in, const AggregationConstants& cf
     out.critChance = in.base.baseCritChance + static_cast<float>(in.attributes.LCK) * cfg.critPerLCK;
     out.critMult = in.base.baseCritMult;
     out.tenacity = in.base.baseTenacity;
+    out.lifesteal = 0.0f;
+    out.lifeOnHit = 0.0f;
+    out.cleaveChance = 0.0f;
     out.cooldownReduction = in.base.baseCooldownReduction;
     out.goldGainMult = 1.0f + static_cast<float>(in.attributes.LCK) * cfg.goldPerLCK;
     out.rarityScore = static_cast<float>(in.attributes.LCK) * cfg.rarityPerLCK;
+    out.statusChance = 0.0f;
     out.resists = in.base.baseResists;
     return out;
 }
@@ -47,6 +51,9 @@ DerivedStats aggregateDerivedStats(const AggregationInput& input, const Aggregat
         result.critChance += c.flat.critChance;
         result.critMult += c.flat.critMult;
         result.armorPen += c.flat.armorPen;
+        result.lifesteal += c.flat.lifesteal;
+        result.lifeOnHit += c.flat.lifeOnHit;
+        result.cleaveChance += c.flat.cleaveChance;
         result.evasion += c.flat.evasion;
         result.armor += c.flat.armor;
         result.tenacity += c.flat.tenacity;
@@ -58,6 +65,7 @@ DerivedStats aggregateDerivedStats(const AggregationInput& input, const Aggregat
         result.resourceRegen += c.flat.resourceRegen;
         result.goldGainMult += c.flat.goldGainMult;
         result.rarityScore += c.flat.rarityScore;
+        result.statusChance += c.flat.statusChance;
         for (std::size_t i = 0; i < result.resists.values.size(); ++i) {
             result.resists.values[i] += c.flat.resists.values[i];
         }
@@ -77,6 +85,9 @@ DerivedStats aggregateDerivedStats(const AggregationInput& input, const Aggregat
         result.critChance = applyMult(result.critChance, c.mult.critChance);
         result.critMult = applyMult(result.critMult, c.mult.critMult);
         result.armorPen = applyMult(result.armorPen, c.mult.armorPen);
+        result.lifesteal = applyMult(result.lifesteal, c.mult.lifesteal);
+        result.lifeOnHit = applyMult(result.lifeOnHit, c.mult.lifeOnHit);
+        result.cleaveChance = applyMult(result.cleaveChance, c.mult.cleaveChance);
         result.evasion = applyMult(result.evasion, c.mult.evasion);
         result.armor = applyMult(result.armor, c.mult.armor);
         result.tenacity = applyMult(result.tenacity, c.mult.tenacity);
@@ -88,6 +99,7 @@ DerivedStats aggregateDerivedStats(const AggregationInput& input, const Aggregat
         result.resourceRegen = applyMult(result.resourceRegen, c.mult.resourceRegen);
         result.goldGainMult = applyMult(result.goldGainMult, c.mult.goldGainMult);
         result.rarityScore = applyMult(result.rarityScore, c.mult.rarityScore);
+        result.statusChance = applyMult(result.statusChance, c.mult.statusChance);
         for (std::size_t i = 0; i < result.resists.values.size(); ++i) {
             result.resists.values[i] = applyMult(result.resists.values[i], c.mult.resists.values[i]);
         }
@@ -96,9 +108,11 @@ DerivedStats aggregateDerivedStats(const AggregationInput& input, const Aggregat
     // Clamp crit chance and CDR to sane ranges.
     result.critChance = std::clamp(result.critChance, 0.0f, 0.95f);
     result.cooldownReduction = std::clamp(result.cooldownReduction, -0.9f, 0.9f);
+    result.lifesteal = std::clamp(result.lifesteal, 0.0f, 0.95f);
+    result.cleaveChance = std::clamp(result.cleaveChance, 0.0f, 0.95f);
+    result.statusChance = std::clamp(result.statusChance, -0.5f, 0.95f);
     // Resistances are clamped at resolve time; keep broad range here.
     return result;
 }
 
 }  // namespace Engine::Gameplay::RPG
-

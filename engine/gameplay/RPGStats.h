@@ -71,6 +71,9 @@ struct DerivedStats {
     float critChance{0.0f};    // 0..1
     float critMult{1.5f};
     float armorPen{0.0f};
+    float lifesteal{0.0f};     // 0..1
+    float lifeOnHit{0.0f};     // flat heal per hit
+    float cleaveChance{0.0f};  // 0..1
 
     // Defense
     float evasion{0.0f};       // contributes to dodge/parry
@@ -87,6 +90,7 @@ struct DerivedStats {
     float resourceRegen{0.0f};
     float goldGainMult{1.0f};
     float rarityScore{0.0f};
+    float statusChance{0.0f};       // additive bonus to on-hit status chance (0..1)
 };
 
 // Tunable aggregation constants (kept data-driven but with sane defaults).
@@ -139,4 +143,3 @@ struct AggregationInput {
 DerivedStats aggregateDerivedStats(const AggregationInput& input, const AggregationConstants& cfg = {});
 
 }  // namespace Engine::Gameplay::RPG
-

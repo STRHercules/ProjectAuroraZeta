@@ -378,3 +378,100 @@
 
 # v0.0.178
 * UI: equipment icon clamping now uses ceil grid sizing to support partial sprite sheet widths (e.g., UniqueGear).
+
+# v0.0.179
+* Gameplay: increased base vision by 3 tiles.
+* Gameplay: Sight upgrades now cap at 3 levels with higher cost and larger per-level gain.
+
+# v0.0.180
+* Gameplay: Sight upgrade costs set to 500/1250/2000 copper.
+
+# v0.0.181
+* Ellis: Charge (Righteous Thrust) now grants 1.5s of post-landing invulnerability.
+* Robin: sword melee reach normalized; bow swap grants extra ranged attack distance.
+* Items: sell value now scales with rarity and affix/socket bonuses.
+* UI: item details/tooltip now show sell price plus food regen and potion restore amounts.
+
+# v0.0.182
+* RPG: affix tier weights and per-rarity affix counts are now data-driven via `data/rpg/loot.json`.
+* RPG: affix roll counts now vary within rarity ranges for additional gear variety.
+
+# v0.0.183
+* RPG: added per-rarity power scaling so base stats and affixes roll with randomized strength on drop.
+* RPG: loot table now supports scalar ranges for base stats/affixes by rarity.
+* UI: gear stat readouts now reflect the scaled roll values.
+
+# v0.0.184
+* UI: lowered the character select attribute table for clearer spacing.
+
+# v0.0.185
+* UI: lowered the character select attribute table further for clearer spacing.
+
+# v0.0.186
+* RPG: talent trees are now tiered, data-driven, and include prerequisites plus UI layout positions.
+* UI: added a match-scoped Talent Tree overlay with pan/zoom, node states, and detail panel.
+* Input: added default `N` hotkey to open/close the Talent Tree and pause gameplay while open.
+
+# v0.0.187
+* RPG: talent points now grant every 5 levels instead of every 10.
+
+# v0.0.188
+* UI: talent tree overlay layout pass to prevent text clipping and panel bleed; improved readability (shadows, wrapping, clipping).
+* RPG: expanded all archetype talent trees to 5 tiers with prerequisites and UI positions.
+
+# v0.0.189
+* UI: talent bonus lines now display correct percent deltas (e.g., +8%) instead of baseline values (e.g., 108%).
+
+# v0.0.190
+* UI: talent tree overlay layout adjusted so the top title always draws above panels, with wider center space and more varied branch spacing.
+
+# v0.0.191
+* RPG: Epic+ gear now rolls random attribute bonuses (Epic +1, Legendary +2, Unique +2-3) with increasing chances for two attributes.
+* RPG: tier 5 talents now grant attribute bonuses alongside their existing effects.
+
+# v0.0.192
+* RPG: non-Unique gear no longer uses static base stats; power now comes from rolled implicit stats and affixes.
+    * Combat-type implicit stat pools added (Melee/Ranged/Magical/Ammo), with per-rarity roll counts.
+    * Affixes and Unique base stats now scale with wave-based item level.
+* UI: RPG item tooltips now show item level and rolled implicit stats.
+* Combat: added RPG cleave chance + lifesteal/life-on-hit hooks for loot-driven effects.
+
+# v0.0.193
+* RPG: armor gear now always rolls an armor line, even if affixes omit it.
+* RPG: non-consumable gear can no longer drop without at least one stat line.
+    * Socketable items fall back to scaled base stats if no rolled stats are present.
+
+# v0.0.194
+* UI: hover tooltips now list total RPG stats only once (no duplicate implicit lines).
+
+# v0.0.195
+* UI: RPG compare tooltip now lists all relevant stat deltas (defense, utility, resists, and more).
+
+# v0.0.196
+* RPG: armor implicit rolls now scale with item rarity.
+
+# v0.0.197
+* Scrolls: Rage now tints the hero red while active.
+* Scrolls: Fireball projectile speed reduced.
+* Combat: contact-applied Fear no longer refreshes while already feared.
+
+# v0.0.198
+* Combat: Fear now forces brief wandering instead of stopping the hero in place.
+
+# v0.0.199
+* UI: added toast notifications for pickups, status effects, and talent points.
+    * Effect toasts persist for the full duration and show remaining time.
+    * Pickup toasts colorize by item rarity and call out inventory-full sells.
+
+# v0.0.200
+* UI: talent tree nodes now show stat icons tinted by archetype color.
+* UI: status effect icons now display above the player in application order.
+* Pickups: health and recharge powerups render at their updated 32x16 size (recharge now 1:1).
+* Loot: added a new set of ranged weapons to the drop/shop pool (Ranged_Weapons2).
+
+# v0.0.201
+* UI: status effect icon assignments updated to match the new StatusEffects sprite sheet legend.
+    * Dead, buff, and immunity indicators now render on the hero where applicable.
+
+# v0.0.202
+* Events: escort NPCs now face their movement direction correctly.

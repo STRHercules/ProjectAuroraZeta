@@ -1,4 +1,200 @@
 {
+  "affixTierWeights": [
+    [
+      1.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.4,
+      0.6,
+      0.0
+    ],
+    [
+      0.15,
+      0.25,
+      0.6
+    ],
+    [
+      0.05,
+      0.15,
+      0.8
+    ],
+    [
+      0.0,
+      0.1,
+      0.9
+    ],
+    [
+      0.0,
+      0.05,
+      0.95
+    ]
+  ],
+  "affixCountByRarity": [
+    [
+      1,
+      1
+    ],
+    [
+      1,
+      2
+    ],
+    [
+      2,
+      3
+    ],
+    [
+      3,
+      4
+    ],
+    [
+      4,
+      5
+    ],
+    [
+      3,
+      3
+    ]
+  ],
+  "baseStatScalarByRarity": [
+    [
+      0.98,
+      1.02
+    ],
+    [
+      1.0,
+      1.08
+    ],
+    [
+      1.05,
+      1.15
+    ],
+    [
+      1.1,
+      1.22
+    ],
+    [
+      1.18,
+      1.32
+    ],
+    [
+      1.25,
+      1.4
+    ]
+  ],
+  "affixScalarByRarity": [
+    [
+      0.95,
+      1.05
+    ],
+    [
+      1.0,
+      1.12
+    ],
+    [
+      1.08,
+      1.2
+    ],
+    [
+      1.15,
+      1.3
+    ],
+    [
+      1.25,
+      1.45
+    ],
+    [
+      1.35,
+      1.55
+    ]
+  ],
+  "armorImplicitScalarByRarity": [
+    [
+      0.98,
+      1.02
+    ],
+    [
+      1.0,
+      1.08
+    ],
+    [
+      1.05,
+      1.15
+    ],
+    [
+      1.1,
+      1.22
+    ],
+    [
+      1.18,
+      1.32
+    ],
+    [
+      1.25,
+      1.4
+    ]
+  ],
+  "attributeBonusCountByRarity": [
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      0
+    ],
+    [
+      1,
+      2
+    ],
+    [
+      1,
+      2
+    ],
+    [
+      1,
+      2
+    ]
+  ],
+  "attributeBonusValueByRarity": [
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      0
+    ],
+    [
+      1,
+      1
+    ],
+    [
+      2,
+      2
+    ],
+    [
+      2,
+      3
+    ]
+  ],
+  "attributeBonusSecondChanceByRarity": [
+    0.0,
+    0.0,
+    0.0,
+    0.25,
+    0.5,
+    0.7
+  ],
   "affixes": [
     {
       "id": "atk_flat_s",
@@ -4577,7 +4773,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "long_spear",
@@ -4614,7 +4811,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "sunsteel_spear",
@@ -4651,7 +4849,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "wooden_sword",
@@ -4688,7 +4887,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "iron_sword",
@@ -4725,7 +4925,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "scimitar",
@@ -4762,7 +4963,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "silver_sword",
@@ -4799,7 +5001,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "bastard_sword",
@@ -4836,7 +5039,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "beastslayer",
@@ -4873,7 +5077,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "zwihander",
@@ -4910,7 +5115,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "old_blade",
@@ -4947,7 +5153,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "broadsword",
@@ -4984,7 +5191,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "golden_broadsword",
@@ -5021,7 +5229,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "diamond_broadsword",
@@ -5058,7 +5267,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "sunsteel_broadsword",
@@ -5095,7 +5305,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "wooden_crossbow",
@@ -5135,7 +5346,8 @@
         "acc_flat_l",
         "marksman_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Ranged"
     },
     {
       "id": "iron_crossbow",
@@ -5175,7 +5387,8 @@
         "acc_flat_l",
         "marksman_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Ranged"
     },
     {
       "id": "sunsteel_crossbow",
@@ -5215,7 +5428,8 @@
         "acc_flat_l",
         "marksman_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Ranged"
     },
     {
       "id": "wooden_bow",
@@ -5255,7 +5469,8 @@
         "acc_flat_l",
         "marksman_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Ranged"
     },
     {
       "id": "wooden_longbow",
@@ -5295,7 +5510,8 @@
         "acc_flat_l",
         "marksman_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Ranged"
     },
     {
       "id": "iron_longbow",
@@ -5335,7 +5551,8 @@
         "acc_flat_l",
         "marksman_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Ranged"
     },
     {
       "id": "redwood_longbow",
@@ -5375,7 +5592,8 @@
         "acc_flat_l",
         "marksman_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Ranged"
     },
     {
       "id": "elven_longbow",
@@ -5415,7 +5633,8 @@
         "acc_flat_l",
         "marksman_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Ranged"
     },
     {
       "id": "reinforced_longbow",
@@ -5455,7 +5674,8 @@
         "acc_flat_l",
         "marksman_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Ranged"
     },
     {
       "id": "hunters_bow",
@@ -5495,7 +5715,8 @@
         "acc_flat_l",
         "marksman_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Ranged"
     },
     {
       "id": "diamond_string_bow",
@@ -5535,7 +5756,8 @@
         "acc_flat_l",
         "marksman_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Ranged"
     },
     {
       "id": "emerald_string_bow",
@@ -5575,7 +5797,8 @@
         "acc_flat_l",
         "marksman_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Ranged"
     },
     {
       "id": "golden_longbow",
@@ -5615,7 +5838,8 @@
         "acc_flat_l",
         "marksman_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Ranged"
     },
     {
       "id": "diamond_longbow",
@@ -5655,7 +5879,8 @@
         "acc_flat_l",
         "marksman_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Ranged"
     },
     {
       "id": "sunsteel_longbow",
@@ -5695,7 +5920,8 @@
         "acc_flat_l",
         "marksman_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Ranged"
     },
     {
       "id": "basic_wand",
@@ -5729,7 +5955,8 @@
         "arcane_res_s",
         "arcane_res_m",
         "all_res_s"
-      ]
+      ],
+      "combatType": "Magical"
     },
     {
       "id": "diamond_wand",
@@ -5763,7 +5990,8 @@
         "arcane_res_s",
         "arcane_res_m",
         "all_res_s"
-      ]
+      ],
+      "combatType": "Magical"
     },
     {
       "id": "sunsteel_wand",
@@ -5797,7 +6025,8 @@
         "arcane_res_s",
         "arcane_res_m",
         "all_res_s"
-      ]
+      ],
+      "combatType": "Magical"
     },
     {
       "id": "water_staff",
@@ -5833,7 +6062,8 @@
         "arcane_res_s",
         "arcane_res_m",
         "all_res_s"
-      ]
+      ],
+      "combatType": "Magical"
     },
     {
       "id": "aqua_staff",
@@ -5869,7 +6099,8 @@
         "arcane_res_s",
         "arcane_res_m",
         "all_res_s"
-      ]
+      ],
+      "combatType": "Magical"
     },
     {
       "id": "staff_of_the_depths",
@@ -5905,7 +6136,8 @@
         "arcane_res_s",
         "arcane_res_m",
         "all_res_s"
-      ]
+      ],
+      "combatType": "Magical"
     },
     {
       "id": "wooden_staff",
@@ -5941,7 +6173,8 @@
         "arcane_res_s",
         "arcane_res_m",
         "all_res_s"
-      ]
+      ],
+      "combatType": "Magical"
     },
     {
       "id": "nature_staff",
@@ -5977,7 +6210,8 @@
         "arcane_res_s",
         "arcane_res_m",
         "all_res_s"
-      ]
+      ],
+      "combatType": "Magical"
     },
     {
       "id": "staff_of_the_oculus",
@@ -6013,7 +6247,8 @@
         "arcane_res_s",
         "arcane_res_m",
         "all_res_s"
-      ]
+      ],
+      "combatType": "Magical"
     },
     {
       "id": "thunder_staff",
@@ -6049,7 +6284,8 @@
         "arcane_res_s",
         "arcane_res_m",
         "all_res_s"
-      ]
+      ],
+      "combatType": "Magical"
     },
     {
       "id": "lightning_staff",
@@ -6085,7 +6321,8 @@
         "arcane_res_s",
         "arcane_res_m",
         "all_res_s"
-      ]
+      ],
+      "combatType": "Magical"
     },
     {
       "id": "staff_of_storms",
@@ -6121,7 +6358,8 @@
         "arcane_res_s",
         "arcane_res_m",
         "all_res_s"
-      ]
+      ],
+      "combatType": "Magical"
     },
     {
       "id": "ember_staff",
@@ -6157,7 +6395,8 @@
         "arcane_res_s",
         "arcane_res_m",
         "all_res_s"
-      ]
+      ],
+      "combatType": "Magical"
     },
     {
       "id": "flame_staff",
@@ -6193,7 +6432,8 @@
         "arcane_res_s",
         "arcane_res_m",
         "all_res_s"
-      ]
+      ],
+      "combatType": "Magical"
     },
     {
       "id": "staff_of_the_inferno",
@@ -6229,7 +6469,8 @@
         "arcane_res_s",
         "arcane_res_m",
         "all_res_s"
-      ]
+      ],
+      "combatType": "Magical"
     },
     {
       "id": "emberwood_hatchet",
@@ -6266,7 +6507,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ironhook_handaxe",
@@ -6303,7 +6545,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "titancleave_greataxe",
@@ -6340,7 +6583,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "stonebiter_hatchet",
@@ -6377,7 +6621,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "skyspike_hookaxe",
@@ -6414,7 +6659,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "frostbeard_battleaxe",
@@ -6451,7 +6697,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "mooncrescent_reaver",
@@ -6488,7 +6735,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ash_raider_waraxe",
@@ -6525,7 +6773,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "stormrend_greatblade",
@@ -6562,7 +6811,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "quarrymaul_chopper",
@@ -6599,7 +6849,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "deepcut_bearded_axe",
@@ -6636,7 +6887,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "frostjaw_waraxe",
@@ -6673,7 +6925,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "pikehead_splitter",
@@ -6710,7 +6963,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "blackforge_broadaxe",
@@ -6747,7 +7001,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "oathbreaker_cleaver",
@@ -6784,7 +7039,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "driftsteel_hatchet",
@@ -6821,7 +7077,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ravagers_beak",
@@ -6858,7 +7115,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "silveredge_handaxe",
@@ -6895,7 +7153,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "gravelgnash_axe",
@@ -6932,7 +7191,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "twinwing_double_bit",
@@ -6969,7 +7229,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "nightreap_crescent_axe",
@@ -7006,7 +7267,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "mountainbreaker_greataxe",
@@ -7043,7 +7305,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ironbloom_cleaver",
@@ -7080,7 +7343,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "hookfang_waraxe",
@@ -7117,7 +7381,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "coldsteel_executioner",
@@ -7154,7 +7419,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "glacierfall_greataxe",
@@ -7191,7 +7457,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "gilded_twin_fang",
@@ -7228,7 +7495,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "warlords_chopper",
@@ -7265,7 +7533,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "thunderhead_greataxe",
@@ -7302,7 +7571,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "leviathan_cleaver",
@@ -7339,7 +7609,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "hearthsteel_cleaver",
@@ -7376,7 +7647,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "stoneblock_chopper",
@@ -7413,7 +7685,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "emberhook_butcher",
@@ -7450,7 +7723,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "duskcurve_cleaver",
@@ -7487,7 +7761,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "searmark_cleaver",
@@ -7524,7 +7799,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "porksplitter",
@@ -7561,7 +7837,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ash_hew_chopper",
@@ -7598,7 +7875,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "smokewedge_cleaver",
@@ -7635,7 +7913,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "bone_shear",
@@ -7672,7 +7951,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "tallowcutter",
@@ -7709,7 +7989,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "rib_ripper",
@@ -7746,7 +8027,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "marrowblade",
@@ -7783,7 +8065,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "chopstorm_cleaver",
@@ -7820,7 +8103,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "slab_slayer",
@@ -7857,7 +8141,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "hookjaw_cleaver",
@@ -7894,7 +8179,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "wharfside_chopper",
@@ -7931,7 +8217,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "gristlegrinder",
@@ -7968,7 +8255,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "broadbite_cleaver",
@@ -8005,7 +8293,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "cartilage_cutter",
@@ -8042,7 +8331,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "twin_weight_chopper",
@@ -8079,7 +8369,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "dockhands_cleaver",
@@ -8116,7 +8407,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ironpantry_chopper",
@@ -8153,7 +8445,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "smelters_butcher",
@@ -8190,7 +8483,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "guttersteel_cleaver",
@@ -8227,7 +8521,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "cinderchop_cleaver",
@@ -8264,7 +8559,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "coldblock_cleaver",
@@ -8301,7 +8597,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "brinehook_butcher",
@@ -8338,7 +8635,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "saltknife_cleaver",
@@ -8375,7 +8673,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "spinesplitter",
@@ -8412,7 +8711,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "heap_hewer",
@@ -8449,7 +8749,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "meathook_reaper",
@@ -8486,7 +8787,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "marketday_cleaver",
@@ -8523,7 +8825,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ashen_carver",
@@ -8560,7 +8863,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "butchers_oath",
@@ -8597,7 +8901,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "furnacefang_cleaver",
@@ -8634,7 +8939,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "hammeredge_chopper",
@@ -8671,7 +8977,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "lowroad_cleaver",
@@ -8708,7 +9015,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "black_apron_blade",
@@ -8745,7 +9053,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "graveyard_butcher",
@@ -8782,7 +9091,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "kings_kitchen_guillotine",
@@ -8819,7 +9129,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "tavern_brawl_baton",
@@ -8856,7 +9167,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "cobbleknob_club",
@@ -8893,7 +9205,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "gutterpick_mace",
@@ -8930,7 +9243,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "knife_edge_cudgel",
@@ -8967,7 +9281,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "old_faithful_cudgel",
@@ -9004,7 +9319,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "gravelspike_crusher",
@@ -9041,7 +9357,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "anvilcap_maul",
@@ -9078,7 +9395,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "rustfang_baton",
@@ -9115,7 +9433,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "oakbone_bludgeon",
@@ -9152,7 +9471,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "squarehead_smiter",
@@ -9189,7 +9509,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "rivet_maul_mace",
@@ -9226,7 +9547,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "gleamshiv_club",
@@ -9263,7 +9585,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "brawlers_branch",
@@ -9300,7 +9623,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "cornerstone_hammer",
@@ -9337,7 +9661,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "morningstar_knocker",
@@ -9374,7 +9699,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "dockside_shivstick",
@@ -9411,7 +9737,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ironknob_cudgel",
@@ -9448,7 +9775,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "pebblemaul",
@@ -9485,7 +9813,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "caltrop_crown_mace",
@@ -9522,7 +9851,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "shortbite_club",
@@ -9559,7 +9889,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "stonejaw_baton",
@@ -9596,7 +9927,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "knuckleknock_mace",
@@ -9633,7 +9965,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "thornwheel_morningstar",
@@ -9670,7 +10003,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "brickbat_club",
@@ -9707,7 +10041,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "golemfist_maul",
@@ -9744,7 +10079,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "roundhead_smasher",
@@ -9781,7 +10117,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "warders_flange",
@@ -9818,7 +10155,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "wickedspike_pick_mace",
@@ -9855,7 +10193,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "hexhead_bruiser",
@@ -9892,7 +10231,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "bulwark_knocker",
@@ -9929,7 +10269,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "stitchspike_star",
@@ -9966,7 +10307,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "backalley_bladebat",
@@ -10003,7 +10345,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "grudgewood_club",
@@ -10040,7 +10383,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "cinderblock_smiter",
@@ -10077,7 +10421,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "crownbreaker_mace",
@@ -10114,7 +10459,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ironfang_baton",
@@ -10151,7 +10497,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "big_stick_energy",
@@ -10188,7 +10535,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "sunburst_smasher",
@@ -10225,7 +10573,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "thistlemaul_morningstar",
@@ -10262,7 +10611,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ogres_tooth_club",
@@ -10299,7 +10649,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "rivet_tap_hammer",
@@ -10336,7 +10687,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "hookbeak_warhammer",
@@ -10373,7 +10725,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "quarryblock_maul",
@@ -10410,7 +10763,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "nailbiter_mallet",
@@ -10447,7 +10801,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "anvilfang_hammer",
@@ -10484,7 +10839,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "sunforged_sledge",
@@ -10521,7 +10877,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "cobblecracker",
@@ -10558,7 +10915,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "splitjaw_maul",
@@ -10595,7 +10953,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ironkeep_hammer",
@@ -10632,7 +10991,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "backhand_basher",
@@ -10669,7 +11029,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "gilded_pounder",
@@ -10706,7 +11067,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "darkforge_maul",
@@ -10743,7 +11105,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "stonethud_hammer",
@@ -10780,7 +11143,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "knuckledrum_maul",
@@ -10817,7 +11181,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "cragspike_warhammer",
@@ -10854,7 +11219,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "bricklayers_sledge",
@@ -10891,7 +11257,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "oresplitter_maul",
@@ -10928,7 +11295,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "grave_anvil_hammer",
@@ -10965,7 +11333,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "hearthmaul",
@@ -11002,7 +11371,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "cinderstrike_hammer",
@@ -11039,7 +11409,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "stormweight_maul",
@@ -11076,7 +11447,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "deepmine_sledge",
@@ -11113,7 +11485,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "frostplate_hammer",
@@ -11150,7 +11523,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "shatterstone_maul",
@@ -11187,7 +11561,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "titans_knocker",
@@ -11224,7 +11599,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "crownhammer",
@@ -11261,7 +11637,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "boltbreaker_maul",
@@ -11298,7 +11675,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "wyrmtooth_warhammer",
@@ -11335,7 +11713,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ironfall_maul",
@@ -11372,7 +11751,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "earthshaker_sledge",
@@ -11409,7 +11789,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ashwood_quarterstaff",
@@ -11446,7 +11827,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ironleaf_spear",
@@ -11483,7 +11865,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "blackforge_halberd",
@@ -11520,7 +11903,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "pilgrims_staff",
@@ -11557,7 +11941,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "wayfarers_staff",
@@ -11594,7 +11979,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "twinspike_partisan",
@@ -11631,7 +12017,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "skullthorn_polemace",
@@ -11668,7 +12055,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "tidefork_trident",
@@ -11705,7 +12093,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "stonecleaver_poleaxe",
@@ -11742,7 +12131,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "reedwind_quarterstaff",
@@ -11779,7 +12169,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "rivethead_polehammer",
@@ -11816,7 +12207,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "coldedge_halberd",
@@ -11853,7 +12245,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "sapphire_loop_staff",
@@ -11890,7 +12283,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "monks_longstaff",
@@ -11927,7 +12321,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "hearthoak_staff",
@@ -11964,7 +12359,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "windcutter_glaive",
@@ -12001,7 +12397,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "starbreaker_warstar",
@@ -12038,7 +12435,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ironhook_poleaxe",
@@ -12075,7 +12473,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "wanderwood_staff",
@@ -12112,7 +12511,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "hillpoint_spear",
@@ -12149,7 +12549,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "greywing_halberd",
@@ -12186,7 +12587,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "birch_quarterstaff",
@@ -12223,7 +12625,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "simplewood_staff",
@@ -12260,7 +12663,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "guards_warstaff",
@@ -12297,7 +12701,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "flintfang_polemace",
@@ -12334,7 +12739,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "splitbeard_halberd",
@@ -12371,7 +12777,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "quarryreap_poleaxe",
@@ -12408,7 +12815,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "swiftthorn_javelin",
@@ -12445,7 +12853,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "oxblade_bardiche",
@@ -12482,7 +12891,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "reapers_hookstaff",
@@ -12519,7 +12929,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "elm_quarterstaff",
@@ -12556,7 +12967,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ashen_longstaff",
@@ -12593,7 +13005,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "lanternbearer_staff",
@@ -12630,7 +13043,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "bonecrush_polemace",
@@ -12667,7 +13081,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "wardens_trident",
@@ -12704,7 +13119,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "crowspike_warstar",
@@ -12741,7 +13157,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "azure_studded_staff",
@@ -12778,7 +13195,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "royalcrest_halberd",
@@ -12815,7 +13233,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ironcrown_polemace",
@@ -12852,7 +13271,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "nightwalk_staff",
@@ -12889,7 +13309,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "riveted_longstaff",
@@ -12926,7 +13347,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "spikefoot_pike",
@@ -12963,7 +13385,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "dreadwheel_warstar",
@@ -13000,7 +13423,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "anviljaw_poleaxe",
@@ -13037,7 +13461,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "blackbarb_bardiche",
@@ -13074,7 +13499,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "orchard_quarterstaff",
@@ -13111,7 +13537,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "dawnpoint_spear",
@@ -13148,7 +13575,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "longreach_pike",
@@ -13185,7 +13613,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "steelcapped_staff",
@@ -13222,7 +13651,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "arcflash_spellstaff",
@@ -13259,7 +13689,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "brawlers_quarterstaff",
@@ -13296,7 +13727,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ragetooth_polemace",
@@ -13333,7 +13765,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "oathsplit_poleaxe",
@@ -13370,7 +13803,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "deepcut_poleaxe",
@@ -13407,7 +13841,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "willowwind_staff",
@@ -13444,7 +13879,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "frostpoint_spear",
@@ -13481,7 +13917,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "emberpoint_spear",
@@ -13518,7 +13955,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "blueflare_spellstaff",
@@ -13555,7 +13993,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "stoneweight_maulstaff",
@@ -13592,7 +14031,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "nailspike_maulstaff",
@@ -13629,7 +14069,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "stormcrown_polemace",
@@ -13666,7 +14107,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "riftedge_halberd",
@@ -13703,7 +14145,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ironbranch_halberd",
@@ -13740,7 +14183,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "travelers_staff",
@@ -13777,7 +14221,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "needlepoint_spear",
@@ -13814,7 +14259,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "boarward_winged_spear",
@@ -13851,7 +14297,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "dustwood_quarterstaff",
@@ -13888,7 +14335,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "knotroot_staff",
@@ -13925,7 +14373,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "moonglow_spellstaff",
@@ -13962,7 +14411,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "grudgeflange_polemace",
@@ -13999,7 +14449,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "frostwheel_warstar",
@@ -14036,7 +14487,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "duskcleave_poleaxe",
@@ -14073,7 +14525,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "creekwood_staff",
@@ -14110,7 +14563,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "skythrust_spear",
@@ -14147,7 +14601,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "bannerlord_halberd",
@@ -14184,7 +14639,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "cedar_longstaff",
@@ -14221,7 +14677,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ironbark_warstaff",
@@ -14258,7 +14715,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "archmages_crescent_staff",
@@ -14295,7 +14753,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "seawatch_trident",
@@ -14332,7 +14791,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "sunspike_warstar",
@@ -14369,7 +14829,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "titanbite_poleaxe",
@@ -14406,7 +14867,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "scholars_staff",
@@ -14443,7 +14905,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "wolfpoint_spear",
@@ -14480,7 +14943,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "mooncrescent_glaive",
@@ -14517,7 +14981,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "pilgrims_longstaff",
@@ -14554,7 +15019,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ogresshoulder_maulstaff",
@@ -14591,7 +15057,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "serpentcoil_sorcerer_staff",
@@ -14628,7 +15095,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "stormfork_trident",
@@ -14665,7 +15133,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "gilded_oath_poleaxe",
@@ -14702,7 +15171,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "kingsplit_poleaxe",
@@ -14739,7 +15209,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ashwood_war_scythe",
@@ -14776,7 +15247,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "rusthook_reaping_scythe",
@@ -14813,7 +15285,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "greyfang_war_scythe",
@@ -14850,7 +15323,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "fieldhand_hand_scythe",
@@ -14887,7 +15361,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "pale_moon_crescent_scythe",
@@ -14924,7 +15399,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "bluejaw_razor_crescent_scythe",
@@ -14961,7 +15437,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "bronzewheat_harvest_scythe",
@@ -14998,7 +15475,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "rivet_reap_war_scythe",
@@ -15035,7 +15513,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ironbriar_reaping_scythe",
@@ -15072,7 +15551,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "butchers_hand_scythe",
@@ -15109,7 +15589,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "duskmarch_crescent_scythe",
@@ -15146,7 +15627,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "frostbite_sawtooth_crescent_scythe",
@@ -15183,7 +15665,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "longreach_harvest_scythe",
@@ -15220,7 +15703,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "hollowsteel_war_scythe",
@@ -15257,7 +15741,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "blackthorn_reaping_scythe",
@@ -15294,7 +15779,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "crookblade_hand_scythe",
@@ -15331,7 +15817,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "gravewind_crescent_scythe",
@@ -15368,7 +15855,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "seawraith_razor_crescent_scythe",
@@ -15405,7 +15893,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "wardens_war_scythe",
@@ -15442,7 +15931,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "stonecut_reaping_scythe",
@@ -15479,7 +15969,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "nightroot_war_scythe",
@@ -15516,7 +16007,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "hooked_reaper_hand_scythe",
@@ -15553,7 +16045,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "murkmoon_crescent_scythe",
@@ -15590,7 +16083,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "stormcrescent_sawtooth_crescent_scythe",
@@ -15627,7 +16121,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ironfield_harvest_scythe",
@@ -15664,7 +16159,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "anvilhook_war_scythe",
@@ -15701,7 +16197,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "widowmaker_reaping_scythe",
@@ -15738,7 +16235,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "oathbreaker_hand_scythe",
@@ -15775,7 +16273,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "bonewhite_crescent_scythe",
@@ -15812,7 +16311,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "steelmoon_razor_crescent_scythe",
@@ -15849,7 +16349,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ember_reap_war_scythe",
@@ -15886,7 +16387,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "forgebrand_reaping_scythe",
@@ -15923,7 +16425,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "shadowspike_war_scythe",
@@ -15960,7 +16463,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "cindersickle_hand_scythe",
@@ -15997,7 +16501,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "sunken_arc_crescent_scythe",
@@ -16034,7 +16539,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "nightglass_sawtooth_crescent_scythe",
@@ -16071,7 +16577,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "frostfield_harvest_scythe",
@@ -16108,7 +16615,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "coldiron_war_scythe",
@@ -16145,7 +16653,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "icefang_reaping_scythe",
@@ -16182,7 +16691,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "wintershear_hand_scythe",
@@ -16219,7 +16729,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "glacierhook_crescent_scythe",
@@ -16256,7 +16767,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "rimecrescent_razor_crescent_scythe",
@@ -16293,7 +16805,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "bloodharvest_war_scythe",
@@ -16330,7 +16843,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "redhook_reaping_scythe",
@@ -16367,7 +16881,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "gorethorn_war_scythe",
@@ -16404,7 +16919,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "bloodletter_hand_scythe",
@@ -16441,7 +16957,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "scarlet_arc_crescent_scythe",
@@ -16478,7 +16995,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "heartreap_sawtooth_crescent_scythe",
@@ -16515,7 +17033,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "voidreap_war_scythe",
@@ -16552,7 +17071,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ebonhook_reaping_scythe",
@@ -16589,7 +17109,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "riftfang_war_scythe",
@@ -16626,7 +17147,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "umbral_hand_scythe",
@@ -16663,7 +17185,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "eclipse_crescent_scythe",
@@ -16700,7 +17223,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "starless_razor_crescent_scythe",
@@ -16737,7 +17261,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "kings_harvest_war_scythe",
@@ -16774,7 +17299,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "oathkeepers_reaping_scythe",
@@ -16811,7 +17337,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "titanreaver_war_scythe",
@@ -16848,7 +17375,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "archreaper_hand_scythe",
@@ -16885,7 +17413,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "seraph_arc_crescent_scythe",
@@ -16922,7 +17451,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "leviathan_sawtooth_crescent_scythe",
@@ -16959,7 +17489,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ashmark_arming_sword",
@@ -16996,7 +17527,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ironridge_bastard_sword",
@@ -17033,7 +17565,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "fieldcleft_falchion",
@@ -17070,7 +17603,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "scouts_shortsword",
@@ -17110,7 +17644,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "squires_longsword",
@@ -17147,7 +17682,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "suncrest_longsword",
@@ -17184,7 +17720,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "quarry_greatsword",
@@ -17221,7 +17758,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "gilded_zweihander",
@@ -17258,7 +17796,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "cleaveredge_greatsword",
@@ -17295,7 +17834,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "needlepoint_rapier",
@@ -17335,7 +17875,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ragetooth_serrated_sword",
@@ -17372,7 +17913,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "seamsteel_backsword",
@@ -17409,7 +17951,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "harbor_sabre",
@@ -17446,7 +17989,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "duneshade_scimitar",
@@ -17483,7 +18027,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "crescent_khopesh",
@@ -17520,7 +18065,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "riverguard_arming_sword",
@@ -17557,7 +18103,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "copperbane_bastard_sword",
@@ -17594,7 +18141,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "stonecut_falchion",
@@ -17631,7 +18179,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "wayknife_shortsword",
@@ -17671,7 +18220,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "banneret_longsword",
@@ -17708,7 +18258,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "lioncross_longsword",
@@ -17745,7 +18296,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "hearthsplit_greatsword",
@@ -17782,7 +18334,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "crownwarden_zweihander",
@@ -17819,7 +18372,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "slabbreaker_greatsword",
@@ -17856,7 +18410,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "courtier_rapier",
@@ -17896,7 +18451,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "sawjaw_serrated_sword",
@@ -17933,7 +18489,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "greyline_backsword",
@@ -17970,7 +18527,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "privateer_sabre",
@@ -18007,7 +18565,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "sandrunner_scimitar",
@@ -18044,7 +18603,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "pharaohs_khopesh",
@@ -18081,7 +18641,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "watchman_arming_sword",
@@ -18118,7 +18679,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "steelhand_bastard_sword",
@@ -18155,7 +18717,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "wolfbite_falchion",
@@ -18192,7 +18755,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "sentinel_shortsword",
@@ -18232,7 +18796,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "knightfall_longsword",
@@ -18269,7 +18834,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "brightsteel_longsword",
@@ -18306,7 +18872,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "bridgeguard_greatsword",
@@ -18343,7 +18910,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "regal_dawn_zweihander",
@@ -18380,7 +18948,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "headsman_greatsword",
@@ -18417,7 +18986,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "glassneedle_rapier",
@@ -18457,7 +19027,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "gnasher_serrated_sword",
@@ -18494,7 +19065,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ironspine_backsword",
@@ -18531,7 +19103,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "seabreeze_sabre",
@@ -18568,7 +19141,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "mirage_scimitar",
@@ -18605,7 +19179,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "sunscar_khopesh",
@@ -18642,7 +19217,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "emberwake_arming_sword",
@@ -18679,7 +19255,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "cindergrip_bastard_sword",
@@ -18716,7 +19293,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "firedusk_falchion",
@@ -18753,7 +19331,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ashpoint_shortsword",
@@ -18793,7 +19372,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "flameward_longsword",
@@ -18830,7 +19410,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "pyrekeeper_longsword",
@@ -18867,7 +19448,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "cindermaul_greatsword",
@@ -18904,7 +19486,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "phoenixcrest_zweihander",
@@ -18941,7 +19524,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "furnacecleave_greatsword",
@@ -18978,7 +19562,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "emberthread_rapier",
@@ -19018,7 +19603,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "charfang_serrated_sword",
@@ -19055,7 +19641,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "coalback_backsword",
@@ -19092,7 +19679,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "redtide_sabre",
@@ -19129,7 +19717,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "scorchwind_scimitar",
@@ -19166,7 +19755,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ashen_khopesh",
@@ -19203,7 +19793,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "frostveil_arming_sword",
@@ -19240,7 +19831,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "rimeclad_bastard_sword",
@@ -19277,7 +19869,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "icehook_falchion",
@@ -19314,7 +19907,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "snowstep_shortsword",
@@ -19354,7 +19948,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "winterguard_longsword",
@@ -19391,7 +19986,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "glacierbrand_longsword",
@@ -19428,7 +20024,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "coldhammer_greatsword",
@@ -19465,7 +20062,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "frostcrown_zweihander",
@@ -19502,7 +20100,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "icebreaker_greatsword",
@@ -19539,7 +20138,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "silverfrost_rapier",
@@ -19579,7 +20179,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "rime_tooth_serrated_sword",
@@ -19616,7 +20217,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "coldspine_backsword",
@@ -19653,7 +20255,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "whitecap_sabre",
@@ -19690,7 +20293,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "sleetcurve_scimitar",
@@ -19727,7 +20331,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "polar_khopesh",
@@ -19764,7 +20369,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "stormline_arming_sword",
@@ -19801,7 +20407,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "thunderhand_bastard_sword",
@@ -19838,7 +20445,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "lightning_falchion",
@@ -19875,7 +20483,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "tempest_shortsword",
@@ -19915,7 +20524,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "stormwarden_longsword",
@@ -19952,7 +20562,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "skyforged_longsword",
@@ -19989,7 +20600,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "thunderclap_greatsword",
@@ -20026,7 +20638,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "stormking_zweihander",
@@ -20063,7 +20676,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "boltcleaver_greatsword",
@@ -20100,7 +20714,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "stormalis_rapier",
@@ -20140,7 +20755,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "shocktooth_serrated_sword",
@@ -20177,7 +20793,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "tempestspine_backsword",
@@ -20214,7 +20831,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "squall_sabre",
@@ -20251,7 +20869,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "sandstorm_scimitar",
@@ -20288,7 +20907,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "tempest_khopesh",
@@ -20325,7 +20945,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "duskhollow_arming_sword",
@@ -20362,7 +20983,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "nightguard_bastard_sword",
@@ -20399,7 +21021,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "umbral_falchion",
@@ -20436,7 +21059,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "shadowstep_shortsword",
@@ -20476,7 +21100,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "blackwatch_longsword",
@@ -20513,7 +21138,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "moonlit_longsword",
@@ -20550,7 +21176,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "nightfall_greatsword",
@@ -20587,7 +21214,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "eclipse_zweihander",
@@ -20624,7 +21252,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "gravecleave_greatsword",
@@ -20661,7 +21290,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "midnight_rapier",
@@ -20701,7 +21331,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "darktooth_serrated_sword",
@@ -20738,7 +21369,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "nightspine_backsword",
@@ -20775,7 +21407,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "nocturne_sabre",
@@ -20812,7 +21445,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "nightwind_scimitar",
@@ -20849,7 +21483,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "eclipse_khopesh",
@@ -20886,7 +21521,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "bloodmark_arming_sword",
@@ -20923,7 +21559,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "goregrip_bastard_sword",
@@ -20960,7 +21597,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "redreap_falchion",
@@ -20997,7 +21635,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "bloodedge_shortsword",
@@ -21037,7 +21676,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "crimson_longsword",
@@ -21074,7 +21714,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "hemlock_longsword",
@@ -21111,7 +21752,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "bloodhammer_greatsword",
@@ -21148,7 +21790,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "warlord_zweihander",
@@ -21185,7 +21828,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "butcher_greatsword",
@@ -21222,7 +21866,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "scarlet_rapier",
@@ -21262,7 +21907,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "ripper_serrated_sword",
@@ -21299,7 +21945,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "redspine_backsword",
@@ -21336,7 +21983,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "corsair_sabre",
@@ -21373,7 +22021,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "reddune_scimitar",
@@ -21410,7 +22059,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "bloodmoon_khopesh",
@@ -21447,7 +22097,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "voidkiss_arming_sword",
@@ -21484,7 +22135,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "riftbound_bastard_sword",
@@ -21521,7 +22173,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "nether_falchion",
@@ -21558,7 +22211,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "voidpoint_shortsword",
@@ -21598,7 +22252,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "starless_longsword",
@@ -21635,7 +22290,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "astral_longsword",
@@ -21672,7 +22328,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "blackhole_greatsword",
@@ -21709,7 +22366,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "voidcrown_zweihander",
@@ -21746,7 +22404,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "riftcleaver_greatsword",
@@ -21783,7 +22442,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "starneedle_rapier",
@@ -21823,7 +22483,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "nullfang_serrated_sword",
@@ -21860,7 +22521,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "voidspine_backsword",
@@ -21897,7 +22559,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "phantom_sabre",
@@ -21934,7 +22597,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "voidwind_scimitar",
@@ -21971,7 +22635,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "starfall_khopesh",
@@ -22008,7 +22673,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "dragonseal_arming_sword",
@@ -22045,7 +22711,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "titanhand_bastard_sword",
@@ -22082,7 +22749,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "kingsplit_falchion",
@@ -22119,7 +22787,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "royal_shortsword",
@@ -22159,7 +22828,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "oathkeeper_longsword",
@@ -22196,7 +22866,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "highlord_longsword",
@@ -22233,7 +22904,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "titanbreaker_greatsword",
@@ -22270,7 +22942,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "emperors_zweihander",
@@ -22307,7 +22980,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "colossus_greatsword",
@@ -22344,7 +23018,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "grandduke_rapier",
@@ -22384,7 +23059,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "kingsaw_serrated_sword",
@@ -22421,7 +23097,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "crownspine_backsword",
@@ -22458,7 +23135,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "admiral_sabre",
@@ -22495,7 +23173,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "sultans_scimitar",
@@ -22532,7 +23211,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "dynasty_khopesh",
@@ -22569,7 +23249,8 @@
         "executioner_s",
         "duelist_s",
         "precision_s"
-      ]
+      ],
+      "combatType": "Melee"
     },
     {
       "id": "wooden_arrow",
@@ -22593,7 +23274,8 @@
         "crit_flat_s",
         "arp_flat_s",
         "marksman_s"
-      ]
+      ],
+      "combatType": "Ammo"
     },
     {
       "id": "iron_arrow",
@@ -22617,7 +23299,8 @@
         "crit_flat_s",
         "arp_flat_s",
         "marksman_s"
-      ]
+      ],
+      "combatType": "Ammo"
     },
     {
       "id": "diamond_arrow",
@@ -22641,7 +23324,8 @@
         "crit_flat_s",
         "arp_flat_s",
         "marksman_s"
-      ]
+      ],
+      "combatType": "Ammo"
     },
     {
       "id": "emerald_arrow",
@@ -22665,7 +23349,8 @@
         "crit_flat_s",
         "arp_flat_s",
         "marksman_s"
-      ]
+      ],
+      "combatType": "Ammo"
     },
     {
       "id": "sunsteel_arrow",
@@ -22689,7 +23374,8 @@
         "crit_flat_s",
         "arp_flat_s",
         "marksman_s"
-      ]
+      ],
+      "combatType": "Ammo"
     },
     {
       "id": "scroll",
@@ -25110,6 +25796,1424 @@
       "maxAffixes": 0,
       "affixPool": [],
       "bagSlots": 96
+    },
+    {
+      "id": "emberwood_handbow",
+      "name": "Emberwood Handbow",
+      "slot": 4,
+      "rarity": 0,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 0,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "rivetjaw_handbow",
+      "name": "Rivetjaw Handbow",
+      "slot": 4,
+      "rarity": 0,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 0,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "rangers_shortbow",
+      "name": "Ranger's Shortbow",
+      "slot": 4,
+      "rarity": 0,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 0,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "trailstalker_bow",
+      "name": "Trailstalker Bow",
+      "slot": 4,
+      "rarity": 0,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 0,
+      "iconCol": 3,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "shadow_recurve",
+      "name": "Shadow Recurve",
+      "slot": 4,
+      "rarity": 0,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 0,
+      "iconCol": 4,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "silver_recurve",
+      "name": "Silver Recurve",
+      "slot": 4,
+      "rarity": 0,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 0,
+      "iconCol": 5,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "ironhorn_warbow",
+      "name": "Ironhorn Warbow",
+      "slot": 4,
+      "rarity": 0,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 0,
+      "iconCol": 6,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 1,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "emberclaw_handbow",
+      "name": "Emberclaw Handbow",
+      "slot": 4,
+      "rarity": 1,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 0,
+      "iconCol": 7,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "copperbite_handbow",
+      "name": "Copperbite Handbow",
+      "slot": 4,
+      "rarity": 1,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 0,
+      "iconCol": 8,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "scouts_bow",
+      "name": "Scout's Bow",
+      "slot": 4,
+      "rarity": 1,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 0,
+      "iconCol": 9,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "huntsmans_bow",
+      "name": "Huntsman's Bow",
+      "slot": 4,
+      "rarity": 1,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 0,
+      "iconCol": 10,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "sunflare_bow",
+      "name": "Sunflare Bow",
+      "slot": 4,
+      "rarity": 1,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 0,
+      "iconCol": 11,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "cinderbrand_bow",
+      "name": "Cinderbrand Bow",
+      "slot": 4,
+      "rarity": 1,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 1,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "ashfang_handbow",
+      "name": "Ashfang Handbow",
+      "slot": 4,
+      "rarity": 1,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 1,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 2,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "frostlink_handbow",
+      "name": "Frostlink Handbow",
+      "slot": 4,
+      "rarity": 2,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 1,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "harborline_bow",
+      "name": "Harborline Bow",
+      "slot": 4,
+      "rarity": 2,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 1,
+      "iconCol": 3,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "tidebinder_bow",
+      "name": "Tidebinder Bow",
+      "slot": 4,
+      "rarity": 2,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 1,
+      "iconCol": 4,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "midnight_longbow",
+      "name": "Midnight Longbow",
+      "slot": 4,
+      "rarity": 2,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 1,
+      "iconCol": 5,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "glacier_recurve",
+      "name": "Glacier Recurve",
+      "slot": 4,
+      "rarity": 2,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 1,
+      "iconCol": 6,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "skybreaker_warbow",
+      "name": "Skybreaker Warbow",
+      "slot": 4,
+      "rarity": 2,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 1,
+      "iconCol": 7,
+      "socketable": false,
+      "socketsMax": 1,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 3,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "prismvine_bow",
+      "name": "Prismvine Bow",
+      "slot": 4,
+      "rarity": 3,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 1,
+      "iconCol": 8,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "nightshade_repeater",
+      "name": "Nightshade Repeater",
+      "slot": 4,
+      "rarity": 3,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 1,
+      "iconCol": 9,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "aurorashot_repeater",
+      "name": "Aurorashot Repeater",
+      "slot": 4,
+      "rarity": 3,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 1,
+      "iconCol": 10,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "steelwing_handbow",
+      "name": "Steelwing Handbow",
+      "slot": 4,
+      "rarity": 3,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 1,
+      "iconCol": 11,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "verdant_snapbow",
+      "name": "Verdant Snapbow",
+      "slot": 4,
+      "rarity": 3,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 2,
+      "iconCol": 0,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "blood_oath_repeater",
+      "name": "Blood-Oath Repeater",
+      "slot": 4,
+      "rarity": 3,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 2,
+      "iconCol": 1,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 4,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "witchlight_bow",
+      "name": "Witchlight Bow",
+      "slot": 4,
+      "rarity": 4,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 2,
+      "iconCol": 2,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 5,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "ashen_recurve",
+      "name": "Ashen Recurve",
+      "slot": 4,
+      "rarity": 4,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 2,
+      "iconCol": 3,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 5,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "briarline_bow",
+      "name": "Briarline Bow",
+      "slot": 4,
+      "rarity": 4,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 2,
+      "iconCol": 4,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 5,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "rosequartz_bow",
+      "name": "Rosequartz Bow",
+      "slot": 4,
+      "rarity": 4,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 2,
+      "iconCol": 5,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 5,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    },
+    {
+      "id": "duskwood_bow",
+      "name": "Duskwood Bow",
+      "slot": 4,
+      "rarity": 4,
+      "iconSheet": "Ranged_Weapons2.png",
+      "iconRow": 2,
+      "iconCol": 6,
+      "socketable": false,
+      "socketsMax": 2,
+      "stats": {
+        "flat": {
+          "attackPower": 10,
+          "accuracy": 4
+        }
+      },
+      "maxAffixes": 5,
+      "affixPool": [
+        "atk_flat_s",
+        "atk_flat_m",
+        "atk_flat_l",
+        "as_mult_s",
+        "as_mult_m",
+        "as_mult_l",
+        "ms_mult_s",
+        "ms_mult_m",
+        "ms_mult_l",
+        "crit_flat_s",
+        "crit_flat_m",
+        "crit_flat_l",
+        "arp_flat_s",
+        "arp_flat_m",
+        "arp_flat_l",
+        "acc_flat_s",
+        "acc_flat_m",
+        "acc_flat_l",
+        "marksman_s",
+        "precision_s"
+      ],
+      "combatType": "Ranged"
+    }
+  ],
+  "implicitStatPools": {
+    "Melee": [
+      {
+        "stat": "attackPower",
+        "mode": "flat",
+        "min": 2.0,
+        "max": 6.0,
+        "weight": 3.0
+      },
+      {
+        "stat": "armorPen",
+        "mode": "flat",
+        "min": 1.0,
+        "max": 4.0,
+        "weight": 2.0
+      },
+      {
+        "stat": "attackSpeed",
+        "mode": "mult",
+        "min": 0.02,
+        "max": 0.06,
+        "weight": 2.0
+      },
+      {
+        "stat": "lifesteal",
+        "mode": "flat",
+        "min": 0.01,
+        "max": 0.03,
+        "weight": 1.0
+      },
+      {
+        "stat": "cleaveChance",
+        "mode": "flat",
+        "min": 0.04,
+        "max": 0.1,
+        "weight": 1.0
+      }
+    ],
+    "Ranged": [
+      {
+        "stat": "armorPen",
+        "mode": "flat",
+        "min": 1.0,
+        "max": 4.0,
+        "weight": 2.0
+      },
+      {
+        "stat": "critChance",
+        "mode": "flat",
+        "min": 0.02,
+        "max": 0.06,
+        "weight": 2.0
+      },
+      {
+        "stat": "attackSpeed",
+        "mode": "mult",
+        "min": 0.02,
+        "max": 0.06,
+        "weight": 2.0
+      }
+    ],
+    "Magical": [
+      {
+        "stat": "spellPower",
+        "mode": "flat",
+        "min": 3.0,
+        "max": 8.0,
+        "weight": 3.0
+      },
+      {
+        "stat": "resourceRegen",
+        "mode": "flat",
+        "min": 0.02,
+        "max": 0.06,
+        "weight": 2.0
+      },
+      {
+        "stat": "cooldownReduction",
+        "mode": "flat",
+        "min": 0.02,
+        "max": 0.05,
+        "weight": 2.0
+      },
+      {
+        "stat": "statusChance",
+        "mode": "flat",
+        "min": 0.04,
+        "max": 0.1,
+        "weight": 1.0
+      }
+    ],
+    "Ammo": [
+      {
+        "stat": "armorPen",
+        "mode": "flat",
+        "min": 1.0,
+        "max": 3.0,
+        "weight": 2.0
+      },
+      {
+        "stat": "critChance",
+        "mode": "flat",
+        "min": 0.02,
+        "max": 0.05,
+        "weight": 2.0
+      }
+    ]
+  },
+  "armorImplicitPool": [
+    {
+      "stat": "armor",
+      "mode": "flat",
+      "min": 1.0,
+      "max": 3.0,
+      "weight": 1.0
+    }
+  ],
+  "fallbackImplicitPool": [
+    {
+      "stat": "critChance",
+      "mode": "flat",
+      "min": 0.01,
+      "max": 0.03,
+      "weight": 2.0
+    },
+    {
+      "stat": "moveSpeed",
+      "mode": "mult",
+      "min": 0.02,
+      "max": 0.05,
+      "weight": 2.0
+    },
+    {
+      "stat": "resourceRegen",
+      "mode": "flat",
+      "min": 0.02,
+      "max": 0.05,
+      "weight": 1.0
+    },
+    {
+      "stat": "cooldownReduction",
+      "mode": "flat",
+      "min": 0.02,
+      "max": 0.04,
+      "weight": 1.0
     }
   ]
 }

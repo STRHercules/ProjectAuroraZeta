@@ -15,6 +15,7 @@
   "restart": ["backspace"],
   "toggleShop": ["b"],
   "characterScreen": ["i"],
+  "talentTree": ["n"],
   "pause": ["escape"],
   "dash": ["space"],
   "interact": ["key:e"],

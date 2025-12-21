@@ -55,6 +55,9 @@ std::optional<InputBindings> InputLoader::loadFromFile(const std::string& path) 
     if (j.contains("characterScreen")) {
         bindings.characterScreen = readStrings(j["characterScreen"]);
     }
+    if (j.contains("talentTree")) {
+        bindings.talentTree = readStrings(j["talentTree"]);
+    }
     if (j.contains("pause")) {
         bindings.pause = readStrings(j["pause"]);
     }
