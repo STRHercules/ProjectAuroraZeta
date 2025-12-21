@@ -1,16 +1,5 @@
 # Assign some sort of class identifier to each Champion
 
-# Normalize asset sizing/scale, style
-- Increase scale of Star, Kaboom, Recharge pickups
-    - Potentially change Kaboom to a more visual 'bomb'
-    - Recharge is very small
-- Frenzy makes little sense visually
-- Better refine health pickups
-
-# Fear is causing death quite a lot
-
-# Introduce 
-
 # Monsters are still being recolored, some assets are flashing colors
 
 # Game sometimes closes match to main menu when handling items in inventory

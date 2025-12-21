@@ -299,3 +299,12 @@
 
 ## 2025-12-21 — Suggestions after escort facing fix
 - Consider deriving sprite flip from velocity when Facing is absent to avoid stale facing on non-combat NPCs.
+
+## 2025-12-21 — Suggestions after fear/powerup tweaks
+- Consider exposing fear avoidance radius and jitter in `data/gameplay.json` for tuning.
+
+## 2025-12-21 — Suggestions after pickup tint removal
+- If we still want pickup emphasis, consider a subtle drop shadow or glow sprite instead of tinting.
+
+## 2025-12-21 — Suggestions after wallet HUD move
+- Consider adding a toggle in `data/gameplay.json` for HUD wallet anchoring (minimap vs inventory).

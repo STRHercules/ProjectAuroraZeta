@@ -475,3 +475,13 @@
 
 # v0.0.202
 * Events: escort NPCs now face their movement direction correctly.
+
+# v0.0.203
+* Combat: feared wandering now biases away from nearby enemies.
+* Pickups: powerups no longer pulse-flash while idle on the ground.
+
+# v0.0.204
+* Pickups: world pickups now render without any tinting.
+
+# v0.0.205
+* UI: moved the copper/gold wallet under the minimap to avoid overlapping the inventory badge.

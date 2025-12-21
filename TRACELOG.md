@@ -2153,3 +2153,67 @@
 **Build / Test**
 - Build: `cmake --build build`
 - Manual test: Not run (needs in-game escort event check).
+
+## 2025-12-21 — Fear avoidance + powerup pulse tweak
+
+**Prompt / Task**
+- Make feared wandering avoid enemies.
+- Stop powerups from flashing while on the ground.
+
+**What Changed**
+- Feared movement now biases away from nearby enemies with slight jitter.
+- Powerup pickups no longer use the pulsing tint effect.
+- Bumped build to v0.0.203 and updated changelog.
+
+**Steps Taken**
+- Updated fear movement steering in `game/Game.cpp`.
+- Adjusted pickup pulse rules in `game/render/RenderSystem.cpp`.
+- Built the project.
+
+**Rationale / Tradeoffs**
+- Keeps fear disorienting but reduces immediate re-approach to threats.
+- Keeps pulsing for coins/items while stabilizing powerup visuals.
+
+**Build / Test**
+- Build: `cmake --build build`
+- Manual test: Not run (needs in-game fear + powerup visual check).
+
+## 2025-12-21 — Untinted pickup rendering
+
+**Prompt / Task**
+- Remove any color tinting from pickups/powerups.
+
+**What Changed**
+- Forced pickup sprites to render with full texture color (no tint/pulse).
+- Bumped build to v0.0.204 and updated changelog.
+
+**Steps Taken**
+- Updated pickup render tint logic in `game/render/RenderSystem.cpp`.
+- Built the project.
+
+**Rationale / Tradeoffs**
+- Ensures pickup art remains consistent with source textures and avoids flashing artifacts.
+
+**Build / Test**
+- Build: `cmake --build build`
+- Manual test: Not run (verify pickup visuals in-game).
+
+## 2025-12-21 — Wallet HUD placement under minimap
+
+**Prompt / Task**
+- Move the copper/gold display to clamp under the minimap.
+
+**What Changed**
+- Repositioned the wallet text to render beneath the minimap with a small panel background.
+- Bumped build to v0.0.205 and updated changelog.
+
+**Steps Taken**
+- Updated HUD layout in `game/Game.cpp` to anchor wallet to minimap bounds.
+- Built the project.
+
+**Rationale / Tradeoffs**
+- Keeps wallet visible without overlapping the inventory badge.
+
+**Build / Test**
+- Build: `cmake --build build`
+- Manual test: Not run (verify minimap + wallet placement in-game).

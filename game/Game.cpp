@@ -1906,12 +1906,47 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
             } else if (paused_ || defeatDelayActive_ || characterScreenOpen_ || ((heroHp && !heroAlive) && !heroGhost) || movementLocked) {
                 vel->value = {0.0f, 0.0f};
             } else if (feared) {
+                auto nearestThreatDir = [&](float radius) -> std::optional<Engine::Vec2> {
+                    Engine::Vec2 bestPos{};
+                    float bestD2 = radius * radius;
+                    registry_.view<Engine::ECS::Transform, Engine::ECS::EnemyTag>(
+                        [&](Engine::ECS::Entity, const Engine::ECS::Transform& tf, const Engine::ECS::EnemyTag&) {
+                            float dx = tf.position.x - heroPos.x;
+                            float dy = tf.position.y - heroPos.y;
+                            float d2 = dx * dx + dy * dy;
+                            if (d2 < bestD2) {
+                                bestD2 = d2;
+                                bestPos = tf.position;
+                            }
+                        });
+                    registry_.view<Engine::ECS::Transform, Engine::ECS::BossTag>(
+                        [&](Engine::ECS::Entity, const Engine::ECS::Transform& tf, const Engine::ECS::BossTag&) {
+                            float dx = tf.position.x - heroPos.x;
+                            float dy = tf.position.y - heroPos.y;
+                            float d2 = dx * dx + dy * dy;
+                            if (d2 < bestD2) {
+                                bestD2 = d2;
+                                bestPos = tf.position;
+                            }
+                        });
+                    if (bestD2 >= radius * radius) return std::nullopt;
+                    Engine::Vec2 away{heroPos.x - bestPos.x, heroPos.y - bestPos.y};
+                    float len = std::sqrt(std::max(away.x * away.x + away.y * away.y, 0.0001f));
+                    return Engine::Vec2{away.x / len, away.y / len};
+                };
                 fearWanderTimer_ = std::max(0.0f, fearWanderTimer_ - static_cast<float>(step.deltaSeconds));
                 if (fearWanderTimer_ <= 0.0f) {
                     std::uniform_real_distribution<float> ang(0.0f, 6.28318f);
+                    std::uniform_real_distribution<float> jitter(-0.6f, 0.6f);
                     std::uniform_real_distribution<float> dur(0.18f, 0.35f);
-                    float a = ang(rng_);
-                    fearWanderDir_ = {std::cos(a), std::sin(a)};
+                    auto away = nearestThreatDir(460.0f);
+                    if (away) {
+                        float a = std::atan2(away->y, away->x) + jitter(rng_);
+                        fearWanderDir_ = {std::cos(a), std::sin(a)};
+                    } else {
+                        float a = ang(rng_);
+                        fearWanderDir_ = {std::cos(a), std::sin(a)};
+                    }
                     fearWanderTimer_ = dur(rng_);
                 }
                 vel->value = {fearWanderDir_.x * heroMoveSpeed_ * moveSpeedBuffMul_ * moveMul,
@@ -5148,11 +5183,37 @@ void GameRoot::onUpdate(const Engine::TimeStep& step, const Engine::InputState& 
                                         0.84f * s, Engine::Color{180, 200, 220, 210});
                     }
                 }
-                // Wallet badge next to inventory.
+                // Wallet badge: clamp under minimap when available.
                 std::ostringstream wallet;
                 wallet << "Copper " << copper_ << " | Gold " << gold_;
-                drawTextUnified(wallet.str(), Engine::Vec2{x + badgeW - 170.0f * s, y + badgeH - 18.0f * s},
-                                0.84f * s, Engine::Color{200, 230, 255, 210});
+                const float walletScale = 0.84f * s;
+                const Engine::Vec2 walletSz = measureTextUnified(wallet.str(), walletScale);
+                const float walletPad = 8.0f * s;
+                float walletX = x + badgeW - 170.0f * s;
+                float walletY = y + badgeH - 18.0f * s;
+                if (miniMapEnabled_) {
+                    const float mapSize = static_cast<float>(miniMapSize_);
+                    const float mapPad = static_cast<float>(miniMapPadding_);
+                    const float mapX = static_cast<float>(viewportWidth_) - mapPad - mapSize;
+                    const float mapY = mapPad;
+                    const float walletW = walletSz.x + walletPad * 2.0f;
+                    const float walletH = walletSz.y + walletPad;
+                    walletX = mapX + mapSize - walletW;
+                    walletY = mapY + mapSize + walletPad;
+                    const float minX = 8.0f * s;
+                    const float minY = mapY + mapSize + walletPad;
+                    walletX = std::clamp(walletX, minX, static_cast<float>(viewportWidth_) - walletW - minX);
+                    walletY = std::clamp(walletY, minY, static_cast<float>(viewportHeight_) - walletH - minX);
+                    render_->drawFilledRect(Engine::Vec2{walletX, walletY}, Engine::Vec2{walletW, walletH},
+                                            Engine::Color{12, 16, 24, 220});
+                    render_->drawFilledRect(Engine::Vec2{walletX, walletY}, Engine::Vec2{walletW, 2.0f},
+                                            Engine::Color{45, 70, 95, 190});
+                    drawTextUnified(wallet.str(), Engine::Vec2{walletX + walletPad, walletY + walletPad * 0.5f},
+                                    walletScale, Engine::Color{200, 230, 255, 210});
+                } else {
+                    drawTextUnified(wallet.str(), Engine::Vec2{walletX, walletY}, walletScale,
+                                    Engine::Color{200, 230, 255, 210});
+                }
             }
         // Active event / status lines.
         registry_.view<Game::EventActive>([&](Engine::ECS::Entity evEnt, const Game::EventActive& ev) {
@@ -9787,7 +9848,7 @@ void GameRoot::renderMenu() {
     drawTextUnified(title, Engine::Vec2{centerX - titleW * 0.5f, titleY}, titleScale, Engine::Color{190, 235, 255, 245});
 
     // Build info (bottom-right).
-    const std::string buildStr = "Pre-Alpha | Build v0.0.202";
+    const std::string buildStr = "Pre-Alpha | Build v0.0.205";
     const float buildScale = std::clamp(0.95f * s, 0.72f, 0.95f);
     const Engine::Vec2 buildSz = measureTextUnified(buildStr, buildScale);
     drawTextUnified(buildStr, Engine::Vec2{vw - margin - buildSz.x, vh - margin - buildSz.y}, buildScale,

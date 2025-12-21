@@ -127,20 +127,9 @@ void RenderSystem::drawEntitiesPass(const Engine::ECS::Registry& registry, const
             if (cloaked && isEnemy) {
                 continue;  // fully hidden to player
             }
-            // Pulse color for pickups (except static Field Medkit item).
+            // Keep pickup sprites untinted; they should render at full texture color.
             if (registry.has<Game::Pickup>(e)) {
-                const auto* pick = registry.get<Game::Pickup>(e);
-                const bool isStaticMedkit = pick && pick->kind == Game::Pickup::Kind::Item &&
-                                            pick->item.effect == Game::ItemEffect::Heal;
-                if (!isStaticMedkit) {
-                    if (const auto* bob = registry.get<Game::PickupBob>(e)) {
-                        float t = 0.5f + 0.5f * std::sin(bob->pulsePhase * 3.14159f * 2.0f);
-                        auto add = static_cast<uint8_t>(30 + 80 * t);
-                        color = {static_cast<uint8_t>(std::min(255, color.r + add)),
-                                 static_cast<uint8_t>(std::min(255, color.g + add)),
-                                 color.b, color.a};
-                    }
-                }
+                color = Engine::Color{255, 255, 255, color.a};
             }
             // Tint bosses differently.
             if (registry.has<Engine::ECS::BossTag>(e)) {
